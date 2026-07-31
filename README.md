@@ -1,4 +1,4 @@
-# امین مارکت (Amin-market)
+# ریهان (RIHAN)
 
 > هوش مصنوعی هستید؟ اول AI-ENTRY.md را بخوانید.
 > مهم‌ترین فایل: docs/CENTRAL-STORY.md

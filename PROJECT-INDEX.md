@@ -1,4 +1,4 @@
-# PROJECT-INDEX — نقشه کامل مخزن امین مارکت
+# PROJECT-INDEX — نقشه کامل مخزن ریهان
 
 > این فایل با هر تغییر پروژه به‌روزرسانی میشود.
 > AI-ENTRY ثابت میماند. این فایل پویا است.
@@ -8,7 +8,7 @@
 
 ## مخزن پروژه
 
-آدرس: https://github.com/abyfahimy91-netizen/Amin-market
+آدرس: https://github.com/abyfahimy91-netizen/RIHAN
 شاخه: main
 
 ---
@@ -19,23 +19,23 @@
 
 | فایل | نقش | اولویت | لینک |
 |------|------|--------|------|
-| AI-ENTRY.md | نقطه ورود رسمی AI | ۱ | [GitHub](https://github.com/abyfahimy91-netizen/Amin-market/blob/main/AI-ENTRY.md) |
-| PROJECT-INDEX.md | نقشه کامل مخزن (این فایل) | ۵ | [GitHub](https://github.com/abyfahimy91-netizen/Amin-market/blob/main/PROJECT-INDEX.md) |
-| CONTINUITY.md | وضعیت فعلی و اقدام بعدی | ۴ | [GitHub](https://github.com/abyfahimy91-netizen/Amin-market/blob/main/CONTINUITY.md) |
-| README.md | شناسنامه پروژه | ۶ | [GitHub](https://github.com/abyfahimy91-netizen/Amin-market/blob/main/README.md) |
+| AI-ENTRY.md | نقطه ورود رسمی AI | ۱ | [GitHub](https://github.com/abyfahimy91-netizen/RIHAN/blob/main/AI-ENTRY.md) |
+| PROJECT-INDEX.md | نقشه کامل مخزن (این فایل) | ۵ | [GitHub](https://github.com/abyfahimy91-netizen/RIHAN/blob/main/PROJECT-INDEX.md) |
+| CONTINUITY.md | وضعیت فعلی و اقدام بعدی | ۴ | [GitHub](https://github.com/abyfahimy91-netizen/RIHAN/blob/main/CONTINUITY.md) |
+| README.md | شناسنامه پروژه | ۶ | [GitHub](https://github.com/abyfahimy91-netizen/RIHAN/blob/main/README.md) |
 
 ### docs/ — مستندات کسب‌وکار و فنی
 
 | فایل | نقش | فاز | وضعیت | لینک |
 |------|------|-----|--------|------|
-| CENTRAL-STORY.md | داستان محوری — قانون اساسی | همه | فعال | [GitHub](https://github.com/abyfahimy91-netizen/Amin-market/blob/main/docs/CENTRAL-STORY.md) |
-| FUNDAMENTAL-PRINCIPLES.md | اصول ۱۰گانه اساسی | همه | فعال | [GitHub](https://github.com/abyfahimy91-netizen/Amin-market/blob/main/docs/FUNDAMENTAL-PRINCIPLES.md) |
-| BUSINESS-OPPORTUNITY.md | سند فرصت کسب‌وکار | ۰ | تکمیل | [GitHub](https://github.com/abyfahimy91-netizen/Amin-market/blob/main/docs/BUSINESS-OPPORTUNITY.md) |
-| MARKET-VALIDATION.md | اعتبارسنجی بازار | ۱ | تکمیل | [GitHub](https://github.com/abyfahimy91-netizen/Amin-market/blob/main/docs/MARKET-VALIDATION.md) |
-| RESEARCH-AND-INSIGHTS.md | تحقیقات و بینش‌ها | ۰-۱ | تکمیل | [GitHub](https://github.com/abyfahimy91-netizen/Amin-market/blob/main/docs/RESEARCH-AND-INSIGHTS.md) |
-| TECHNICAL-REQUIREMENTS.md | الزامات فنی | ۰-۱ | تکمیل | [GitHub](https://github.com/abyfahimy91-netizen/Amin-market/blob/main/docs/TECHNICAL-REQUIREMENTS.md) |
-| ASSUMPTIONS.md | فرضیات | همه | فعال | [GitHub](https://github.com/abyfahimy91-netizen/Amin-market/blob/main/docs/ASSUMPTIONS.md) |
-| OPEN-QUESTIONS.md | سؤالات باز | همه | فعال | [GitHub](https://github.com/abyfahimy91-netizen/Amin-market/blob/main/docs/OPEN-QUESTIONS.md) |
+| CENTRAL-STORY.md | داستان محوری — قانون اساسی | همه | فعال | [GitHub](https://github.com/abyfahimy91-netizen/RIHAN/blob/main/docs/CENTRAL-STORY.md) |
+| FUNDAMENTAL-PRINCIPLES.md | اصول ۱۰گانه اساسی | همه | فعال | [GitHub](https://github.com/abyfahimy91-netizen/RIHAN/blob/main/docs/FUNDAMENTAL-PRINCIPLES.md) |
+| BUSINESS-OPPORTUNITY.md | سند فرصت کسب‌وکار | ۰ | تکمیل | [GitHub](https://github.com/abyfahimy91-netizen/RIHAN/blob/main/docs/BUSINESS-OPPORTUNITY.md) |
+| MARKET-VALIDATION.md | اعتبارسنجی بازار | ۱ | تکمیل | [GitHub](https://github.com/abyfahimy91-netizen/RIHAN/blob/main/docs/MARKET-VALIDATION.md) |
+| RESEARCH-AND-INSIGHTS.md | تحقیقات و بینش‌ها | ۰-۱ | تکمیل | [GitHub](https://github.com/abyfahimy91-netizen/RIHAN/blob/main/docs/RESEARCH-AND-INSIGHTS.md) |
+| TECHNICAL-REQUIREMENTS.md | الزامات فنی | ۰-۱ | تکمیل | [GitHub](https://github.com/abyfahimy91-netizen/RIHAN/blob/main/docs/TECHNICAL-REQUIREMENTS.md) |
+| ASSUMPTIONS.md | فرضیات | همه | فعال | [GitHub](https://github.com/abyfahimy91-netizen/RIHAN/blob/main/docs/ASSUMPTIONS.md) |
+| OPEN-QUESTIONS.md | سؤالات باز | همه | فعال | [GitHub](https://github.com/abyfahimy91-netizen/RIHAN/blob/main/docs/OPEN-QUESTIONS.md) |
 | REVENUE-MODEL.md | مدل درآمدی | ۲ | بعدی | — |
 | PRICING-STRATEGY.md | استراتژی قیمت‌گذاری | ۲ | بعدی | — |
 | FINANCIAL-PROJECTIONS.md | پیش‌بینی مالی | ۲ | بعدی | — |
@@ -50,7 +50,7 @@
 
 | فایل | نقش | وضعیت | لینک |
 |------|------|--------|------|
-| DECISIONS.md | ثبت تمام تصمیمات (۲۸ تصمیم) | فعال | [GitHub](https://github.com/abyfahimy91-netizen/Amin-market/blob/main/decisions/DECISIONS.md) |
+| DECISIONS.md | ثبت تمام تصمیمات (۲۸ تصمیم) | فعال | [GitHub](https://github.com/abyfahimy91-netizen/RIHAN/blob/main/decisions/DECISIONS.md) |
 | ARCHITECTURE-DECISIONS.md | تصمیمات معماری | فاز ۴ | — |
 | TECHNOLOGY-SELECTION.md | انتخاب فناوری | فاز ۴ | — |
 
@@ -58,7 +58,7 @@
 
 | فایل | نقش | وضعیت | لینک |
 |------|------|--------|------|
-| ROADMAP.md | نقشه راه ۵ ساله | فعال | [GitHub](https://github.com/abyfahimy91-netizen/Amin-market/blob/main/plans/ROADMAP.md) |
+| ROADMAP.md | نقشه راه ۵ ساله | فعال | [GitHub](https://github.com/abyfahimy91-netizen/RIHAN/blob/main/plans/ROADMAP.md) |
 | DEVELOPMENT-PLAN.md | برنامه توسعه | فاز ۵ | — |
 | TEST-PLAN.md | برنامه تست | فاز ۵ | — |
 | LAUNCH-PLAN.md | برنامه راه‌اندازی | فاز ۶ | — |

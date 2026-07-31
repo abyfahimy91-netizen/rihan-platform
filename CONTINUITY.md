@@ -8,8 +8,8 @@
 
 ## وضعیت
 
-- پروژه: امین مارکت (Amin-market)
-- مخزن: https://github.com/abyfahimy91-netizen/Amin-market
+- پروژه: ریهان (RIHAN)
+- مخزن: https://github.com/abyfahimy91-netizen/RIHAN
 - نسخه: ۰.۱.۰
 - فاز ۰ و ۱: تکمیل و تأیید شده
 - تحقیقات: انجام شده

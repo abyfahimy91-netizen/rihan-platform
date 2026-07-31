@@ -1,4 +1,4 @@
-# AI-ENTRY — نقطه ورود رسمی پروژه امین مارکت
+# AI-ENTRY — نقطه ورود رسمی پروژه ریهان
 
 > این فایل Entry Point و Repository Manifest Entry پروژه است.
 > هر هوش مصنوعی جدید تنها با دریافت این فایل میتواند پروژه را بشناسد،
@@ -38,10 +38,10 @@
   - core/PROJECT-LIFECYCLE.md — چرخه حیات فازها
   - core/ARCHITECTURE-DECISIONS.md — تصمیمات معماری
 
-### مخزن ۲: Amin-market (پروژه)
+### مخزن ۲: RIHAN (پروژه)
 
 - نوع: Project Repository
-- آدرس: https://github.com/abyfahimy91-netizen/Amin-market
+- آدرس: https://github.com/abyfahimy91-netizen/RIHAN
 - وضعیت: Public Repository
 - نقش: تمام توسعه، مستندسازی، تصمیمات و کدنویسی فقط در این مخزن
 - قانون: READ WRITE — اینجا کار کنید
@@ -49,8 +49,8 @@
 ### قوانین دو مخزن
 
 - AI-VOS فقط خوانده میشود.
-- Amin-market توسعه داده میشود.
-- هر تصمیم پروژه داخل Amin-market ثبت میشود.
+- RIHAN توسعه داده میشود.
+- هر تصمیم پروژه داخل RIHAN ثبت میشود.
 - AI-VOS مستقل باقی میماند.
 - AI-VOS مرجع توسعه است اما محل توسعه نیست.
 
@@ -100,7 +100,7 @@ PROJECT-INDEX با هر تغییر پروژه به‌روزرسانی میشود
 ## ۴. منبع حقیقت (Source of Truth)
 
 منبع نهایی حقیقت به ترتیب:
-1. فایل‌های موجود در مخزن پروژه (Amin-market)
+1. فایل‌های موجود در مخزن پروژه (RIHAN)
 2. تصمیمات ثبت‌شده (decisions/DECISIONS.md)
 3. CONTINUITY.md (آخرین وضعیت)
 4. گفتگوها صرفاً زمینه موقت هستند و در صورت تعارض معتبر نیستند.
@@ -157,7 +157,7 @@ PROJECT-INDEX با هر تغییر پروژه به‌روزرسانی میشود
 
 ## ۹. خلاصه کسب‌وکار
 
-امین مارکت یک فروشگاه آنلاین اعتمادمحور (Curated Marketplace) است.
+ریهان یک فروشگاه آنلاین اعتمادمحور (Curated Marketplace) است.
 بنیان‌گذار و همسرش سال‌هاست غیررسمی و بدون سود برای اطرافیان خرید
 می‌کنند. سایت این کار را کانالیزه، حرفه‌ای و درآمدزا می‌کند.
 محصول متغیر است. اعتماد ثابت. برند به محصول گره نمی‌خورد.
@@ -173,7 +173,7 @@ PROJECT-INDEX با هر تغییر پروژه به‌روزرسانی میشود
 هر فایل جدید با این الگو ساخته شود.
 به جای MYDELIM یک نام منحصربه‌فرد بگذارید که در محتوا وجود نداشته باشد.
 
-    cat << 'MYDELIM' > ~/Amin-market/PATH/FILENAME.md
+    cat << 'MYDELIM' > ~/RIHAN/PATH/FILENAME.md
     محتوای فایل اینجا
     MYDELIM
 
@@ -181,7 +181,7 @@ PROJECT-INDEX با هر تغییر پروژه به‌روزرسانی میشود
 
 محتوای کامل جدید را بنویسید، نه فقط بخش تغییر یافته.
 
-    cat << 'MYDELIM' > ~/Amin-market/PATH/FILENAME.md
+    cat << 'MYDELIM' > ~/RIHAN/PATH/FILENAME.md
     کل محتوای جدید
     MYDELIM
 
@@ -192,11 +192,11 @@ PROJECT-INDEX با هر تغییر پروژه به‌روزرسانی میشود
 مرحله ۳ — CONTINUITY.md به‌روزرسانی شود (وضعیت و اقدام بعدی).
 مرحله ۴ — ثبت و آپلود:
 
-    cd ~/Amin-market && git add . && git commit -m "شرح تغییر" && git push
+    cd ~/RIHAN && git add . && git commit -m "شرح تغییر" && git push
 
 مرحله ۵ — تأیید:
 
-    cd ~/Amin-market && git log --oneline -3 && git status
+    cd ~/RIHAN && git log --oneline -3 && git status
 
 ### د) قالب پیام commit
 
@@ -224,5 +224,5 @@ AI بعدی نمی‌تواند ادامه دهد.
 
 ---
 
-به پروژه امین مارکت خوش آمدید.
+به پروژه ریهان خوش آمدید.
 اول بخوانید. بعد بفهمید. بعد سؤال بپرسید. بعد اجرا کنید.
