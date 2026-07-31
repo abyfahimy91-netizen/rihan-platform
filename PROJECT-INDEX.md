@@ -47,6 +47,12 @@
 | SECURITY-ANALYSIS.md | تحلیل امنیت | ۴ | — | — |
 | TECH-DOCUMENTATION.md | مستندات فنی | ۵ | — | — |
 
+### brand/ — هویت بصری برند
+
+| فایل | نقش | فاز | وضعیت | لینک |
+|------|------|-----|--------|------|
+| VISUAL-IDENTITY-BRIEF.md | بریف هویت بصری برند | ۱ | تکمیل | [GitHub](https://github.com/abyfahimy91-netizen/rihan-platform/blob/main/brand/VISUAL-IDENTITY-BRIEF.md) |
+
 ### decisions/ — تصمیمات
 
 | فایل | نقش | وضعیت | لینک |
