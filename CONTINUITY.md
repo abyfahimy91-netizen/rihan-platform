@@ -1,35 +1,41 @@
-# فایل تداوم — اول AI-ENTRY.md سپس این فایل
+# CONTINUITY — وضعیت فعلی پروژه
 
-## مهم‌ترین نکته
-docs/CENTRAL-STORY.md = قانون اساسی. محور همه‌چیز.
-docs/FUNDAMENTAL-PRINCIPLES.md = اصول ۱۰گانه غیرقابل مذاکره.
+> اول AI-ENTRY.md سپس این فایل را بخوانید.
+> نقشه کامل مخزن: PROJECT-INDEX.md
+> قانون اساسی: docs/CENTRAL-STORY.md
+
+---
 
 ## وضعیت
+
 - پروژه: امین مارکت (Amin-market)
-- مخزن: github.com/abyfahimy91-netizen/Amin-market
+- مخزن: https://github.com/abyfahimy91-netizen/Amin-market
+- نسخه: ۰.۱.۰
 - فاز ۰ و ۱: تکمیل و تأیید شده
 - تحقیقات: انجام شده
-- فاز بعدی: ۲ (مدل درآمدی)
+- فاز بعدی: ۲ (مدل درآمدی و قیمت‌گذاری)
 - تاریخ: ۱۴۰۵/۰۵/۰۹
 
 ## بنیان‌گذار
+
 عبدالحسین فهیمی — کارمند دولت — اهل هوراند — ساکن تبریز
 بازنشستگی: ۱۴۱۰ — زبان: فارسی — سطح فنی: وایب‌کدینگ
 
 ## اقدام بعدی
-فاز ۲: مدل درآمدی و قیمت‌گذاری
-خروجی: docs/REVENUE-MODEL.md, docs/PRICING-STRATEGY.md, docs/FINANCIAL-PROJECTIONS.md
 
-## فایل‌ها (ترتیب خواندن)
-1. AI-ENTRY.md
-2. docs/CENTRAL-STORY.md
-3. docs/FUNDAMENTAL-PRINCIPLES.md
-4. CONTINUITY.md
-5. docs/BUSINESS-OPPORTUNITY.md
-6. docs/MARKET-VALIDATION.md
-7. docs/RESEARCH-AND-INSIGHTS.md
-8. docs/TECHNICAL-REQUIREMENTS.md
-9. docs/ASSUMPTIONS.md
-10. docs/OPEN-QUESTIONS.md
-11. decisions/DECISIONS.md
-12. plans/ROADMAP.md
+فاز ۲: مدل درآمدی و قیمت‌گذاری
+موتور: Revenue Model Engine (AI-VOS)
+خروجی‌ها:
+- docs/REVENUE-MODEL.md
+- docs/PRICING-STRATEGY.md
+- docs/FINANCIAL-PROJECTIONS.md
+
+## فایل‌های کلیدی (ترتیب خواندن)
+
+1. AI-ENTRY.md — نقطه ورود
+2. docs/CENTRAL-STORY.md — قانون اساسی
+3. docs/FUNDAMENTAL-PRINCIPLES.md — اصول ۱۰گانه
+4. CONTINUITY.md — این فایل
+5. PROJECT-INDEX.md — نقشه مخزن
+6. decisions/DECISIONS.md — ۲۸ تصمیم
+7. plans/ROADMAP.md — نقشه راه
