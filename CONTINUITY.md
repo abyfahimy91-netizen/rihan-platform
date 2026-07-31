@@ -64,7 +64,7 @@ Completed Components:
 
 Decision:
 
-D-039: RIHAN Phase 2 Business Model & Product Architecture Completion
+D-029: RIHAN Phase 2 Business Model & Product Architecture Completion
 
 
 # Current Phase
