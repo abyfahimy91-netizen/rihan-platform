@@ -41,7 +41,7 @@
 ### مخزن ۲: RIHAN (پروژه)
 
 - نوع: Project Repository
-- آدرس: https://github.com/abyfahimy91-netizen/RIHAN
+- آدرس: https://github.com/abyfahimy91-netizen/rihan-platform
 - وضعیت: Public Repository
 - نقش: تمام توسعه، مستندسازی، تصمیمات و کدنویسی فقط در این مخزن
 - قانون: READ WRITE — اینجا کار کنید

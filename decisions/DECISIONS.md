@@ -31,3 +31,5 @@ D-027: ثبت‌نام: شماره+رمز (OTP بعداً با پنل پیامک
 D-028: انعطاف کامل — ماژول‌های ناموجود هم قابل اضافه
 D-029: تکمیل فاز ۲ — مدل کسب‌وکار و معماری محصول (Business Model & Product Architecture)
 Status: Phase 2 COMPLETED — اسناد: BUSINESS-MODEL-CANVAS.md, REVENUE-MODEL.md, PRICING-STRATEGY.md, FINANCIAL-PROJECTIONS.md
+D-030: تکمیل فاز ۱ — بنیان برند (Brand Foundation)
+Status: Phase 1 COMPLETED — ثبت دیرهنگام (retroactive)؛ اسناد: CENTRAL-STORY.md, FUNDAMENTAL-PRINCIPLES.md, brand/VISUAL-IDENTITY-BRIEF.md
