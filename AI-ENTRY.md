@@ -9,6 +9,25 @@
 
 ---
 
+## شروع سریع برای هوش مصنوعی جدید
+
+اگر اولین بار است این پروژه را میبینید، این مراحل را انجام دهید:
+
+۱. مخزن را clone کنید یا فایل‌های آن را بخوانید (آدرس در بخش ۱).
+۲. همین فایل (AI-ENTRY.md) را کامل بخوانید.
+۳. پنج فایل کلیدی را به ترتیب بخوانید:
+   - docs/CENTRAL-STORY.md (قانون اساسی کسب‌وکار)
+   - docs/FUNDAMENTAL-PRINCIPLES.md (اصول تغییرناپذیر)
+   - CONTINUITY.md (وضعیت فعلی و اقدام بعدی)
+   - PROJECT-INDEX.md (نقشه کامل مخزن)
+   - decisions/DECISIONS.md (تصمیمات قطعی)
+۴. وضعیت فعلی: فاز ۱ و ۲ تکمیل؛ فاز ۳ آماده شروع.
+۵. اقدام بعدی: ساخت docs/PRODUCT-DEFINITION.md (آغاز فاز ۳).
+
+> قانون طلایی: اول بخوانید. بعد بفهمید. بعد سؤال بپرسید. بعد اجرا کنید.
+
+---
+
 ## منشور پروژه
 
 هدف پروژه صرفاً ساخت یک فروشگاه اینترنتی نیست.
@@ -43,8 +62,13 @@
 - نوع: Project Repository
 - آدرس: https://github.com/abyfahimy91-netizen/rihan-platform
 - وضعیت: Public Repository
-- نقش: تمام توسعه، مستندسازی، تصمیمات و کدنویسی فقط در این مخزن
+- نقش: �مام توسعه، مستندسازی، تصمیمات و کدنویسی فقط در این مخزن
 - قانون: READ WRITE — اینجا کار کنید
+- دسترسی سریع:
+  - Clone: git clone https://github.com/abyfahimy91-netizen/rihan-platform.git
+  - الگوی خواندن مستقیم هر فایل:
+    https://raw.githubusercontent.com/abyfahimy91-netizen/rihan-platform/main/PATH/FILE.md
+    (مثال: https://raw.githubusercontent.com/abyfahimy91-netizen/rihan-platform/main/CONTINUITY.md)
 
 ### قوانین دو مخزن
 
@@ -90,12 +114,16 @@ PROJECT-INDEX با هر تغییر پروژه به‌روزرسانی میشود
 | ۶ | README.md | شناسنامه کلی پروژه |
 | ۷ | docs/BUSINESS-OPPORTUNITY.md | مدل کسب‌وکار (فاز ۰) |
 | ۸ | docs/MARKET-VALIDATION.md | تحلیل بازار (فاز ۱) |
-| ۹ | docs/RESEARCH-AND-INSIGHTS.md | تحقیقات و بینش‌ها |
-| ۱۰ | docs/TECHNICAL-REQUIREMENTS.md | الزامات فنی |
-| ۱۱ | docs/ASSUMPTIONS.md | فرضیات تأییدشده و نشده |
-| ۱۲ | docs/OPEN-QUESTIONS.md | سؤالات باز |
-| ۱۳ | decisions/DECISIONS.md | تصمیمات قطعی |
-| ۱۴ | plans/ROADMAP.md | برنامه آینده |
+| ۹ | docs/BUSINESS-MODEL-CANVAS.md | بوم مدل کسب‌وکار (فاز ۲) |
+| ۱۰ | docs/REVENUE-MODEL.md | مدل درآمدی (فاز ۲) |
+| ۱۱ | docs/PRICING-STRATEGY.md | استراتژی قیمت‌گذاری (فاز ۲) |
+| ۱۲ | docs/FINANCIAL-PROJECTIONS.md | پیش‌بینی مالی (فاز ۲) |
+| ۱۳ | docs/RESEARCH-AND-INSIGHTS.md | تحقیقات و بینش‌ها |
+| ۱۴ | docs/TECHNICAL-REQUIREMENTS.md | الزامات فنی |
+| ۱۵ | docs/ASSUMPTIONS.md | فرضیات تأییدشده و نشده |
+| ۱۶ | docs/OPEN-QUESTIONS.md | سؤالات باز |
+| ۱۷ | decisions/DECISIONS.md | تصمیمات قطعی |
+| ۱۸ | plans/ROADMAP.md | برنامه آینده |
 
 ---
 
@@ -136,12 +164,12 @@ PROJECT-INDEX با هر تغییر پروژه به‌روزرسانی میشود
 
 ## ۷. وضعیت پروژه
 
-> وضعیت لحظه‌ای و معتبر همیشه در CONTINUITY.md است. این بخش فقط یک نمای کلی است.
+> برای وضعیت دقیق و به‌روز، همیشه CONTINUITY.md را بخوانید. این بخش فقط یک نمای کلی است.
 
 - نسخه پروژه: ۰.۲.۰
 - فاز فعلی: فاز ۱ و ۲ تکمیل — فاز ۳ بعدی
-- آخرین مرحله تکمیل‌شده: فاز ۲ — مدل کسب‌وکار و معماری محصول
-- مرحله بعد: فاز ۳ — تعریف محصول و طراحی
+- آخرین مرحله تکمیل‌شده: مدل کسب‌وکار، مدل درآمدی، قیمت‌گذاری، پیش‌بینی مالی
+- مرحله بعد: فاز ۳ — تعریف محصول و طراحی (PRODUCT-DEFINITION.md)
 - آخرین به‌روزرسانی: ۱۴۰۵/۰۵/۰۹
 
 ---
@@ -172,7 +200,7 @@ PROJECT-INDEX با هر تغییر پروژه به‌روزرسانی میشود
 
 ## ۱۰. دستورالعمل عملی ثبت تغییرات
 
-> مسیر مخزن پروژه روی سرور: ~/rihan-platform
+> مسیر مخزن روی سرور: ~/rihan-platform
 
 ### الف) ساخت فایل جدید
 
@@ -183,8 +211,7 @@ PROJECT-INDEX با هر تغییر پروژه به‌روزرسانی میشود
     محتوای فایل اینجا
     MYDELIM
 
-> نکته حیاتی: برای فایل‌های فارسی یا طولانی، از روش Base64 استفاده کنید
-> تا از به‌هم‌ریختگی متن در ترمینال جلوگیری شود:
+> نکته حیاتی: برای فایل‌های فارسی یا طولانی، از روش Base64 استفاده کنید تا از به‌هم‌ریختگی در ترمینال جلوگیری شود:
 >
 >     echo 'BASE64_STRING' | base64 -d > ~/rihan-platform/PATH/FILENAME.md
 
