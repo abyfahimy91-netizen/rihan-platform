@@ -1,7 +1,7 @@
 # معماری اطلاعات ریهان (Information Architecture)
 
-**نسخه:** 1.0
-**تاریخ:** 2026-08-01
+**نسخه:** 1.1
+**تاریخ:** 2026-08-02
 **فاز:** 3 — Product Definition & Design
 **موتور AI-VOS:** Product Design Engine
 **وضعیت:** پیش‌نویس آماده تأیید بنیان‌گذار
@@ -10,233 +10,200 @@
 
 ## ۱. مقدمه
 
-معماری اطلاعات ریهان، ساختار سازمان‌دهی محتوا، ناوبری و دسترسی کاربر به اطلاعات را تعریف می‌کند. هدف، طراحی سیستمی است که کاربر در کمترین زمان و با کمترین کلیک، به اطلاعات مورد نیاز دسترسی پیدا کند.
+این سند ساختار اطلاعاتی پلتفرم ریهان را تعریف می‌کند: نقشه سایت، سیستم ناوبری، ساختار URL و انواع محتوا.
 
-این سند بر اساس اصول زیر طراحی شده است:
-- **سادگی ناوبری:** هیچ کاربری نباید برای یافتن محصول یا اطلاعات بیش از ۳ کلیک نیاز داشته باشد.
-- **شفافیت ساختار:** کاربر در هر لحظه بداند کجای سایت است.
-- **اولویت موبایل:** ساختار باید در صفحه‌های کوچک موبایل به‌خوبی کار کند.
-- **آماده‌سازی برای رشد:** ساختار باید بتواند ماژول‌های آینده را بدون بازسازی جذب کند.
+### اصول
+
+- سادگی: حداکثر ۳ سطح عمق
+- دسترسی: هر صفحه حداکثر ۳ کلیک از خانه
+- موبایل-اول: منوها برای لمس بهینه شوند
+- مقیاس‌پذیری: ساختار بدون تغییر، ظرفیت رشد داشته باشد
 
 ---
 
-## ۲. ساختار کلی سایت (Site Map)
+## ۲. نقشه سایت (Site Map)
 
-ساختار سلسله‌مراتبی سایت ریهان به شرح زیر است:
+### ۲.۱ بخش عمومی (مشتری)
 
-```
-ریهان (ریشه)
-├── صفحه اصلی (/)
-│
-├── کاتالوگ محصولات (/products)
-│   ├── دسته‌بندی: خشکبار (/products/dry-fruits)
-│   ├── دسته‌بندی: چای و نوشیدنی (/products/tea)
-│   ├── دسته‌بندی: لباس و پوشاک (/products/clothing)
-│   ├── دسته‌بندی: لبازم منزل (/products/home)
-│   ├── دسته‌بندی: محصولات فصلی (/products/seasonal)
-│   └── صفحه جزئیات محصول (/products/[slug])
-│
-├── درباره ریهان (/about)
-│   ├── داستان ما (/about/story)
-│   ├── اصول و ارزش‌ها (/about/principles)
-│   ├── فرآیند انتخاب (/about/selection)
-│   ├── سیاست مرجوعی (/about/returns)
-│   └── تماس با ما (/about/contact)
-│
-├── حساب کاربری (/account) [نیازمند ورود]
-│   ├── پروفایل (/account/profile)
-│   ├── سفارش‌های من (/account/orders)
-│   ├── پیگیری سفارش (/account/track)
-│   ├── نظرات من (/account/reviews)
-│   └── علاقه‌مندی‌ها (/account/wishlist) [Should]
-│
-├── سبد سفارش (/cart) [در صورت وجود سفارش]
-├── تسویه حساب (/checkout)
-├── پیگیری سفارش (/track) [عمومی، با کد سفارش]
-├── فرم سرنخ (/lead)
-├── ورود / ثبت‌نام (/auth)
-│   ├── ورود (/auth/login)
-│   └── ثبت‌نام (/auth/register)
-│
-├── صفحات حقوقی
-│   ├── قوانین و مقررات (/legal/terms)
-│   └── حریم خصوصی (/legal/privacy)
-│
-├── پنل خانواده (/admin) [نیازمند ورود مدیر]
-│   ├── داشبورد (/admin/dashboard)
-│   ├── محصولات (/admin/products)
-│   ├── سفارش‌ها (/admin/orders)
-│   ├── کاربران (/admin/users)
-│   ├── نظرات (/admin/reviews)
-│   ├── سرنخ‌ها (/admin/leads)
-│   ├── مالی (/admin/finance)
-│   ├── محتوا (/admin/content)
-│   ├── تنظیمات (/admin/settings)
-│   ├── ماژول‌ها (/admin/modules)
-│   └── گزارش‌ها (/admin/reports)
-│
-└── پنل تأمین‌کننده (/supplier) [نیازمند ورود تأمین‌کننده]
+    خانه (/)
+    ├── کاتالوگ (/catalog)
+    │   ├── دسته اصلی (/catalog/[category])
+    │   │   └── زیردسته (/catalog/[category]/[subcategory])
+    │   └── محصول (/product/[slug])
+    ├── درباره ما (/about)
+    ├── تماس با ما (/contact)
+    ├── سیاست مرجوعی (/return-policy)
+    ├── پیگیری سفارش (/track)
+    ├── ورود / ثبت‌نام (/auth)
+    ├── حساب کاربری (/account)
+    │   ├── سفارش‌های من (/account/orders)
+    │   ├── علاقه‌مندی‌ها (/account/wishlist)
+    │   └── تنظیمات (/account/settings)
+    └── سبد سفارش (/cart)
+
+### ۲.۲ بخش ادمین (خانواده)
+
+    پنل ادمین (/admin)
+    ├── داشبورد (/admin/dashboard)
+    ├── محصولات (/admin/products)
+    │   ├── افزودن (/admin/products/new)
+    │   └── ویرایش (/admin/products/[id]/edit)
+    ├── دسته‌بندی‌ها (/admin/categories)
+    ├── سفارش‌ها (/admin/orders)
+    │   └── جزئیات (/admin/orders/[id])
+    ├── نظرات (/admin/reviews)
+    ├── سرنخ‌ها (/admin/leads)
+    ├── مالی (/admin/finance)
+    ├── ماژول‌ها (/admin/modules)
+    ├── کاربران (/admin/users)
+    ├── تنظیمات (/admin/settings)
+    └── لاگ‌ها (/admin/logs)
+
+### ۲.۳ بخش تأمین‌کننده
+
+    پنل تأمین‌کننده (/supplier)
     ├── داشبورد (/supplier/dashboard)
-    ├── سفارش‌های من (/supplier/orders)
-    ├── ثبت کد رهگیری (/supplier/track)
-    └── حساب من (/supplier/account)
-```
+    ├── سفارش‌ها (/supplier/orders)
+    ├── ثبت کد رهگیری (/supplier/tracking)
+    └── حساب ماهانه (/supplier/account)
 
 ---
 
-## ۳. سیستم ناوبری (Navigation System)
+## ۳. سیستم ناوبری
 
-### ۳.۱ نوار بالایی (Header)
+### ۳.۱ نوار بالایی (Header) — همه صفحات عمومی
 
-نوار بالایی در تمام صفحات (به‌جز پنل‌ها) ثابت است و شامل موارد زیر است:
+    [لوگو ریهان] [کاتالوگ ▼] [درباره ما] [تماس] [جستجو 🔍] [حساب 👤] [سبد 🛒]
 
-| عنصر | توضیح | اولویت |
-|------|------|--------|
-| لوگوی ریهان | کلیک برای بازگشت به صفحه اصلی | Must |
-| منوی اصلی | کاتالوگ، درباره، تماس | Must |
-| جستجو | آیکون جستجوی سریع | Should |
-| ورود/ثبت‌نام | در صورت عدم ورود کاربر | Must |
-| حساب کاربری | در صورت ورود کاربر | Must |
-| سبد سفارش | با شمارنده تعداد | Must |
+- لوگو: کلیک → خانه
+- کاتالوگ: منوی کشویی با دسته‌های اصلی
+- جستجو: باز شدن فیلد جستجو
+- حساب: ورود / حساب کاربری
+- سبد: تعداد آیتم‌ها + لینک سبد
 
-#### منوی اصلی (Primary Menu)
+### ۳.۲ منوی کاتالوگ (کشویی)
 
-```
-[لوگو]    کاتالوگ    درباره ریهان    تماس با ما    [جستجو] [حساب/ورود] [سبد]
-```
-
-در موبایل، منو به آیکون همبرگری (☰) تبدیل می‌شود.
-
-### ۳.۲ منوی کاتالوگ (Catalog Menu)
-
-منوی کاتالوگ به‌صورت کٴویی (Dropdown) با نمایش دسته‌بندی‌ها:
-
-```
-کاتالوگ
-├── همه محصولات
-├── خشکبار
-│   ├── سماق
-│   ├── توت خشک
-│   └── ...
-├── چای و نوشیدنی
-├── لباس و پوشاک
-├── لوازم منزل
-└── محصولات فصلی
-```
+    ├── خشکبار
+    │   ├── گردو
+    │   ├── بادام
+    │   └── کشمش
+    ├── لباس
+    │   ├── مردانه
+    │   └── زنانه
+    ├── لوازم منزل
+    └── [سایر دسته‌ها — پویا از دیتابیس]
 
 ### ۳.۳ فوتر (Footer)
 
-فوتر در تمام صفحات عمومی و شامل:
+    ستون ۱: درباره ریهان (خلاصه ۲ خطی + لینک درباره ما)
+    ستون ۲: دسترسی سریع (کاتالوگ / پیگیری / تماس)
+    ستون ۳: اطلاعات (شماره تماس / آدرس / ساعات پاسخگویی)
+    پایین: کپی‌رایت + سیاست مرجوعی
 
-| بخش | محتوا |
-|------|------|
-| درباره | خلاصه داستان ریهان + لینک «بیشتر بدانید» |
-| دسترسی سریع | کاتالوگ، درباره، تماس، پیگیری سفارش |
-| اطلاعات تماس | شماره تماس، آدرس پستی، ایمیل |
-| نمادها | نماد اعتماد الکترونیکی (آینده)، اینماد (آینده) |
-| شبکه‌های اجتماعی | تلگرام، اینستاگرام (آینده) |
-| حقوقی | قوانین و مقررات، حریم خصوصی |
-| کپی‌رایت | © ۱۴۰۵ ریهان. تمام حقوق محفوظ است. |
+### ۳.۴ منوی کناری ادمین
 
-### ۳.۴ ناوبری در پنل خانواده (Admin Sidebar)
+    داشبورد | محصولات | دسته‌بندی | سفارش‌ها | نظرات
+    سرنخ‌ها | مالی | ماژول‌ها | کاربران | تنظیمات | لاگ‌ها | خروج
 
-منوی کناری در پنل ادمین:
+### ۳.۵ منوی کناری تأمین‌کننده
 
-```
-[لوگو ریهان — ادمین]
-
-📊 داشبورد
-📦 محصولات
-🛒 سفارش‌ها
-👥 کاربران
-💬 نظرات
-📌 سرنخ‌ها
-💰 مالی
-📝 محتوا
-⚙️ تنظیمات
-🔌 ماژول‌ها
-📊 گزارش‌ها
-
-[خروج]
-```
-
-#### نکات طراحی منوی ادمین
-- آیکون گویا برای هر بخش (با tooltips فارسی)
-- نمایش شمارنده در بخش‌های دارای موارد جدید (سفارش‌ها، نظرات، سرنخ‌ها)
-- گروه‌بندی منطقی (محصولات، سفارش‌ها، مدیریت)
-- فعال‌سازی/غیرفعال‌سازی بخش‌ها بر اساس نقش کاربر
-
-### ۳.۵ ناوبری در پنل تأمین‌کننده (Supplier Sidebar)
-
-منوی کناری در پنل تأمین‌کننده (ساده‌تر از پنل ادمین):
-
-```
-[لوگو ریهان — تأمین‌کننده]
-
-📊 داشبورد
-🛒 سفارش‌های من
-📦 ثبت کد رهگیری
-💰 حساب من
-
-[خروج]
-```
+    داشبورد | سفارش‌ها | ثبت رهگیری | حساب ماهانه | خروج
 
 ---
 
-## ۴. سیستم برچسب‌گذاری URL (URL Structure)
+## ۴. ساختار URL
 
-### ۴.۱ اصول برچسب‌گذاری
+### ۴.۱ الگوها
 
-- تمام URLها به انگلیسی و با حروف کوچک (lowercase)
-- استفاده از خط تیره (-) برای جدا کردن کلمات
-- با slug محصول/صفحه به‌جای ID عددی
-- پشتیبانی از RTL در نمایش URLهای فارسی (در صورت نیاز در آینده)
+| صفحه | الگو | مثال |
+|------|------|------|
+| خانه | / | / |
+| کاتالوگ | /catalog | /catalog |
+| دسته اصلی | /catalog/[category] | /catalog/dried-fruit |
+| زیردسته | /catalog/[category]/[sub] | /catalog/dried-fruit/walnut |
+| محصول | /product/[slug] | /product/horand-walnut-500g |
+| سبد | /cart | /cart |
+| پیگیری | /track | /track |
+| حساب | /account/[section] | /account/orders |
+| ادمین | /admin/[section] | /admin/products |
+| تأمین‌کننده | /supplier/[section] | /supplier/orders |
 
-### ۴.۲ الگوهای URL
+### ۴.۲ قوانین URL
 
-| نوع صفحه | الگوی URL | مثال |
-|----------|----------|------|
-| صفحه اصلی | `/` | `rihan360.ir/` |
-| کاتالوگ | `/products` | `rihan360.ir/products` |
-| دسته‌بندی | `/products/[category]` | `rihan360.ir/products/dry-fruits` |
-| محصول | `/products/[category]/[slug]` | `rihan360.ir/products/dry-fruits/sumac-hourvand` |
-| درباره | `/about` | `rihan360.ir/about` |
-| صفحه داخلی درباره | `/about/[section]` | `rihan360.ir/about/story` |
-| حساب کاربری | `/account/[section]` | `rihan360.ir/account/orders` |
-| پنل ادمین | `/admin/[section]` | `rihan360.ir/admin/products` |
-| پنل تأمین‌کننده | `/supplier/[section]` | `rihan360.ir/supplier/orders` |
-| پیگیری | `/track` | `rihan360.ir/track` |
-| سرنخ | `/lead` | `rihan360.ir/lead` |
-| صفحات حقوقی | `/legal/[page]` | `rihan360.ir/legal/terms` |
+- تمام حروف کوچک (lowercase)
+- جداکننده کلمات: خط تیره (-)
+- بدون کاراکتر فارسی در URL (slug انگلیسی)
+- حداکثر ۳ سطح عمق
+- بدون trailing slash (اسلش انتهایی حذف شود)
+- Slug محصول: نام + وزن/اندازه (مثال: horand-walnut-500g)
+- Slug دسته: ترجمه انگلیسی کوتاه (مثال: dried-fruit)
+- ID عددی فقط در پنل ادمین (نه بخش عمومی)
+- ریدایرکت 301 برای URLهای تغییرکرده
 
-### ۴.۳ قوانین خاص
+### ۴.۳ Slug محصولات — قواعد ساخت
 
-- URL محصول شامم دسته‌بندی و slug است (به‌روزرسانی دسته، URLهار تثn3n3băfn3�3b�fb��(��b�băb�f#b�b��b�b�n3n3bāͱ՜�fb�b�f#fb0�UI0�fb�n3fn0�b�f�3b�f#b�b����āI���ɕ�Ѓb�f�UI0�b�b�n3b��fb�b�n3b��b�f#b�(��b�fb�b�b��f�j�n3fn3b���b�fb�f�n�b0�ñf �����b�b���������9���b�n3fb�f�b�b�b�n0�b�b�f �((���((���nԸ�b�n3b�b�f�b�b�b�f�3b�fb�n0�fb�b�f#fb�b���Aɽ�ՍЁ�ѕ��ɥ�ѥ���((����nԻnăb�b�b�b�b�băb�b�b�f�3b�fb�n0(+b�n3fb�f�b�bȃn3j��b�b�b�b�b�băb�f �b�b�b�n0�b�b�b�f�3b�fb�n0�b�b�b�fb�b�f�fn3�3j�fb���b�b�b�f�b�b�fn0���b�n3b�b�b�b�f�b�b�b�n3b�b�n0��()��b�b�b�f�b�b�fn0���b�n3b�b�b�b�f�3fb���fff#ff����fb�b�f#fb�b��fff#ff��)𴴴��������𴴴������������������𴴴��������������)��b�b�j�b�b�bā��b�fb�fb0�b�f#b��b�b�j�b0�j�n3b�fb�f�j�f#fn3b0�b�b�n3f���b�fb�f�ff#b�b�fb�b0�b�f#b��b�b�j��ff#b�b�fb���)��jb�n0�f �ff#b�n3b�fn0���jb�n0�b�n3b�fb0�jb�n0�b�b�b�b0�b�fff#bЁ��jb�n0�b�fb�fb0�jb�n0�fb�fn3b�b�f��)��fb�b�b̃f �f�f#b�b�j����b�f#b�b�n3b0�b�b�fb0�fb�fb�f#b0�fb�b�b̃fb�fb�n0���b�f#b�b�n0�b�b�b�n3b�fb0�b�b�f�j�b�b�b�f��)��ff#b�b�f�ffb�f���ff#b�b�f�b�b�f�b�b�b�ffb0�b�j�f#b�b�b�n3f#fb0�ff#b�b�f�b�b�ff���b�b�f#f�fb�n3b0�ff#b�b�f�b�b�ff��)��fb�b�f#fb�b��fb�fn0���f�j��n3fb�b�b0�ff#b�f#b�b0�b�fb�b�f���f�j��n3fb�b��n�n�n�nԁ�)��ff#b�b��b�b�b�n3n0���b�b�fb�b0�b�b�fb0�b�b�fb�b�f���b�b�fb��b�b�b�fb0�b�b�f�b�b�n3b�n0��((����nԻnȃb�b�f#f�b�b�b�f�3b�fb�n0((��fbăfb�b�f#f�b�b�fb�f,�b�băn3j��b�b�b�f�b�b�fn0�fb�b�băfn3�3j�n3b�b�(��b�n3b�b�b�b�f�b�b�b�n3b�b�n0�b�b�b���fb�b�f#f�fn3�3b�f#b�fb��fb�b�fn3fb�f,�b�băb�b�b�f�b�b�fn0�b�b�b�b��(��n3j��fb�b�f#f�fn3�3b�f#b�fb��b�băjfb��b�b�b�f�b�b�b�b���fb�fb�f,�b�b�f�b�bă
-�ff#b�b��b�b�b�n3n3
-�f �
-�f�j��n3fb�b�
-�(��b�băb�n3fb�fb0�b�n3b�b�f�Q���b�b�b�n0�b�b�jb�b��3j�b�b�b�n0�b�b�b�n0��fb�fb�f,�
-�fb�b�f#f�ff#b�b�fb�
-�b0�
-�fb�b�f#f�b�b�ff
-�(��b�b�b�f�3b�fb�n3�3fb��b�bȃf�ff�b�b�fn3f�fb�b�f�b�fb�f#b�f�f#n3b�b�n3bпb�b�f�b�b�b�fb�((����nԻnȃfb�f#f�ffb�n3bЃb�b�b�f�3b�fb�n0((��b�fb�f�fbăb�b�b�f�b�ff#b�f�b�b�b�fb0�b�f#b�n3b�b�b�b0�b�b�f#n3băb�b�b�fb0�fn3fb�băfb�b�f#fb�b�(��b�băb�fb�f�fb�b�f#f�ffb�n3bЃ
-�fb�n3b�
-쀡	ɕ����յ�̤聃b�b�ff���b�b�j�b�b�bĀ��b�fb�f���b�fb�f�ff#b�b�fb��(��b�băff#b�b��fn3fj��b�f�nԃb�b�b�f�b�b�fn0(��b�băfff#n0�j�b�f#n3n0�j�b�b�b�ff#j��ffb�n3bЃfbăb�b�b�f�f �b�n3b�b�b�b�f�3fb�n3b�((���((���nظ�fb�fb�b�n0�b�b�fb�b�b�b��fb�b�f#f��Aɽ�ՍЁ%���ɵ�ѥ���ɍ��ѕ���ɔ�(+fbăb�fb�f�fb�b�f#f�b�b�ff�b�b�fb�b�b�b��b�b�b�b�b�b�n3b�fb�f�b�n3băb�b�b��((����nػnăb�b�b�b�b�băb�fb�f�fb�b�f#f()���)m	ɕ����յ���b�b�ff���b�b�b�f���fb�b�f#ft)oj�b�fb�n0�b�j�bϊ3fb���P�b�b�b�j����b�b�b�f#n3băj�f#jj�t)ob�ff#b�f�fb�b�f#ft)ob�fb�n3b�bȃfn3b�fj�n3f���b�b�b�b�b��fb�b�b�b�t)ofn3fb��b�f�b�f#fb�f���f#b�b�n3b��ff#b�f#b�n1t)ob�j�ff�
-�b�fb�f#b�f�b�f�b�fb�b�b�
-�t()ob�b��3fb��t+�Rs�R�R �b�f#b�n3b�b�b��f �b�b�b�b�b�f�fb�b�f#f+�Rs�R�R �fb�b�b�b�b��fb�b�f#f��f#b�fb0�fb�b�b�b0�b�b�b�n3b��b�f#fn3b��f ����+�Rs�R�R �fb�b�b�b��fb�b�b�n3b�f+�RS�R�R �b�b�b�fb�b��fb�b�b�f#f��M��ձ��()ofb�b�f#fb�b��fb�b�b�b�t)���((����nػnȃb�b�fb�b�b�b��fbăfb�b�f#f���ф�5�����()��fn3fb����ff#b���b�b�f#b�n0���b�f#b�n3b���)𴴴���𴴴���𴴴�����𴴴����)��ͱ՜�����ɥ�����b�ff���b�fb�b�f�UI0��)��fb�f�����ɥ�����b�ff���ffb�n3bЃb�băj�b�b�b�ff#j���)��fb�f�j�f�ff�����ɥ�����b�n3bā��b�ff#b�f�b�băb�fb�f�fb�b�f#f��)��b�f#b�n3b�b�b��j�f#b�b�f���ѕ�Ё��b�ff���b�fb�b�f�b�băj�b�b�b�ff#j���)��b�f#b�n3b�b�b��j�b�ff���ѕ�Ѐ�ɥ������b�ff���b�băb�fb�f�fb�b�f#f��)��b�b�b�b�b�f�fb�b�f#f���ѕ�Ѐ�ɥ������M��ձ����b�f#b�n3b��fb�b�f#f��)��fn3fb������ѕ��ȁ��b�ff���b�f�b�f#fb�f��)��ff#b�f#b�n0�����ѕ��ȁ��b�ff���b�b�b���)��f#b�f�������������M��ձ����j�n3ff#j�b�f��)��fb�b�b������ɥ�����M��ձ����b�fbĿffb�ff��)��b�b�fn3f�3j�ffb�f���ɕ��ɕ������b�ff���b�b�b�b�b�b�f�b�b�f#f�b�b�fn3f�3j�ffb�j�b�f��)��b�b�b�f�b�b�fn0���ɕ��ɕ������b�ff���b�b�b�b�b�b�f�b�b�f#f�b�b�b�f�3fb���)��b�n3b�b�b�b�f���ɕ��ɕ������b�n3bā��b�b�b�b�b�b�b�b�n3b�b�n0��)��b�j�b̃b�b�fn0�����������b�ff���b�j�b̃b�b�fn0�fb�b�f#f��)��j�b�fb�n0�b�j�b́��������mt���M��ձ����b�j�bϊ3fb�n0�b�b�b�fn0��)��f#b�b�n3b������մ���b�ff���fb�b�f�b�n3b�fb�b�f�ff#b�f#b��b�f �b�f�b�b�fb�f�fb�ff#b�f#b���)��b�b�b�n3b��b�n3b�b�b������ѕѥ�����b�ff���b�f#b�j�b�bā�)��b�b�b�n3b��b�f�3b�f#b�b�b�b�fn0�����ѕѥ�����b�ff���b�f#b�j�b�bā�)��f#n3jcj�n3�3fb�����ͽ����b�n3bā��f#n3jcj�n3�3fb�n0�b�b�bԀ�fb�f�b�fj�b0�b�b�n3bȤ��)��fb�b��b�ff#b�f��M<������ɥ�����M��ձ����b�b�b�n0�b�b�f ��)��fb�b��b�f#b�n3b�b�b���M<����ѕ�Ё��M��ձ����b�b�b�n0�b�b�f ��((���((���nܸ�fb�fb�b�n0�b�b�fb�b�b�b��f�ff�b�b�fn3f�������%�((����nܻnăb�b�b�b�b�băb�b�b�b�f#b�b��b�b�fn0()���+b�b�b�b�f#b�b��b�b�fn0+�Rs�R�R �j�b�b�b��3fb�n0�b�fb�b�f�b�f#b�b�ff+�R����Rs�R�R �b�fb�b�bӊ3fb�n0�b�fb�f#b�+�R����Rs�R�R �b�b�b�fb��b�fb�f#b�+�R����Rs�R�R �b�fb�b�bӊ3fb�n0�b�băb�fb�b�b�băb�b�n3n3b�+�R����RS�R�R �fb�b�f#fb�b��b�f �b�f�b�b�fb�f+�Rs�R�R �fff#b�b�băb�b�b�fb��n܃b�f#bȃb�b�n3b�+�Rs�R�R �b�b�b�n3f�b�fb�b�bӊ3fb���b�b�f#b�b�b��+�RS�R�R �b�n0�b�băb�ff#b�b�b�f�f#b�fb�f+�RS�R�R �fb�b�b�b���b�b�b��fb�b�bܤ+�RS�R�R �fb�b�b�b�fb���ff#b�f#b�f�ffn0�b�b�b�f#bФ)���((����nܻnȃb�b�b�b�b�băb�b�bЃfb�b�f#fb�b�()���+jb�b�b�f�fb�b�b�fb�b�+�Rs�R�R �b�fb�b�bӊ3fb��b�b�b�b�b�n0�b�b�b�n3b�+�Rs�R�R �ff#b�b�n3f�b�băff#b�b�b�f+�Rs�R�R �b�b�b�f�3b�fb�n0�b�băff#b�b�b�f�3j�ffb�j�b�f+�RS�R�R �b�b�fn3f�3j�ffb�j�b�f)���((����nܻñb�b�b�b�b�băb�b�bЃb�fb�b�bӊ3fb�()���+b�fb�b�bӊ3fb�+�Rs�R�R �fff�b�fb�b�bӊ3fb���b�b��fn3fb�băf#b�b�n3b��+�Rs�R�R �b�fb�b�bӊ3fb�n0�b�b�n3b�+�Rs�R�R �b�fb�b�bӊ3fb�n0�b�băb�fb�b�b�băf�b�b�b�b�b�+�Rs�R�R �b�fb�b�bӊ3fb�n0�b�băb�b�f�b�fb�b�f�3b�b�b�n0+�Rs�R�R �b�fb�b�bӊ3fb�n0�b�b�b�b�f�b�b�f+�Rs�R�R �b�fb�b�bӊ3fb�n0�b�b�f#n3f�b�b�f+�Rs�R�R �b�fb�b�bӊ3fb�n0�fb�f �b�b�f+�RS�R�R �b�fb�b�bӊ3fb�n0�fb�b�f#b�b�b�f)���((����nܻnЃb�b�b�b�b�băb�b�bЃfb�fn0()���+fb�fn0+�Rs�R�R �b�fb�b�f�fb�f�b�b�b�n0+�Rs�R�R �b�b�b�j�fbӊ3fb�+�Rs�R�R �b�fb��b�b�fn3f�3j�ffb�j�b�f+�Rs�R�R �fb�n3ff�3fb�n0�b�b�b�b�+�Rs�R�R �j�b�b�b�bӊ3fb�n0�fb�fb�ff+�RS�R�R �b�b�f#b�n0�ፕ��MX)���((����nܻnԃb�b�b�b�b�băb�b�bЃb�fb�n3fb�b�()���+b�fb�n3fb�b�+�Rs�R�R �b�ff#fn0��fb�f�b�b�n3b�b0�b�f#b�n3b�b�b�b0�f#b�b�b��+�Rs�R�R �b�b�fbĀ�b�fj�b0�ff#fb�b0�ff#j�f �+�Rs�R�R �fb�b�f#fb�b���b�b�b�f�3b�fb�n0�f�n3bӊ3fb�b�b0�ffb�n3bФ+�Rs�R�R �b�fb�b�bЀ�b�f#bӊ3fb�n0�b�b�b�b�fb0�f�b�b�b�b�b��+�Rs�R�R �j�b�b�b�b�b�f��ffbӊ3fb�b0�b�b�b�b�b�n3�3fb��+�Rs�R�R �fb�jcf#f�3fb���fb�b�f�b�n3b�fb�b�f�+�Rs�R�R �b�ffn3b���fb�b�f#b�n3b��f#b�f#b�b0�fb�j��+�RS�R�R �f�b�b�n3b�b�f���������)���((���((���nฃb�n3b�b�f�b�b�b�b�f ��M��ɍ��M��ѕ��((����n�năb�b�b�b�f#n0�b�b�b�f��5Y@�((��b�b�b�b�f �b�băfb�f�f �b�f#b�n3b�b�b��j�f#b�b�f�fb�b�f#fb�b�(��ffb�n3bЃfb�n3b�f�b�băb�fb�f���͕�ɍ����m�Օ��u�(��ffb�n3bЃfb�b�f#fb�b��ffb�b�f�b�f�3b�f#b�b��j�b�n3b�(��b�băb�f#b�b��b�b�f�fb�n3b�fb0�ffb�n3bЃf�n3b�f�
-�fb�b�f#fn0�n3b�fb��fb�b�
-쀬�fn3fj��b�f�fb�f�b�b�fb�((����n�nȃb�b�b�b�f#n0�f�n3b�b�fb�f��M��ձ��((��fn3fb�băb�băb�b�b�b��b�b�b�fb0�fn3fb�b0�fb�b�b�b0�b�b�fn3f�3j�ffb�f(��fb�b�b��3b�b�b�n0�b�băb�b�b�b��b�b�n3b�b�b�n3fb0�fn3fb�b0�b�fb�n3b�b�b0�f�b�fb�f#bӊ3b�b�n3f(��ffb�n3bЃb�b�b�b�b��fb�b�n3b�(��b�fb�f�3b�fb�n0��A�����ѥ���((���((���n七b�n3b�b�f�	ɕ����յ��(+b�băb�fb�f�b�fb�b�b��b�b�b�fn3b0�	ɕ����յ�̃ffb�n3bЃb�b�b�f�fn3�3b�f#b��()���+b�b�ff���b�b�j�b�b�bĀ��b�fb�f���b�fb�f�ff#b�b�fb�+b�b�ff���b�b�b�b�b�f�b�n3fb�f���b�b�b�b�b�f�fb�+b�b�ff���b�b�b�b��j�b�b�b�b�n0���b�fb�b�bӊ3fb�n0�ff)���(+fj�b�b��(��b�b�ff�ffn3b�f�fb�b�f�j�fn3j��b�b�b�(��fbăb�b�bЃb�bȁ	ɕ����յ�̃fb�b�f�j�fn3j��b�b�b���b�f�b�b�b�f�n3b��b�fb�f�fb�b�f#b�f�(��b�băb�fb�b�b��ff#b�b�n3fb0�	ɕ����յ�̃fb�b�f�f�ffb�f�b�b�f((���((���n�n���b�n3b�b�f�A�����ѥ���f �1����((��b�băj�b�b�b�ff#j��n�nȃfb�b�f#f�b�băfbăb�fb�f��ñb�b�f#f�X�nЃb�b�n3f�b�băb�b�j�b�b�f�b0�năb�b�f#f�b�băff#b�b�n3f�(��b�băfn3b�b��b�fb�b�b�b�b��b�b�fn3f�n�n��b�fb�b�bЃb�băfbăb�fb�f(��b�băfb�b�b�b��n�n��fb�băb�băfbăb�fb�f(��ffb�n3bЃ
-�ffb�n3bЁ`�b�b��d�b�bȁh�fb�n3b�f
-�(��b�j�ff�3fb�n0�
-�fb�fn3
-�f �
-�b�b�b�n3
-쀬�b�fb�b�f�b�fb�b�b�((���((���n�nĸ�b�b�b�fb�n0�n�n�nЃf �I���ɕ��fb�((����n�nĻnăb�fb�f�n�n�n�((��b�b�b�b�n0�fb�b�b�f�b�b��b�b�fb��b�n3fb�f(��f�n3b�f�fb�b�b�n0�
-�b�fb�f�ff#b�b��fb�băn3b�fb��fb�b�
-�(��f�n3b�ffb�b��
-�b�b�n3b��b�n3f�fb�b�f#fb�b��b�b�b�n0�b�fb��b�b�fb��b�b�b�b�
-쀬�ffb�n3bЃñfb�b�f#f�b�b�b�b�fn0(��fn3fj��b�f�b�fb�f�b�b�fn0�f �j�b�b�b�ff#j�(��ffb�n3bЃfb�f�b�b�b�b�f ((����n�nĻnȁI���ɕ��fb�((��b�b�n3n3bāͱ՜�fb�b�f#f��H���ăb�f�UI0�b�b�n3b�(��b�b�f�fb�b�f#f��H�ffb�n3bЃb�fb�f�
-�fb�b�f#f�b�n3j�băff#b�f#b��fn3b�b�
-�b�b��fb�b�f#fb�b��fb�b�b�f(��b�b�b�b�b�n0�b�f�b�fb�f�fb�b�f#b��b�b�f��fb�f�f�ff�b�b�fn3f���H�I���ɕ�Ѓb�f�b�fb�f�f#b�f#b��b�b�����ͅ��((���((���n�nȸ�fb�fb�b�n0�b�b�fb�b�b�b��ff#b�b�n3f��5������%�((����n�nȻnăb�fb�f#b��3fb�n0�ff#b�b�n3f((��ff#b�băb�b�fb�n3n0�fb�b�b�f�3b�b��ffb܃ff#j�f#b0�b�n3j�f#f�b�b�b�b�f#b0�b�n3j�f#f�b�b�b�b0�b�n3j�f#f�fff (��fff#n0�b�b�fn0�b�f�b�n3j�f#f�ffb�b�j�b�n0���b���b�b�b�n3f�fn3�3b�f#b�(��j�b�b�b�ff#j��năb�b�f#f�b�f�3b�b�n0�n�b0�b�b��b�fj�b�f�b�b�n3n3băb�f�nȃb�b�f#f(��b�băb�fb�f�fb�b�f#f�j�b�fb�n0�b�f�3b�f#b�b���ɽ�͕�(��f�ff�b�b�fn3f�fff#n0�j�fb�b�n0�b�f�Ʌݕȃb�b�b�n3f�fn3�3b�f#b���b�b��b�j�ff�b�b�bȿb�b�b�f�(��	ɕ����յ�̃b�băff#b�b�n3f�ffb܃b�b�b�f�fb�fn0���b�j�ff�
-�b�b�b�j�b�b�
-�((����n�nȻnȃb�f#ff#n3b��ff#b�b�n3f((��n�n�f��j�b�b�b�b�b�f�b�b��ff#b�b�n3f�f#b�b�b��fn3�3b�f#fb���@ăfb�n3fb0�@̃b�fb�b��(��b�fb�f�fb�b�n3fb�fb��b�b�n3b��b�băff#b�b�n3f�b�b�f#f�fb�j�f�j�b�băj�ffb�(��b�b�b�b�b��fb�b�b�n0�f �ff#fb��3fb�n0�ffb�b�b��b�fb�b�b�f�3fb�n0�ff#b�b�n3f(��b�j�ff�3fb�n0�ffb�n0�b�b�b�j���b�b�b�ff�n�n�_n�nЃf�n3j�b�f�((���((���n�n̸�b�fb�b�f�3b�b�b�n0�b�b�b�n0�b�b�b������ɔ�Aɽ������((����n�n̻năfb�b�fb�n0�b�fb�b�f�b�b�b�n0�fb�b�fb�n0�b�b�b�n0((��b�fb�j�聀�������f ��������mͱ՝u�(��b�fb�f�j�ff�n3f聀���������̽mͱ՝u�(��b�fb�f�b�fb�j�聀��������ѕ����mͱ՝u�(��b�fb�f�ff#n3b�fb�f��b�băb�f#b�b��fn3b�bȤ聀��������ѡ�Ƚm��u�(��A$�b�ff#fn0聀������ļ������b�n3fb�f�b�f#b�b0�ffb܃b�b�b�n0�b�f��ff#b�b�n3f�(��b�b�b�fb�b��fb�b�b�f#f聀���ŀ(��b�fb�f�b�b�fb�b���b�b�f�nзnԤ聀�͕�٥��̀((����n�n̻nȃb�fb�b�f�3b�b�b�n0�jfb�b�b�b�ff��b�n3fb�f�b�f#bĤ((��b�b�b�b�b�bāUI0�b�fb�b�f�b�b�b�n0������������b�fj�fn3b�n0���P�fb�jfb��fb�fb�f,�]���Ё!�ٔ(��fb�n3f�b�b�b�ff�3fb��b�bā��������̽����ͽ���f ���������̽����ͽ��(��b�f#n3j�b�b����ḃb�fb�b�f�b�băj�b���fb�jfb��fb�fb�f,�ffb܃fb�b�b�n0�fb�b�f�((���((���n�nи�b�b�b�b�b�b�b�((����b�b�fb�b��fb�b�b�(������̽AI=UP�%9%Q%=8������P�b�b�b�n3f�fb�b�f#f�f �b�b�f#f�b�b�b�b�n0(������̽UMH�AIM=9L������P�f�b�b�f#fb�fb�n0�j�b�b�b�b�(������̽5Y@�M=A������P�fb�jcf#f�3fb�n0�5Y@(������̽�Ʌ���Y%MU0�%9Q%Qd�	I%������P�b�b�n3f�ff#n3b��b�b�b�n0(������̽Q!9%0�IEU%I59QL������P�b�fb�b�fb�b��ffn0((����b�b�fb�b��fb�b�b�b܃fb�bȃn�(������̽UMH�1=]L������P�fb�n3b�fb�n0�j�b�b�b�băb�băb�fb�b�b�(������̽UM
+فرمول: [مبدأ]-[محصول]-[وزن/واحد]
+
+مثال‌ها:
+- horand-walnut-500g
+- horand-almond-1kg
+- tabriz-raisin-250g
+- horand-dried-apricot-400g
+
+قواعد:
+- حداکثر ۶۰ کاراکتر
+- فقط حروف انگلیسی، اعداد، خط تیره
+- بدون حرف اضافه (a, the, of)
+- واحد به انگلیسی: g, kg, pcs, pack
+- در صورت تکراری: افزودن عدد (horand-walnut-500g-2)
+
+---
+
+## ۵. انواع محتوا (Content Types)
+
+| نوع | فیلدهای اصلی | نمایش |
+|------|-------------|------|
+| محصول | نام، slug، قیمت، موجودی، عکس، توضیح، داستان، دسته، واحد | کاتالوگ + جستجو |
+| دسته | نام، slug، والد، ترتیب، عکس | منو + کاتالوگ |
+| سفارش | شماره، مشتری، آیتم‌ها، مبلغ، وضعیت، رسید، رهگیری | پنل ادمین + پیگیری |
+| نظر | نام، محصول، امتیاز، متن، وضعیت | صفحه محصول |
+| سرنخ | نام، موبایل، محصول، تاریخ، وضعیت | پنل ادمین |
+| کاربر | نام، نقش، موبایل، رمز، وضعیت | پنل ادمین |
+| ماژول | نام، کلید، توضیح، وضعیت | پنل ادمین |
+| تراکنش | سفارش، مبلغ، روش، تاریخ، وضعیت | پنل مالی |
+
+---
+
+## ۶. Breadcrumbs
+
+### بخش عمومی
+
+    خانه > کاتالوگ > [دسته] > [محصول]
+    خانه > درباره ما
+    خانه > پیگیری سفارش
+
+### پنل ادمین
+
+    پنل > [بخش] > [جزئیات]
+    مثال: پنل > سفارش‌ها > سفارش #1042
+
+### قوانین
+
+- هر بخش لینک‌دار به‌جز آخرین (صفحه فعلی)
+- جداکننده: >
+- در موبایل: فقط ۲ سطح آخر نمایش داده شود
+
+---
+
+## ۷. ارجاعات
+
+- docs/PRODUCT-DEFINITION.md
+- docs/USER-PERSONAS.md
+- docs/MVP-SCOPE.md
+- docs/USER-FLOWS.md
+- docs/USER-STORIES.md
+- decisions/D-031-RIHAN-PHASE3-PRODUCT-DEFINITION.md
+
+---
+
+*این سند با هر تغییر در ساختار اطلاعاتی به‌روزرسانی می‌شود.*
