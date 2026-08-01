@@ -2,7 +2,7 @@
 
 > این فایل با هر تغییر پروژه به‌روزرسانی میشود.
 > AI-ENTRY ثابت میماند. این فایل پویا است.
-> آخرین به‌روزرسانی: ۱۴۰۵/۰۵/۰۹
+> آخرین به‌روزرسانی: ۱۴۰۵/۰۵/۱۰
 
 ---
 
@@ -40,24 +40,34 @@
 | REVENUE-MODEL.md | مدل درآمدی | ۲ | تکمیل | [GitHub](https://github.com/abyfahimy91-netizen/rihan-platform/blob/main/docs/REVENUE-MODEL.md) |
 | PRICING-STRATEGY.md | استراتژی قیمت‌گذاری | ۲ | تکمیل | [GitHub](https://github.com/abyfahimy91-netizen/rihan-platform/blob/main/docs/PRICING-STRATEGY.md) |
 | FINANCIAL-PROJECTIONS.md | پیش‌بینی مالی | ۲ | تکمیل | [GitHub](https://github.com/abyfahimy91-netizen/rihan-platform/blob/main/docs/FINANCIAL-PROJECTIONS.md) |
-| PRODUCT-DEFINITION.md | تعریف محصول | ۳ | — | — |
-| MVP-SCOPE.md | محدوده MVP | ۳ | — | — |
-| USER-STORIES.md | داستان‌های کاربر | ۳ | — | — |
+| PRODUCT-DEFINITION.md | تعریف محصول | ۳ | تکمیل | [GitHub](https://github.com/abyfahimy91-netizen/rihan-platform/blob/main/docs/PRODUCT-DEFINITION.md) |
+| USER-PERSONAS.md | پرسوناهای کاربر | ۳ | تکمیل | [GitHub](https://github.com/abyfahimy91-netizen/rihan-platform/blob/main/docs/USER-PERSONAS.md) |
+| MVP-SCOPE.md | محدوده MVP با MoSCoW | ۳ | تکمیل | [GitHub](https://github.com/abyfahimy91-netizen/rihan-platform/blob/main/docs/MVP-SCOPE.md) |
+| INFORMATION-ARCHITECTURE.md | معماری اطلاعات | ۳ | تکمیل | [GitHub](https://github.com/abyfahimy91-netizen/rihan-platform/blob/main/docs/INFORMATION-ARCHITECTURE.md) |
+| USER-FLOWS.md | مسیرهای کاربر | ۳ | تکمیل | [GitHub](https://github.com/abyfahimy91-netizen/rihan-platform/blob/main/docs/USER-FLOWS.md) |
+| USER-STORIES.md | داستان‌های کاربر | ۳ | تکمیل | [GitHub](https://github.com/abyfahimy91-netizen/rihan-platform/blob/main/docs/USER-STORIES.md) |
 | REQUIREMENTS.md | نیازمندی‌ها | ۴ | — | — |
 | SECURITY-ANALYSIS.md | تحلیل امنیت | ۴ | — | — |
 | TECH-DOCUMENTATION.md | مستندات فنی | ۵ | — | — |
 
-### brand/ — هویت بصری برند
+### docs/brand/ — هویت بصری برند
 
 | فایل | نقش | فاز | وضعیت | لینک |
 |------|------|-----|--------|------|
-| VISUAL-IDENTITY-BRIEF.md | بریف هویت بصری برند | ۱ | تکمیل | [GitHub](https://github.com/abyfahimy91-netizen/rihan-platform/blob/main/brand/VISUAL-IDENTITY-BRIEF.md) |
+| VISUAL-IDENTITY-BRIEF.md | بریف هویت بصری برند | ۱ | تکمیل | [GitHub](https://github.com/abyfahimy91-netizen/rihan-platform/blob/main/docs/brand/VISUAL-IDENTITY-BRIEF.md) |
+| BRAND-IDENTITY.md | هویت برند | ۱ | تکمیل | [GitHub](https://github.com/abyfahimy91-netizen/rihan-platform/blob/main/docs/brand/BRAND-IDENTITY.md) |
+| BRAND-STRATEGY.md | استراتژی برند | ۱ | تکمیل | [GitHub](https://github.com/abyfahimy91-netizen/rihan-platform/blob/main/docs/brand/BRAND-STRATEGY.md) |
+| BRAND-STORY.md | داستان برند | ۱ | تکمیل | [GitHub](https://github.com/abyfahimy91-netizen/rihan-platform/blob/main/docs/brand/BRAND-STORY.md) |
+| BRAND-DECISIONS.md | تصمیمات برند | ۱ | تکمیل | [GitHub](https://github.com/abyfahimy91-netizen/rihan-platform/blob/main/docs/brand/BRAND-DECISIONS.md) |
 
 ### decisions/ — تصمیمات
 
 | فایل | نقش | وضعیت | لینک |
 |------|------|--------|------|
 | DECISIONS.md | ثبت تمام تصمیمات | فعال | [GitHub](https://github.com/abyfahimy91-netizen/rihan-platform/blob/main/decisions/DECISIONS.md) |
+| D-029-RIHAN-BRAND-APPROVAL.md | تأیید برند ریهان | تکمیل | [GitHub](https://github.com/abyfahimy91-netizen/rihan-platform/blob/main/decisions/D-029-RIHAN-BRAND-APPROVAL.md) |
+| D-038-RIHAN-PHASE1-BRAND-FOUNDATION.md | تکمیل فاز ۱ بنیان برند | تکمیل | [GitHub](https://github.com/abyfahimy91-netizen/rihan-platform/blob/main/decisions/D-038-RIHAN-PHASE1-BRAND-FOUNDATION.md) |
+| D-031-RIHAN-PHASE3-PRODUCT-DEFINITION.md | تکمیل فاز ۳ تعریف محصول | تکمیل | [GitHub](https://github.com/abyfahimy91-netizen/rihan-platform/blob/main/decisions/D-031-RIHAN-PHASE3-PRODUCT-DEFINITION.md) |
 | ARCHITECTURE-DECISIONS.md | تصمیمات معماری | فاز ۴ | — |
 | TECHNOLOGY-SELECTION.md | انتخاب فناوری | فاز ۴ | — |
 
