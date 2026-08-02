@@ -138,3 +138,27 @@ Guest Checkout برای دایره اول حیاتی است.
 - docs/USER-FLOWS.md (C1, C2, E2)
 - docs/INFORMATION-ARCHITECTURE.md (/auth, /account/devices)
 - docs/PRODUCT-DEFINITION.md (بخش ۶.۱)
+
+---
+
+D-042: هویت بصری MVP — پالت رنگ + فونت + قوانین استفاده
+Status: تأیید بنیان‌گذار ✅
+تاریخ: 2026-08-02 (۱۴۰۵/۰۵/۱۱)
+فاز: 3
+تصمیم‌گیرنده: عبدالحسین فهیمی
+
+قطعی:
+- پالت ۹ رنگ با HEX (سبز #0D3B2E، طلایی #C9A961 فقط روی سبز، طلایی تیره #7A6428 برای متن، سفید گرم #FAF7F0، متن #1A1A1A، فرعی #5C5C5C، حاشیه #E8E4DC، موفق #2D6A4F، خطا #9B2C2C)
+- فونت MVP: وزیرمتن (Regular/Medium/Bold/Black) — رایگان، لوکال
+- CTA: سبز + سفید (نه طلایی)
+- قوانین: طلایی فقط تأکید محدود، هرگز رنگ غالب
+- Light Mode only
+- توکن‌های CSS معنایی
+
+باز (عمداً):
+- لوگو نهایی → فاز ۵ (Q-013)
+- ایران‌سنس → فاز ۵+ (اختیاری، مشروط به لایسنس)
+- Dark Mode → فاز ۷+
+
+سند: docs/brand/VISUAL-IDENTITY.md
+مرتبط: Q-005 (Partially Closed)، Q-012 (Closed)، اصول ۲، ۴، ۸، ۹

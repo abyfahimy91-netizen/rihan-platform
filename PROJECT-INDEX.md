@@ -59,7 +59,8 @@
 | BRAND-IDENTITY.md | هویت برند | ۱ | تکمیل | [GitHub](https://github.com/abyfahimy91-netizen/rihan-platform/blob/main/docs/brand/BRAND-IDENTITY.md) |
 | BRAND-STRATEGY.md | استراتژی برند | ۱ | تکمیل | [GitHub](https://github.com/abyfahimy91-netizen/rihan-platform/blob/main/docs/brand/BRAND-STRATEGY.md) |
 | BRAND-STORY.md | داستان برند | ۱ | تکمیل | [GitHub](https://github.com/abyfahimy91-netizen/rihan-platform/blob/main/docs/brand/BRAND-STORY.md) |
-| BRAND-DECISIONS.md | تصمیمات برند | ۱ | تکمیل | [GitHub](https://github.com/abyfahimy91-netizen/rihan-platform/blob/main/docs/brand/BRAND-DECISIONS.md) |
+| BRAND-DECISIONS.md | تصمیمات برند | ۱ | تکمیل |
+| VISUAL-IDENTITY.md | هویت بصری (پالت + فونت + قوانین) | ۳ | تأییدشده ✅ | [GitHub](https://github.com/abyfahimy91-netizen/rihan-platform/blob/main/docs/brand/BRAND-DECISIONS.md) |
 
 ### decisions/ — تصمیمات
 
@@ -72,6 +73,7 @@
 | D-039-RIHAN-AUTH-MODEL.md | مدل احراز هویت (لغو شده) | Superseded by D-040 | — |
 | D-040-RIHAN-PASSWORDLESS-AUTH.md | احراز هویت Passwordless | تأییدشده | — |
 | D-041 (در DECISIONS.md) | اصل یکسان بودن سیاست مرجوعی | تأییدشده ✅ | — |
+| D-042 (در DECISIONS.md) | هویت بصری MVP | تأییدشده ✅ | — |
 | ARCHITECTURE-DECISIONS.md | تصمیمات معماری | فاز ۴ | — |
 | TECHNOLOGY-SELECTION.md | انتخاب فناوری | فاز ۴ | — |
 
