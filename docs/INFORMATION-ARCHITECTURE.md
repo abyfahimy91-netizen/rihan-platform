@@ -34,12 +34,12 @@
     ├── تماس با ما (/contact)
     ├── سیاست مرجوعی (/return-policy)
     ├── پیگیری سفارش (/track)
-    ├── ورود / ثبت‌نام (/auth) — Passwordless: موبایل + OTP + Device Remembering
+    ├── ورود / ثبت‌نام (/auth)          ← مبتنی بر شماره موبایل + OTP + Device Remembering
     ├── حساب کاربری (/account)
     │   ├── سفارش‌های من (/account/orders)
     │   ├── علاقه‌مندی‌ها (/account/wishlist)
-    │   ├── تنظیمات (/account/settings)
-│   └── دستگاه‌های من (/account/devices)
+    │   ├── مدیریت دستگاه‌ها (/account/devices)
+│   └── تنظیمات (/account/settings)
     └── سبد سفارش (/cart)
 
 ### ۲.۲ بخش ادمین (خانواده)
