@@ -45,7 +45,7 @@
 | MVP-SCOPE.md | محدوده MVP با MoSCoW | ۳ | پیش‌نویس — انتظار تأیید | [GitHub](https://github.com/abyfahimy91-netizen/rihan-platform/blob/main/docs/MVP-SCOPE.md) |
 | INFORMATION-ARCHITECTURE.md | معماری اطلاعات | ۳ | پیش‌نویس — انتظار تأیید | [GitHub](https://github.com/abyfahimy91-netizen/rihan-platform/blob/main/docs/INFORMATION-ARCHITECTURE.md) |
 | USER-FLOWS.md | مسیرهای کاربر | ۳ | پیش‌نویس — انتظار تأیید | [GitHub](https://github.com/abyfahimy91-netizen/rihan-platform/blob/main/docs/USER-FLOWS.md) |
-| USER-STORIES.md | داستان‌های کاربر | ۳ | پیش‌نویس — انتظار تأیید |
+| USER-STORIES.md | داستان‌های کاربر | ۳ | پیش‌نویس — انتظار تأیید [GitHub](https://github.com/abyfahimy91-netizen/rihan-platform/blob/main/docs/USER-STORIES.md) |
 | RETURN-POLICY.md | سیاست مرجوعی و بازگشت کالا | ۳ | تأییدشده ✅ | [GitHub](https://github.com/abyfahimy91-netizen/rihan-platform/blob/main/docs/RETURN-POLICY.md) |
 | REQUIREMENTS.md | نیازمندی‌ها | ۴ | — | — |
 | SECURITY-ANALYSIS.md | تحلیل امنیت | ۴ | — | — |
@@ -59,7 +59,7 @@
 | BRAND-IDENTITY.md | هویت برند | ۱ | تکمیل | [GitHub](https://github.com/abyfahimy91-netizen/rihan-platform/blob/main/docs/brand/BRAND-IDENTITY.md) |
 | BRAND-STRATEGY.md | استراتژی برند | ۱ | تکمیل | [GitHub](https://github.com/abyfahimy91-netizen/rihan-platform/blob/main/docs/brand/BRAND-STRATEGY.md) |
 | BRAND-STORY.md | داستان برند | ۱ | تکمیل | [GitHub](https://github.com/abyfahimy91-netizen/rihan-platform/blob/main/docs/brand/BRAND-STORY.md) |
-| BRAND-DECISIONS.md | تصمیمات برند | ۱ | تکمیل |
+| BRAND-DECISIONS.md | تصمیمات برند | ۱ | تکمیل [GitHub](https://github.com/abyfahimy91-netizen/rihan-platform/blob/main/docs/brand/BRAND-DECISIONS.md) |
 | VISUAL-IDENTITY.md | هویت بصری (پالت + فونت + قوانین) | ۳ | تأییدشده ✅ | [GitHub](https://github.com/abyfahimy91-netizen/rihan-platform/blob/main/docs/brand/VISUAL-IDENTITY.md) |
 
 ### decisions/ — تصمیمات
