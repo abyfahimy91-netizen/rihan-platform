@@ -60,7 +60,7 @@
 | BRAND-STRATEGY.md | استراتژی برند | ۱ | تکمیل | [GitHub](https://github.com/abyfahimy91-netizen/rihan-platform/blob/main/docs/brand/BRAND-STRATEGY.md) |
 | BRAND-STORY.md | داستان برند | ۱ | تکمیل | [GitHub](https://github.com/abyfahimy91-netizen/rihan-platform/blob/main/docs/brand/BRAND-STORY.md) |
 | BRAND-DECISIONS.md | تصمیمات برند | ۱ | تکمیل |
-| VISUAL-IDENTITY.md | هویت بصری (پالت + فونت + قوانین) | ۳ | تأییدشده ✅ | [GitHub](https://github.com/abyfahimy91-netizen/rihan-platform/blob/main/docs/brand/BRAND-DECISIONS.md) |
+| VISUAL-IDENTITY.md | هویت بصری (پالت + فونت + قوانین) | ۳ | تأییدشده ✅ | [GitHub](https://github.com/abyfahimy91-netizen/rihan-platform/blob/main/docs/brand/VISUAL-IDENTITY.md) |
 
 ### decisions/ — تصمیمات
 
