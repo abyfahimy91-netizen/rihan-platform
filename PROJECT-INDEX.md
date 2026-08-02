@@ -45,7 +45,8 @@
 | MVP-SCOPE.md | محدوده MVP با MoSCoW | ۳ | پیش‌نویس — انتظار تأیید | [GitHub](https://github.com/abyfahimy91-netizen/rihan-platform/blob/main/docs/MVP-SCOPE.md) |
 | INFORMATION-ARCHITECTURE.md | معماری اطلاعات | ۳ | پیش‌نویس — انتظار تأیید | [GitHub](https://github.com/abyfahimy91-netizen/rihan-platform/blob/main/docs/INFORMATION-ARCHITECTURE.md) |
 | USER-FLOWS.md | مسیرهای کاربر | ۳ | پیش‌نویس — انتظار تأیید | [GitHub](https://github.com/abyfahimy91-netizen/rihan-platform/blob/main/docs/USER-FLOWS.md) |
-| USER-STORIES.md | داستان‌های کاربر | ۳ | پیش‌نویس — انتظار تأیید | [GitHub](https://github.com/abyfahimy91-netizen/rihan-platform/blob/main/docs/USER-STORIES.md) |
+| USER-STORIES.md | داستان‌های کاربر | ۳ | پیش‌نویس — انتظار تأیید |
+| RETURN-POLICY.md | سیاست مرجوعی و بازگشت کالا | ۳ | تأییدشده ✅ | [GitHub](https://github.com/abyfahimy91-netizen/rihan-platform/blob/main/docs/RETURN-POLICY.md) |
 | REQUIREMENTS.md | نیازمندی‌ها | ۴ | — | — |
 | SECURITY-ANALYSIS.md | تحلیل امنیت | ۴ | — | — |
 | TECH-DOCUMENTATION.md | مستندات فنی | ۵ | — | — |
@@ -70,6 +71,7 @@
 | D-031-RIHAN-PHASE3-PRODUCT-DEFINITION.md | تکمیل فاز ۳ تعریف محصول | پیش‌نویس — انتظار تأیید | [GitHub](https://github.com/abyfahimy91-netizen/rihan-platform/blob/main/decisions/D-031-RIHAN-PHASE3-PRODUCT-DEFINITION.md) |
 | D-039-RIHAN-AUTH-MODEL.md | مدل احراز هویت (لغو شده) | Superseded by D-040 | — |
 | D-040-RIHAN-PASSWORDLESS-AUTH.md | احراز هویت Passwordless | تأییدشده | — |
+| D-041 (در DECISIONS.md) | اصل یکسان بودن سیاست مرجوعی | تأییدشده ✅ | — |
 | ARCHITECTURE-DECISIONS.md | تصمیمات معماری | فاز ۴ | — |
 | TECHNOLOGY-SELECTION.md | انتخاب فناوری | فاز ۴ | — |
 

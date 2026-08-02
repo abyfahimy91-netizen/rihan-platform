@@ -4,7 +4,7 @@
 **تاریخ:** 2026-08-02
 **فاز:** 3 — Product Definition & Design
 **موتور AI-VOS:** Product Design Engine
-**وضعیت:** تأییدشده ✅
+**وضعیت:** پیش‌نویس — انتظار تأیید بنیان‌گذار ⏳
 
 ---
 
@@ -32,7 +32,7 @@
     │   └── محصول (/product/[slug])
     ├── درباره ما (/about)
     ├── تماس با ما (/contact)
-    ├── سیاست مرجوعی (/return-policy)
+    ├── سیاست مرجوعی (/about/return-policy)
     ├── پیگیری سفارش (/track)
     ├── ورود / ثبت‌نام (/auth)          ← مبتنی بر شماره موبایل + OTP + Device Remembering
     ├── حساب کاربری (/account)
