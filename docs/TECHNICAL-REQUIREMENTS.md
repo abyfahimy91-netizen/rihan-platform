@@ -197,7 +197,7 @@ API: Verify (تولید + ارسال + اعتبارسنجی)
 | M7 | tracking | پیگیری سفارش | وضعیت + خط زمانی + کد رهگیری |
 | M8 | reviews | نظرات و امتیازات | ثبت + تأیید ادمین + پاسخ |
 | M9 | leads | فرم سرنخ | اطلاع‌رسانی موجودی + پیگیری ادمین |
-| M10 | auth | ثبت‌نام و احراز هویت | OTP (Kavenegar) + رمز + فراموشی خودکار |
+| M10 | auth | احراز هویت مشتری | Passwordless (OTP + Device Remembering) + رمز اختیاری |
 | M11 | payment | پرداخت کارت‌به‌کارت | شماره کارت + آپلود رسید + تأیید ادمین |
 | M12 | brand_page | صفحه درباره برند | داستان + اصول + تماس + مرجوعی |
 | M13 | ui_design | طراحی حرفه‌ای | لوکس + RTL + شمسی + موبایل-اول |
@@ -231,7 +231,7 @@ API: Verify (تولید + ارسال + اعتبارسنجی)
 - docs/MVP-SCOPE.md (فاز ۳)
 - docs/USER-STORIES.md (فاز ۳)
 - docs/USER-FLOWS.md (فاز ۳)
-- decisions/D-039-RIHAN-AUTH-MODEL.md
+- decisions/DECISIONS.md (D-040)
 
 ---
 

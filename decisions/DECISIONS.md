@@ -27,7 +27,7 @@ D-023: Feature Flags — فعال‌سازی با سوئیچ
 D-024: تست کامل قبل از فعال‌سازی هر ماژول
 D-025: داستان = قانون اساسی (CENTRAL-STORY.md)
 D-026: اصول ۱۰گانه اساسی (FUNDAMENTAL-PRINCIPLES.md)
-D-027: ثبت‌نام: شماره+رمز (OTP بعداً با پنل پیامک)
+D-027: [Superseded by D-040] ثبت‌نام: شماره+رمز (OTP بعداً با پنل پیامک)
 D-028: انعطاف کامل — ماژول‌های ناموجود هم قابل اضافه
 D-029: تکمیل فاز ۲ — مدل کسب‌وکار و معماری محصول (Business Model & Product Architecture)
 Status: Phase 2 COMPLETED — اسناد: BUSINESS-MODEL-CANVAS.md, REVENUE-MODEL.md, PRICING-STRATEGY.md, FINANCIAL-PROJECTIONS.md
