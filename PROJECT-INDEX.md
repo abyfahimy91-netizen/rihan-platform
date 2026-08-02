@@ -2,7 +2,7 @@
 
 > این فایل با هر تغییر پروژه به‌روزرسانی میشود.
 > AI-ENTRY ثابت میماند. این فایل پویا است.
-> آخرین به‌روزرسانی: ۱۴۰۵/۰۵/۱۰
+> آخرین به‌روزرسانی: ۱۴۰۵/۰۵/۱۱
 
 ---
 
@@ -40,12 +40,12 @@
 | REVENUE-MODEL.md | مدل درآمدی | ۲ | تکمیل | [GitHub](https://github.com/abyfahimy91-netizen/rihan-platform/blob/main/docs/REVENUE-MODEL.md) |
 | PRICING-STRATEGY.md | استراتژی قیمت‌گذاری | ۲ | تکمیل | [GitHub](https://github.com/abyfahimy91-netizen/rihan-platform/blob/main/docs/PRICING-STRATEGY.md) |
 | FINANCIAL-PROJECTIONS.md | پیش‌بینی مالی | ۲ | تکمیل | [GitHub](https://github.com/abyfahimy91-netizen/rihan-platform/blob/main/docs/FINANCIAL-PROJECTIONS.md) |
-| PRODUCT-DEFINITION.md | تعریف محصول | ۳ | تکمیل | [GitHub](https://github.com/abyfahimy91-netizen/rihan-platform/blob/main/docs/PRODUCT-DEFINITION.md) |
-| USER-PERSONAS.md | پرسوناهای کاربر | ۳ | تکمیل | [GitHub](https://github.com/abyfahimy91-netizen/rihan-platform/blob/main/docs/USER-PERSONAS.md) |
-| MVP-SCOPE.md | محدوده MVP با MoSCoW | ۳ | تکمیل | [GitHub](https://github.com/abyfahimy91-netizen/rihan-platform/blob/main/docs/MVP-SCOPE.md) |
-| INFORMATION-ARCHITECTURE.md | معماری اطلاعات | ۳ | تکمیل | [GitHub](https://github.com/abyfahimy91-netizen/rihan-platform/blob/main/docs/INFORMATION-ARCHITECTURE.md) |
-| USER-FLOWS.md | مسیرهای کاربر | ۳ | تکمیل | [GitHub](https://github.com/abyfahimy91-netizen/rihan-platform/blob/main/docs/USER-FLOWS.md) |
-| USER-STORIES.md | داستان‌های کاربر | ۳ | تکمیل | [GitHub](https://github.com/abyfahimy91-netizen/rihan-platform/blob/main/docs/USER-STORIES.md) |
+| PRODUCT-DEFINITION.md | تعریف محصول | ۳ | پیش‌نویس — انتظار تأیید | [GitHub](https://github.com/abyfahimy91-netizen/rihan-platform/blob/main/docs/PRODUCT-DEFINITION.md) |
+| USER-PERSONAS.md | پرسوناهای کاربر | ۳ | پیش‌نویس — انتظار تأیید | [GitHub](https://github.com/abyfahimy91-netizen/rihan-platform/blob/main/docs/USER-PERSONAS.md) |
+| MVP-SCOPE.md | محدوده MVP با MoSCoW | ۳ | پیش‌نویس — انتظار تأیید | [GitHub](https://github.com/abyfahimy91-netizen/rihan-platform/blob/main/docs/MVP-SCOPE.md) |
+| INFORMATION-ARCHITECTURE.md | معماری اطلاعات | ۳ | پیش‌نویس — انتظار تأیید | [GitHub](https://github.com/abyfahimy91-netizen/rihan-platform/blob/main/docs/INFORMATION-ARCHITECTURE.md) |
+| USER-FLOWS.md | مسیرهای کاربر | ۳ | پیش‌نویس — انتظار تأیید | [GitHub](https://github.com/abyfahimy91-netizen/rihan-platform/blob/main/docs/USER-FLOWS.md) |
+| USER-STORIES.md | داستان‌های کاربر | ۳ | پیش‌نویس — انتظار تأیید | [GitHub](https://github.com/abyfahimy91-netizen/rihan-platform/blob/main/docs/USER-STORIES.md) |
 | REQUIREMENTS.md | نیازمندی‌ها | ۴ | — | — |
 | SECURITY-ANALYSIS.md | تحلیل امنیت | ۴ | — | — |
 | TECH-DOCUMENTATION.md | مستندات فنی | ۵ | — | — |
@@ -67,7 +67,9 @@
 | DECISIONS.md | ثبت تمام تصمیمات | فعال | [GitHub](https://github.com/abyfahimy91-netizen/rihan-platform/blob/main/decisions/DECISIONS.md) |
 | D-029-RIHAN-BRAND-APPROVAL.md | تأیید برند ریهان | تکمیل | [GitHub](https://github.com/abyfahimy91-netizen/rihan-platform/blob/main/decisions/D-029-RIHAN-BRAND-APPROVAL.md) |
 | D-038-RIHAN-PHASE1-BRAND-FOUNDATION.md | تکمیل فاز ۱ بنیان برند | تکمیل | [GitHub](https://github.com/abyfahimy91-netizen/rihan-platform/blob/main/decisions/D-038-RIHAN-PHASE1-BRAND-FOUNDATION.md) |
-| D-031-RIHAN-PHASE3-PRODUCT-DEFINITION.md | تکمیل فاز ۳ تعریف محصول | تکمیل | [GitHub](https://github.com/abyfahimy91-netizen/rihan-platform/blob/main/decisions/D-031-RIHAN-PHASE3-PRODUCT-DEFINITION.md) |
+| D-031-RIHAN-PHASE3-PRODUCT-DEFINITION.md | تکمیل فاز ۳ تعریف محصول | پیش‌نویس — انتظار تأیید | [GitHub](https://github.com/abyfahimy91-netizen/rihan-platform/blob/main/decisions/D-031-RIHAN-PHASE3-PRODUCT-DEFINITION.md) |
+| D-039-RIHAN-AUTH-MODEL.md | مدل احراز هویت (لغو شده) | Superseded by D-040 | — |
+| D-040-RIHAN-PASSWORDLESS-AUTH.md | احراز هویت Passwordless | تأییدشده | — |
 | ARCHITECTURE-DECISIONS.md | تصمیمات معماری | فاز ۴ | — |
 | TECHNOLOGY-SELECTION.md | انتخاب فناوری | فاز ۴ | — |
 
