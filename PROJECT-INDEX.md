@@ -73,6 +73,7 @@
 | D-039 (در DECISIONS.md) | مدل احراز هویت (لغو شده) | Superseded by D-040 | — |
 | D-040 (در DECISIONS.md) | احراز هویت Passwordless | تأییدشده | — |
 | D-041 (در DECISIONS.md) | اصل یکسان بودن سیاست مرجوعی | تأییدشده ✅ | — |
+| D-043 (در DECISIONS.md) | اصل ۱۱ کرامت مشتری | تأییدشده ✅ | — |
 | D-042 (در DECISIONS.md) | هویت بصری MVP | تأییدشده ✅ | — |
 | ARCHITECTURE-DECISIONS.md | تصمیمات معماری | فاز ۴ | — |
 | TECHNOLOGY-SELECTION.md | انتخاب فناوری | فاز ۴ | — |
