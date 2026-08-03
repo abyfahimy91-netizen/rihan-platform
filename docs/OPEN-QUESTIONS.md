@@ -19,7 +19,7 @@ Status: Partially Closed ✅
 
 Q-006: دسته‌بندی محصولات
 Status: Closed — ۶ دسته اصلی تأیید شد (خشکبار، چای و نوشیدنی، لباس، لوازم منزل، محصولات فصلی، مواد غذایی)
-جزئیات در INFORMATION-ARCHITECTURE.md بخش ۵
+جزئیات در INFORMATION-ARCHITECTURE.md بخش ۴.۵
 
 Q-007: سیاست مرجوعی
 Status: Closed ✅ — تعریف و تأیید شد (۱۴۰۵/۰۵/۱۱)

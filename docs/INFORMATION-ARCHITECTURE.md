@@ -179,7 +179,7 @@
 - هر محصول دقیقاً **یک** دسته اصلی دارد
 - زیردسته‌ها اختیاری هستند (می‌توانند خالی باشند)
 - Slug دسته: انگلیسی، lowercase، خط‌تیره
-- URL: /products/[category-slug]/[product-slug]
+- URL: /product/[slug] (مطابق نقشه سایت بخش ۴.۱)
 - مدیریت: ادمین می‌تواند دسته/زیردسته اضافه یا غیرفعال کند
 - دسته غیرفعال: محصولاتش از کاتالوگ حذف نمی‌شوند، فقط فیلتر حذف می‌شود
 
@@ -222,6 +222,8 @@
 ---
 
 ## ۷. ارجاعات
+- docs/RETURN-POLICY.md — سیاست مرجوعی
+- docs/brand/VISUAL-IDENTITY.md — هویت بصری
 
 - docs/PRODUCT-DEFINITION.md
 - docs/USER-PERSONAS.md
