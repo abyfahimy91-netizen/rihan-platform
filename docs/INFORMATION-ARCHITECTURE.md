@@ -39,7 +39,7 @@
     │   ├── سفارش‌های من (/account/orders)
     │   ├── علاقه‌مندی‌ها (/account/wishlist)
     │   ├── مدیریت دستگاه‌ها (/account/devices)
-│   └── تنظیمات (/account/settings)
+    │   └── تنظیمات (/account/settings)
     └── سبد سفارش (/cart)
 
 ### ۲.۲ بخش ادمین (خانواده)
@@ -123,6 +123,7 @@
 | دسته اصلی | /catalog/[category] | /catalog/dried-fruit |
 | زیردسته | /catalog/[category]/[sub] | /catalog/dried-fruit/walnut |
 | محصول | /product/[slug] | /product/horand-walnut-500g |
+| سیاست مرجوعی | /about/return-policy | /about/return-policy |
 | سبد | /cart | /cart |
 | پیگیری | /track | /track |
 | حساب | /account/[section] | /account/orders |
@@ -161,7 +162,6 @@
 ---
 
 
-- /about/return-policy — سیاست مرجوعی و بازگشت کالا
 
 ## ۴.۵ دسته‌بندی محصولات (نهایی — تأییدشده)
 
