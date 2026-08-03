@@ -46,7 +46,8 @@
 | INFORMATION-ARCHITECTURE.md | معماری اطلاعات | ۳ | پیش‌نویس — انتظار تأیید | [GitHub](https://github.com/abyfahimy91-netizen/rihan-platform/blob/main/docs/INFORMATION-ARCHITECTURE.md) |
 | USER-FLOWS.md | مسیرهای کاربر | ۳ | پیش‌نویس — انتظار تأیید | [GitHub](https://github.com/abyfahimy91-netizen/rihan-platform/blob/main/docs/USER-FLOWS.md) |
 | USER-STORIES.md | داستان‌های کاربر | ۳ | پیش‌نویس — انتظار تأیید | [GitHub](https://github.com/abyfahimy91-netizen/rihan-platform/blob/main/docs/USER-STORIES.md) |
-| RETURN-POLICY.md | سیاست مرجوعی و بازگشت کالا | ۳ | تأییدشده ✅ | [GitHub](https://github.com/abyfahimy91-netizen/rihan-platform/blob/main/docs/RETURN-POLICY.md) |
+| RETURN-POLICY.md | سیاست مرجوعی و بازگشت کالا | ۳ | تأییدشده ✅ |
+| CONTENT-STRATEGY.md | استراتژی محتوا (روایت‌محور) | ۳ | تأییدشده ✅ | [GitHub](https://github.com/abyfahimy91-netizen/rihan-platform/blob/main/docs/RETURN-POLICY.md) |
 | REQUIREMENTS.md | نیازمندی‌ها | ۴ | — | — |
 | SECURITY-ANALYSIS.md | تحلیل امنیت | ۴ | — | — |
 | TECH-DOCUMENTATION.md | مستندات فنی | ۵ | — | — |
@@ -74,6 +75,7 @@
 | D-040 (در DECISIONS.md) | احراز هویت Passwordless | تأییدشده | — |
 | D-041 (در DECISIONS.md) | اصل یکسان بودن سیاست مرجوعی | تأییدشده ✅ | — |
 | D-043 (در DECISIONS.md) | اصل ۱۱ کرامت مشتری | تأییدشده ✅ | — |
+| D-044 (در DECISIONS.md) | استراتژی محتوا | تأییدشده ✅ | — |
 | D-042 (در DECISIONS.md) | هویت بصری MVP | تأییدشده ✅ | — |
 | ARCHITECTURE-DECISIONS.md | تصمیمات معماری | فاز ۴ | — |
 | TECHNOLOGY-SELECTION.md | انتخاب فناوری | فاز ۴ | — |
