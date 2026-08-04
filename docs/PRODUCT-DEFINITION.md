@@ -318,6 +318,7 @@
 ### اسناد خروجی (فاز ۳ — این فاز)
 - `docs/USER-PERSONAS.md` — پرسوناهای کاربر
 - `docs/MVP-SCOPE.md` — محدوده MVP
+- `docs/SHIPPING-POLICY.md` — سیاست قیمت‌گذاری و ارسال (D-046)
 - `docs/INVENTORY-FLOW.md` — جریان موجودی (D-045) با MoSCoW
 - `docs/INFORMATION-ARCHITECTURE.md` — معماری اطلاعات
 - `docs/USER-FLOWS.md` — مسیرهای کاربر
