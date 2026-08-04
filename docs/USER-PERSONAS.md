@@ -1,6 +1,6 @@
 # پرسوناهای کاربر ریهان (User Personas)
 
-**نسخه:** 1.0
+**نسخه:** 1.1
 **تاریخ:** 2026-08-01
 **فاز:** 3 — Product Definition & Design
 **موتور AI-VOS:** Product Design Engine
