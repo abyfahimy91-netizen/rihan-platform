@@ -317,7 +317,8 @@
 
 ### اسناد خروجی (فاز ۳ — این فاز)
 - `docs/USER-PERSONAS.md` — پرسوناهای کاربر
-- `docs/MVP-SCOPE.md` — محدوده MVP با MoSCoW
+- `docs/MVP-SCOPE.md` — محدوده MVP
+- `docs/INVENTORY-FLOW.md` — جریان موجودی (D-045) با MoSCoW
 - `docs/INFORMATION-ARCHITECTURE.md` — معماری اطلاعات
 - `docs/USER-FLOWS.md` — مسیرهای کاربر
 - `docs/USER-STORIES.md` — داستان‌های کاربر با Acceptance Criteria
