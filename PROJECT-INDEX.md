@@ -55,6 +55,7 @@
 | ARCHITECTURE-PRINCIPLES.md | 🔴 فلسفه معماری (۶ الگو) | ۳ | تأییدشده ✅ | D-059 |
 | TRACEABILITY-MATRIX.md | ماتریس ردیابی (Vision تا AC) | ۳ | تأییدشده ✅ | D-061 |
 | UX-DETAILS.md | جزئیات تجربه کاربری (۱۳ بخش) | ۳ | تأییدشده ✅ | D-062 |
+| PHASE3-HANDOFF.md | سند تحویل فاز ۳ به ۴ | ۳ | تأییدشده ✅ | D-066 |
 | CART-RECOVERY.md | استراتژی بازیابی سبد | ۳ | تأییدشده ✅ | D-063 |
 | RTL-GUIDE.md | راهنمای طراحی RTL | ۳ | تأییدشده ✅ | D-064 |
 | REQUIREMENTS.md | نیازمندی‌ها | ۴ | — | — |
