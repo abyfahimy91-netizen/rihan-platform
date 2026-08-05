@@ -33,8 +33,8 @@ D-029: تکمیل فاز ۲ — مدل کسب‌وکار و معماری محص�
 Status: Phase 2 COMPLETED — اسناد: BUSINESS-MODEL-CANVAS.md, REVENUE-MODEL.md, PRICING-STRATEGY.md, FINANCIAL-PROJECTIONS.md
 D-030: تکمیل فاز ۱ — بنیان برند (Brand Foundation)
 Status: Phase 1 COMPLETED — ثبت دیرهنگام (retroactive)؛ اسناد: CENTRAL-STORY.md, FUNDAMENTAL-PRINCIPLES.md, brand/VISUAL-IDENTITY-BRIEF.md
-D-031: فاز ۳ — پیش‌نویس (انتظار تأیید نهایی) — تعریف و طراحی محصول (Product Definition & Design)
-Status: Phase 3 IN PROGRESS — پیش‌نویس، انتظار تأیید نهایی بنیان‌گذار ⏳ — اسناد: PRODUCT-DEFINITION.md, USER-PERSONAS.md, MVP-SCOPE.md, INFORMATION-ARCHITECTURE.md, USER-FLOWS.md, USER-STORIES.md
+D-031: فاز ۳ — تکمیل‌شده (D-066) — تعریف و طراحی محصول (Product Definition & Design)
+Status: Phase 3 COMPLETED — تأیید نهایی بنیان‌گذار ✅ (D-066) — اسناد: PRODUCT-DEFINITION.md, USER-PERSONAS.md, MVP-SCOPE.md, INFORMATION-ARCHITECTURE.md, USER-FLOWS.md, USER-STORIES.md
 جزئیات: decisions/D-031-RIHAN-PHASE3-PRODUCT-DEFINITION.md
 خلاصه: ۸ پرسونا، ۱۴ ماژول Must Have، ۳۹ داستان کاربر، ۱۳ مسیر کاربر، ۷ اصل طراحی محصول، ۱۰ معیار پذیرش MVP، برآورد ۱۶ هفته توسعه پاره‌وقت.
 
