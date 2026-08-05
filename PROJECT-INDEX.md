@@ -48,6 +48,11 @@
 | USER-STORIES.md | داستان‌های کاربر | ۳ | پیش‌نویس — انتظار تأیید | [GitHub](https://github.com/abyfahimy91-netizen/rihan-platform/blob/main/docs/USER-STORIES.md) |
 | RETURN-POLICY.md | سیاست مرجوعی و بازگشت کالا | ۳ | تأییدشده ✅ |
 | CONTENT-STRATEGY.md | استراتژی محتوا (روایت‌محور) | ۳ | تأییدشده ✅ | [GitHub](https://github.com/abyfahimy91-netizen/rihan-platform/blob/main/docs/RETURN-POLICY.md) |
+| PRODUCT-PRINCIPLES.md | اصول تغییرناپذیر محصول (۷ اصل) | ۳ | تأییدشده ✅ | D-055 |
+| VISION-GUARD.md | نگهبان هویت ریهان (۸ اصل) | ۳ | تأییدشده ✅ | D-056 |
+| SELECTION-PHILOSOPHY.md | فلسفه انتخاب محصول (۵ ستون) | ۳ | تأییدشده ✅ | D-057 |
+| PRODUCT-THESIS.md | رساله محصول (۶ سؤال بنیادین) | ۳ | تأییدشده ✅ | D-058 |
+| ARCHITECTURE-PHILOSOPHY.md | 🔴 فلسفه معماری (۶ الگو) | ۳ | تأییدشده ✅ | D-059 |
 | REQUIREMENTS.md | نیازمندی‌ها | ۴ | — | — |
 | SECURITY-ANALYSIS.md | تحلیل امنیت | ۴ | — | — |
 | TECH-DOCUMENTATION.md | مستندات فنی | ۵ | — | — |
