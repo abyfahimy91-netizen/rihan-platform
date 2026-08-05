@@ -63,6 +63,7 @@
 |-------|--------|
 | 2026-08-04 | ✅ نقص ۳.۸ حل شد: سیاست حداقل محتوای اجباری (D-049) با رویکرد سبک‌سازی سطح اجباری و حفظ الزام داستان مبدأ ثبت شد. |
 | 2026-08-04 | 🔄 تغییر نام ARCHITECTURE-PHILOSOPHY به ARCHITECTURE-PRINCIPLES (D-060) + ایجاد TRACEABILITY-MATRIX (D-061). |
+| 2026-08-05 | 📚 ۳ سند UX جامع اضافه شد: UX-DETAILS (۱۳ بخش), CART-RECOVERY, RTL-GUIDE (D-062 تا D-064) - بر اساس تحقیقات Baymard, NN/g, Shopify, Algolia. |
 | 2026-08-04 | 📝 ۵ سند مرجع جدید اضافه شد: PRODUCT-PRINCIPLES, VISION-GUARD, SELECTION-PHILOSOPHY, PRODUCT-THESIS, ARCHITECTURE-PRINCIPLES (D-055 تا D-059). |
 | 2026-08-04 | 🔄 MVP-SCOPE به‌روز شد: بخش «Won't Have» به «Not Yet (معماری آماده)» تبدیل شد. |
 | 2026-08-04 | 🔴 ARCHITECTURE-PRINCIPLES.md به AI-ENTRY.md به‌عنوان فایل اجباری برای AIهای آینده اضافه شد. |
