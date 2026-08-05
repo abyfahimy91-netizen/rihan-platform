@@ -46,7 +46,7 @@
 
 1. ✅ فاز ۳ با موفقیت بسته شد (D-066)
 2. ✅ **اولویت ۱: یکدست‌سازی منبع حقیقت (تکمیل‌شده)**
-3. ⏳ **اولویت ۲: ADR-001 (Backend Framework — Django vs Go vs Laravel)**
+اولویت ۲: ADR-001 (Backend Framework — Django vs Go vs Laravel) ⏳ **پیش‌نویس** — در انتظار تأیید نهایی مشاور
 4. ⏳ **اولویت ۳: ۶ ADR باقی‌مانده**
 
 ### فاز ۴ (Software Planning) — IN PROGRESS
