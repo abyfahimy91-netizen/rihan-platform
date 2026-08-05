@@ -49,4 +49,4 @@
 - docs/VISION-GUARD.md — اصول هویتی
 - docs/SELECTION-PHILOSOPHY.md — فلسفه انتخاب
 - docs/PRODUCT-THESIS.md — رساله محصول
-- docs/ARCHITECTURE-PHILOSOPHY.md — فلسفه معماری
+- docs/ARCHITECTURE-PRINCIPLES.md — فلسفه معماری

@@ -62,9 +62,10 @@
 | تاریخ | رویداد |
 |-------|--------|
 | 2026-08-04 | ✅ نقص ۳.۸ حل شد: سیاست حداقل محتوای اجباری (D-049) با رویکرد سبک‌سازی سطح اجباری و حفظ الزام داستان مبدأ ثبت شد. |
-| 2026-08-04 | 📝 ۵ سند مرجع جدید اضافه شد: PRODUCT-PRINCIPLES, VISION-GUARD, SELECTION-PHILOSOPHY, PRODUCT-THESIS, ARCHITECTURE-PHILOSOPHY (D-055 تا D-059). |
+| 2026-08-04 | 🔄 تغییر نام ARCHITECTURE-PHILOSOPHY به ARCHITECTURE-PRINCIPLES (D-060) + ایجاد TRACEABILITY-MATRIX (D-061). |
+| 2026-08-04 | 📝 ۵ سند مرجع جدید اضافه شد: PRODUCT-PRINCIPLES, VISION-GUARD, SELECTION-PHILOSOPHY, PRODUCT-THESIS, ARCHITECTURE-PRINCIPLES (D-055 تا D-059). |
 | 2026-08-04 | 🔄 MVP-SCOPE به‌روز شد: بخش «Won't Have» به «Not Yet (معماری آماده)» تبدیل شد. |
-| 2026-08-04 | 🔴 ARCHITECTURE-PHILOSOPHY.md به AI-ENTRY.md به‌عنوان فایل اجباری برای AIهای آینده اضافه شد. |
+| 2026-08-04 | 🔴 ARCHITECTURE-PRINCIPLES.md به AI-ENTRY.md به‌عنوان فایل اجباری برای AIهای آینده اضافه شد. |
 | 2026-08-04 | ✅ نقص ۳.۱۰ حل شد: ساختاردهی مجدد ASSUMPTIONS.md (D-054) با ۳۹ فرضیه قابل ردیابی. |
 | 2026-08-04 | ✅ نقص ۳.۶ حل شد: تکمیل سناریوهای P6 و P8 (D-053). |
 | 2026-08-04 | ✅ نقص ۳.۵ تکمیل شد: بازنویسی USER-STORIES.md (D-052) بر اساس MODULE-REGISTRY. |

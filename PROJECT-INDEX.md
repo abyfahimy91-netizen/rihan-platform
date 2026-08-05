@@ -52,7 +52,8 @@
 | VISION-GUARD.md | نگهبان هویت ریهان (۸ اصل) | ۳ | تأییدشده ✅ | D-056 |
 | SELECTION-PHILOSOPHY.md | فلسفه انتخاب محصول (۵ ستون) | ۳ | تأییدشده ✅ | D-057 |
 | PRODUCT-THESIS.md | رساله محصول (۶ سؤال بنیادین) | ۳ | تأییدشده ✅ | D-058 |
-| ARCHITECTURE-PHILOSOPHY.md | 🔴 فلسفه معماری (۶ الگو) | ۳ | تأییدشده ✅ | D-059 |
+| ARCHITECTURE-PRINCIPLES.md | 🔴 فلسفه معماری (۶ الگو) | ۳ | تأییدشده ✅ | D-059 |
+| TRACEABILITY-MATRIX.md | ماتریس ردیابی (Vision تا AC) | ۳ | تأییدشده ✅ | D-061 |
 | REQUIREMENTS.md | نیازمندی‌ها | ۴ | — | — |
 | SECURITY-ANALYSIS.md | تحلیل امنیت | ۴ | — | — |
 | TECH-DOCUMENTATION.md | مستندات فنی | ۵ | — | — |
