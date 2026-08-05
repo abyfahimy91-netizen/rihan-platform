@@ -2,7 +2,7 @@
 
 > این فایل با هر تغییر پروژه به‌روزرسانی میشود.
 > AI-ENTRY ثابت میماند. این فایل پویا است.
-> آخرین به‌روزرسانی: ۱۴۰۵/۰۵/۱۱
+> آخرین به‌روزرسانی: ۱۴۰۵/۰۵/۱۴
 
 ---
 
@@ -40,12 +40,12 @@
 | REVENUE-MODEL.md | مدل درآمدی | ۲ | تکمیل | [GitHub](https://github.com/abyfahimy91-netizen/rihan-platform/blob/main/docs/REVENUE-MODEL.md) |
 | PRICING-STRATEGY.md | استراتژی قیمت‌گذاری | ۲ | تکمیل | [GitHub](https://github.com/abyfahimy91-netizen/rihan-platform/blob/main/docs/PRICING-STRATEGY.md) |
 | FINANCIAL-PROJECTIONS.md | پیش‌بینی مالی | ۲ | تکمیل | [GitHub](https://github.com/abyfahimy91-netizen/rihan-platform/blob/main/docs/FINANCIAL-PROJECTIONS.md) |
-| PRODUCT-DEFINITION.md | تعریف محصول | ۳ | پیش‌نویس — انتظار تأیید | [GitHub](https://github.com/abyfahimy91-netizen/rihan-platform/blob/main/docs/PRODUCT-DEFINITION.md) |
-| USER-PERSONAS.md | پرسوناهای کاربر | ۳ | پیش‌نویس — انتظار تأیید | [GitHub](https://github.com/abyfahimy91-netizen/rihan-platform/blob/main/docs/USER-PERSONAS.md) |
-| MVP-SCOPE.md | محدوده MVP با MoSCoW | ۳ | پیش‌نویس — انتظار تأیید | [GitHub](https://github.com/abyfahimy91-netizen/rihan-platform/blob/main/docs/MVP-SCOPE.md) |
-| INFORMATION-ARCHITECTURE.md | معماری اطلاعات | ۳ | پیش‌نویس — انتظار تأیید | [GitHub](https://github.com/abyfahimy91-netizen/rihan-platform/blob/main/docs/INFORMATION-ARCHITECTURE.md) |
-| USER-FLOWS.md | مسیرهای کاربر | ۳ | پیش‌نویس — انتظار تأیید | [GitHub](https://github.com/abyfahimy91-netizen/rihan-platform/blob/main/docs/USER-FLOWS.md) |
-| USER-STORIES.md | داستان‌های کاربر | ۳ | پیش‌نویس — انتظار تأیید | [GitHub](https://github.com/abyfahimy91-netizen/rihan-platform/blob/main/docs/USER-STORIES.md) |
+| PRODUCT-DEFINITION.md | تعریف محصول | ۳ | ✅ تأییدشده (D-066) | [GitHub](https://github.com/abyfahimy91-netizen/rihan-platform/blob/main/docs/PRODUCT-DEFINITION.md) |
+| USER-PERSONAS.md | پرسوناهای کاربر | ۳ | ✅ تأییدشده (D-066) | [GitHub](https://github.com/abyfahimy91-netizen/rihan-platform/blob/main/docs/USER-PERSONAS.md) |
+| MVP-SCOPE.md | محدوده MVP با MoSCoW | ۳ | ✅ تأییدشده (D-066) | [GitHub](https://github.com/abyfahimy91-netizen/rihan-platform/blob/main/docs/MVP-SCOPE.md) |
+| INFORMATION-ARCHITECTURE.md | معماری اطلاعات | ۳ | ✅ تأییدشده (D-066) | [GitHub](https://github.com/abyfahimy91-netizen/rihan-platform/blob/main/docs/INFORMATION-ARCHITECTURE.md) |
+| USER-FLOWS.md | مسیرهای کاربر | ۳ | ✅ تأییدشده (D-066) | [GitHub](https://github.com/abyfahimy91-netizen/rihan-platform/blob/main/docs/USER-FLOWS.md) |
+| USER-STORIES.md | داستان‌های کاربر | ۳ | ✅ تأییدشده (D-066) | [GitHub](https://github.com/abyfahimy91-netizen/rihan-platform/blob/main/docs/USER-STORIES.md) |
 | RETURN-POLICY.md | سیاست مرجوعی و بازگشت کالا | ۳ | تأییدشده ✅ |
 | CONTENT-STRATEGY.md | استراتژی محتوا (روایت‌محور) | ۳ | تأییدشده ✅ | [GitHub](https://github.com/abyfahimy91-netizen/rihan-platform/blob/main/docs/RETURN-POLICY.md) |
 | PRODUCT-PRINCIPLES.md | اصول تغییرناپذیر محصول (۷ اصل) | ۳ | تأییدشده ✅ | D-055 |
@@ -80,7 +80,7 @@
 | DECISIONS.md | ثبت تمام تصمیمات | فعال | [GitHub](https://github.com/abyfahimy91-netizen/rihan-platform/blob/main/decisions/DECISIONS.md) |
 | D-029-RIHAN-BRAND-APPROVAL.md | تأیید برند ریهان | تکمیل | [GitHub](https://github.com/abyfahimy91-netizen/rihan-platform/blob/main/decisions/D-029-RIHAN-BRAND-APPROVAL.md) |
 | D-038-RIHAN-PHASE1-BRAND-FOUNDATION.md | تکمیل فاز ۱ بنیان برند | تکمیل | [GitHub](https://github.com/abyfahimy91-netizen/rihan-platform/blob/main/decisions/D-038-RIHAN-PHASE1-BRAND-FOUNDATION.md) |
-| D-031-RIHAN-PHASE3-PRODUCT-DEFINITION.md | تکمیل فاز ۳ تعریف محصول | پیش‌نویس — انتظار تأیید | [GitHub](https://github.com/abyfahimy91-netizen/rihan-platform/blob/main/decisions/D-031-RIHAN-PHASE3-PRODUCT-DEFINITION.md) |
+| D-031-RIHAN-PHASE3-PRODUCT-DEFINITION.md | تکمیل فاز ۳ تعریف محصول | ✅ تأییدشده (D-066) | [GitHub](https://github.com/abyfahimy91-netizen/rihan-platform/blob/main/decisions/D-031-RIHAN-PHASE3-PRODUCT-DEFINITION.md) |
 | D-039 (در DECISIONS.md) | مدل احراز هویت (لغو شده) | Superseded by D-040 | — |
 | D-040 (در DECISIONS.md) | احراز هویت Passwordless | تأییدشده | — |
 | D-041 (در DECISIONS.md) | اصل یکسان بودن سیاست مرجوعی | تأییدشده ✅ | — |
