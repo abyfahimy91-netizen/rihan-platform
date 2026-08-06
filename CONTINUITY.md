@@ -49,12 +49,13 @@
 4. ✅ اولویت ۳: ADR-002 (Database / مدل داده) — **Approved ✅** (مصوب ۱۴۰۵/۰۵/۱۶)
 5. ✅ اولویت ۴: ADR-003 (API Strategy + API-First) — **Approved ✅** (مصوب ۱۴۰۵/۰۵/۱۶)
 6. ✅ اولویت ۵: ADR-004 (Feature Flags / Plugin Architecture) — **Approved ✅** (مصوب ۱۴۰۵/۰۵/۱۶)
-7. ⏳ اولویت ۶: **پیش‌نویس ADR-005 (Payment Abstraction)**
+7. ✅ اولویت ۶: ADR-005 (Payment Abstraction) — **Approved ✅** (مصوب ۱۴۰۵/۰۵/۱۶)
+8. ⏳ اولویت ۷: **پیش‌نویس ADR-006 (Authentication / Passwordless)**
 
 ### فاز ۴ (Software Planning) — IN PROGRESS
 
 > ⚠️ **قفل ترتیبی:**
-> - تا مصوب شدن ADR-005، هیچ ADR بعدی شروع نمی‌شود
+> - تا مصوب شدن ADR-006، هیچ ADR بعدی شروع نمی‌شود
 > - هیچ پاکسازی سرور، هیچ نصب استک، هیچ کدنویسی محصول
 > - خروجی‌های بعدی فقط فایل‌محور و قابل راستی‌آزمایی هستند
 
@@ -64,6 +65,7 @@
 
 | تاریخ | رویداد |
 | --- | --- |
+| 2026-08-06 | ✅ ADR-005 (Payment Abstraction) تصویب شد — Strategy Pattern، CardToCard، موجودی سه‌مرحله‌ای |
 | 2026-08-06 | ✅ ADR-004 (Feature Flags) تصویب شد — ۱۴ App، ۸ ماژول سیستمی، D-069 |
 | 2026-08-06 | ✅ ADR-003 (API Strategy) تصویب شد — ۱۲ بخش، ۳ کانال احراز هویت، Idempotency |
 | 2026-08-06 | ✅ ADR-002 (مدل داده) تصویب شد — ۱۷ موجودیت، Guest Checkout، RBAC واقعی |
