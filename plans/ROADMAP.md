@@ -16,8 +16,8 @@
 
 | ترتیب | ADR | موضوع | وضعیت |
 |--------|-----|-------|--------|
-| ۱ | ADR-001 | Backend Framework | ⏳ Proposed (مصوب نشده) |
-| ۲ | ADR-002 | Database / مدل داده | 🔒 شروع پس از تصویب ADR-001 |
+| ۱ | ADR-001 | Backend Framework | **Approved ✅** (مصوب ۱۴۰۵/۰۵/۱۶) |
+| ۲ | ADR-002 | Database / مدل داده | ⏳ **مجاز برای پیش‌نویس** (در انتظار تأیید مشاور) |
 | ۳ | ADR-003 | API Strategy + API-First | 🔒 شروع پس از تصویب ADR-002 |
 | ۴ | ADR-004 | Feature Flags / Plugin Architecture | 🔒 |
 | ۵ | ADR-005 | Payment Abstraction | 🔒 |
