@@ -3,7 +3,7 @@
 | شناسه | ADR-003 |
 | --- | --- |
 | عنوان | استراتژی API و طراحی API-First |
-| وضعیت | **Proposed** — پیش‌نویس اولیه |
+| وضعیت | **Proposed v2** — اصلاح‌شده بر اساس ۵ نکته مشاور |
 | تاریخ | ۲۰۲۶-۰۸-۰۶ |
 | مرتبط | ADR-001, ADR-002, D-040 |
 
@@ -57,7 +57,10 @@
 
 **Content Type:** application/json (UTF-8)
 
-**زمان‌بندی:** p95 زیر ۵۰۰ میلی‌ثانیه، هر endpoint زیر ۲۰۰ میلی‌ثانیه پردازش
+**زمان‌بندی (هدف عملکردی، نه تعهد سخت فاز ۴):**
+- p95 زیر ۵۰۰ میلی‌ثانیه برای درخواست‌های عمومی
+- هر endpoint زیر ۲۰۰ میلی‌ثانیه پردازش سرور
+- **نکته:** این اهداف در فاز ۸ (Deployment) با monitoring واقعی سنجیده می‌شوند
 
 ## ۴. فرمت پاسخ استاندارد
 
@@ -102,18 +105,31 @@
 
 ## ۵. احراز هویت در لایه API (اصول)
 
-**روش‌ها:**
-1. Session-based: برای Web (مرورگر) — HttpOnly Cookie
-2. Token-based (JWT): برای API (اپ موبایل آینده) — در Header
-3. Device Token: برای Device Remembering (D-040) — ۳۰ روز
+### سه کانال جداگانه (غیرقابل ترکیب):
 
-**نکته:** پیاده‌سازی کامل OTP/Kavenegar در ADR-006. اینجا فقط اصول.
+**۱. Web (مرورگر فعلی):**
+- روش: Session cookie
+- ویژگی: HttpOnly, Secure, SameSite=Strict
+- استفاده: تمام درخواست‌های HTMX و Template
+- انقضا: ۳۰ روز (با تمدید خودکار)
 
-**قوانین:**
-- JWT در HttpOnly + Secure + SameSite Cookie
-- Token دستگاه جدا از JWT — بلندمدت — قابل ابطال
+**۲. API (کلاینت‌های آینده - اپ موبایل):**
+- روش: Bearer Token در Authorization header
+- فرمت: JWT
+- ویژگی: Stateless، قابل ابطال
+- استفاده: فقط درخواست‌های /api/v1/ از اپ موبایل
+- **نکته:** در MVP فعال نمی‌شود. پیاده‌سازی در آینده با ADR جدید.
+
+**۳. Device Remembering (D-040):**
+- روش: Device Token جداگانه
+- ویژگی: بلندمدت (۳۰ روز)، قابل ابطال از پنل کاربر
+- استفاده: حذف نیاز به OTP مجدد برای دستگاه شناخته‌شده
+- پیاده‌سازی: در ADR-006
+
+**قوانین کلی:**
 - Rate Limit: ۱۰۰ درخواست/دقیقه per IP
 - پیام خطای احراز هویت مبهم: شماره یا کد اشتباه است
+- **هرگز JWT را هم در Header و هم در Cookie نفرستید** — فقط یکی بسته به کانال
 
 ## ۶. Pagination, Filtering, Ordering
 
@@ -137,24 +153,45 @@
 
 ### Products (عمومی)
 - GET /api/v1/products/ — لیست + فیلتر + pagination
-- GET /api/v1/products/slug/ — جزئیات محصول
-- POST /api/v1/products/ — ایجاد (فقط ادمین)
-- PATCH /api/v1/products/id/ — ویرایش (فقط ادمین)
+- GET /api/v1/products/{slug}/ — جزئیات محصول (فقط slug، نه id — URL-friendly)
+- POST /api/v1/products/ — ایجاد (فقط ادمین، با permission class)
+- PATCH /api/v1/products/{id}/ — ویرایش (فقط ادمین، با permission class)
+- DELETE /api/v1/products/{id}/ — Soft delete (فقط ادمین، با permission class)
+
+**نکته:** در MVP فقط slug برای نمایش عمومی استفاده می‌شود. id فقط در پنل ادمین.
 
 ### Cart (مهمان + کاربر)
-- GET /api/v1/cart/ — سبد فعلی
+
+**مکانیزم شناسایی:**
+- **کاربر لاگین:** سبد از طریق session cookie به user_id متصل می‌شود
+- **مهمان:** سبد از طریق X-Session-Key header (تولیدشده توسط مرورگر) شناسایی می‌شود
+- **Merge پس از login:** هنگام ورود کاربر مهمان، سبد session به کاربر منتقل می‌شود (Cart.session_key → Cart.user_id)
+
+**Endpoints:**
+- GET /api/v1/cart/ — سبد فعلی (بر اساس session یا user)
 - POST /api/v1/cart/items/ — افزودن به سبد
 - PATCH /api/v1/cart/items/id/ — تغییر مقدار
 - DELETE /api/v1/cart/items/id/ — حذف از سبد
 
-### Orders (کاربر + ادمین)
-- POST /api/v1/orders/ — ایجاد سفارش (از سبد)
-- GET /api/v1/orders/ — لیست سفارشات کاربر
-- GET /api/v1/orders/id/ — جزئیات سفارش
+### Orders (کاربر + مهمان + ادمین)
+
+**POST /api/v1/orders/ — ایجاد سفارش:**
+- **حالت ۱ (کاربر لاگین):** از سبد کاربر + آدرس ذخیره‌شده
+- **حالت ۲ (مهمان):** نیاز به body شامل:
+  - guest_phone (شماره موبایل مهمان)
+  - shipping_full_name, shipping_phone, shipping_province, shipping_city, shipping_address, shipping_postal_code
+  - (هم‌راستا با ADR-002 - Order.shipping_* fields)
+
+**Endpoints:**
+- POST /api/v1/orders/ — ایجاد سفارش (از سبد، با دو حالت بالا)
+- GET /api/v1/orders/ — لیست سفارشات کاربر لاگین
+- GET /api/v1/orders/id/ — جزئیات سفارش (با guest_phone برای مهمان)
 - PATCH /api/v1/orders/id/status/ — تغییر وضعیت (فقط ادمین)
+- GET /api/v1/admin/orders/ — لیست همه سفارش‌ها با فیلتر (فقط admin/family_admin)
+- GET /api/v1/admin/payments/ — لیست پرداخت‌های در انتظار تأیید (فقط admin/family_admin)
 
 ### Payments (کاربر + ادمین)
-- POST /api/v1/orders/order_id/payments/ — ثبت پرداخت (D-067)
+- POST /api/v1/orders/order_id/payments/ — ثبت پرداخت (D-067) — شماره کارت مقصد از settings خوانده می‌شود، نه از body درخواست
 - GET /api/v1/orders/order_id/payments/ — لیست پرداخت‌ها
 - PATCH /api/v1/payments/id/confirm/ — تأیید (فقط ادمین)
 - PATCH /api/v1/payments/id/reject/ — رد (فقط ادمین)
@@ -180,6 +217,18 @@
 - POST /api/v1/auth/logout/ — خروج
 - GET /api/v1/user/ — اطلاعات کاربر فعلی
 
+## ۷.۱ Supplier Endpoints (برای M4 - پنل تأمین‌کننده)
+
+**مجوز:** فقط نقش supplier (از طریق RBAC - ADR-002)
+
+**Endpoints:**
+- GET /api/v1/supplier/orders/ — لیست سفارش‌های مرتبط (فقط OrderItemهایی که supplier_id = کاربر فعلی)
+- GET /api/v1/supplier/orders/id/ — جزئیات سفارش مرتبط
+- PATCH /api/v1/supplier/orders/id/tracking/ — ثبت کد رهگیری ارسال
+- GET /api/v1/supplier/monthly-report/ — گزارش ماهانه (تعداد، مبلغ، طلب)
+
+**نکته:** تأمین‌کننده فقط اطلاعات مرتبط با محصولات خودش را می‌بیند. قیمت فروش به مشتری و حاشیه سود ریهان نمایش داده نمی‌شود.
+
 ## ۸. مجوزها و نقش‌ها (ارجاع به RBAC)
 
 **نقش‌ها (از ADR-002 - Role/UserRole):**
@@ -195,11 +244,20 @@
 
 ## ۹. Idempotency و ایمنی عملیات حساس
 
-### Idempotency (برای عملیات ایجاد)
-- مشکل: اگر کاربر دکمه ثبت سفارش را دو بار بزند، دو سفارش ایجاد نشود
-- راه‌حل: Idempotency-Key در Header
-- پیاده‌سازی: کلاینت یک UUID تولید می‌کند و در Header می‌فرستد
-- سرور: اگر همان Key قبلاً پردازش شده، همان پاسخ قبلی را برمی‌گرداند
+### Idempotency (برای عملیات حساس)
+**مشکل:** اگر کاربر دکمه ثبت سفارش را دو بار بزند، دو سفارش ایجاد نشود
+
+**راه‌حل:** Idempotency-Key در Header
+- کلاینت یک UUID تولید می‌کند و در Header می‌فرستد: `Idempotency-Key: uuid-here`
+- سرور: اگر همان Key قبلاً پردازش شده، همان پاسخ قبلی را برمی‌گرداند (بدون اجرای مجدد منطق)
+
+**حداقل endpoints مشمول در MVP (قفل شده):**
+1. `POST /api/v1/orders/` — ایجاد سفارش
+2. `POST /api/v1/orders/{id}/payments/` — ثبت پرداخت (D-067)
+
+**نکته:** سایر endpoints (مثل افزودن به سبد، ثبت نظر) در MVP نیاز به Idempotency ندارند. اگر در آینده نیاز شد، با ADR جدید اضافه می‌شود.
+
+**پیاده‌سازی:** ذخیره Idempotency-Key + Response در جدول موقت (۲۴ ساعت TTL)
 
 ### عملیات حساس
 - تأیید پرداخت: نیاز به تأیید دو مرحله‌ای در آینده (ADR-007)
