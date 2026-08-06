@@ -829,3 +829,26 @@ Guest Checkout برای دایره اول حیاتی است.
 - Product.supplier_id NOT NULL
 - OrderItem.supplier_id برای گزارش‌گیری مالی
 - تأمین‌کننده فقط سفارشات مربوط به محصولات خودش را می‌بیند
+
+
+---
+
+## D-069: موجودیت FeatureFlag متمم ADR-002
+
+**تاریخ:** 1405/05/16
+**وضعیت:** تأییدشده
+**فاز:** 4 (Software Planning)
+**سند مرتبط:** decisions/adr/ADR-004-feature-flags.md, decisions/adr/ADR-002-database.md
+**مرتبط با:** D-004, D-023, ADR-002
+
+### زمینه
+ADR-004 نیاز به جدول مرکزی FeatureFlag دارد که در ADR-002 تعریف نشده بود.
+
+### تصمیم
+- موجودیت FeatureFlag به‌عنوان متمم ADR-002 ثبت می‌شود
+- در فاز ۵ (توسعه) همراه سایر جداول ADR-002 ساخته خواهد شد
+- شامل: module_key, display_name, is_enabled, is_system, timestamps
+
+### پیامدها
+- ADR-002 با این موجودیت تکمیل می‌شود (بدون نیاز به ADR جدید)
+- در پیاده‌سازی، جدول feature_flags یکی از ۱۸ جدول اصلی خواهد بود
