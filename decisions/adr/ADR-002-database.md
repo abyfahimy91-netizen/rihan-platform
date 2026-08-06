@@ -3,9 +3,9 @@
 | شناسه | ADR-002 |
 | --- | --- |
 | عنوان | معماری دیتابیس و مدل داده MVP |
-| وضعیت | **Proposed** — پیش‌نویس، در انتظار تأیید مشاور |
+| وضعیت | **Proposed v2** — اصلاح‌شده بر اساس ۵ نکته مشاور |
 | تاریخ | ۲۰۲۶-۰۸-۰۶ |
-| مرتبط | ADR-001, D-040, D-045, D-046, D-067 |
+| مرتبط | ADR-001, D-040, D-045, D-046, D-067, D-068 |
 
 > این سند پیش‌نویس است. تا تصویب مشاور، migration یا کد مدل تولید نشود.
 
@@ -27,7 +27,23 @@
 
 ## ۲. موجودیت‌ها
 
-### ۲.۱ User
+### ۲.۱ Role (جدید - RBAC واقعی)
+
+| فیلد | نوع | توضیح |
+| --- | --- | --- |
+| id | UUID PK | شناسه یکتا |
+| name | VARCHAR(50) UNIQUE | نام نقش |
+| code | VARCHAR(50) UNIQUE | کد فنی نقش |
+| description | TEXT | توضیح نقش |
+| permissions | JSONB | لیست مجوزها |
+| is_system | BOOLEAN | نقش سیستمی (غیرقابل حذف) |
+| created_at | TIMESTAMP | ایجاد |
+| updated_at | TIMESTAMP | به‌روزرسانی |
+
+**نقش‌های اولیه MVP:**
+- customer, admin, family_admin, family_member, observer, supplier
+
+### ۲.۲ User
 
 | فیلد | نوع | توضیح |
 | --- | --- | --- |
@@ -36,13 +52,30 @@
 | password | VARCHAR(255) NULL | رمز اختیاری bcrypt |
 | first_name | VARCHAR(50) | نام |
 | last_name | VARCHAR(50) | نام خانوادگی |
-| role | ENUM | customer/admin/family_admin/family_member/observer/supplier |
 | is_active | BOOLEAN | فعال |
 | created_at | TIMESTAMP | ثبت‌نام |
 | updated_at | TIMESTAMP | به‌روزرسانی |
 | deleted_at | TIMESTAMP NULL | Soft delete |
 
-### ۲.۲ Supplier
+**نکته مهم:** فیلد role حذف شد. نقش از طریق UserRole مشخص می‌شود.
+
+### ۲.۳ UserRole (جدید - Many-to-Many)
+
+| فیلد | نوع | توضیح |
+| --- | --- | --- |
+| id | UUID PK | شناسه یکتا |
+| user_id | UUID FK->User | کاربر |
+| role_id | UUID FK->Role | نقش |
+| granted_at | TIMESTAMP | تاریخ اعطا |
+| granted_by | UUID FK->User NULL | اعطاکننده |
+| is_primary | BOOLEAN | نقش اصلی کاربر |
+| created_at | TIMESTAMP | ایجاد |
+
+**قیود:** UNIQUE(user_id, role_id)
+
+**قانون MVP:** در MVP هر کاربر یک نقش اصلی دارد (is_primary = true). این معماری آماده ارتقا به چند-نقشی در آینده است.
+
+### ۲.۴ Supplier
 
 | فیلد | نوع | توضیح |
 | --- | --- | --- |
@@ -57,7 +90,7 @@
 | created_at | TIMESTAMP | ثبت |
 | updated_at | TIMESTAMP | به‌روزرسانی |
 
-### ۲.۳ Product
+### ۲.۵ Product
 
 | فیلد | نوع | توضیح |
 | --- | --- | --- |
@@ -82,23 +115,26 @@
 | updated_at | TIMESTAMP | به‌روزرسانی |
 | deleted_at | TIMESTAMP NULL | Soft delete |
 
-### ۲.۴ Inventory
+### ۲.۶ Inventory (با available_quantity محاسبه‌ای)
 
 | فیلد | نوع | توضیح |
 | --- | --- | --- |
 | id | UUID PK | شناسه یکتا |
 | product_id | UUID FK->Product UNIQUE | محصول |
-| quantity | DECIMAL(10,2) | موجود |
+| quantity | DECIMAL(10,2) | موجود فیزیکی (منبع حقیقت) |
 | unit | VARCHAR(20) | واحد |
 | low_stock_threshold | DECIMAL(10,2) | آستانه هشدار |
-| reserved_quantity | DECIMAL(10,2) | رزرو شده |
-| available_quantity | DECIMAL(10,2) | قابل فروش |
+| reserved_quantity | DECIMAL(10,2) | رزرو شده (منبع حقیقت) |
+| available_quantity | DECIMAL GENERATED | quantity - reserved_quantity |
 | created_at | TIMESTAMP | ایجاد |
 | updated_at | TIMESTAMP | به‌روزرسانی |
 
-**قیود:** UNIQUE(product_id)، CHECK(available_quantity >= 0)
+**تعریف فنی (PostgreSQL 12+):**
+available_quantity DECIMAL(10,2) GENERATED ALWAYS AS (quantity - reserved_quantity) STORED
 
-### ۲.۴.۱ InventoryTransaction (تاریخچه موجودی - D-045)
+**قید:** UNIQUE(product_id) → رابطه Product 1:1 Inventory (صریح)
+
+### ۲.۷ InventoryTransaction (تاریخچه موجودی - D-045)
 
 | فیلد | نوع | توضیح |
 | --- | --- | --- |
@@ -112,7 +148,44 @@
 | created_at | TIMESTAMP | تاریخ |
 | created_by | UUID FK->User | کاربر |
 
-### ۲.۵ Order
+### ۲.۸ Cart (جدید - سبد خرید)
+
+| فیلد | نوع | توضیح |
+| --- | --- | --- |
+| id | UUID PK | شناسه سبد |
+| user_id | UUID FK->User NULL | کاربر (NULL برای مهمان) |
+| session_key | VARCHAR(100) NULL | کلید session برای مهمان |
+| status | ENUM | active/abandoned/converted |
+| expires_at | TIMESTAMP | تاریخ انقضا (۷ روز) |
+| abandoned_at | TIMESTAMP NULL | تاریخ رها شدن |
+| recovered_at | TIMESTAMP NULL | تاریخ بازیابی |
+| created_at | TIMESTAMP | ایجاد |
+| updated_at | TIMESTAMP | به‌روزرسانی |
+
+**قیود:**
+- اگر user_id NULL است، session_key باید پر باشد
+- هر کاربر/session حداکثر یک سبد active
+
+**بازیابی سبد مهمان (Cart Recovery - D-063):**
+- session_key از cookie مرورگر گرفته می‌شود
+- پس از احراز هویت، سبد مهمان به سبد کاربر منتقل می‌شود (merge)
+- abandoned_at برای trigger کردن Cart Recovery Flow
+
+### ۲.۹ CartItem (جدید - آیتم‌های سبد)
+
+| فیلد | نوع | توضیح |
+| --- | --- | --- |
+| id | UUID PK | شناسه |
+| cart_id | UUID FK->Cart | سبد |
+| product_id | UUID FK->Product | محصول |
+| quantity | DECIMAL(10,2) | مقدار |
+| unit_price | DECIMAL(10,2) | قیمت در لحظه افزودن |
+| added_at | TIMESTAMP | تاریخ افزودن |
+| updated_at | TIMESTAMP | به‌روزرسانی |
+
+**قیود:** UNIQUE(cart_id, product_id) — هر محصول یک بار در هر سبد
+
+### ۲.۱۰ Order
 
 | فیلد | نوع | توضیح |
 | --- | --- | --- |
@@ -120,6 +193,7 @@
 | order_number | VARCHAR(20) UNIQUE | شماره سفارش |
 | user_id | UUID FK->User NULL | کاربر (NULL=مهمان) |
 | guest_phone | VARCHAR(11) NULL | شماره مهمان |
+| cart_id | UUID FK->Cart NULL | سبد مبدأ (برای trace) |
 | address_id | UUID FK->Address | آدرس تحویل |
 | status | ENUM | pending/confirmed/preparing/shipped/delivered/cancelled/returned |
 | subtotal | DECIMAL(10,2) | جمع |
@@ -136,7 +210,7 @@
 | updated_at | TIMESTAMP | به‌روزرسانی |
 | deleted_at | TIMESTAMP NULL | Soft delete |
 
-### ۲.۶ OrderItem
+### ۲.۱۱ OrderItem
 
 | فیلد | نوع | توضیح |
 | --- | --- | --- |
@@ -154,7 +228,7 @@
 | created_at | TIMESTAMP | ایجاد |
 | updated_at | TIMESTAMP | به‌روزرسانی |
 
-### ۲.۷ Payment (طبق D-067)
+### ۲.۱۲ Payment (طبق D-067)
 
 | فیلد | نوع | توضیح |
 | --- | --- | --- |
@@ -177,7 +251,7 @@
 
 **قیود:** CHECK(amount > 0)، بدون UNIQUE(order_id) — چند تلاش مجاز
 
-### ۲.۸ Review
+### ۲.۱۳ Review
 
 | فیلد | نوع | توضیح |
 | --- | --- | --- |
@@ -194,7 +268,7 @@
 | created_at | TIMESTAMP | ایجاد |
 | updated_at | TIMESTAMP | به‌روزرسانی |
 
-### ۲.۹ Lead
+### ۲.۱۴ Lead
 
 | فیلد | نوع | توضیح |
 | --- | --- | --- |
@@ -208,7 +282,7 @@
 | created_at | TIMESTAMP | ایجاد |
 | updated_at | TIMESTAMP | به‌روزرسانی |
 
-### ۲.۱۰ Address
+### ۲.۱۵ Address
 
 | فیلد | نوع | توضیح |
 | --- | --- | --- |
@@ -225,7 +299,7 @@
 | updated_at | TIMESTAMP | به‌روزرسانی |
 | deleted_at | TIMESTAMP NULL | Soft delete |
 
-### ۲.۱۱ DeviceToken (D-040)
+### ۲.۱۶ DeviceToken (D-040)
 
 | فیلد | نوع | توضیح |
 | --- | --- | --- |
@@ -240,7 +314,7 @@
 
 **قیود:** UNIQUE(user_id, device_fingerprint)
 
-### ۲.۱۲ AuditLog
+### ۲.۱۷ AuditLog
 
 | فیلد | نوع | توضیح |
 | --- | --- | --- |
@@ -254,23 +328,58 @@
 | ip_address | VARCHAR(50) | IP |
 | created_at | TIMESTAMP | تاریخ |
 
-## ۳. تصمیم‌های مدل‌سازی
+## ۳. روابط و قیود کلیدی
+
+### ۳.۱ مدل تأمین‌کننده (قفل شده - D-068)
+**در MVP:** هر محصول دقیقاً یک تأمین‌کننده دارد (Product.supplier_id).
+- رابطه: Product N:1 Supplier
+- چندتأمین‌کننده در سطح سفارش یعنی: یک Order می‌تواند OrderItemهایی از Supplierهای مختلف داشته باشد
+- این محدودیت MVP است. در آینده اگر نیاز به چندتأمین‌کننده برای یک محصول بود، ADR جدید ثبت می‌شود
+
+### ۳.۲ رزرو موجودی و جلوگیری از Oversell
+- هنگام ثبت سفارش، OrderItemها موجودی را رزرو می‌کنند
+- Inventory.reserved_quantity افزایش می‌یابد
+- available_quantity = quantity - reserved_quantity (محاسبه‌ای)
+- اگر available_quantity < 0، سفارش رد می‌شود
+- پس از تأیید سفارش، InventoryTransaction ایجاد می‌شود (change_type: sale)
+- پس از لغو یا مرجوعی، InventoryTransaction ایجاد می‌شود (change_type: release یا return)
+
+### ۳.۳ وضعیت‌های سفارش
+pending → confirmed → preparing → shipped → delivered
+cancelled یا returned در هر مرحله ممکن است
+
+### ۳.۴ ارتباط پرداخت با سفارش (D-067)
+- هر Order می‌تواند چندین Payment داشته باشد (تلاش‌های متعدد)
+- Payment.status: pending, confirmed, rejected
+- Order.payment_status بر اساس آخرین Payment تنظیم می‌شود
+
+### ۳.۵ نقش‌های خانواده/ادمین/تأمین‌کننده (RBAC)
+- Role: تعریف نقش‌ها و مجوزها
+- UserRole: ارتباط کاربر با نقش (Many-to-Many)
+- در MVP هر کاربر یک نقش اصلی دارد (is_primary = true)
+- آماده ارتقا به چند-نقشی در آینده
+
+## ۴. تصمیم‌های مدل‌سازی
 
 - **Normalization:** 3NF + Denormalization محدود
-- **JSONField:** فقط images, metadata, audit values
+- **JSONField:** فقط images, metadata, audit values, Role.permissions
 - **Soft Delete:** User, Product, Order, Address
 - **Hard Delete:** DeviceToken, Lead (پس از fulfilled)
 - **تاریخچه:** InventoryTransaction + PriceHistory
+- **Computed Fields:** available_quantity (GENERATED ALWAYS AS)
 
-## ۴. شاخص‌های ضروری
+## ۵. شاخص‌های ضروری
 
 | جدول | فیلد | نوع |
 | --- | --- | --- |
 | User | phone | UNIQUE |
-| User | role | INDEX |
+| Role | code | UNIQUE |
+| UserRole | user_id, role_id | UNIQUE |
 | Product | slug | UNIQUE |
 | Product | category, status | INDEX |
 | Inventory | product_id | UNIQUE |
+| Cart | user_id, session_key | INDEX |
+| CartItem | cart_id, product_id | UNIQUE |
 | Order | order_number | UNIQUE |
 | Order | user_id, status, created_at | INDEX |
 | OrderItem | order_id, product_id | INDEX |
@@ -278,10 +387,10 @@
 | Review | product_id, status | INDEX |
 | Lead | product_id | INDEX |
 | Address | user_id | INDEX |
-| DeviceToken | user_id + device_fingerprint | UNIQUE |
-| AuditLog | entity_type + entity_id, created_at | INDEX |
+| DeviceToken | user_id, device_fingerprint | UNIQUE |
+| AuditLog | entity_type, entity_id, created_at | INDEX |
 
-## ۵. Out of Scope صریح
+## ۶. Out of Scope صریح
 
 - Celery / Event bus / Redis Pub/Sub
 - جداول وفاداری / Loyalty
@@ -289,7 +398,8 @@
 - آنالیتیکس پیشرفته
 - Sharding / Partitioning
 - Microservice DB
+- Multi-supplier per product (در MVP)
 
-## ۶. ارجاعات
+## ۷. ارجاعات
 
-ADR-001, D-040, D-045, D-046, D-067, MVP-SCOPE.md, USER-STORIES.md, ARCHITECTURE-PRINCIPLES.md
+ADR-001, D-040, D-045, D-046, D-067, D-068, MVP-SCOPE.md, USER-STORIES.md, ARCHITECTURE-PRINCIPLES.md
