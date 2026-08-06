@@ -3,7 +3,7 @@
 | شناسه | ADR-002 |
 | --- | --- |
 | عنوان | معماری دیتابیس و مدل داده MVP |
-| وضعیت | **Proposed v2** — اصلاح‌شده بر اساس ۵ نکته مشاور |
+| وضعیت | **Proposed v3** — اصلاح‌شده بر اساس ۵ نکته مشاور + Guest Checkout |
 | تاریخ | ۲۰۲۶-۰۸-۰۶ |
 | مرتبط | ADR-001, D-040, D-045, D-046, D-067, D-068 |
 
@@ -194,7 +194,13 @@ available_quantity DECIMAL(10,2) GENERATED ALWAYS AS (quantity - reserved_quanti
 | user_id | UUID FK->User NULL | کاربر (NULL=مهمان) |
 | guest_phone | VARCHAR(11) NULL | شماره مهمان |
 | cart_id | UUID FK->Cart NULL | سبد مبدأ (برای trace) |
-| address_id | UUID FK->Address | آدرس تحویل |
+| address_id | UUID FK->Address NULL | آدرس تحویل (NULL برای مهمان) |
+| shipping_full_name | VARCHAR(100) NULL | نام گیرنده (snapshot مهمان) |
+| shipping_phone | VARCHAR(11) NULL | تلفن گیرنده (snapshot مهمان) |
+| shipping_province | VARCHAR(50) NULL | استان (snapshot مهمان) |
+| shipping_city | VARCHAR(50) NULL | شهر (snapshot مهمان) |
+| shipping_address | TEXT NULL | آدرس کامل (snapshot مهمان) |
+| shipping_postal_code | VARCHAR(10) NULL | کد پستی (snapshot مهمان) |
 | status | ENUM | pending/confirmed/preparing/shipped/delivered/cancelled/returned |
 | subtotal | DECIMAL(10,2) | جمع |
 | shipping_cost | DECIMAL(10,2) | ارسال |
@@ -287,7 +293,7 @@ available_quantity DECIMAL(10,2) GENERATED ALWAYS AS (quantity - reserved_quanti
 | فیلد | نوع | توضیح |
 | --- | --- | --- |
 | id | UUID PK | شناسه |
-| user_id | UUID FK->User | کاربر |
+| user_id | UUID FK->User NULL | کاربر (NULL برای مهمان) |
 | label | VARCHAR(50) | برچسب |
 | province | VARCHAR(50) | استان |
 | city | VARCHAR(50) | شهر |
@@ -344,16 +350,22 @@ available_quantity DECIMAL(10,2) GENERATED ALWAYS AS (quantity - reserved_quanti
 - پس از تأیید سفارش، InventoryTransaction ایجاد می‌شود (change_type: sale)
 - پس از لغو یا مرجوعی، InventoryTransaction ایجاد می‌شود (change_type: release یا return)
 
-### ۳.۳ وضعیت‌های سفارش
+### ۳.۳ Guest Checkout و Address
+- برای خریدار مهمان: Order.shipping_* فیلدها پر می‌شوند (snapshot)
+- برای خریدار ثبت‌نام‌شده: Order.address_id به Address اشاره می‌کند
+- Address.user_id NULL مجاز است (برای آدرس‌های موقت مهمان)
+- پس از ثبت سفارش، آدرس مهمان در Order ذخیره می‌شود و نیازی به Address جداگانه نیست
+
+### ۳.۴ وضعیت‌های سفارش
 pending → confirmed → preparing → shipped → delivered
 cancelled یا returned در هر مرحله ممکن است
 
-### ۳.۴ ارتباط پرداخت با سفارش (D-067)
+### ۳.۵ ارتباط پرداخت با سفارش (D-067)
 - هر Order می‌تواند چندین Payment داشته باشد (تلاش‌های متعدد)
 - Payment.status: pending, confirmed, rejected
 - Order.payment_status بر اساس آخرین Payment تنظیم می‌شود
 
-### ۳.۵ نقش‌های خانواده/ادمین/تأمین‌کننده (RBAC)
+### ۳.۶ نقش‌های خانواده/ادمین/تأمین‌کننده (RBAC)
 - Role: تعریف نقش‌ها و مجوزها
 - UserRole: ارتباط کاربر با نقش (Many-to-Many)
 - در MVP هر کاربر یک نقش اصلی دارد (is_primary = true)
@@ -365,7 +377,7 @@ cancelled یا returned در هر مرحله ممکن است
 - **JSONField:** فقط images, metadata, audit values, Role.permissions
 - **Soft Delete:** User, Product, Order, Address
 - **Hard Delete:** DeviceToken, Lead (پس از fulfilled)
-- **تاریخچه:** InventoryTransaction + PriceHistory
+- **تاریخچه:** InventoryTransaction (برای موجودی)
 - **Computed Fields:** available_quantity (GENERATED ALWAYS AS)
 
 ## ۵. شاخص‌های ضروری
