@@ -3,7 +3,7 @@
 | شناسه | ADR-005 |
 | --- | --- |
 | عنوان | لایه انتزاع پرداخت (Payment Abstraction) |
-| وضعیت | **Proposed** — پیش‌نویس اولیه، در انتظار تأیید مشاور |
+| وضعیت | **Proposed v2** — اصلاح‌شده بر اساس ۲ نکته اجباری + ۴ نکته توصیه‌ای مشاور |
 | تاریخ | ۲۰۲۶-۰۸-۰۶ |
 | تصمیم‌گیرنده | عبدالحسین فهیمی (بنیان‌گذار) + تحلیلگر فنی |
 | مرتبط | ADR-001, ADR-002, ADR-003, D-003, D-067, M11 |
@@ -70,8 +70,8 @@
 **۲. verify_payment(payment_attempt, evidence)**
 - ورودی: تلاش پرداخت، evidence (مثل ۴ رقم + زمان + رسید)
 - خروجی: وضعیت verified/rejected + دلیل
-- برای CardToCard: بررسی تطبیق evidence با سیاست تأیید
-- برای درگاه آنلاین: بررسی callback از درگاه
+- **برای CardToCard در MVP:** این متد «ثبت evidence + انتظار تأیید ادمین» است، نه verify خودکار بانکی. verify واقعی توسط ادمین در پنل انجام می‌شود (manual review).
+- برای درگاه آنلاین (آینده): بررسی خودکار callback از درگاه
 
 **۳. refund_payment(payment, reason)**
 - ورودی: پرداخت، دلیل
@@ -92,18 +92,21 @@
 - evidence طبق D-067: sender_card_last4، transfer_time، amount، receipt_image (اختیاری)
 - بدون اتصال خارجی: تمام منطق در سرور ریهان است
 
-### وضعیت‌های Payment (هم‌راستا با ADR-002)
+### وضعیت‌های Payment (یکدست با ADR-002)
 
-pending → confirmed → completed
-pending → rejected
-confirmed → refunded
+**۴ وضعیت قطعی در MVP:**
+- pending → confirmed
+- pending → rejected
+- confirmed → refunded
 
 | وضعیت | توضیح | مجاز توسط |
 | --- | --- | --- |
 | pending | مشتری evidence ثبت کرده، در انتظار تأیید ادمین | سیستم (خودکار) |
-| confirmed | ادمین تأیید کرده | ادمین (admin/family_admin) |
-| rejected | ادمین رد کرده | ادمین |
+| confirmed | ادمین تأیید کرده، پرداخت موفق | ادمین (admin/family_admin) |
+| rejected | ادمین رد کرده، نیاز به تلاش مجدد | ادمین |
 | refunded | پرداخت تأییدشده برگشت داده شده | ادمین |
+
+**نکته:** وضعیت completed حذف شد (مبهم بود). Payment تأییدشده = confirmed (نیاز به وضعیت جداگانه ندارد).
 
 ### جریان کامل در MVP
 
@@ -118,7 +121,7 @@ confirmed → refunded
 - Payment جدید با status=pending ایجاد می‌شود
 
 **۳. تأیید توسط ادمین:**
-- ادمین به /admin-panel/payments/pending/ می‌رود
+- ادمین به /api/v1/admin/payments/?status=pending می‌رود (مسیر یکدست با ADR-003)
 - لیست پرداخت‌های در انتظار + evidence نمایش داده می‌شود
 - ادمین با SMS بانکی خودش چک می‌کند
 - اگر OK: کلیک روی تأیید → Payment.status = confirmed
@@ -145,9 +148,11 @@ PAYMENT_CONFIG = {
     }
 }
 
-### منطق dynamic
-- اگر receipt_required_above تنظیم شده و مبلغ سفارش بیشتر باشد، receipt_image اجباری می‌شود
+### منطق dynamic (هم‌راستا با D-067)
+- **پیش‌فرض (D-067):** receipt_image اختیاری است (NULL مجاز)
+- **آستانه receipt_required_above:** اگر تنظیم شده و مبلغ سفارش بیشتر باشد، receipt_image اجباری می‌شود (override برای مبالغ بالا)
 - این منطق در آینده از طریق پنل ادمین قابل تغییر است
+- مثال: اگر receipt_required_above = ۵,۰۰۰,۰۰۰ تومان، سفارش‌های بالای این مبلغ رسید اجباری دارند
 
 ### مزیت
 - شماره کارت مقصد در کد hardcode نمی‌شود
@@ -168,10 +173,26 @@ PAYMENT_CONFIG = {
 - اگر payment_status = rejected باشد، Order.status در pending می‌ماند
 - اگر Order.cancelled شود، تمام Paymentهای pending به rejected تغییر می‌کنند
 
-### قوانین موجودی
-- موجودی فقط هنگام Order.status = confirmed رزرو/کاهش می‌یابد
-- Payment به تنهایی موجودی را تغییر نمی‌دهد (جلوگیری از oversell)
-- InventoryTransaction فقط پس از تأیید Order ایجاد می‌شود
+### قوانین موجودی (سه‌مرحله‌ای - هم‌راستا با ADR-002)
+
+**مرحله ۱: ثبت سفارش (Reservation)**
+- هنگام ایجاد Order با status=pending، reserved_quantity افزایش می‌یابد
+- InventoryTransaction با change_type=reservation ایجاد می‌شود
+- available_quantity = quantity - reserved_quantity کاهش می‌یابد
+- این کار از oversell جلوگیری می‌کند
+
+**مرحله ۲: تأیید پرداخت (Finalize)**
+- هنگام Payment.status = confirmed، Order.status = confirmed می‌شود
+- InventoryTransaction با change_type=sale ایجاد می‌شود
+- quantity کاهش می‌یابد و reserved_quantity آزاد می‌شود
+- موجودی فیزیکی به‌روز می‌شود
+
+**مرحله ۳: لغو/رد نهایی (Release)**
+- هنگام لغو Order یا رد نهایی پرداخت، reserved_quantity آزاد می‌شود
+- InventoryTransaction با change_type=release ایجاد می‌شود
+- available_quantity افزایش می‌یابد (موجودی برای فروش مجدد آماده می‌شود)
+
+**قانون کلیدی:** Payment به تنهایی موجودی را تغییر نمی‌دهد — فقط وضعیت Order است که InventoryTransaction را trigger می‌کند. این هم‌راستایی کامل با ADR-002 است.
 
 ## ۷. نقش ادمین در تأیید/رد
 
@@ -230,10 +251,11 @@ PAYMENT_CONFIG = {
 - RejectingGateway: برای تست سناریوهای خطا
 - تست‌های unit روی PaymentService بدون دیتابیس واقعی
 
-### Coverage مورد انتظار
-- PaymentService: ۱۰۰٪ coverage
-- CardToCardGateway: ۹۰٪ coverage
-- GatewayFactory: ۱۰۰٪ coverage
+### Coverage مورد انتظار (هدف آرمانی، نه تعهد سخت فاز ۴)
+- PaymentService: هدف ۱۰۰٪ coverage
+- CardToCardGateway: هدف ۹۰٪ coverage
+- GatewayFactory: هدف ۱۰۰٪ coverage
+- **نکته:** این اهداف در فاز ۵ (توسعه) پیگیری می‌شوند، نه در فاز ۴ (برنامه‌ریزی). کیفیت تست مهم‌تر از درصد coverage است.
 
 ## ۱۰. Out of Scope صریح
 
