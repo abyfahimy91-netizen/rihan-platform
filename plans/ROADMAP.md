@@ -19,8 +19,8 @@
 | ۱ | ADR-001 | Backend Framework | **Approved ✅** (مصوب ۱۴۰۵/۰۵/۱۶) |
 | ۲ | ADR-002 | Database / مدل داده | **Approved ✅** (مصوب ۱۴۰۵/۰۵/۱۶) |
 | ۳ | ADR-003 | API Strategy + API-First | **Approved ✅** (مصوب ۱۴۰۵/۰۵/۱۶) |
-| ۴ | ADR-004 | Feature Flags / Plugin Architecture | ⏳ **مجاز برای پیش‌نویس** (در انتظار تأیید مشاور) |
-| ۵ | ADR-005 | Payment Abstraction | 🔒 |
+| ۴ | ADR-004 | Feature Flags / Plugin Architecture | **Approved ✅** (مصوب ۱۴۰۵/۰۵/۱۶) |
+| ۵ | ADR-005 | Payment Abstraction | ⏳ **مجاز برای پیش‌نویس** (در انتظار تأیید مشاور) |
 | ۶ | ADR-006 | Authentication (Passwordless) | 🔒 |
 | ۷ | ADR-007 | Admin/UI Strategy | 🔒 |
 | ۸ | ADR-008 | Deployment / Backup / Monitoring | 🔒 |
@@ -29,4 +29,4 @@
 
 > **قفل ترتیبی:** هر ADR فقط پس از Approved شدن ADR قبلی شروع می‌شود. هیچ استثنایی وجود ندارد.
 
-> **توجه:** ADR-001، ADR-002 و ADR-003 تصویب شده‌اند. تا تأیید نهایی ADR-004 توسط مشاور پروژه، هیچ اقدامی برای نصب استک یا کدنویسی محصول انجام نخواهد شد.
+> **توجه:** ADR-001، ADR-002، ADR-003 و ADR-004 تصویب شده‌اند. تا تأیید نهایی ADR-005 توسط مشاور پروژه، هیچ اقدامی برای نصب استک یا کدنویسی محصول انجام نخواهد شد.
