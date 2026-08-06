@@ -20,6 +20,14 @@
    - docs/FUNDAMENTAL-PRINCIPLES.md (اصول تغییرناپذیر)
    - CONTINUITY.md (وضعیت فعلی و اقدام بعدی)
    - PROJECT-INDEX.md (نقشه کامل مخزن)
+   - decisions/DECISIONS.md (تمام تصمیمات ثبت‌شده)
+۴. اگر در فاز ۴ (Software Planning) هستید، ADRهای مصوب را بخوانید:
+   - decisions/adr/ADR-001-backend-framework.md
+   - decisions/adr/ADR-002-database.md
+   - decisions/adr/ADR-003-api-strategy.md
+   - decisions/adr/ADR-004-feature-flags.md
+   - decisions/adr/ADR-005-payment-abstraction.md
+   - PROJECT-INDEX.md (نقشه کامل مخزن)
    - decisions/DECISIONS.md (تصمیمات قطعی)
 ۴. وضعیت فعلی: فاز ۱ و ۲ تکمیل؛ فاز ۳ — IN PROGRESS (در انتظار تأیید نهایی بنیان‌گذار).
 ۵. اقدام بعدی: ادامه بحث و تبادل نظر بنیان‌گذار روی ۶ سند فاز ۳.
