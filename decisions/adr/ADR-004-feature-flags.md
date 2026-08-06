@@ -282,3 +282,23 @@
 - FUNDAMENTAL-PRINCIPLES.md: اصل ۳ (انعطاف کامل)
 - ARCHITECTURE-PRINCIPLES.md: الگوی ۵ (Plugin Architecture)
 - MVP-SCOPE.md: ۱۴ ماژول Must Have + Not Yet
+
+
+---
+
+## 📋 راستی‌آزمایی اصلاحات v2 (برای مشاور)
+
+**commit:** 81b3d7c (فعلی) — تمام ۵ اصلاح اجباری در این فایل موجود است:
+
+1. ✅ **وضعیت:** Proposed v2 (در هدر)
+2. ✅ **لیست سیستمی قطعی (بخش ۳):**
+   - سیستمی (۸): catalog, order_form, admin_panel, rbac, auth, payment, ui_design, plugin_arch
+   - غیرسیستمی (۶): supplier_panel, finance, tracking, reviews, leads, brand_page
+   - قانون قطعی: "auth و payment در فروشگاه زنده غیرفعال نمی‌شوند"
+3. ✅ **بخش ۳.۱ (معنای Flag):** Flag ≠ uninstall — App در INSTALLED_APPS می‌ماند، فقط رفتار/مسیر/منو قطع می‌شود
+4. ✅ **Isolation (بخش ۶):** وابستگی دامنه‌ای Order/Cart/Product/Payment پذیرفته شده؛ فقط coupling فنی ممنوع است
+5. ✅ **Cache (بخش ۵ لایه ۱):** in-process/local با TTL ۵ دقیقه، Redis اختیاری برای آینده
+
+**D-069:** در DECISIONS.md ثبت شده (متمم ADR-002).
+
+**تاریخ راستی‌آزمایی مجدد:** ۲۰۲۶-۰۸-۰۶
