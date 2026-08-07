@@ -65,6 +65,7 @@
 
 | تاریخ | رویداد |
 | --- | --- |
+| 2026-08-07 | ⏳ ADR-006 v2 — اعمال ۴ الزام اجباری ناظر (PII/مالیاتی, Hybrid Auth, RTR, Middleware) |
 | 2026-08-06 | ✅ ADR-005 (Payment Abstraction) تصویب شد — Strategy Pattern، CardToCard، موجودی سه‌مرحله‌ای |
 | 2026-08-06 | ✅ ADR-004 (Feature Flags) تصویب شد — ۱۴ App، ۸ ماژول سیستمی، D-069 |
 | 2026-08-06 | ✅ ADR-003 (API Strategy) تصویب شد — ۱۲ بخش، ۳ کانال احراز هویت، Idempotency |
