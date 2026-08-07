@@ -104,7 +104,7 @@
 | ADR-005-payment-abstraction.md | Payment Abstraction (Strategy Pattern) | **Approved ✅** | [GitHub](https://github.com/abyfahimy91-netizen/rihan-platform/blob/main/decisions/adr/ADR-005-payment-abstraction.md) |
 | ADR-006-authentication.md | Authentication / Passwordless | **Approved ✅** |
 | ADR-007-frontend-stack.md | Frontend Stack (HTML+HTMX+Alpine+Tailwind) | **Approved ✅ v2** |
-| ADR-008-deployment-docker.md | Deployment / Docker / CI-CD / Backup | **Approved ✅** | [GitHub](https://github.com/abyfahimy91-netizen/rihan-platform/blob/main/decisions/adr/ADR-007-frontend-stack.md) |
+| ADR-008-deployment-docker.md | Deployment / Docker / CI-CD / Backup | **Approved ✅** | [GitHub](https://github.com/abyfahimy91-netizen/rihan-platform/blob/main/decisions/adr/ADR-008-deployment-docker.md) |
 
 ### plans/ — برنامه‌ها
 
