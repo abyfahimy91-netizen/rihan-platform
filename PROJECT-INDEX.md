@@ -58,6 +58,7 @@
 | PHASE3-HANDOFF.md | سند تحویل فاز ۳ به ۴ | ۳ | تأییدشده ✅ | D-066 |
 | CART-RECOVERY.md | استراتژی بازیابی سبد | ۳ | تأییدشده ✅ | D-063 |
 | RTL-GUIDE.md | راهنمای طراحی RTL | ۳ | تأییدشده ✅ | D-064 |
+| PHASE4-INTEGRATION-MATRIX.md | ماتریس یکپارچگی فاز ۴ (پیش‌نیاز فاز ۵) | ۴ | ✅ Active | [GitHub](https://github.com/abyfahimy91-netizen/rihan-platform/blob/main/docs/PHASE4-INTEGRATION-MATRIX.md) |
 | REQUIREMENTS.md | نیازمندی‌ها | ۴ | — | — |
 | SECURITY-ANALYSIS.md | تحلیل امنیت | ۴ | — | — |
 | TECH-DOCUMENTATION.md | مستندات فنی | ۵ | — | — |
@@ -101,7 +102,8 @@
 | ADR-004-feature-flags.md | Feature Flags / Plugin Architecture | **Approved ✅** | [GitHub](https://github.com/abyfahimy91-netizen/rihan-platform/blob/main/decisions/adr/ADR-004-feature-flags.md) |
 | ADR-005-payment-abstraction.md | Payment Abstraction (Strategy Pattern) | **Approved ✅** | [GitHub](https://github.com/abyfahimy91-netizen/rihan-platform/blob/main/decisions/adr/ADR-005-payment-abstraction.md) |
 | ADR-006-authentication.md | Authentication / Passwordless | **Approved ✅** |
-| ADR-007-frontend-stack.md | Frontend Stack (HTML+HTMX+Alpine+Tailwind) | **Approved ✅ v2** | [GitHub](https://github.com/abyfahimy91-netizen/rihan-platform/blob/main/decisions/adr/ADR-007-frontend-stack.md) |
+| ADR-007-frontend-stack.md | Frontend Stack (HTML+HTMX+Alpine+Tailwind) | **Approved ✅ v2** |
+| ADR-008-deployment-docker.md | Deployment / Docker / CI-CD / Backup | **Approved ✅** | [GitHub](https://github.com/abyfahimy91-netizen/rihan-platform/blob/main/decisions/adr/ADR-007-frontend-stack.md) |
 
 ### plans/ — برنامه‌ها
 

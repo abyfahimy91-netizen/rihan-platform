@@ -23,10 +23,10 @@
 | ۵ | ADR-005 | Payment Abstraction | **Approved ✅** (مصوب ۱۴۰۵/۰۵/۱۶) |
 | ۶ | ADR-006 | Authentication (Passwordless) | **Approved ✅** (مصوب ۱۴۰۵/۰۵/۱۷) |
 | ۷ | ADR-007 | Frontend Stack | **Approved ✅ v2** |
-| ۸ | ADR-008 | Deployment / Backup / Monitoring | 🔒 |
+| ۸ | ADR-008 | Deployment / Backup / Monitoring | **Approved ✅** |
 
 > **نکته:** Static/CDN به‌عنوان زیربخش در ADR-008 قرار می‌گیرد، نه ADR مستقل.
 
 > **قفل ترتیبی:** هر ADR فقط پس از Approved شدن ADR قبلی شروع می‌شود. هیچ استثنایی وجود ندارد.
 
-> **توجه:** ADR-001 تا ADR-007 + متمم ADR-003 تصویب شده‌اند. اقدام بعدی: ADR-008 (Deployment/Docker/CI-CD).
+> **توجه:** **فاز ۴ تکمیل شد** — تمام ۹ سند معماری (۸ ADR + ۱ متمم) Approved هستند. پروژه در حال تکمیل پیش‌نیازهای فاز ۵ (Cold Start + ماتریس یکپارچگی) است. ورود به فاز ۵ منوط به تأیید نهایی ناظر.

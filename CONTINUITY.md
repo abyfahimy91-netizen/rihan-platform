@@ -53,12 +53,15 @@
 8. ✅ اولویت ۷: ADR-006 (Authentication / Passwordless) — **Approved ✅** (مصوب ۱۴۰۵/۰۵/۱۷)
 9. ✅ اولویت ۸: متمم ADR-003 (Offline-First / Caching / PWA) — **Approved ✅** (مصوب ۱۴۰۵/۰۵/۱۷)
 10. ✅ اولویت ۹: ADR-007 (Frontend Stack) — **Approved ✅ v2** (HTML+HTMX+Alpine+Tailwind با ۴ متمم فنی)
-11. ⏳ اولویت ۱۰: **پیش‌نویس ADR-008 (Deployment / Docker / CI-CD)**
+11. ✅ اولویت ۱۰: ADR-008 (Deployment / Docker / CI-CD) — **Approved ✅** (مصوب ۱۴۰۵/۰۵/۱۷)
+12. ⏳ اولویت ۱۱: **تکالیف پیش از فاز ۵ (Cold Start + ماتریس یکپارچگی)**
+13. 🔒 اولویت ۱۲: **ورود به فاز ۵ (کدنویسی MVP)** — منوط به تأیید ناظر
 
 ### فاز ۴ (Software Planning) — IN PROGRESS
 
-> ⚠️ **قفل ترتیبی:**
-> - تا مصوب شدن ADR-008، هیچ اقدام کدنویسی یا استقرار انجام نمی‌شود
+> ⚠️ **قفل فاز ۵:**
+> - فاز ۴ از نظر ADRها تکمیل است (۸ ADR + ۱ متمم، همه Approved)
+> - فاز ۵ (کدنویسی) منوط به تکمیل تکالیف پیش‌نیاز (Cold Start + ماتریس یکپارچگی) و تأیید نهایی ناظر است
 > - هیچ پاکسازی سرور، هیچ نصب استک، هیچ کدنویسی محصول
 > - خروجی‌های بعدی فقط فایل‌محور و قابل راستی‌آزمایی هستند
 
@@ -68,6 +71,7 @@
 
 | تاریخ | رویداد |
 | --- | --- |
+| 2026-08-07 | ✅ ADR-008 (Deployment/Docker/CI-CD) تصویب شد — ۳ کانتینر، One-Command، Backup روزانه. ۴ مغایرت ممیزی بسته شد |
 | 2026-08-07 | ✅ ADR-007 (Frontend Stack) تصویب شد — HTML+HTMX+Alpine+Tailwind با ۴ متمم فنی ناظر |
 | 2026-08-07 | ✅ متمم ADR-003 (Offline-First/Caching/PWA) تصویب شد — Payload Compression+Caching+Offline-Aware |
 | 2026-08-07 | ✅ ADR-006 (احراز هویت Passwordless) تصویب شد — OTP+Kavenegar+Hybrid Auth+RTR+PII/مالیاتی |
