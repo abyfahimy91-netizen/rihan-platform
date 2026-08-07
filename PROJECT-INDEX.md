@@ -99,7 +99,7 @@
 | ADR-003-api-strategy.md | API Strategy + API-First | **Approved ✅** | [GitHub](https://github.com/abyfahimy91-netizen/rihan-platform/blob/main/decisions/adr/ADR-003-api-strategy.md) |
 | ADR-004-feature-flags.md | Feature Flags / Plugin Architecture | **Approved ✅** | [GitHub](https://github.com/abyfahimy91-netizen/rihan-platform/blob/main/decisions/adr/ADR-004-feature-flags.md) |
 | ADR-005-payment-abstraction.md | Payment Abstraction (Strategy Pattern) | **Approved ✅** | [GitHub](https://github.com/abyfahimy91-netizen/rihan-platform/blob/main/decisions/adr/ADR-005-payment-abstraction.md) |
-| ADR-006-authentication.md | Authentication / Passwordless | ⏳ پیش‌نویس در انتظار | — |
+| ADR-006-authentication.md | Authentication / Passwordless | **Approved ✅** | [GitHub](https://github.com/abyfahimy91-netizen/rihan-platform/blob/main/decisions/adr/ADR-006-authentication.md) |
 
 ### plans/ — برنامه‌ها
 

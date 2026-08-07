@@ -50,12 +50,13 @@
 5. ✅ اولویت ۴: ADR-003 (API Strategy + API-First) — **Approved ✅** (مصوب ۱۴۰۵/۰۵/۱۶)
 6. ✅ اولویت ۵: ADR-004 (Feature Flags / Plugin Architecture) — **Approved ✅** (مصوب ۱۴۰۵/۰۵/۱۶)
 7. ✅ اولویت ۶: ADR-005 (Payment Abstraction) — **Approved ✅** (مصوب ۱۴۰۵/۰۵/۱۶)
-8. ⏳ اولویت ۷: **پیش‌نویس ADR-006 (Authentication / Passwordless)**
+8. ✅ اولویت ۷: ADR-006 (Authentication / Passwordless) — **Approved ✅** (مصوب ۱۴۰۵/۰۵/۱۷)
+9. ⏳ اولویت ۸: **متمم ADR-003 (Offline-First / Caching / PWA for Weak Networks)**
 
 ### فاز ۴ (Software Planning) — IN PROGRESS
 
 > ⚠️ **قفل ترتیبی:**
-> - تا مصوب شدن ADR-006، هیچ ADR بعدی شروع نمی‌شود
+> - تا مصوب شدن متمم ADR-003، هیچ ADR بعدی شروع نمی‌شود
 > - هیچ پاکسازی سرور، هیچ نصب استک، هیچ کدنویسی محصول
 > - خروجی‌های بعدی فقط فایل‌محور و قابل راستی‌آزمایی هستند
 
@@ -65,6 +66,7 @@
 
 | تاریخ | رویداد |
 | --- | --- |
+| 2026-08-07 | ✅ ADR-006 (احراز هویت Passwordless) تصویب شد — OTP+Kavenegar+Hybrid Auth+RTR+PII/مالیاتی |
 | 2026-08-07 | ⏳ ADR-006 v2 — اعمال ۴ الزام اجباری ناظر (PII/مالیاتی, Hybrid Auth, RTR, Middleware) |
 | 2026-08-06 | ✅ ADR-005 (Payment Abstraction) تصویب شد — Strategy Pattern، CardToCard، موجودی سه‌مرحله‌ای |
 | 2026-08-06 | ✅ ADR-004 (Feature Flags) تصویب شد — ۱۴ App، ۸ ماژول سیستمی، D-069 |
