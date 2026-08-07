@@ -416,6 +416,9 @@
 - **Let's Encrypt:** https://letsencrypt.org
 - **GitHub Actions:** https://docs.github.com/en/actions
 
+### پچ‌های تکمیلی
+- **PHASE4-FINAL-PATCHES.md:** ۴ اصلاحیه تکمیلی (Media WebP, Cart Validation API, Log Rotation, Trust Badges Fixtures)
+
 ### استانداردها
 - **12-Factor App:** https://12factor.net
 - **OWASP Docker Security Cheat Sheet**

@@ -54,7 +54,9 @@
 9. ✅ اولویت ۸: متمم ADR-003 (Offline-First / Caching / PWA) — **Approved ✅** (مصوب ۱۴۰۵/۰۵/۱۷)
 10. ✅ اولویت ۹: ADR-007 (Frontend Stack) — **Approved ✅ v2** (HTML+HTMX+Alpine+Tailwind با ۴ متمم فنی)
 11. ✅ اولویت ۱۰: ADR-008 (Deployment / Docker / CI-CD) — **Approved ✅** (مصوب ۱۴۰۵/۰۵/۱۷)
-12. ⏳ اولویت ۱۱: **تکالیف پیش از فاز ۵ (Cold Start + ماتریس یکپارچگی)**
+12. ✅ اولویت ۱۱: تکالیف پیش از فاز ۵ (Cold Start + ماتریس یکپارچگی) — **تکمیل شد** (commit 9e46003)
+13. ✅ اولویت ۱۲: **۴ پچ تکمیلی ناظر** (Media/Cart/Log/TrustBadges) — **تکمیل شد** (PHASE4-FINAL-PATCHES.md)
+14. 🔒 اولویت ۱۳: **ورود به فاز ۵ (کدنویسی MVP)** — منوط به تأیید نهایی ناظر
 13. 🔒 اولویت ۱۲: **ورود به فاز ۵ (کدنویسی MVP)** — منوط به تأیید ناظر
 
 ### فاز ۴ (Software Planning) — IN PROGRESS
@@ -71,6 +73,7 @@
 
 | تاریخ | رویداد |
 | --- | --- |
+| 2026-08-07 | ✅ ۴ پچ تکمیلی ناظر اعمال شد — Media WebP + Cart Validation API + Log Rotation + Trust Badges Fixtures (یکپارچگی ۱۰۰٪) |
 | 2026-08-07 | ✅ ADR-008 (Deployment/Docker/CI-CD) تصویب شد — ۳ کانتینر، One-Command، Backup روزانه. ۴ مغایرت ممیزی بسته شد |
 | 2026-08-07 | ✅ ADR-007 (Frontend Stack) تصویب شد — HTML+HTMX+Alpine+Tailwind با ۴ متمم فنی ناظر |
 | 2026-08-07 | ✅ متمم ADR-003 (Offline-First/Caching/PWA) تصویب شد — Payload Compression+Caching+Offline-Aware |

@@ -59,6 +59,7 @@
 | CART-RECOVERY.md | استراتژی بازیابی سبد | ۳ | تأییدشده ✅ | D-063 |
 | RTL-GUIDE.md | راهنمای طراحی RTL | ۳ | تأییدشده ✅ | D-064 |
 | PHASE4-INTEGRATION-MATRIX.md | ماتریس یکپارچگی فاز ۴ (پیش‌نیاز فاز ۵) | ۴ | ✅ Active | [GitHub](https://github.com/abyfahimy91-netizen/rihan-platform/blob/main/docs/PHASE4-INTEGRATION-MATRIX.md) |
+| PHASE4-FINAL-PATCHES.md | ۴ پچ تکمیلی نهایی فاز ۴ (WebP/Cart/Log/TrustBadges) | ۴ | ✅ Active | [GitHub](https://github.com/abyfahimy91-netizen/rihan-platform/blob/main/docs/PHASE4-FINAL-PATCHES.md) |
 | REQUIREMENTS.md | نیازمندی‌ها | ۴ | — | — |
 | SECURITY-ANALYSIS.md | تحلیل امنیت | ۴ | — | — |
 | TECH-DOCUMENTATION.md | مستندات فنی | ۵ | — | — |
