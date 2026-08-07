@@ -3,7 +3,7 @@
 | شناسه | ADR-007 |
 | --- | --- |
 | عنوان | استک و معماری فرانت‌اند (Frontend Stack) |
-| وضعیت | **Proposed** — پیش‌نویس، در انتظار تأیید ناظر |
+| وضعیت | **Approved ✅ v2** — مصوب با ۴ متمم فنی ناظر (۱۴۰۵/۰۵/۱۷) |
 | تاریخ | ۲۰۲۶-۰۸-۰۷ |
 | تصمیم‌گیرنده | عبدالحسین فهیمی (بنیان‌گذار) + تحلیلگر فنی |
 | مرتبط | ADR-001, ADR-003, ADR-003-Appendix, ADR-006, ADR-004, CENTRAL-STORY.md, اصل ۹, ۱۰, ۱۱ |
@@ -159,13 +159,31 @@ static/
 
 **برای درخواست‌های HTMX:**
 - Session cookie خودکار ارسال می‌شود
-- CSRF token در header X-CSRFToken
-- HTMX به‌صورت خودکار cookie را ارسال می‌کند
+- CSRF token به‌صورت خودکار در header X-CSRFToken تزریق می‌شود (الزام ناظر)
+- Idempotency Key برای POST
 
 **برای درخواست‌های API (آینده - اپ موبایل):**
 - JWT در Authorization header
 - Refresh Token Rotation (ADR-006)
 - Idempotency Key برای POST
+
+### 🔧 کانفیگ سراسری HTMX (الزام ناظر - آسیب ۳)
+
+**تزریق خودکار CSRF Token در تمام درخواست‌های غیر-GET:**
+
+فایل static/js/htmx-csrf.js در base.html لود می‌شود و به‌صورت سراسری CSRF Token را از cookie یا meta tag خوانده و به هدر X-CSRFToken اضافه می‌کند. این کار از خطای 403 Forbidden در تمام فرم‌های HTMX جلوگیری می‌کند.
+
+**نکته:** این فایل قبل از htmx.min.js لود نمی‌شود، بلکه پس از آن و با استفاده از event listener روی document.body ثبت می‌شود تا htmx:configRequest را catch کند.
+
+### 🔧 سازگاری DOM بین HTMX و Alpine.js (الزام ناظر - آسیب ۱)
+
+**مشکل:** هنگامی که HTMX بخشی از HTML را با hx-swap جایگزین می‌کند، کامپوننت‌های Alpine.js درون آن بخش Event Listenerها و State خود را از دست می‌دهند.
+
+**راه‌حل:** استفاده از هوک htmx:afterSettle + Alpine.initTree()
+
+پس از هر Swap موفق HTMX، event listener روی document.body فعال می‌شود و روی عنصر جایگزین‌شده (detail.elt) تابع Alpine.initTree() را فراخوانی می‌کند. این کار باعث Re-bind خودکار تمام کامپوننت‌های Alpine.js در محتوای جدید می‌شود.
+
+**گزینه جایگزین:** استفاده از کتابخانه hx-alpine-compat (در صورت نیاز به پیچیدگی بیشتر). در MVP از روش دستی (Alpine.initTree) استفاده می‌شود که سبک‌تر و قابل فهم‌تر است.
 
 ### Middleware Integration (متمم ADR-006)
 
@@ -214,40 +232,62 @@ static/
 
 ## ۷. Asset Pipeline و Build Process
 
-### Tailwind CSS Build
+### 🔧 میزبانی محلی تمام کتابخانه‌ها (الزام ناظر - اصل ۹ - آسیب ۲)
+
+**اصل ۹ (استقلال از سیستم‌های خارجی) ایجاب می‌کند:**
+تمام کتابخانه‌های فرانت‌اند (htmx.min.js، alpine.min.js، فونت Vazirmatn) باید به‌صورت فایل‌های استاتیک محلی در پوشه /static/vendor/ ذخیره شوند. **هیچ فراخوانی به CDN خارجی (unpkg, cdnjs, Google Fonts) در Runtime صورت نمی‌گیرد** تا قطعی اینترنت بین‌الملل یا فیلترینگ سایت را فلج نکند.
+
+**ساختار پوشه vendor:**
+- /static/vendor/htmx/htmx.min.js (نسخه پایداری که تست شده)
+- /static/vendor/alpine/alpine.min.js (نسخه پایداری که تست شده)
+- /static/vendor/fonts/vazirmatn/Vazirmatn-Regular.woff2
+- /static/vendor/fonts/vazirmatn/Vazirmatn-Bold.woff2
+
+**بارگذاری در base.html:**
+همه کتابخانه‌ها از مسیرهای محلی (/static/vendor/...) لود می‌شوند، نه از CDN. این کار باعث می‌شود سایت در شرایط قطعی اینترنت بین‌الملل نیز کاملاً عملیاتی بماند.
+
+### Tailwind CSS Build (الزام ناظر - آسیب ۴)
 
 **توسعه (Development):**
-- Tailwind CDN برای سرعت توسعه
-- <script src="https://cdn.tailwindcss.com"></script>
-- همه کلاس‌ها در دسترس، بدون build
+- Tailwind CLI در حالت watch
+- npx tailwindcss -i ./static/css/input.css -o ./static/css/dist/styles.css --watch
+- تغییر فوری با هر تغییر در HTML
 
 **Production:**
 - Tailwind CLI برای build نهایی
-- npx tailwindcss -i ./static/css/input.css -o ./static/css/main.css --minify
+- npx tailwindcss -i ./static/css/input.css -o ./static/css/dist/styles.css --minify
 - PurgeCSS برای حذف کلاس‌های استفاده‌نشده
-- فایل نهایی: < 50 KB gzip
+- **فایل نهایی:** /static/css/dist/styles.css
+- حجم نهایی: < 50 KB gzip
+
+**نکته مهم (الزام ناظر):**
+فایل کامپایل‌شده (static/css/dist/styles.css) به مخزن commit می‌شود. این یعنی در سرور تولید (production) **نیازی به Node.js یا اجرای Tailwind CLI نیست**. فقط فایل CSS نهایی توسط Nginx serve می‌شود. این هم‌راستا با تصمیم "بدون Node.js در production" در بخش ۲ است.
 
 **Build Script:**
 - scripts/build_css.sh در مخزن
 - اجرای خودکار قبل از deploy (در ADR-008)
+- یا اجرای دستی توسط توسعه‌دهنده قبل از commit
 
-### JavaScript Libraries
+### JavaScript Libraries (میزبانی محلی)
 
 **HTMX:**
-- htmx.min.js از CDN
-- <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+- /static/vendor/htmx/htmx.min.js
 - حجم: ۱۴ KB gzip
+- نسخه pinned در مخزن
 
 **Alpine.js:**
-- alpine.min.js از CDN
-- <script defer src="https://unpkg.com/alpinejs@3.13.5/dist/cdn.min.js"></script>
+- /static/vendor/alpine/alpine.min.js
 - حجم: ۱۵ KB gzip
+- نسخه pinned در مخزن
 
 **Custom JS (app.js):**
-- فقط برای Offline-Aware features
-- ذخیره‌سازی LocalStorage
-- Queue sync
+- /static/js/app.js
+- فقط برای Offline-Aware features + HTMX/Alpine integration (CSRF, initTree)
 - حجم: < 5 KB
+
+**htmx-csrf.js:**
+- /static/js/htmx-csrf.js
+- کانفیگ سراسری CSRF برای HTMX
 
 ### Images و Assets
 
@@ -258,9 +298,9 @@ static/
 - thumbnail: 300x300، full: 1200x1200
 
 **CDN (آینده - فاز ۶):**
-- در MVP از CDN استفاده نمی‌شود
+- در MVP از CDN استفاده نمی‌شود (اصل ۹)
 - اما ساختار آماده است: static files در /static/
-- افزودن CDN فقط نیاز به تغییر Nginx config دارد
+- افزودن CDN فقط نیاز به تغییر Nginx config دارد (در ADR-008)
 
 ## ۸. معیارهای پذیرش و ریسک‌ها
 
@@ -360,3 +400,20 @@ static/
 - **PWA Checklist (web.dev):** معیارهای Progressive Web App
 - **Google Web Vitals:** TTFB, LCP, FID
 - **WCAG 2.1:** Accessibility guidelines
+
+
+---
+
+## تأیید نهایی ناظر (با ۴ متمم فنی)
+
+**تاریخ تصویب:** ۱۴۰۵/۰۵/۱۷
+**Commit راستی‌آزمایی:** fb5a4d3
+**Commit اصلاحات فنی:** (در انتظار ثبت)
+
+**۴ الزام فنی اعمال‌شده:**
+۱. تزریق خودکار CSRF Token جانگو در درخواست‌های HTMX (بخش ۵)
+۲. سازگاری DOM بین HTMX و Alpine.js با htmx:afterSettle + Alpine.initTree (بخش ۵)
+۳. میزبانی محلی تمام کتابخانه‌ها در /static/vendor/ طبق اصل ۹ (بخش ۷)
+۴. ذخیره CSS کامپایل‌شده در /static/css/dist/styles.css (بخش ۷)
+
+این سند اکنون **مصوب** است و استک فرانت‌اند برای MVP ریهان قطعی شد.

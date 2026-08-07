@@ -51,12 +51,14 @@
 6. ✅ اولویت ۵: ADR-004 (Feature Flags / Plugin Architecture) — **Approved ✅** (مصوب ۱۴۰۵/۰۵/۱۶)
 7. ✅ اولویت ۶: ADR-005 (Payment Abstraction) — **Approved ✅** (مصوب ۱۴۰۵/۰۵/۱۶)
 8. ✅ اولویت ۷: ADR-006 (Authentication / Passwordless) — **Approved ✅** (مصوب ۱۴۰۵/۰۵/۱۷)
-9. ⏳ اولویت ۸: **متمم ADR-003 (Offline-First / Caching / PWA for Weak Networks)**
+9. ✅ اولویت ۸: متمم ADR-003 (Offline-First / Caching / PWA) — **Approved ✅** (مصوب ۱۴۰۵/۰۵/۱۷)
+10. ✅ اولویت ۹: ADR-007 (Frontend Stack) — **Approved ✅ v2** (HTML+HTMX+Alpine+Tailwind با ۴ متمم فنی)
+11. ⏳ اولویت ۱۰: **پیش‌نویس ADR-008 (Deployment / Docker / CI-CD)**
 
 ### فاز ۴ (Software Planning) — IN PROGRESS
 
 > ⚠️ **قفل ترتیبی:**
-> - تا مصوب شدن متمم ADR-003، هیچ ADR بعدی شروع نمی‌شود
+> - تا مصوب شدن ADR-008، هیچ اقدام کدنویسی یا استقرار انجام نمی‌شود
 > - هیچ پاکسازی سرور، هیچ نصب استک، هیچ کدنویسی محصول
 > - خروجی‌های بعدی فقط فایل‌محور و قابل راستی‌آزمایی هستند
 
@@ -66,6 +68,8 @@
 
 | تاریخ | رویداد |
 | --- | --- |
+| 2026-08-07 | ✅ ADR-007 (Frontend Stack) تصویب شد — HTML+HTMX+Alpine+Tailwind با ۴ متمم فنی ناظر |
+| 2026-08-07 | ✅ متمم ADR-003 (Offline-First/Caching/PWA) تصویب شد — Payload Compression+Caching+Offline-Aware |
 | 2026-08-07 | ✅ ADR-006 (احراز هویت Passwordless) تصویب شد — OTP+Kavenegar+Hybrid Auth+RTR+PII/مالیاتی |
 | 2026-08-07 | ⏳ ADR-006 v2 — اعمال ۴ الزام اجباری ناظر (PII/مالیاتی, Hybrid Auth, RTR, Middleware) |
 | 2026-08-06 | ✅ ADR-005 (Payment Abstraction) تصویب شد — Strategy Pattern، CardToCard، موجودی سه‌مرحله‌ای |

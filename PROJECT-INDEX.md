@@ -96,10 +96,12 @@
 | --- | --- | --- | --- |
 | ADR-001-backend-framework.md | Backend Framework (Django 5.2 LTS) | **Approved ✅** | [GitHub](https://github.com/abyfahimy91-netizen/rihan-platform/blob/main/decisions/adr/ADR-001-backend-framework.md) |
 | ADR-002-database.md | Database / مدل داده (۱۷ موجودیت) | **Approved ✅** | [GitHub](https://github.com/abyfahimy91-netizen/rihan-platform/blob/main/decisions/adr/ADR-002-database.md) |
-| ADR-003-api-strategy.md | API Strategy + API-First | **Approved ✅** | [GitHub](https://github.com/abyfahimy91-netizen/rihan-platform/blob/main/decisions/adr/ADR-003-api-strategy.md) |
+| ADR-003-api-strategy.md | API Strategy + API-First | **Approved ✅** |
+| ADR-003-appendix-offline-caching.md | متمم: Offline-First / Caching / PWA | **Approved ✅** | [GitHub](https://github.com/abyfahimy91-netizen/rihan-platform/blob/main/decisions/adr/ADR-003-api-strategy.md) |
 | ADR-004-feature-flags.md | Feature Flags / Plugin Architecture | **Approved ✅** | [GitHub](https://github.com/abyfahimy91-netizen/rihan-platform/blob/main/decisions/adr/ADR-004-feature-flags.md) |
 | ADR-005-payment-abstraction.md | Payment Abstraction (Strategy Pattern) | **Approved ✅** | [GitHub](https://github.com/abyfahimy91-netizen/rihan-platform/blob/main/decisions/adr/ADR-005-payment-abstraction.md) |
-| ADR-006-authentication.md | Authentication / Passwordless | **Approved ✅** | [GitHub](https://github.com/abyfahimy91-netizen/rihan-platform/blob/main/decisions/adr/ADR-006-authentication.md) |
+| ADR-006-authentication.md | Authentication / Passwordless | **Approved ✅** |
+| ADR-007-frontend-stack.md | Frontend Stack (HTML+HTMX+Alpine+Tailwind) | **Approved ✅ v2** | [GitHub](https://github.com/abyfahimy91-netizen/rihan-platform/blob/main/decisions/adr/ADR-007-frontend-stack.md) |
 
 ### plans/ — برنامه‌ها
 
