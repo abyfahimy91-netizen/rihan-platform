@@ -24,9 +24,12 @@
 ۴. اگر در فاز ۴ (Software Planning) هستید، ADRهای مصوب را بخوانید:
    - decisions/adr/ADR-001-backend-framework.md
    - decisions/adr/ADR-002-database.md
-   - decisions/adr/ADR-003-api-strategy.md
+   - decisions/adr/ADR-003-api-strategy.md (همراه با متمم ADR-003-appendix-offline-caching.md)
    - decisions/adr/ADR-004-feature-flags.md
    - decisions/adr/ADR-005-payment-abstraction.md
+   - decisions/adr/ADR-006-authentication.md (v2 - Approved)
+   - decisions/adr/ADR-007-frontend-stack.md (v2 - Approved)
+   - decisions/adr/ADR-008-deployment-docker.md (Approved)
 
 ## منشور پروژه
 
@@ -166,12 +169,13 @@ PROJECT-INDEX با هر تغییر پروژه به‌روزرسانی میشود
 
 > برای وضعیت دقیق و به‌روز، همیشه CONTINUITY.md را بخوانید. این بخش فقط یک نمای کلی است.
 
-- نسخه پروژه: ۰.۳.۰
-- فاز فعلی: فاز ۳ تکمیل ✅ — فاز ۴ (Software Planning) IN PROGRESS
-- آخرین مرحله تکمیل‌شده: فاز ۳ با D-066 تأیید نهایی شد
-- ADRهای Approved: ADR-001 تا ADR-005 (Backend, Database, API, Feature Flags, Payment)
-- مرحله بعد: پیش‌نویس ADR-006 (Authentication / Passwordless)
-- آخرین به‌روزرسانی: ۱۴۰۵/۰۵/۱۶
+- نسخه پروژه: ۰.۴.۰
+- فاز فعلی: فاز ۴ تکمیل ✅ — آماده ورود به فاز ۵ (Development)
+- آخرین مرحله تکمیل‌شده: فاز ۴ با ۹ سند معماری (۸ ADR + ۱ متمم) + ۵ Fix از ممیزی ۳۶۰ درجه
+- ADRهای Approved: ADR-001 تا ADR-008 + متمم ADR-003 (Backend, Database, API, Feature Flags, Payment, Authentication, Frontend, Deployment)
+- اسناد تکمیلی: D-073 (شمارش User Stories)، D-074 (تعریف Micro-MVP)، PHASE4-INTEGRATION-MATRIX، PHASE4-FINAL-PATCHES
+- مرحله بعد: شروع فاز ۵ با Micro-MVP (۶ ماژول حیاتی: کاتالوگ، سفارش، پیگیری، احراز هویت، پرداخت، معماری پایه)
+- آخرین به‌روزرسانی: ۱۴۰۵/۰۵/۱۷
 
 ---
 
