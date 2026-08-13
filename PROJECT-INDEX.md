@@ -58,7 +58,7 @@
 | PHASE3-HANDOFF.md | سند تحویل فاز ۳ به ۴ | ۳ | تأییدشده ✅ | D-066 |
 | CART-RECOVERY.md | استراتژی بازیابی سبد | ۳ | تأییدشده ✅ | D-063 |
 | RTL-GUIDE.md | راهنمای طراحی RTL | ۳ | تأییدشده ✅ | D-064 |
-| PHASE4-INTEGRATION-MATRIX.md | ماتریس یکپارچگی فاز ۴ (پیش‌نیاز فاز ۵) | ۴ | ✅ Active | [GitHub](https://github.com/abyfahimy91-netizen/rihan-platform/blob/main/docs/PHASE4-INTEGRATION-MATRIX.md) |
+| PHASE4-INTEGRATION-MATRIX.md | ماتریس یکپارچگی فاز ۴ | ۴ | ✅ Active | [GitHub](https://github.com/abyfahimy91-netizen/rihan-platform/blob/main/docs/PHASE4-INTEGRATION-MATRIX.md) |
 | PHASE4-FINAL-PATCHES.md | ۴ پچ تکمیلی نهایی فاز ۴ (WebP/Cart/Log/TrustBadges) | ۴ | ✅ Active | [GitHub](https://github.com/abyfahimy91-netizen/rihan-platform/blob/main/docs/PHASE4-FINAL-PATCHES.md) |
 | REQUIREMENTS.md | نیازمندی‌ها | ۴ | — | — |
 | SECURITY-ANALYSIS.md | تحلیل امنیت | ۴ | — | — |
@@ -111,13 +111,13 @@
 | فایل | نقش | وضعیت | لینک |
 |------|------|--------|------|
 | ROADMAP.md | نقشه راه ۵ ساله | فعال | [GitHub](https://github.com/abyfahimy91-netizen/rihan-platform/blob/main/plans/ROADMAP.md) |
-| DEVELOPMENT-PLAN.md | برنامه توسعه | فاز ۵ | — |
-| TEST-PLAN.md | برنامه تست | فاز ۵ | — |
-| LAUNCH-PLAN.md | برنامه راه‌اندازی | فاز ۶ | — |
-| MARKETING-STRATEGY.md | استراتژی بازاریابی | فاز ۶ | — |
-| GROWTH-PLAN.md | برنامه رشد | فاز ۷ | — |
+| DEVELOPMENT-PLAN.md | برنامه توسعه | — |
+| TEST-PLAN.md | برنامه تست | — |
+| LAUNCH-PLAN.md | برنامه راه‌اندازی | — |
+| MARKETING-STRATEGY.md | استراتژی بازاریابی | — |
+| GROWTH-PLAN.md | برنامه رشد | — |
 
-### src/ — کد منبع (فاز ۵)
+### src/ — کد منبع
 
 | مسیر | نقش | وضعیت |
 |------|------|--------|
@@ -125,7 +125,7 @@
 | src/backend/ | بک‌اند | خالی |
 | src/database/ | دیتابیس | خالی |
 
-### tests/ — تست‌ها (فاز ۵)
+### tests/ — تست‌ها
 
 | مسیر | نقش | وضعیت |
 |------|------|--------|
@@ -133,7 +133,7 @@
 | tests/integration/ | تست یکپارچگی | خالی |
 | tests/e2e/ | تست انتها به انتها | خالی |
 
-### deploy/ — راه‌اندازی (فاز ۶)
+### deploy/ — راه‌اندازی
 
 | مسیر | نقش | وضعیت |
 |------|------|--------|
