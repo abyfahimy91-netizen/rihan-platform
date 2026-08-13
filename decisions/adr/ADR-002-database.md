@@ -4,12 +4,18 @@
 | --- | --- |
 | عنوان | معماری دیتابیس و مدل داده MVP |
 | وضعیت | **Approved ✅** — مصوب شده توسط مشاور پروژه (۱۴۰۵/۰۵/۱۶) |
-| تاریخ | ۲۰۲۶-۰۸-۰۶ |
-| مرتبط | ADR-001, D-040, D-045, D-046, D-067, D-068 |
+| تاریخ | ۲۰۲۶-۰۸-۰۶ (آخرین بازنویسی: ۲۰۲۶-۰۸-۱۲ بر اساس D-079) |
+| مرتبط | ADR-001, D-040, D-045, D-046, D-067, D-068, **D-079** |
 
 > **✅ این سند مصوب است.** هر تغییر اساسی نیاز به ADR جدید دارد.
 > **تاریخ تصویب:** ۱۴۰۵/۰۵/۱۶
 > **تأییدکننده:** مشاور پروژه
+>
+> ⚠️ **یادداشت بازنویسی (D-079):** در تاریخ ۲۰۲۶-۰۸-۱۲، سه تغییر اساسی بر اساس D-079 اعمال شد:
+> - افزودن **فیلدهای سئو** (seo_title, seo_description, seo_keywords) به موجودیت Product
+> - افزودن موجودیت **ContentBlock** برای سیستم بلوک‌محور
+> - افزودن موجودیت **ProductBlock** برای اتصال Product به ContentBlock (Many-to-Many)
+> **ارجاع:** [decisions/D-079-RETURN-TO-ORIGINAL-VISION.md](../D-079-RETURN-TO-ORIGINAL-VISION.md)
 
 ## ۱. هدف و مرز
 
@@ -109,6 +115,9 @@
 | short_description | TEXT | توضیح کوتاه |
 | origin_story | TEXT | داستان مبدأ (اجباری) |
 | long_description | TEXT | توضیح کامل |
+| seo_title | VARCHAR(60) NULL | عنوان سئو (حداکثر ۶۰ کاراکتر) - D-079 |
+| seo_description | VARCHAR(160) NULL | توضیح سئو (حداکثر ۱۶۰ کاراکتر) - D-079 |
+| seo_keywords | JSONB NULL | کلمات کلیدی سئو (JSON array) - D-079 |
 | images | JSONB | لیست تصاویر |
 | metadata | JSONB | اطلاعات منعطف |
 | status | ENUM | draft/active/inactive/out_of_stock |
@@ -117,7 +126,24 @@
 | updated_at | TIMESTAMP | به‌روزرسانی |
 | deleted_at | TIMESTAMP NULL | Soft delete |
 
-### ۲.۶ Inventory (با available_quantity محاسبه‌ای)
+### ۲.۶ ContentBlock (سیستم بلوک‌محور - D-079)
+
+| ستون | نوع | پیش‌فرض | توضیح |
+| --- | --- | --- | --- |
+| id | BIGINT UNSIGNED | AUTO_INCREMENT | شناسه یکتا |
+| type | ENUM('text','heading','image','gallery','video','link','quote','table','spacer','cta','trust_badges','related_products') | NULL | نوع بلوک |
+| content | JSON | NULL | محتوای بلوک (JSON schema بسته به type) |
+| position | INT | 0 | ترتیب نمایش در محصول |
+| is_active | BOOLEAN | true | فعال/غیرفعال |
+| created_at | TIMESTAMP | CURRENT_TIMESTAMP | تاریخ ایجاد |
+| updated_at | TIMESTAMP | CURRENT_TIMESTAMP ON UPDATE | تاریخ به‌روزرسانی |
+
+**نکات مهم:**
+- محتوای JSON بسته به نوع بلوک متفاوت است (مثلاً image دارای image_url, alt_text, caption است)
+- position برای ترتیب‌دهی بلوک‌ها در صفحه محصول استفاده می‌شود
+- ادمین می‌تواند با drag & drop ترتیب را تغییر دهد (position به‌روز می‌شود)
+
+### ۲.۷ Inventory (با available_quantity محاسبه‌ای)
 
 | فیلد | نوع | توضیح |
 | --- | --- | --- |
@@ -323,6 +349,38 @@ available_quantity DECIMAL(10,2) GENERATED ALWAYS AS (quantity - reserved_quanti
 **قیود:** UNIQUE(user_id, device_fingerprint)
 
 ### ۲.۱۷ AuditLog
+
+| ستون | نوع | پیش‌فرض | توضیح |
+| --- | --- | --- | --- |
+| id | BIGINT UNSIGNED | AUTO_INCREMENT | شناسه یکتا |
+| user_id | BIGINT UNSIGNED | NULL | کاربر انجام‌دهنده |
+| action | VARCHAR(50) | NULL | نوع عملیات (create, update, delete) |
+| entity_type | VARCHAR(50) | NULL | نوع موجودیت (product, order, user) |
+| entity_id | BIGINT UNSIGNED | NULL | شناسه موجودیت |
+| changes | JSON | NULL | تغییرات اعمال‌شده |
+| created_at | TIMESTAMP | CURRENT_TIMESTAMP | تاریخ ایجاد |
+
+### ۲.۱۸ ProductBlock (ارتباط Product با ContentBlock - D-079)
+
+| ستون | نوع | پیش‌فرض | توضیح |
+| --- | --- | --- | --- |
+| id | BIGINT UNSIGNED | AUTO_INCREMENT | شناسه یکتا |
+| product_id | BIGINT UNSIGNED | NOT NULL | شناسه محصول (FK → products.id) |
+| content_block_id | BIGINT UNSIGNED | NOT NULL | شناسه بلوک (FK → content_blocks.id) |
+| position | INT | 0 | ترتیب نمایش در محصول |
+| is_active | BOOLEAN | true | فعال/غیرفعال |
+| created_at | TIMESTAMP | CURRENT_TIMESTAMP | تاریخ ایجاد |
+
+**نکات مهم:**
+- این جدول Many-to-Many بین Product و ContentBlock است
+- position برای ترتیب‌دهی بلوک‌ها در صفحه محصول استفاده می‌شود
+- ادمین می‌تواند با drag & drop ترتیب را تغییر دهد
+- UNIQUE(product_id, content_block_id) برای جلوگیری از تکرار
+
+**ایندکس‌ها:**
+- idx_product_block_product (product_id)
+- idx_product_block_block (content_block_id)
+- UNIQUE idx_product_block_unique (product_id, content_block_id)
 
 | فیلد | نوع | توضیح |
 | --- | --- | --- |
