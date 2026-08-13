@@ -4,12 +4,18 @@
 | --- | --- |
 | عنوان | استراتژی API و طراحی API-First |
 | وضعیت | **Approved ✅** — مصوب شده توسط مشاور پروژه (۱۴۰۵/۰۵/۱۶) |
-| تاریخ | ۲۰۲۶-۰۸-۰۶ |
-| مرتبط | ADR-001, ADR-002, D-040 |
+| تاریخ | ۲۰۲۶-۰۸-۰۶ (آخرین بازنویسی: ۲۰۲۶-۰۸-۱۳ بر اساس D-079) |
+| مرتبط | ADR-001, ADR-002, D-040, **D-079** |
 
 > **✅ این سند مصوب است.** هر تغییر اساسی نیاز به ADR جدید دارد.
 > **تاریخ تصویب:** ۱۴۰۵/۰۵/۱۶
 > **تأییدکننده:** مشاور پروژه
+>
+> ⚠️ **یادداشت بازنویسی (D-079):** در تاریخ ۲۰۲۶-۰۸-۱۳، APIهای جدید بر اساس D-079 اضافه شدند:
+> - **ContentBlock API** (سیستم بلوک‌محور)
+> - **SEO API** (فیلدهای سئو برای Product)
+> - **ProductBlock API** (اتصال Product به ContentBlock)
+> **ارجاع:** [decisions/D-079-RETURN-TO-ORIGINAL-VISION.md](../D-079-RETURN-TO-ORIGINAL-VISION.md)
 
 ## ۱. هدف و مرز
 
@@ -230,6 +236,82 @@
 - GET /api/v1/supplier/monthly-report/ — گزارش ماهانه (تعداد، مبلغ، طلب)
 
 **نکته:** تأمین‌کننده فقط اطلاعات مرتبط با محصولات خودش را می‌بیند. قیمت فروش به مشتری و حاشیه سود ریهان نمایش داده نمی‌شود.
+
+
+## ۷.۲ ContentBlock API (سیستم بلوک‌محور - D-079)
+
+مدیریت بلوک‌های محتوایی قابل استفاده مجدد در صفحه محصول.
+
+### Endpoints
+
+| Method | Path | دسترسی | توضیح |
+| --- | --- | --- | --- |
+| GET | /api/content-blocks | Admin | لیست تمام بلوک‌های ادمین |
+| GET | /api/content-blocks/:id | Admin | دریافت جزئیات یک بلوک |
+| POST | /api/content-blocks | Admin | ایجاد بلوک جدید |
+| PUT | /api/content-blocks/:id | Admin | ویرایش بلوک |
+| DELETE | /api/content-blocks/:id | Admin | حذف بلوک (soft delete) |
+
+**مقادیر type:** text, heading, image, gallery, video, link, quote, table, spacer, cta, trust_badges, related_products
+
+---
+
+## ۷.۳ ProductBlock API (اتصال Product به ContentBlock - D-079)
+
+مدیریت ترتیب و ارتباط بلوک‌ها با محصول خاص.
+
+### Endpoints
+
+| Method | Path | دسترسی | توضیح |
+| --- | --- | --- | --- |
+| GET | /api/products/:productId/blocks | Public | دریافت بلوک‌های مرتب‌شده یک محصول |
+| POST | /api/products/:productId/blocks | Admin | افزودن بلوک به محصول |
+| PUT | /api/products/:productId/blocks/:blockId | Admin | ویرایش اتصال بلوک |
+| DELETE | /api/products/:productId/blocks/:blockId | Admin | حذف بلوک از محصول |
+| PUT | /api/products/:productId/blocks/reorder | Admin | ترتیب‌دهی مجدد (drag & drop) |
+| PUT | /api/products/:productId/blocks/:blockId/activate | Admin | فعال/غیرفعال کردن بلوک |
+
+---
+
+## ۷.۴ Product SEO API (فیلدهای سئو - D-079)
+
+مدیریت فیلدهای سئو برای هر محصول.
+
+### Endpoints
+
+| Method | Path | دسترسی | توضیح |
+| --- | --- | --- | --- |
+| GET | /api/products/:id/seo | Admin | دریافت اطلاعات سئو محصول |
+| PUT | /api/products/:id/seo | Admin | به‌روزرسانی فیلدهای سئو |
+| POST | /api/products/:id/seo/validate | Admin | اعتبارسنجی قبل از انتشار |
+| GET | /api/products/:id/seo/preview | Admin | پیش‌نمایش در Google SERP |
+
+### Validation Rules
+
+- seo_title: حداکثر ۶۰ کاراکتر، اجباری
+- seo_description: حداکثر ۱۶۰ کاراکتر، اجباری
+- seo_keywords: آرایه JSON، حداکثر ۱۰ کلمه، اختیاری
+
+---
+
+## ۷.۵ Sitemap و Robots API (سئو فنی - D-079)
+
+### Endpoints
+
+| Method | Path | دسترسی | توضیح |
+| --- | --- | --- | --- |
+| GET | /sitemap.xml | Public | Sitemap XML (خودکار تولید می‌شود) |
+| GET | /robots.txt | Public | فایل robots.txt |
+| POST | /api/sitemap/regenerate | Admin | بازسازی sitemap |
+| GET | /api/sitemap/status | Admin | وضعیت sitemap |
+
+### قوانین بازسازی sitemap
+
+- هر بار که محصول جدیدی publish می‌شود، sitemap به‌روز می‌شود
+- هر روز یکبار در cron job بازسازی کامل
+- فقط محصولات active و published در sitemap می‌آیند
+
+---
 
 ## ۸. مجوزها و نقش‌ها (ارجاع به RBAC)
 
