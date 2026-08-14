@@ -59,3 +59,5 @@ PluginRegistry.register("M10", "احراز هویت پیامکی و رمز پش�
 PluginRegistry.register("M11", "پرداخت کارت‌به‌کارت", "0.5.6", is_system=True)
 PluginRegistry.register("M13", "طراحی تجربه کاربری بومی RTL", "0.5.6", is_system=True)
 PluginRegistry.register("M14", "معماری افزونه‌محور و Feature Flags", "0.5.6", is_system=True)
+
+PluginRegistry.register("M5", "سیستم کنترل دسترسی نقش‌محور RBAC", "0.5.8", is_system=True)
