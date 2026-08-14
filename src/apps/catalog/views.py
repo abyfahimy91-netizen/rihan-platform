@@ -132,3 +132,37 @@ def submit_review_view(request, slug):
     
     messages.success(request, msg)
     return redirect('product_detail', slug=slug)
+
+from .models import LeadCapture
+
+@require_POST
+def submit_lead_view(request):
+    """ثبت درخواست کالای ناموجود یا سرنخ اختصاصی (M9 - Flow C3)"""
+    phone = request.POST.get('phone', '').strip()
+    full_name = request.POST.get('full_name', '').strip()
+    product_id = request.POST.get('product_id')
+    requested_name = request.POST.get('requested_product_name', '').strip()
+    notes = request.POST.get('notes', '').strip()
+
+    if phone and len(phone) >= 10:
+        product = None
+        if product_id:
+            product = Product.objects.filter(id=product_id).first()
+
+        LeadCapture.objects.create(
+            phone=phone,
+            full_name=full_name,
+            product=product,
+            requested_product_name=requested_name,
+            notes=notes,
+            status='new'
+        )
+        msg = "درخواست شما با احترام ثبت شد. به محض تأمین و موجود شدن، از طریق پیامک به شما اطلاع‌رسانی خواهد شد."
+    else:
+        msg = "لطفاً شماره تلفن همراه معتبر را وارد فرمایید."
+
+    if request.headers.get('HX-Request'):
+        return render(request, 'catalog/partials/lead_feedback.html', {'message': msg})
+    
+    messages.success(request, msg)
+    return redirect('product_list')

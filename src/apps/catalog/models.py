@@ -204,3 +204,31 @@ class ProductReview(models.Model):
 
     def __str__(self):
         return f"نظر {self.author_name} برای {self.product.title} ({self.rating} ستاره)"
+
+
+class LeadCapture(models.Model):
+    """مدل ثبت سرنخ و درخواست کالای ناموجود یا اختصاصی (M9 - Flow C3 & MVP-SCOPE)"""
+    STATUS_CHOICES = [
+        ('new', 'درخواست جدید'),
+        ('in_progress', 'در حال پیگیری و گزینش تأمین‌کننده'),
+        ('supplied', 'تأمین‌شده و اطلاع‌رسانی‌شده'),
+        ('rejected', 'عدم امکان تأمین / بسته شده'),
+    ]
+
+    full_name = models.CharField(max_length=150, blank=True, verbose_name="نام و نام خانوادگی")
+    phone = models.CharField(max_length=20, verbose_name="شماره موبایل")
+    product = models.ForeignKey('Product', on_delete=models.SET_NULL, null=True, blank=True, related_name='leads', verbose_name="محصول ناموجود کاتالوگ")
+    requested_product_name = models.CharField(max_length=200, blank=True, verbose_name="عنوان کالای درخواستی")
+    notes = models.TextField(blank=True, verbose_name="توضیحات و ویژگی‌های خاص")
+    status = models.CharField(max_length=30, choices=STATUS_CHOICES, default='new', verbose_name="وضعیت پیگیری")
+    admin_notes = models.TextField(blank=True, verbose_name="یادداشت و اقدامات ادمین")
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="زمان ثبت")
+
+    class Meta:
+        verbose_name = "سرنخ / درخواست محصول (M9)"
+        verbose_name_plural = "سرنخ‌ها و درخواست‌های محصولات"
+        ordering = ['-created_at']
+
+    def __str__(self):
+        prod = self.product.title if self.product else (self.requested_product_name or "کالای درخواستی")
+        return f"درخواست {prod} از {self.phone} ({self.get_status_display()})"

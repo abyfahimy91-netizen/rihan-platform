@@ -65,3 +65,5 @@ PluginRegistry.register("M5", "سیستم کنترل دسترسی نقش‌مح�
 PluginRegistry.register("M6", "حساب و کتاب مالی و سود ناخالص D-046", "0.5.9", is_system=True)
 
 PluginRegistry.register("M8", "نظرات و بازخورد خریداران معتمد D-044", "0.5.10", is_system=True)
+
+PluginRegistry.register("M9", "فرم ثبت سرنخ و اطلاع‌رسانی کالای ناموجود C3", "0.5.11", is_system=True)
