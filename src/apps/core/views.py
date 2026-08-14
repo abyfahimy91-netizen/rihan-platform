@@ -17,3 +17,8 @@ def home_view(request):
         "description": "فروشگاه آنلاین اعتمادمحور مبتنی بر سیستم‌عامل AI-VOS",
         "health_endpoint": "/api/health/"
     }, json_dumps_params={'ensure_ascii': False})
+
+
+def about_view(request):
+    """صفحه اصالت، فلسفه گزینش و داستان برند ریهان (M12 - CENTRAL-STORY.md)"""
+    return render(request, 'core/about.html')
