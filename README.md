@@ -26,7 +26,7 @@
 
 ## ساختار
 docs/ — مستندات | decisions/ — تصمیمات | plans/ — برنامه‌ها
-src/ — کد (فاز ۵) | tests/ — تست (فاز ۵) | deploy/ — راه‌اندازی (فاز ۶)
+src/ — کد | tests/ — تست | deploy/ — راه‌اندازی
 
 ## سیستم‌عامل: AI-VOS v1.1.1
 https://github.com/abyfahimy91-netizen/ai-vos-development
