@@ -1,104 +1,165 @@
 # CONTINUITY — وضعیت فعلی و اقدام بعدی
 
-**آخرین به‌روزرسانی:** 2026-08-06
-**نسخه پروژه:** 0.3.0
+**آخرین به‌روزرسانی:** 2026-08-14
+**نسخه پروژه:** 0.4.0
 
 ---
 
-## وضعیت فعلی
+## 🎯 وضعیت فعلی
 
-فاز ۳ (Product Definition & Design) — **COMPLETED** ✅
-
-### اسناد فاز ۳
+### فاز ۳ (Product Definition & Design) — COMPLETED ✅
 
 | سند | وضعیت |
-| --- | --- |
+|-----|-------|
 | docs/PRODUCT-DEFINITION.md | ✅ تأییدشده (D-066) |
 | docs/USER-PERSONAS.md | ✅ تأییدشده (D-066) |
-| docs/MVP-SCOPE.md | ✅ تأییدشده (D-066) |
+| docs/MVP-SCOPE.md | ✅ تأییدشده (D-066) — بازنویسی کامل v2.0 طبق D-079 |
 | docs/INFORMATION-ARCHITECTURE.md | ✅ تأییدشده (D-066) |
 | docs/USER-FLOWS.md | ✅ تأییدشده (D-066) |
-| docs/USER-STORIES.md | ✅ تأییدشده (D-066) |
+| docs/USER-STORIES.md | ✅ تأییدشده (D-066) — ۸ داستان جدید طبق D-079 |
+| docs/CONTENT-STRATEGY.md | ✅ تکمیل |
+| docs/SELECTION-PHILOSOPHY.md | ✅ تکمیل |
+| docs/CENTRAL-STORY.md | ✅ بازنویسی برندمحور طبق D-079 |
+| docs/ARCHITECTURE-PRINCIPLES.md | ✅ تکمیل |
+| docs/TECHNICAL-REQUIREMENTS.md | ✅ تکمیل |
+
+### فاز ۴ (Software Planning) — COMPLETED ✅
+
+#### ADRها (۱۵ تصمیم معماری):
+
+| ADR | موضوع | وضعیت |
+|-----|-------|-------|
+| ADR-001 | Backend Framework (Django) | ✅ Approved |
+| ADR-002 | Database / مدل داده | ✅ Approved |
+| ADR-003 | API Strategy + API-First | ✅ Approved + متمم Offline-Caching |
+| ADR-004 | Feature Flags / Plugin Architecture | ✅ Approved |
+| ADR-005 | Payment Abstraction | ✅ Approved |
+| ADR-006 | Authentication / Passwordless (OTP) | ✅ Approved |
+| ADR-007 | Frontend Stack (HTML+HTMX+Alpine+Tailwind) | ✅ Approved v2 |
+| ADR-008 | Deployment / Docker / Backup / CI-CD | ✅ Approved |
+| ADR-009 | Logging & Monitoring Strategy | ✅ Approved (جدید) |
+| ADR-010 | Testing Strategy | ✅ Approved (جدید) |
+| ADR-011 | CI/CD Pipeline Strategy | ✅ Approved (جدید) |
+| ADR-012 | Security & Compliance Strategy | ✅ Approved (جدید) |
+| ADR-013 | Performance & Scalability Strategy | ✅ Approved (جدید) |
+| ADR-014 | Backup & Disaster Recovery Strategy | ✅ Approved (جدید) |
+
+#### تکالیف پیش از فاز ۵:
+- ✅ Cold Start Data
+- ✅ ماتریس یکپارچگی نهایی فاز ۴ (PHASE4-INTEGRATION-MATRIX.md)
+- ✅ ۴ پچ تکمیلی ناظر (PHASE4-FINAL-PATCHES.md)
+- ✅ .env.template و entrypoint.sh
 
 ---
 
-## 📊 وضعیت رفع نقص‌های ممیزی فاز ۳ (Audit Defects)
+## 🔄 D-079: بازگشت به ایده اصلی — COMPLETED ✅
 
-| # | نقص ممیزی | وضعیت | سند/تصمیم مرتبط |
-| --- | --- | --- | --- |
-| 1 | ۳.۱: جریان موجودی | ✅ حل‌شده | D-045, US-044, docs/INVENTORY-FLOW.md |
-| 2 | ۳.۲: چندتأمین‌کننده | ✅ حل‌شده | US-041, US-042, US-043 |
-| 3 | ۳.۳: قیمت نهایی و ارسال | ✅ حل‌شده | D-046, US-045, docs/SHIPPING-POLICY.md |
-| 4 | ۳.۴: سناریوهای خطا و بازیابی | ✅ حل‌شده | D-047, US-046, docs/ERROR-HANDLING.md |
-| 5 | ۳.۷: چک‌لیست اعتماد صفحه محصول | ✅ حل‌شده | D-048, US-047, docs/TRUST-CHECKLIST.md |
-| 6 | ۳.۸: حداقل محتوای اجباری محصول | ✅ حل‌شده | D-049, docs/PRODUCT-CONTENT-REQUIREMENTS.md |
-| 7 | ۳.۹: معیارهای موفقیت کمی ماه ۱-۳ | ✅ حل‌شده | D-050, docs/EARLY-SUCCESS-METRICS.md |
-| 8 | ۳.۵: یکپارچه‌سازی شماره‌گذاری ماژول‌ها | ✅ حل‌شده (کامل) | D-051 + D-052, MODULE-REGISTRY + USER-STORIES |
-| 9 | ۳.۶: عمق سفر پرسوناها | ✅ حل‌شده | D-053, docs/USER-PERSONAS.md |
-| 10 | ۳.۱۰: فهرست متمرکز فرضیات باز | ✅ حل‌شده | D-054, docs/ASSUMPTIONS.md |
+**تاریخ:** ۲۰۲۶-۰۸-۱۴ (۱۴۰۵/۰۵/۲۳)  
+**گزارش کامل:** `D079-FINAL-REPORT.md`
 
----
+### تصمیمات کلیدی D-079:
 
-## اقدام بعدی
+1. ✅ **ابطال D-074** (Micro-MVP با ۶ ماژول)
+2. ✅ **بازگشت به ۱۴ ماژول کامل**
+3. ✅ **برند مستقل**: حذف نام بنیان‌گذار از سایت عمومی
+4. ✅ **سئو از روز اول** (نه در فاز بعدی)
+5. ✅ **صفحه محصول بلوک‌محور** (ContentBlock + ProductBlock)
+6. ✅ **قیف فروش** (از روز اول)
+7. ✅ **حذف زمان‌بندی‌های قطعی** (حفظ نام فازها)
 
-### فوری (فاز ۴ — Software Planning)
+### ۱۴ ماژول کامل (طبق D-079):
 
-1. ✅ فاز ۳ با موفقیت بسته شد (D-066)
-2. ✅ اولویت ۱: یکدست‌سازی منبع حقیقت (تکمیل‌شده)
-3. ✅ اولویت ۲: ADR-001 (Backend Framework) — **Approved ✅** (مصوب ۱۴۰۵/۰۵/۱۶)
-4. ✅ اولویت ۳: ADR-002 (Database / مدل داده) — **Approved ✅** (مصوب ۱۴۰۵/۰۵/۱۶)
-5. ✅ اولویت ۴: ADR-003 (API Strategy + API-First) — **Approved ✅** (مصوب ۱۴۰۵/۰۵/۱۶)
-6. ✅ اولویت ۵: ADR-004 (Feature Flags / Plugin Architecture) — **Approved ✅** (مصوب ۱۴۰۵/۰۵/۱۶)
-7. ✅ اولویت ۶: ADR-005 (Payment Abstraction) — **Approved ✅** (مصوب ۱۴۰۵/۰۵/۱۶)
-8. ✅ اولویت ۷: ADR-006 (Authentication / Passwordless) — **Approved ✅** (مصوب ۱۴۰۵/۰۵/۱۷)
-9. ✅ اولویت ۸: متمم ADR-003 (Offline-First / Caching / PWA) — **Approved ✅** (مصوب ۱۴۰۵/۰۵/۱۷)
-10. ✅ اولویت ۹: ADR-007 (Frontend Stack) — **Approved ✅ v2** (HTML+HTMX+Alpine+Tailwind با ۴ متمم فنی)
-11. ✅ اولویت ۱۰: ADR-008 (Deployment / Docker / CI-CD) — **Approved ✅** (مصوب ۱۴۰۵/۰۵/۱۷)
-12. ✅ اولویت ۱۱: تکالیف پیش از فاز ۵ (Cold Start + ماتریس یکپارچگی) — **تکمیل شد** (commit 9e46003)
-13. ✅ اولویت ۱۲: **۴ پچ تکمیلی ناظر** (Media/Cart/Log/TrustBadges) — **تکمیل شد** (PHASE4-FINAL-PATCHES.md)
-14. 🔒 اولویت ۱۳: **ورود به فاز ۵ (کدنویسی MVP)** — منوط به تأیید نهایی ناظر
-13. 🔒 اولویت ۱۲: **ورود به فاز ۵ (کدنویسی MVP)** — منوط به تأیید ناظر
+**ماژول‌های اصلی:**
+1. M1: کاتالوگ محصولات
+2. M2: سبد خرید و سفارش
+3. M3: پنل خانواده (ادمین)
+4. M4: پیگیری سفارش
+5. M5: احراز هویت (OTP)
+6. M6: پرداخت (کارت‌به‌کارت)
 
-### فاز ۴ (Software Planning) — IN PROGRESS
-
-> ⚠️ **قفل فاز ۵:**
-> - فاز ۴ از نظر ADRها تکمیل است (۸ ADR + ۱ متمم، همه Approved)
-> - فاز ۵ (کدنویسی) منوط به تکمیل تکالیف پیش‌نیاز (Cold Start + ماتریس یکپارچگی) و تأیید نهایی ناظر است
-> - هیچ پاکسازی سرور، هیچ نصب استک، هیچ کدنویسی محصول
-> - خروجی‌های بعدی فقط فایل‌محور و قابل راستی‌آزمایی هستند
+**ویژگی‌های اضافی (از روز اول):**
+7. سئو فنی (Schema.org, Sitemap, Meta tags)
+8. قیف فروش
+9. صفحه محصول بلوک‌محور
+10. سیستم پلاگین‌محور
+11. UX ایرانی (RTL, شمسی, تومان)
+12. برند مستقل
+13. ContentBlock API
+14. ProductBlock API
 
 ---
 
-## تاریخچه
+## 📊 وضعیت سندهای پاکسازی‌شده (D-079)
 
-| تاریخ | رویداد |
-| --- | --- |
-| 2026-08-07 | ✅ ۴ پچ تکمیلی ناظر اعمال شد — Media WebP + Cart Validation API + Log Rotation + Trust Badges Fixtures (یکپارچگی ۱۰۰٪) |
-| 2026-08-07 | ✅ ADR-008 (Deployment/Docker/CI-CD) تصویب شد — ۳ کانتینر، One-Command، Backup روزانه. ۴ مغایرت ممیزی بسته شد |
-| 2026-08-07 | ✅ ADR-007 (Frontend Stack) تصویب شد — HTML+HTMX+Alpine+Tailwind با ۴ متمم فنی ناظر |
-| 2026-08-07 | ✅ متمم ADR-003 (Offline-First/Caching/PWA) تصویب شد — Payload Compression+Caching+Offline-Aware |
-| 2026-08-07 | ✅ ADR-006 (احراز هویت Passwordless) تصویب شد — OTP+Kavenegar+Hybrid Auth+RTR+PII/مالیاتی |
-| 2026-08-07 | ⏳ ADR-006 v2 — اعمال ۴ الزام اجباری ناظر (PII/مالیاتی, Hybrid Auth, RTR, Middleware) |
-| 2026-08-06 | ✅ ADR-005 (Payment Abstraction) تصویب شد — Strategy Pattern، CardToCard، موجودی سه‌مرحله‌ای |
-| 2026-08-06 | ✅ ADR-004 (Feature Flags) تصویب شد — ۱۴ App، ۸ ماژول سیستمی، D-069 |
-| 2026-08-06 | ✅ ADR-003 (API Strategy) تصویب شد — ۱۲ بخش، ۳ کانال احراز هویت، Idempotency |
-| 2026-08-06 | ✅ ADR-002 (مدل داده) تصویب شد — ۱۷ موجودیت، Guest Checkout، RBAC واقعی |
-| 2026-08-06 | ✅ ADR-001 (Backend Framework) تصویب شد — Django 5.2 LTS، API-First، مقایسه Go vs Django |
-| 2026-08-06 | ⏳ ADR-001 به وضعیت Proposed تغییر کرد + الزامات نهایی مشاور اضافه شد |
-| 2026-08-06 | 🔒 قفل ترتیبی ADRها توسط مشاور: شروع ADR-002 فقط پس از Approved شدن ADR-001 |
-| 2026-08-06 | ✅ D-068 ثبت شد — مدل تأمین‌کننده MVP (یک تأمین‌کننده per محصول) |
-| 2026-08-05 | ✅ نقص ۳.۸ حل شد: سیاست حداقل محتوای اجباری (D-049) |
-| 2026-08-05 | 🔄 تغییر نام ARCHITECTURE-PHILOSOPHY به ARCHITECTURE-PRINCIPLES (D-060) + ایجاد TRACEABILITY-MATRIX (D-061) |
-| 2026-08-05 | 🔄 یکدست‌سازی CONTINUITY و PROJECT-INDEX — رفع تناقضات پس از D-066 |
-| 2026-08-05 | ✅ فاز ۳ تکمیل شد: تأیید نهایی ۶ سند اصلی + D-066 + Phase Gate پاس شد + PHASE3-HANDOFF.md ساخته شد |
+| سند | تغییرات اعمال‌شده |
+|-----|-------------------|
+| README.md | ✅ حذف بخش "بنیان‌گذار" |
+| AI-ENTRY.md | ✅ حذف بخش ۸ (اطلاعات بنیان‌گذار) |
+| PROJECT-INDEX.md | ✅ حذف زمان‌بندی‌های فاز ۵/۶/۷ + افزودن ADR-009 تا ADR-014 |
+| CENTRAL-STORY.md | ✅ بازنویسی داستان برندمحور |
+| SELECTION-PHILOSOPHY.md | ✅ "بنیان‌گذار" → "تیم ریهان" |
+| ARCHITECTURE-PRINCIPLES.md | ✅ "با بنیان‌گذار" → "با ناظر پروژه" |
+| USER-PERSONAS.md | ✅ "تأیید بنیان‌گذار" → "تأیید ناظر پروژه" (پرسونای ادمین حفظ شد) |
+| CONTENT-STRATEGY.md | ✅ حذف زمان‌بندی فاز ۵/۷ |
+| MVP-SCOPE.md | ✅ بازنویسی کامل v2.0 |
 
-## Phase Gate — چک‌لیست گذار بین فازها
+---
 
-- [x] تأیید صریح بنیان‌گذار روی ۶ سند فاز ۳ ✅
-- [x] Q-007 (سیاست مرجوعی) ✅
-- [x] Q-005 (هویت بصری) ✅ (لوگو باز برای فاز ۵)
-- [x] استراتژی محتوا ✅
-- [x] CONTINUITY.md به‌روز شده (فاز ۳ = COMPLETED) ✅
-- [x] DECISIONS.md: D-066 وضعیت → تأیید نهایی ✅
-- [x] ROADMAP.md: فاز ۳ → تکمیل ✅
-- [x] PROJECT-INDEX.md: اسناد فاز ۳ → تکمیل ✅
+## 🚀 اقدام بعدی
+
+### فاز ۵ (MVP Development) — آماده شروع 🔓
+
+**پیش‌نیازها:**
+- ✅ فاز ۴ تکمیل شد (۱۵ ADR)
+- ✅ تکالیف پیش از فاز ۵ انجام شد
+- ✅ D-079 تکمیل شد (۱۴ ماژول)
+- 🔓 **در انتظار تأیید نهایی ناظر برای شروع کدنویسی**
+
+### مراحل شروع فاز ۵:
+
+1. **راه‌اندازی محیط توسعه:**
+   - Django project setup
+   - PostgreSQL + Redis
+   - Docker Compose
+   - Tailwind + HTMX + Alpine.js
+
+2. **پیاده‌سازی ماژول‌ها (به ترتیب اولویت):**
+   - M1: کاتالوگ محصولات + سئو
+   - M2: سبد خرید و سفارش
+   - M3: پنل خانواده (ادمین)
+   - M4: پیگیری سفارش
+   - M5: احراز هویت (OTP)
+   - M6: پرداخت (کارت‌به‌کارت)
+
+3. **یکپارچه‌سازی ویژگی‌های D-079:**
+   - سئو فنی در همه ماژول‌ها
+   - بلوک‌محور (ContentBlock/ProductBlock)
+   - قیف فروش
+   - پلاگین‌محور
+
+---
+
+## ⚠️ نکات مهم برای AI بعدی
+
+### ۱. گزارش D-079 را بخوانید
+قبل از هر کاری، `D079-FINAL-REPORT.md` را بخوانید تا با تصمیمات اخیر آشنا شوید.
+
+### ۲. نام فازها حفظ شده‌اند
+D-079 فقط **زمان‌بندی‌های تقویمی** را حذف کرد، نه **نام فازها**.
+- ✅ "فاز ۵: توسعه" → **حفظ شود** (نام مرحله)
+- ❌ "فاز ۵ در تیر ۱۴۰۵ تمام می‌شود" → **حذف شود** (زمان‌بندی)
+
+### ۳. قوانین برند مستقل
+نام بنیان‌گذار در **قوانین برند** و **پرسونای ادمین** مجاز است، اما در **سایت عمومی** ممنوع.
+
+### ۴. مسیر ADRها
+همیشه در `decisions/adr/` ایجاد کنید، نه `docs/decisions/`.
+
+### ۵. ۱۴ ماژول کامل
+طبق D-079، MVP باید **۱۴ ماژول کامل** داشته باشد، نه ۶ ماژول Micro-MVP.
+
+---
+
+## 📞 تماس
+
+**ناظر پروژه:** برای تأیید نهایی و شروع فاز ۵
