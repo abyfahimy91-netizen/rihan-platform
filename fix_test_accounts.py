@@ -1,4 +1,7 @@
-from django.test import TestCase, Client
+from pathlib import Path
+BASE = Path("/root/rihan-platform")
+
+test_content = """from django.test import TestCase, Client
 from django.contrib.auth import get_user_model
 from django.urls import reverse
 from apps.accounts.services import SMSAuthService
@@ -43,3 +46,6 @@ class HybridAccountsTestCase(TestCase):
             'password': 'MyStrongBackupPass1405'
         })
         self.assertEqual(res_pass_login.status_code, 302) # Logged in successfully!
+"""
+(BASE / "tests/test_accounts.py").write_text(test_content, encoding="utf-8")
+print("✓ Fixed test_accounts.py")

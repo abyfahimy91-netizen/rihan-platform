@@ -1,171 +1,73 @@
-# PROJECT-INDEX — نقشه کامل مخزن ریهان
+# PROJECT-INDEX — نقشه جامع و مانیفست مخزن ریهان
 
-> این فایل با هر تغییر پروژه به‌روزرسانی میشود.
-> AI-ENTRY ثابت میماند. این فایل پویا است.
-> آخرین به‌روزرسانی: ۱۴۰۵/۰۵/۱۶
-
----
-
-## مخزن پروژه
-
-آدرس: https://github.com/abyfahimy91-netizen/rihan-platform
-شاخه: main
+**نسخه پروژه:** 0.5.6-dev
+**آخرین بهروزرسانی:** 2026-08-14
+**وضعیت:** منبع یگانه حقیقت (Single Source of Truth)
 
 ---
 
-## نقشه فایل‌ها
+## ۱. فایل‌های ریشه و اسناد حاکمیتی
 
-### ریشه (Root)
-
-| فایل | نقش | اولویت | لینک |
-|------|------|--------|------|
-| AI-ENTRY.md | نقطه ورود رسمی AI | ۱ | [GitHub](https://github.com/abyfahimy91-netizen/rihan-platform/blob/main/AI-ENTRY.md) |
-| PROJECT-INDEX.md | نقشه کامل مخزن (این فایل) | ۵ | [GitHub](https://github.com/abyfahimy91-netizen/rihan-platform/blob/main/PROJECT-INDEX.md) |
-| CONTINUITY.md | وضعیت فعلی و اقدام بعدی | ۴ | [GitHub](https://github.com/abyfahimy91-netizen/rihan-platform/blob/main/CONTINUITY.md) |
-| README.md | شناسنامه پروژه | ۶ | [GitHub](https://github.com/abyfahimy91-netizen/rihan-platform/blob/main/README.md) |
-
-### docs/ — مستندات کسب‌وکار و فنی
-
-| فایل | نقش | فاز | وضعیت | لینک |
-|------|------|-----|--------|------|
-| CENTRAL-STORY.md | داستان محوری — قانون اساسی | همه | فعال | [GitHub](https://github.com/abyfahimy91-netizen/rihan-platform/blob/main/docs/CENTRAL-STORY.md) |
-| FUNDAMENTAL-PRINCIPLES.md | اصول ۱۰گانه اساسی | همه | فعال | [GitHub](https://github.com/abyfahimy91-netizen/rihan-platform/blob/main/docs/FUNDAMENTAL-PRINCIPLES.md) |
-| BUSINESS-OPPORTUNITY.md | سند فرصت کسب‌وکار | ۰ | تکمیل | [GitHub](https://github.com/abyfahimy91-netizen/rihan-platform/blob/main/docs/BUSINESS-OPPORTUNITY.md) |
-| MARKET-VALIDATION.md | اعتبارسنجی بازار | ۱ | تکمیل | [GitHub](https://github.com/abyfahimy91-netizen/rihan-platform/blob/main/docs/MARKET-VALIDATION.md) |
-| RESEARCH-AND-INSIGHTS.md | تحقیقات و بینش‌ها | ۰-۱ | تکمیل | [GitHub](https://github.com/abyfahimy91-netizen/rihan-platform/blob/main/docs/RESEARCH-AND-INSIGHTS.md) |
-| TECHNICAL-REQUIREMENTS.md | الزامات فنی | ۰-۱ | تکمیل | [GitHub](https://github.com/abyfahimy91-netizen/rihan-platform/blob/main/docs/TECHNICAL-REQUIREMENTS.md) |
-| ASSUMPTIONS.md | فرضیات | همه | فعال | [GitHub](https://github.com/abyfahimy91-netizen/rihan-platform/blob/main/docs/ASSUMPTIONS.md) |
-| OPEN-QUESTIONS.md | سؤالات باز | همه | فعال | [GitHub](https://github.com/abyfahimy91-netizen/rihan-platform/blob/main/docs/OPEN-QUESTIONS.md) |
-| BUSINESS-MODEL-CANVAS.md | بوم مدل کسب‌وکار | ۲ | تکمیل | [GitHub](https://github.com/abyfahimy91-netizen/rihan-platform/blob/main/docs/BUSINESS-MODEL-CANVAS.md) |
-| REVENUE-MODEL.md | مدل درآمدی | ۲ | تکمیل | [GitHub](https://github.com/abyfahimy91-netizen/rihan-platform/blob/main/docs/REVENUE-MODEL.md) |
-| PRICING-STRATEGY.md | استراتژی قیمت‌گذاری | ۲ | تکمیل | [GitHub](https://github.com/abyfahimy91-netizen/rihan-platform/blob/main/docs/PRICING-STRATEGY.md) |
-| FINANCIAL-PROJECTIONS.md | پیش‌بینی مالی | ۲ | تکمیل | [GitHub](https://github.com/abyfahimy91-netizen/rihan-platform/blob/main/docs/FINANCIAL-PROJECTIONS.md) |
-| PRODUCT-DEFINITION.md | تعریف محصول | ۳ | ✅ تأییدشده (D-066) | [GitHub](https://github.com/abyfahimy91-netizen/rihan-platform/blob/main/docs/PRODUCT-DEFINITION.md) |
-| USER-PERSONAS.md | پرسوناهای کاربر | ۳ | ✅ تأییدشده (D-066) | [GitHub](https://github.com/abyfahimy91-netizen/rihan-platform/blob/main/docs/USER-PERSONAS.md) |
-| MVP-SCOPE.md | محدوده MVP با MoSCoW | ۳ | ✅ تأییدشده (D-066) | [GitHub](https://github.com/abyfahimy91-netizen/rihan-platform/blob/main/docs/MVP-SCOPE.md) |
-| INFORMATION-ARCHITECTURE.md | معماری اطلاعات | ۳ | ✅ تأییدشده (D-066) | [GitHub](https://github.com/abyfahimy91-netizen/rihan-platform/blob/main/docs/INFORMATION-ARCHITECTURE.md) |
-| USER-FLOWS.md | مسیرهای کاربر | ۳ | ✅ تأییدشده (D-066) | [GitHub](https://github.com/abyfahimy91-netizen/rihan-platform/blob/main/docs/USER-FLOWS.md) |
-| USER-STORIES.md | داستان‌های کاربر | ۳ | ✅ تأییدشده (D-066) | [GitHub](https://github.com/abyfahimy91-netizen/rihan-platform/blob/main/docs/USER-STORIES.md) |
-| RETURN-POLICY.md | سیاست مرجوعی و بازگشت کالا | ۳ | تأییدشده ✅ |
-| CONTENT-STRATEGY.md | استراتژی محتوا (روایت‌محور) | ۳ | تأییدشده ✅ | [GitHub](https://github.com/abyfahimy91-netizen/rihan-platform/blob/main/docs/RETURN-POLICY.md) |
-| PRODUCT-PRINCIPLES.md | اصول تغییرناپذیر محصول (۷ اصل) | ۳ | تأییدشده ✅ | D-055 |
-| VISION-GUARD.md | نگهبان هویت ریهان (۸ اصل) | ۳ | تأییدشده ✅ | D-056 |
-| SELECTION-PHILOSOPHY.md | فلسفه انتخاب محصول (۵ ستون) | ۳ | تأییدشده ✅ | D-057 |
-| PRODUCT-THESIS.md | رساله محصول (۶ سؤال بنیادین) | ۳ | تأییدشده ✅ | D-058 |
-| ARCHITECTURE-PRINCIPLES.md | 🔴 فلسفه معماری (۶ الگو) | ۳ | تأییدشده ✅ | D-059 |
-| TRACEABILITY-MATRIX.md | ماتریس ردیابی (Vision تا AC) | ۳ | تأییدشده ✅ | D-061 |
-| UX-DETAILS.md | جزئیات تجربه کاربری (۱۳ بخش) | ۳ | تأییدشده ✅ | D-062 |
-| PHASE3-HANDOFF.md | سند تحویل فاز ۳ به ۴ | ۳ | تأییدشده ✅ | D-066 |
-| CART-RECOVERY.md | استراتژی بازیابی سبد | ۳ | تأییدشده ✅ | D-063 |
-| RTL-GUIDE.md | راهنمای طراحی RTL | ۳ | تأییدشده ✅ | D-064 |
-| PHASE4-INTEGRATION-MATRIX.md | ماتریس یکپارچگی فاز ۴ | ۴ | ✅ Active | [GitHub](https://github.com/abyfahimy91-netizen/rihan-platform/blob/main/docs/PHASE4-INTEGRATION-MATRIX.md) |
-| PHASE4-FINAL-PATCHES.md | ۴ پچ تکمیلی نهایی فاز ۴ (WebP/Cart/Log/TrustBadges) | ۴ | ✅ Active | [GitHub](https://github.com/abyfahimy91-netizen/rihan-platform/blob/main/docs/PHASE4-FINAL-PATCHES.md) |
-| REQUIREMENTS.md | نیازمندی‌ها | ۴ | — | — |
-| SECURITY-ANALYSIS.md | تحلیل امنیت | ۴ | — | — |
-| TECH-DOCUMENTATION.md | مستندات فنی | ۵ | — | — |
-
-### docs/brand/ — هویت بصری برند
-
-| فایل | نقش | فاز | وضعیت | لینک |
-|------|------|-----|--------|------|
-| VISUAL-IDENTITY-BRIEF.md | بریف هویت بصری برند | ۱ | تکمیل | [GitHub](https://github.com/abyfahimy91-netizen/rihan-platform/blob/main/docs/brand/VISUAL-IDENTITY-BRIEF.md) |
-| BRAND-IDENTITY.md | هویت برند | ۱ | تکمیل | [GitHub](https://github.com/abyfahimy91-netizen/rihan-platform/blob/main/docs/brand/BRAND-IDENTITY.md) |
-| BRAND-STRATEGY.md | استراتژی برند | ۱ | تکمیل | [GitHub](https://github.com/abyfahimy91-netizen/rihan-platform/blob/main/docs/brand/BRAND-STRATEGY.md) |
-| BRAND-STORY.md | داستان برند | ۱ | تکمیل | [GitHub](https://github.com/abyfahimy91-netizen/rihan-platform/blob/main/docs/brand/BRAND-STORY.md) |
-| BRAND-DECISIONS.md | تصمیمات برند | ۱ | تکمیل | [GitHub](https://github.com/abyfahimy91-netizen/rihan-platform/blob/main/docs/brand/BRAND-DECISIONS.md) |
-| VISUAL-IDENTITY.md | هویت بصری (پالت + فونت + قوانین) | ۳ | تأییدشده ✅ | [GitHub](https://github.com/abyfahimy91-netizen/rihan-platform/blob/main/docs/brand/VISUAL-IDENTITY.md) |
-
-### decisions/ — تصمیمات
-
-| فایل | نقش | وضعیت | لینک |
-|------|------|--------|------|
-| DECISIONS.md | ثبت تمام تصمیمات | فعال | [GitHub](https://github.com/abyfahimy91-netizen/rihan-platform/blob/main/decisions/DECISIONS.md) |
-| D-029-RIHAN-BRAND-APPROVAL.md | تأیید برند ریهان | تکمیل | [GitHub](https://github.com/abyfahimy91-netizen/rihan-platform/blob/main/decisions/D-029-RIHAN-BRAND-APPROVAL.md) |
-| D-038-RIHAN-PHASE1-BRAND-FOUNDATION.md | تکمیل فاز ۱ بنیان برند | تکمیل | [GitHub](https://github.com/abyfahimy91-netizen/rihan-platform/blob/main/decisions/D-038-RIHAN-PHASE1-BRAND-FOUNDATION.md) |
-| D-031-RIHAN-PHASE3-PRODUCT-DEFINITION.md | تکمیل فاز ۳ تعریف محصول | ✅ تأییدشده (D-066) | [GitHub](https://github.com/abyfahimy91-netizen/rihan-platform/blob/main/decisions/D-031-RIHAN-PHASE3-PRODUCT-DEFINITION.md) |
-| D-039 (در DECISIONS.md) | مدل احراز هویت (لغو شده) | Superseded by D-040 | — |
-| D-040 (در DECISIONS.md) | احراز هویت Passwordless | تأییدشده | — |
-| D-041 (در DECISIONS.md) | اصل یکسان بودن سیاست مرجوعی | تأییدشده ✅ | — |
-| D-043 (در DECISIONS.md) | اصل ۱۱ کرامت مشتری | تأییدشده ✅ | — |
-| D-044 (در DECISIONS.md) | استراتژی محتوا | تأییدشده ✅ | — |
-| D-042 (در DECISIONS.md) | هویت بصری MVP | تأییدشده ✅ | — |
-| ARCHITECTURE-DECISIONS.md | تصمیمات معماری | فاز ۴ | — |
-| TECHNOLOGY-SELECTION.md | انتخاب فناوری | فاز ۴ | — |
-
-### decisions/adr/ — Architecture Decision Records (فاز ۴)
-
-| فایل | موضوع | وضعیت | لینک |
-| --- | --- | --- | --- |
-| ADR-001-backend-framework.md | Backend Framework (Django 5.2 LTS) | **Approved ✅** | [GitHub](https://github.com/abyfahimy91-netizen/rihan-platform/blob/main/decisions/adr/ADR-001-backend-framework.md) |
-| ADR-002-database.md | Database / مدل داده (۱۷ موجودیت) | **Approved ✅** | [GitHub](https://github.com/abyfahimy91-netizen/rihan-platform/blob/main/decisions/adr/ADR-002-database.md) |
-| ADR-003-api-strategy.md | API Strategy + API-First | **Approved ✅** |
-| ADR-003-appendix-offline-caching.md | متمم: Offline-First / Caching / PWA | **Approved ✅** | [GitHub](https://github.com/abyfahimy91-netizen/rihan-platform/blob/main/decisions/adr/ADR-003-api-strategy.md) |
-| ADR-004-feature-flags.md | Feature Flags / Plugin Architecture | **Approved ✅** | [GitHub](https://github.com/abyfahimy91-netizen/rihan-platform/blob/main/decisions/adr/ADR-004-feature-flags.md) |
-| ADR-005-payment-abstraction.md | Payment Abstraction (Strategy Pattern) | **Approved ✅** | [GitHub](https://github.com/abyfahimy91-netizen/rihan-platform/blob/main/decisions/adr/ADR-005-payment-abstraction.md) |
-| ADR-006-authentication.md | Authentication / Passwordless | **Approved ✅** |
-| ADR-007-frontend-stack.md | Frontend Stack (HTML+HTMX+Alpine+Tailwind) | **Approved ✅ v2** |
-| ADR-008-deployment-docker.md | Deployment / Docker / CI-CD / Backup | **Approved ✅** | [GitHub](https://github.com/abyfahimy91-netizen/rihan-platform/blob/main/decisions/adr/ADR-008-deployment-docker.md) |
-| ADR-009-logging-monitoring.md | استراتژی لاگینگ و مانیتورینگ | ۴ | Approved ✅ | [GitHub](https://github.com/abyfahimy91-netizen/rihan-platform/blob/main/decisions/adr/ADR-009-logging-monitoring.md) |
-| ADR-010-testing-strategy.md | استراتژی تست | ۴ | Approved ✅ | [GitHub](https://github.com/abyfahimy91-netizen/rihan-platform/blob/main/decisions/adr/ADR-010-testing-strategy.md) |
-| ADR-011-cicd-pipeline.md | استراتژی CI/CD | ۴ | Approved ✅ | [GitHub](https://github.com/abyfahimy91-netizen/rihan-platform/blob/main/decisions/adr/ADR-011-cicd-pipeline.md) |
-| ADR-012-security-compliance.md | استراتژی امنیت و انطباق | ۴ | Approved ✅ | [GitHub](https://github.com/abyfahimy91-netizen/rihan-platform/blob/main/decisions/adr/ADR-012-security-compliance.md) |
-| ADR-013-performance-scalability.md | استراتژی عملکرد و مقیاس‌پذیری | ۴ | Approved ✅ | [GitHub](https://github.com/abyfahimy91-netizen/rihan-platform/blob/main/decisions/adr/ADR-013-performance-scalability.md) |
-| ADR-014-backup-disaster-recovery.md | استراتژی پشتیبان‌گیری و بازیابی | ۴ | Approved ✅ | [GitHub](https://github.com/abyfahimy91-netizen/rihan-platform/blob/main/decisions/adr/ADR-014-backup-disaster-recovery.md) |
-
-### plans/ — برنامه‌ها
-
-| فایل | نقش | وضعیت | لینک |
-|------|------|--------|------|
-| ROADMAP.md | نقشه راه ۵ ساله | فعال | [GitHub](https://github.com/abyfahimy91-netizen/rihan-platform/blob/main/plans/ROADMAP.md) |
-| DEVELOPMENT-PLAN.md | برنامه توسعه | — |
-| TEST-PLAN.md | برنامه تست | — |
-| LAUNCH-PLAN.md | برنامه راه‌اندازی | — |
-| MARKETING-STRATEGY.md | استراتژی بازاریابی | — |
-| GROWTH-PLAN.md | برنامه رشد | — |
-
-### src/ — کد منبع
-
-| مسیر | نقش | وضعیت |
-|------|------|--------|
-| src/frontend/ | فرانت‌اند | خالی |
-| src/backend/ | بک‌اند | خالی |
-| src/database/ | دیتابیس | خالی |
-
-### tests/ — تست‌ها
-
-| مسیر | نقش | وضعیت |
-|------|------|--------|
-| tests/unit/ | تست واحد | خالی |
-| tests/integration/ | تست یکپارچگی | خالی |
-| tests/e2e/ | تست انتها به انتها | خالی |
-
-### deploy/ — راه‌اندازی
-
-| مسیر | نقش | وضعیت |
-|------|------|--------|
-| deploy/nginx/ | تنظیمات Nginx | خالی |
-| deploy/scripts/ | اسکریپت‌ها | خالی |
+| مسیر فایل | دسته‌بندی | شرح سند |
+|:---|:---|:---|
+| `AI-ENTRY.md` | حاکمیت AI | نقطه ورود و قوانین کاربری سیستم‌عامل AI-VOS |
+| `CENTRAL-STORY.md` | قانون اساسی | داستان اصالت، رسالت برند و اصول اعتمادمحور |
+| `FUNDAMENTAL-PRINCIPLES.md` | قانون اساسی | اصول ۱۱ گانه تغییرناپذیر (کرامت مشتری و Zero Dark Patterns) |
+| `CONTINUITY.md` | تداوم | وضعیت لحظه‌ای، ماتریس ۱۴ ماژول و اقدام بعدی |
+| `PROJECT-INDEX.md` | مانیفست | نقشه کامل تمامی فایل‌های موجود در مخزن |
+| `README.md` | شناسنامه | شناسنامه عمومی پروژه و پلتفرم ریهان |
+| `Dockerfile` | زیرساخت | پیکربندی ایمیج کانتینر پایتون ۳.۱۰ و وابستگی‌ها |
+| `docker-compose.yml` | زیرساخت | ارکستراسیون سرویس‌های Django, PostgreSQL 16, Redis 7 |
+| `requirements.txt` | پکیج‌ها | لیست وابستگی‌های بک‌اند (Django, DRF, Celery/Redis, Gunicorn) |
+| `.env.example` | امنیت | الگوی متغیرهای محیطی امن پروژه |
 
 ---
 
-## وابستگی‌ها
+## ۲. ساختار کدهای منبع (`src/`)
 
-AI-ENTRY.md → PROJECT-INDEX.md (نقشه)
-AI-ENTRY.md → CENTRAL-STORY.md (قانون اساسی)
-AI-ENTRY.md → FUNDAMENTAL-PRINCIPLES.md (اصول)
-AI-ENTRY.md → CONTINUITY.md (وضعیت)
-CONTINUITY.md → تمام فایل‌های docs/ و decisions/
-ROADMAP.md → تمام فازها
-DECISIONS.md → تمام تصمیمات
+| مسیر پکیج / فایل | ماژول مرتبط | شرح کارکرد |
+|:---|:---:|:---|
+| `src/manage.py` | هسته | اسکریپت مدیریت و اجرای فرامین جنگو |
+| `src/rihan/settings.py` | هسته | پیکربندی ماژولار جنگو، دیتابیس، کش و زبان |
+| `src/rihan/urls.py` | هسته | مسیریاب سراسری و نگاشت Sitemaps |
+| `src/rihan/wsgi.py` | زیرساخت | نقطه اتصال وب‌سرور Gunicorn |
+| `src/apps/core/feature_flags.py` | **M14** | موتور پرچم‌های قابلیت و معماری افزونه‌محور (ADR-004) |
+| `src/apps/catalog/models.py` | **M1, M9** | دسته‌بندی‌ها، محصولات، تصاویر و ContentBlocks |
+| `src/apps/catalog/views.py` | **M1, M13** | ویوهای کاتالوگ HTMX و اندپوینت‌های REST API |
+| `src/apps/catalog/sitemaps.py` | **M7** | تولید پویای sitemap.xml و سئو تکنیکال |
+| `src/apps/orders/models.py` | **M2, M3** | مدل‌های سفارش، آیتم‌های سفارش و شماره فاکتور RH-1405 |
+| `src/apps/orders/cart.py` | **M2** | مدیریت سشن سبد خرید و محاسبه قیمت تمام‌شده (D-046) |
+| `src/apps/orders/admin.py` | **M3** | پنل مدیریت خانواده، نشان‌های وضعیت و صدور فاکتور |
+| `src/apps/orders/views.py` | **M2, M7** | ویوهای سبد خرید، تسویه‌حساب و استعلام /track/ |
+| `src/apps/accounts/models.py` | **M10** | مدل کدهای یکبارمصرف (PhoneOTP ۶ رقمی) |
+| `src/apps/accounts/services.py` | **M10** | سرویس پیامکی OTP ردیس و انتزاع کاوه‌نگار |
+| `src/apps/accounts/views.py` | **M10** | ورود پیامکی پیش‌فرض + ورود با پسورد پشتیبان (Fallback) |
 
 ---
 
-## قوانین به‌روزرسانی این فایل
+## ۳. قالب‌های وب (`src/templates/`)
 
-- هر فایل جدید → اضافه کردن ردیف جدید
-- هر تغییر وضعیت → به‌روزرسانی ستون وضعیت
-- هر تغییر ساختار → به‌روزرسانی مسیرها و لینک‌ها
-- هر فاز جدید → اضافه کردن فایل‌های آن فاز
-| docs/PRODUCT-CONTENT-REQUIREMENTS.md | الزامات محتوای محصول (حداقل‌های اجباری) | پیش‌نویس — انتظار تأیید | D-049 |
-| docs/EARLY-SUCCESS-METRICS.md | معیارهای موفقیت ۹۰ روز اول (KPIهای واقع‌بینانه) | تأییدشده ✅ | D-050 |
-| docs/MODULE-REGISTRY.md | مرجع ماژول‌های ریهان (M1 تا M14) | تأییدشده ✅ | D-051 |
+| مسیر قالب | کاربرد | ویژگی‌ها |
+|:---|:---|:---|
+| `src/templates/base.html` | تمپلیت والد | تم لوکس مینیمال، تایپوگرافی Vazirmatn، پشتیبانی HTMX/Alpine |
+| `src/templates/catalog/list.html` | کاتالوگ | لیست محصولات با فیلتر لحظه‌ای دسته‌بندی بدون رفرش |
+| `src/templates/catalog/detail.html` | جزئیات کالا | گالری تصاویر، بلوک‌های روایتی، قیمت تمام‌شده و اسکیما سئو |
+| `src/templates/orders/cart.html` | سبد خرید | شفافیت کامل مالی (ارسال لحاظ‌شده)، حذف ۱ کلیکی |
+| `src/templates/orders/checkout.html` | تسویه‌حساب | فرم ثبت سفارش سریع با کمترین اصطکاک (Guest Checkout) |
+| `src/templates/orders/order_success.html` | تایید سفارش | صدور فاکتور، راهنمای کارت‌به‌کارت و دکمه بارگذاری رسید |
+| `src/templates/orders/tracking.html` | **M7** | سامانه پیگیری با تایم‌لاین ۵ مرحله‌ای و لینک پست |
+| `src/templates/admin/orders/invoice.html` | **M3** | برگه فاکتور چاپی فاخر جهت قرار در بسته مرسوله |
+| `src/templates/accounts/login.html` | **M10** | فرم ورود پیامکی ۶ رقمی + سوئیچ رمز پشتیبان |
+| `src/templates/accounts/profile.html` | **M10** | پنل کاربری خریدار و ثبت رمز عبور پشتیبان |
+
+---
+
+## ۴. آزمون‌های خودکار (`tests/`)
+
+| فایل تست | ماژول‌های تحت پوشش | تعداد تست‌ها |
+|:---|:---:|:---:|
+| `tests/test_catalog.py` | M1, M7, M9, M13 | ۲ تست (پاس ✅) |
+| `tests/test_orders.py` | M2 | ۲ تست (پاس ✅) |
+| `tests/test_family_admin.py` | M3 | ۱ تست (پاس ✅) |
+| `tests/test_tracking.py` | M7 | ۲ تست (پاس ✅) |
+| `tests/test_accounts.py` | M10 | ۲ تست (پاس ✅) |
