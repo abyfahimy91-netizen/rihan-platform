@@ -1,9 +1,14 @@
-from django.db import models
+from pathlib import Path
+
+BASE = Path("/root/rihan-platform")
+models_file = BASE / "src/apps/catalog/models.py"
+
+content = """from django.db import models
 from django.conf import settings
 import json
 
 class Supplier(models.Model):
-    """مدل تأمین‌کننده محلی و بومی (M4 - Persona 7: Mola)"""
+    \"\"\"مدل تأمین‌کننده محلی و بومی (M4 - Persona 7: Mola)\"\"\"
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='supplier_profile', verbose_name="حساب کاربری")
     title = models.CharField(max_length=150, verbose_name="نام کارگاه / تأمین‌کننده")
     contact_name = models.CharField(max_length=100, verbose_name="نام مسئول")
@@ -163,3 +168,6 @@ class ProductBlock(models.Model):
 
     def __str__(self):
         return f"{self.product.title} <-> {self.content_block.title}"
+"""
+models_file.write_text(content, encoding="utf-8")
+print("✓ Successfully cleaned up catalog/models.py")
