@@ -7,5 +7,6 @@ urlpatterns = [
     path('cart/remove/<int:product_id>/', views.cart_remove_view, name='cart_remove'),
     path('checkout/', views.checkout_view, name='checkout'),
     path('orders/success/<str:order_number>/', views.order_success_view, name='order_success'),
+    path('admin/orders/<int:order_id>/invoice/', views.admin_order_invoice_view, name='admin_order_invoice'),
     path('api/orders/create/', views.OrderCreateAPI.as_view(), name='api_order_create'),
 ]

@@ -15,3 +15,7 @@ urlpatterns = [
     path('', include('apps.catalog.urls')),
     path('', include('apps.orders.urls')),
 ]
+
+admin.site.site_header = "سامانه مدیریت و پنل خانواده ریهان"
+admin.site.site_title = "پنل خانواده ریهان"
+admin.site.index_title = "داشبورد مدیریت سفارش‌ها و کاتالوگ"

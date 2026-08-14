@@ -1,5 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views.decorators.http import require_POST
+from django.contrib.admin.views.decorators import staff_member_required
 from rest_framework import generics, status
 from rest_framework.response import Response
 from apps.catalog.models import Product
@@ -83,6 +84,11 @@ def checkout_view(request):
 def order_success_view(request, order_number):
     order = get_object_or_404(Order.objects.prefetch_related('items'), order_number=order_number)
     return render(request, 'orders/order_success.html', {'order': order})
+
+@staff_member_required
+def admin_order_invoice_view(request, order_id):
+    order = get_object_or_404(Order.objects.prefetch_related('items'), id=order_id)
+    return render(request, 'admin/orders/invoice.html', {'order': order})
 
 class OrderCreateAPI(generics.CreateAPIView):
     serializer_class = OrderSerializer
