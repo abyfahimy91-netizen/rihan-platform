@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Category, Product, ProductImage, ContentBlock, ProductBlock
+from .models import Category, Product, ProductImage, ContentBlock, ProductBlock, Supplier
 
 class ProductImageInline(admin.TabularInline):
     model = ProductImage
@@ -29,3 +29,9 @@ class ProductBlockInline(admin.TabularInline):
 @admin.register(ContentBlock)
 class ContentBlockAdmin(admin.ModelAdmin):
     list_display = ['title', 'product', 'block_type', 'sort_order', 'is_active']
+
+
+@admin.register(Supplier)
+class SupplierAdmin(admin.ModelAdmin):
+    list_display = ['title', 'contact_name', 'phone', 'city', 'is_active', 'created_at']
+    search_fields = ['title', 'contact_name', 'phone', 'city']
