@@ -32,13 +32,14 @@ class FamilyAdminTestCase(TestCase):
 
     def test_admin_invoice_access(self):
         c = Client()
-        # Guest cannot access invoice
-        res_guest = c.get(reverse('admin_order_invoice', args=[self.order.id]))
+        # Guest redirected to admin login
+        res_guest = c.get(reverse('admin:order_invoice', args=[self.order.id]))
         self.assertEqual(res_guest.status_code, 302)
 
-        # Admin can access printable invoice
+        # Admin accesses printable invoice (200 OK)
         c.force_login(self.admin_user)
-        res_admin = c.get(reverse('admin_order_invoice', args=[self.order.id]))
+        res_admin = c.get(reverse('admin:order_invoice', args=[self.order.id]))
         self.assertEqual(res_admin.status_code, 200)
         self.assertContains(res_admin, "سماق هوراند")
         self.assertContains(res_admin, "مریم کارمند")
+        self.assertContains(res_admin, self.order.order_number)
