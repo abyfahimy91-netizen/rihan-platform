@@ -49,8 +49,13 @@
                         <a href="/api/health/" class="text-xs text-green-600 bg-green-50 px-2.5 py-1 rounded-full border border-green-200">سیستم فعال (v0.5)</a>
                     </nav>
                 </div>
-                <div class="flex items-center gap-4">
-                    <a href="/products/" class="text-sm font-medium text-rihan-800 hover:text-rihan-gold transition">کاتالوگ و خرید</a>
+                
+                <div class="flex items-center gap-3">
+                    {% if user.is_authenticated %}
+                    <a href="/accounts/profile/" class="text-xs text-rihan-900 font-bold bg-rihan-100 px-3 py-1.5 rounded-lg hover:bg-rihan-200 transition font-mono">{{ user.username }} 👤</a>
+                    {% else %}
+                    <a href="/accounts/login/" class="text-xs text-rihan-900 font-semibold border border-gray-200 px-3 py-1.5 rounded-lg hover:border-rihan-gold transition">ورود / حساب کاربری</a>
+                    {% endif %}
                     <a href="/admin/" class="text-xs text-gray-500 hover:text-gray-900 border border-gray-200 px-3 py-1.5 rounded-lg transition">پنل مدیریت</a>
                 </div>
             </div>
