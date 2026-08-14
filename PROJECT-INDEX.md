@@ -105,6 +105,12 @@
 | ADR-006-authentication.md | Authentication / Passwordless | **Approved ✅** |
 | ADR-007-frontend-stack.md | Frontend Stack (HTML+HTMX+Alpine+Tailwind) | **Approved ✅ v2** |
 | ADR-008-deployment-docker.md | Deployment / Docker / CI-CD / Backup | **Approved ✅** | [GitHub](https://github.com/abyfahimy91-netizen/rihan-platform/blob/main/decisions/adr/ADR-008-deployment-docker.md) |
+| ADR-009-logging-monitoring.md | استراتژی لاگینگ و مانیتورینگ | ۴ | Approved ✅ | [GitHub](https://github.com/abyfahimy91-netizen/rihan-platform/blob/main/decisions/adr/ADR-009-logging-monitoring.md) |
+| ADR-010-testing-strategy.md | استراتژی تست | ۴ | Approved ✅ | [GitHub](https://github.com/abyfahimy91-netizen/rihan-platform/blob/main/decisions/adr/ADR-010-testing-strategy.md) |
+| ADR-011-cicd-pipeline.md | استراتژی CI/CD | ۴ | Approved ✅ | [GitHub](https://github.com/abyfahimy91-netizen/rihan-platform/blob/main/decisions/adr/ADR-011-cicd-pipeline.md) |
+| ADR-012-security-compliance.md | استراتژی امنیت و انطباق | ۴ | Approved ✅ | [GitHub](https://github.com/abyfahimy91-netizen/rihan-platform/blob/main/decisions/adr/ADR-012-security-compliance.md) |
+| ADR-013-performance-scalability.md | استراتژی عملکرد و مقیاس‌پذیری | ۴ | Approved ✅ | [GitHub](https://github.com/abyfahimy91-netizen/rihan-platform/blob/main/decisions/adr/ADR-013-performance-scalability.md) |
+| ADR-014-backup-disaster-recovery.md | استراتژی پشتیبان‌گیری و بازیابی | ۴ | Approved ✅ | [GitHub](https://github.com/abyfahimy91-netizen/rihan-platform/blob/main/decisions/adr/ADR-014-backup-disaster-recovery.md) |
 
 ### plans/ — برنامه‌ها
 
