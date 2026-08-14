@@ -87,6 +87,22 @@ class Product(models.Model):
             img = self.images.first()
         return img
 
+    
+    @property
+    def approved_reviews(self):
+        return self.reviews.filter(is_approved=True)
+
+    @property
+    def average_rating(self):
+        reviews = self.approved_reviews
+        if reviews.exists():
+            return round(sum(r.rating for r in reviews) / reviews.count(), 1)
+        return 5.0
+
+    @property
+    def reviews_count(self):
+        return self.approved_reviews.count()
+
     def get_schema_json_ld(self):
         schema = {
             "@context": "https://schema.org/",
@@ -163,3 +179,28 @@ class ProductBlock(models.Model):
 
     def __str__(self):
         return f"{self.product.title} <-> {self.content_block.title}"
+
+
+class ProductReview(models.Model):
+    """مدل نظرات و امتیازات خریداران معتمد (M8 - D-044 & D-048)"""
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='reviews', verbose_name="محصول")
+    author_name = models.CharField(max_length=150, verbose_name="نام خریدار")
+    author_phone = models.CharField(max_length=20, blank=True, verbose_name="شماره تماس")
+    order_number = models.CharField(max_length=50, blank=True, verbose_name="شماره سفارش مرتبط")
+    rating = models.PositiveSmallIntegerField(choices=[(i, f"{i} ستاره") for i in range(1, 6)], default=5, verbose_name="امتیاز (۱ تا ۵)")
+    comment = models.TextField(verbose_name="متن نظر و تجربه خرید")
+    
+    is_approved = models.BooleanField(default=False, verbose_name="تأییدشده جهت نمایش عمومی")
+    is_verified_buyer = models.BooleanField(default=False, verbose_name="خریدار تأییدشده")
+    
+    admin_reply = models.TextField(blank=True, verbose_name="پاسخ رسمی مدیریت ریهان")
+    replied_at = models.DateTimeField(null=True, blank=True, verbose_name="زمان پاسخ ادمین")
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="زمان ثبت")
+
+    class Meta:
+        verbose_name = "نظر محصول (M8)"
+        verbose_name_plural = "نظرات و امتیازات محصولات"
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"نظر {self.author_name} برای {self.product.title} ({self.rating} ستاره)"

@@ -63,3 +63,5 @@ PluginRegistry.register("M14", "معماری افزونه‌محور و Feature 
 PluginRegistry.register("M5", "سیستم کنترل دسترسی نقش‌محور RBAC", "0.5.8", is_system=True)
 
 PluginRegistry.register("M6", "حساب و کتاب مالی و سود ناخالص D-046", "0.5.9", is_system=True)
+
+PluginRegistry.register("M8", "نظرات و بازخورد خریداران معتمد D-044", "0.5.10", is_system=True)

@@ -94,3 +94,41 @@ class ContentBlockListAPI(generics.ListAPIView):
     serializer_class = ContentBlockSerializer
     def get_queryset(self):
         return ContentBlock.objects.filter(product__slug=self.kwargs.get('product_slug'), is_active=True)
+
+from .models import ProductReview
+
+@require_POST
+def submit_review_view(request, slug):
+    """ثبت نظر خریدار با تعاملات سریع HTMX (M8)"""
+    product = get_object_or_404(Product, slug=slug, is_available=True)
+    author_name = request.POST.get('author_name', '').strip()
+    author_phone = request.POST.get('author_phone', '').strip()
+    order_number = request.POST.get('order_number', '').strip()
+    rating = int(request.POST.get('rating', 5))
+    comment = request.POST.get('comment', '').strip()
+
+    if author_name and comment:
+        is_verified = False
+        if order_number:
+            from apps.orders.models import Order
+            is_verified = Order.objects.filter(order_number__iexact=order_number).exists()
+
+        ProductReview.objects.create(
+            product=product,
+            author_name=author_name,
+            author_phone=author_phone,
+            order_number=order_number,
+            rating=min(max(rating, 1), 5),
+            comment=comment,
+            is_verified_buyer=is_verified,
+            is_approved=False # منوط به تایید ادمین
+        )
+        msg = "دیدگاه ارزشمند شما با احترام ثبت شد و پس از بررسی منتشر خواهد شد."
+    else:
+        msg = "لطفاً نام و متن دیدگاه را وارد فرمایید."
+
+    if request.headers.get('HX-Request'):
+        return render(request, 'catalog/partials/review_feedback.html', {'message': msg})
+    
+    messages.success(request, msg)
+    return redirect('product_detail', slug=slug)

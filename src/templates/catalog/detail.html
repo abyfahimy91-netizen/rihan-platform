@@ -1,6 +1,168 @@
 {% extends 'base.html' %}
-{% block title %}{{ product.meta_title|default:product.title }} | ریهان{% endblock %}
-{% block meta_description %}{{ product.meta_description|default:product.summary }}{% endblock %}
+{% block title %}{{ product.meta_title|default:product.title }} | ریهان
+    <!-- Customer Reviews & Ratings Section (M8 - D-044) -->
+    <div class="mt-16 bg-white rounded-3xl border border-gray-100 p-6 sm:p-10 shadow-sm space-y-8">
+        <div class="flex flex-wrap justify-between items-center border-b border-gray-100 pb-4 gap-4">
+            <div>
+                <h2 class="text-xl font-bold text-gray-900">نظرات و تجربیات خریداران معتمد</h2>
+                <p class="text-xs text-gray-500 mt-1">دیدگاه‌های ثبت‌شده پس از تحویل کالا</p>
+            </div>
+            <div class="flex items-center gap-2">
+                <span class="text-2xl font-black text-rihan-900 font-mono">{{ product.average_rating }}</span>
+                <span class="text-rihan-gold text-lg">★★★★★</span>
+                <span class="text-xs text-gray-400">({{ product.reviews_count }} نظر)</span>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Reviews List (2 Cols) -->
+            <div class="lg:col-span-2 space-y-4">
+                {% for rev in product.approved_reviews %}
+                <div class="bg-gray-50 rounded-2xl p-5 border border-gray-100 space-y-2">
+                    <div class="flex justify-between items-center">
+                        <div class="flex items-center gap-2">
+                            <strong class="text-xs text-gray-900">{{ rev.author_name }}</strong>
+                            {% if rev.is_verified_buyer %}
+                            <span class="text-[10px] text-green-700 bg-green-50 px-2 py-0.5 rounded border border-green-200">✓ خریدار معتمد</span>
+                            {% endif %}
+                        </div>
+                        <span class="text-[11px] text-gray-400">{{ rev.created_at|date:"Y/m/d" }}</span>
+                    </div>
+                    <p class="text-xs text-gray-700 leading-relaxed">{{ rev.comment }}</p>
+                    
+                    {% if rev.admin_reply %}
+                    <div class="bg-white p-3 rounded-xl border-r-2 border-rihan-gold text-[11px] text-gray-600 mt-2 space-y-1">
+                        <strong class="text-rihan-900 block">پاسخ مدیریت ریهان:</strong>
+                        <p>{{ rev.admin_reply }}</p>
+                    </div>
+                    {% endif %}
+                </div>
+                {% empty %}
+                <div class="text-center py-8 bg-gray-50 rounded-2xl border border-dashed border-gray-200">
+                    <p class="text-xs text-gray-500">هنوز دیدگاهی برای این محصول منتشر نشده است. شما می‌توانید اولین تجربه را ثبت فرمایید.</p>
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- Submit Review Form (1 Col) -->
+            <div class="bg-rihan-50 p-6 rounded-2xl border border-rihan-100 h-fit space-y-4">
+                <h3 class="text-xs font-bold text-rihan-900">ثبت تجربه خرید شما</h3>
+                
+                <div id="review-feedback-box">
+                    <form method="post" action="{% url 'submit_review' slug=product.slug %}" hx-post="{% url 'submit_review' slug=product.slug %}" hx-target="#review-feedback-box" class="space-y-3">
+                        {% csrf_token %}
+                        <div>
+                            <label class="block text-[11px] font-semibold text-gray-700 mb-1">نام شما *</label>
+                            <input type="text" name="author_name" required class="w-full bg-white border border-gray-200 rounded-xl p-2 text-xs focus:outline-none focus:border-rihan-gold" placeholder="مثال: مریم کارمند">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-semibold text-gray-700 mb-1">شماره سفارش (جهت دریافت نشان خریدار معتمد)</label>
+                            <input type="text" name="order_number" class="w-full bg-white border border-gray-200 rounded-xl p-2 text-xs font-mono focus:outline-none focus:border-rihan-gold" placeholder="RH-1405-...">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-semibold text-gray-700 mb-1">امتیاز شما به کیفیت محصول</label>
+                            <select name="rating" class="w-full bg-white border border-gray-200 rounded-xl p-2 text-xs focus:outline-none focus:border-rihan-gold">
+                                <option value="5">۵ ستاره — عالی و اصیل</option>
+                                <option value="4">۴ ستاره — بسیار خوب</option>
+                                <option value="3">۳ ستاره — متوسط</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-semibold text-gray-700 mb-1">متن دیدگاه شما *</label>
+                            <textarea name="comment" rows="3" required class="w-full bg-white border border-gray-200 rounded-xl p-2 text-xs focus:outline-none focus:border-rihan-gold" placeholder="کیفیت، عطر، بسته‌بندی..."></textarea>
+                        </div>
+                        <button type="submit" class="w-full bg-rihan-900 hover:bg-rihan-800 text-white font-bold py-2.5 rounded-xl text-xs transition shadow-sm">
+                            ارسال دیدگاه ↗
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
+{% block meta_description %}{{ product.meta_description|default:product.summary }}
+    <!-- Customer Reviews & Ratings Section (M8 - D-044) -->
+    <div class="mt-16 bg-white rounded-3xl border border-gray-100 p-6 sm:p-10 shadow-sm space-y-8">
+        <div class="flex flex-wrap justify-between items-center border-b border-gray-100 pb-4 gap-4">
+            <div>
+                <h2 class="text-xl font-bold text-gray-900">نظرات و تجربیات خریداران معتمد</h2>
+                <p class="text-xs text-gray-500 mt-1">دیدگاه‌های ثبت‌شده پس از تحویل کالا</p>
+            </div>
+            <div class="flex items-center gap-2">
+                <span class="text-2xl font-black text-rihan-900 font-mono">{{ product.average_rating }}</span>
+                <span class="text-rihan-gold text-lg">★★★★★</span>
+                <span class="text-xs text-gray-400">({{ product.reviews_count }} نظر)</span>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Reviews List (2 Cols) -->
+            <div class="lg:col-span-2 space-y-4">
+                {% for rev in product.approved_reviews %}
+                <div class="bg-gray-50 rounded-2xl p-5 border border-gray-100 space-y-2">
+                    <div class="flex justify-between items-center">
+                        <div class="flex items-center gap-2">
+                            <strong class="text-xs text-gray-900">{{ rev.author_name }}</strong>
+                            {% if rev.is_verified_buyer %}
+                            <span class="text-[10px] text-green-700 bg-green-50 px-2 py-0.5 rounded border border-green-200">✓ خریدار معتمد</span>
+                            {% endif %}
+                        </div>
+                        <span class="text-[11px] text-gray-400">{{ rev.created_at|date:"Y/m/d" }}</span>
+                    </div>
+                    <p class="text-xs text-gray-700 leading-relaxed">{{ rev.comment }}</p>
+                    
+                    {% if rev.admin_reply %}
+                    <div class="bg-white p-3 rounded-xl border-r-2 border-rihan-gold text-[11px] text-gray-600 mt-2 space-y-1">
+                        <strong class="text-rihan-900 block">پاسخ مدیریت ریهان:</strong>
+                        <p>{{ rev.admin_reply }}</p>
+                    </div>
+                    {% endif %}
+                </div>
+                {% empty %}
+                <div class="text-center py-8 bg-gray-50 rounded-2xl border border-dashed border-gray-200">
+                    <p class="text-xs text-gray-500">هنوز دیدگاهی برای این محصول منتشر نشده است. شما می‌توانید اولین تجربه را ثبت فرمایید.</p>
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- Submit Review Form (1 Col) -->
+            <div class="bg-rihan-50 p-6 rounded-2xl border border-rihan-100 h-fit space-y-4">
+                <h3 class="text-xs font-bold text-rihan-900">ثبت تجربه خرید شما</h3>
+                
+                <div id="review-feedback-box">
+                    <form method="post" action="{% url 'submit_review' slug=product.slug %}" hx-post="{% url 'submit_review' slug=product.slug %}" hx-target="#review-feedback-box" class="space-y-3">
+                        {% csrf_token %}
+                        <div>
+                            <label class="block text-[11px] font-semibold text-gray-700 mb-1">نام شما *</label>
+                            <input type="text" name="author_name" required class="w-full bg-white border border-gray-200 rounded-xl p-2 text-xs focus:outline-none focus:border-rihan-gold" placeholder="مثال: مریم کارمند">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-semibold text-gray-700 mb-1">شماره سفارش (جهت دریافت نشان خریدار معتمد)</label>
+                            <input type="text" name="order_number" class="w-full bg-white border border-gray-200 rounded-xl p-2 text-xs font-mono focus:outline-none focus:border-rihan-gold" placeholder="RH-1405-...">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-semibold text-gray-700 mb-1">امتیاز شما به کیفیت محصول</label>
+                            <select name="rating" class="w-full bg-white border border-gray-200 rounded-xl p-2 text-xs focus:outline-none focus:border-rihan-gold">
+                                <option value="5">۵ ستاره — عالی و اصیل</option>
+                                <option value="4">۴ ستاره — بسیار خوب</option>
+                                <option value="3">۳ ستاره — متوسط</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-semibold text-gray-700 mb-1">متن دیدگاه شما *</label>
+                            <textarea name="comment" rows="3" required class="w-full bg-white border border-gray-200 rounded-xl p-2 text-xs focus:outline-none focus:border-rihan-gold" placeholder="کیفیت، عطر، بسته‌بندی..."></textarea>
+                        </div>
+                        <button type="submit" class="w-full bg-rihan-900 hover:bg-rihan-800 text-white font-bold py-2.5 rounded-xl text-xs transition shadow-sm">
+                            ارسال دیدگاه ↗
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
 {% block extra_head %}
 <script type="application/ld+json">
 {{ product.get_schema_json_ld|safe }}
@@ -11,6 +173,87 @@
 {% if product.primary_image %}
 <meta property="og:image" content="{{ product.primary_image.image_url }}">
 {% endif %}
+
+    <!-- Customer Reviews & Ratings Section (M8 - D-044) -->
+    <div class="mt-16 bg-white rounded-3xl border border-gray-100 p-6 sm:p-10 shadow-sm space-y-8">
+        <div class="flex flex-wrap justify-between items-center border-b border-gray-100 pb-4 gap-4">
+            <div>
+                <h2 class="text-xl font-bold text-gray-900">نظرات و تجربیات خریداران معتمد</h2>
+                <p class="text-xs text-gray-500 mt-1">دیدگاه‌های ثبت‌شده پس از تحویل کالا</p>
+            </div>
+            <div class="flex items-center gap-2">
+                <span class="text-2xl font-black text-rihan-900 font-mono">{{ product.average_rating }}</span>
+                <span class="text-rihan-gold text-lg">★★★★★</span>
+                <span class="text-xs text-gray-400">({{ product.reviews_count }} نظر)</span>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Reviews List (2 Cols) -->
+            <div class="lg:col-span-2 space-y-4">
+                {% for rev in product.approved_reviews %}
+                <div class="bg-gray-50 rounded-2xl p-5 border border-gray-100 space-y-2">
+                    <div class="flex justify-between items-center">
+                        <div class="flex items-center gap-2">
+                            <strong class="text-xs text-gray-900">{{ rev.author_name }}</strong>
+                            {% if rev.is_verified_buyer %}
+                            <span class="text-[10px] text-green-700 bg-green-50 px-2 py-0.5 rounded border border-green-200">✓ خریدار معتمد</span>
+                            {% endif %}
+                        </div>
+                        <span class="text-[11px] text-gray-400">{{ rev.created_at|date:"Y/m/d" }}</span>
+                    </div>
+                    <p class="text-xs text-gray-700 leading-relaxed">{{ rev.comment }}</p>
+                    
+                    {% if rev.admin_reply %}
+                    <div class="bg-white p-3 rounded-xl border-r-2 border-rihan-gold text-[11px] text-gray-600 mt-2 space-y-1">
+                        <strong class="text-rihan-900 block">پاسخ مدیریت ریهان:</strong>
+                        <p>{{ rev.admin_reply }}</p>
+                    </div>
+                    {% endif %}
+                </div>
+                {% empty %}
+                <div class="text-center py-8 bg-gray-50 rounded-2xl border border-dashed border-gray-200">
+                    <p class="text-xs text-gray-500">هنوز دیدگاهی برای این محصول منتشر نشده است. شما می‌توانید اولین تجربه را ثبت فرمایید.</p>
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- Submit Review Form (1 Col) -->
+            <div class="bg-rihan-50 p-6 rounded-2xl border border-rihan-100 h-fit space-y-4">
+                <h3 class="text-xs font-bold text-rihan-900">ثبت تجربه خرید شما</h3>
+                
+                <div id="review-feedback-box">
+                    <form method="post" action="{% url 'submit_review' slug=product.slug %}" hx-post="{% url 'submit_review' slug=product.slug %}" hx-target="#review-feedback-box" class="space-y-3">
+                        {% csrf_token %}
+                        <div>
+                            <label class="block text-[11px] font-semibold text-gray-700 mb-1">نام شما *</label>
+                            <input type="text" name="author_name" required class="w-full bg-white border border-gray-200 rounded-xl p-2 text-xs focus:outline-none focus:border-rihan-gold" placeholder="مثال: مریم کارمند">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-semibold text-gray-700 mb-1">شماره سفارش (جهت دریافت نشان خریدار معتمد)</label>
+                            <input type="text" name="order_number" class="w-full bg-white border border-gray-200 rounded-xl p-2 text-xs font-mono focus:outline-none focus:border-rihan-gold" placeholder="RH-1405-...">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-semibold text-gray-700 mb-1">امتیاز شما به کیفیت محصول</label>
+                            <select name="rating" class="w-full bg-white border border-gray-200 rounded-xl p-2 text-xs focus:outline-none focus:border-rihan-gold">
+                                <option value="5">۵ ستاره — عالی و اصیل</option>
+                                <option value="4">۴ ستاره — بسیار خوب</option>
+                                <option value="3">۳ ستاره — متوسط</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-semibold text-gray-700 mb-1">متن دیدگاه شما *</label>
+                            <textarea name="comment" rows="3" required class="w-full bg-white border border-gray-200 rounded-xl p-2 text-xs focus:outline-none focus:border-rihan-gold" placeholder="کیفیت، عطر، بسته‌بندی..."></textarea>
+                        </div>
+                        <button type="submit" class="w-full bg-rihan-900 hover:bg-rihan-800 text-white font-bold py-2.5 rounded-xl text-xs transition shadow-sm">
+                            ارسال دیدگاه ↗
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
 {% endblock %}
 {% block content %}
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
@@ -87,4 +330,85 @@
     </div>
     {% endif %}
 </div>
+
+    <!-- Customer Reviews & Ratings Section (M8 - D-044) -->
+    <div class="mt-16 bg-white rounded-3xl border border-gray-100 p-6 sm:p-10 shadow-sm space-y-8">
+        <div class="flex flex-wrap justify-between items-center border-b border-gray-100 pb-4 gap-4">
+            <div>
+                <h2 class="text-xl font-bold text-gray-900">نظرات و تجربیات خریداران معتمد</h2>
+                <p class="text-xs text-gray-500 mt-1">دیدگاه‌های ثبت‌شده پس از تحویل کالا</p>
+            </div>
+            <div class="flex items-center gap-2">
+                <span class="text-2xl font-black text-rihan-900 font-mono">{{ product.average_rating }}</span>
+                <span class="text-rihan-gold text-lg">★★★★★</span>
+                <span class="text-xs text-gray-400">({{ product.reviews_count }} نظر)</span>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Reviews List (2 Cols) -->
+            <div class="lg:col-span-2 space-y-4">
+                {% for rev in product.approved_reviews %}
+                <div class="bg-gray-50 rounded-2xl p-5 border border-gray-100 space-y-2">
+                    <div class="flex justify-between items-center">
+                        <div class="flex items-center gap-2">
+                            <strong class="text-xs text-gray-900">{{ rev.author_name }}</strong>
+                            {% if rev.is_verified_buyer %}
+                            <span class="text-[10px] text-green-700 bg-green-50 px-2 py-0.5 rounded border border-green-200">✓ خریدار معتمد</span>
+                            {% endif %}
+                        </div>
+                        <span class="text-[11px] text-gray-400">{{ rev.created_at|date:"Y/m/d" }}</span>
+                    </div>
+                    <p class="text-xs text-gray-700 leading-relaxed">{{ rev.comment }}</p>
+                    
+                    {% if rev.admin_reply %}
+                    <div class="bg-white p-3 rounded-xl border-r-2 border-rihan-gold text-[11px] text-gray-600 mt-2 space-y-1">
+                        <strong class="text-rihan-900 block">پاسخ مدیریت ریهان:</strong>
+                        <p>{{ rev.admin_reply }}</p>
+                    </div>
+                    {% endif %}
+                </div>
+                {% empty %}
+                <div class="text-center py-8 bg-gray-50 rounded-2xl border border-dashed border-gray-200">
+                    <p class="text-xs text-gray-500">هنوز دیدگاهی برای این محصول منتشر نشده است. شما می‌توانید اولین تجربه را ثبت فرمایید.</p>
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- Submit Review Form (1 Col) -->
+            <div class="bg-rihan-50 p-6 rounded-2xl border border-rihan-100 h-fit space-y-4">
+                <h3 class="text-xs font-bold text-rihan-900">ثبت تجربه خرید شما</h3>
+                
+                <div id="review-feedback-box">
+                    <form method="post" action="{% url 'submit_review' slug=product.slug %}" hx-post="{% url 'submit_review' slug=product.slug %}" hx-target="#review-feedback-box" class="space-y-3">
+                        {% csrf_token %}
+                        <div>
+                            <label class="block text-[11px] font-semibold text-gray-700 mb-1">نام شما *</label>
+                            <input type="text" name="author_name" required class="w-full bg-white border border-gray-200 rounded-xl p-2 text-xs focus:outline-none focus:border-rihan-gold" placeholder="مثال: مریم کارمند">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-semibold text-gray-700 mb-1">شماره سفارش (جهت دریافت نشان خریدار معتمد)</label>
+                            <input type="text" name="order_number" class="w-full bg-white border border-gray-200 rounded-xl p-2 text-xs font-mono focus:outline-none focus:border-rihan-gold" placeholder="RH-1405-...">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-semibold text-gray-700 mb-1">امتیاز شما به کیفیت محصول</label>
+                            <select name="rating" class="w-full bg-white border border-gray-200 rounded-xl p-2 text-xs focus:outline-none focus:border-rihan-gold">
+                                <option value="5">۵ ستاره — عالی و اصیل</option>
+                                <option value="4">۴ ستاره — بسیار خوب</option>
+                                <option value="3">۳ ستاره — متوسط</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-semibold text-gray-700 mb-1">متن دیدگاه شما *</label>
+                            <textarea name="comment" rows="3" required class="w-full bg-white border border-gray-200 rounded-xl p-2 text-xs focus:outline-none focus:border-rihan-gold" placeholder="کیفیت، عطر، بسته‌بندی..."></textarea>
+                        </div>
+                        <button type="submit" class="w-full bg-rihan-900 hover:bg-rihan-800 text-white font-bold py-2.5 rounded-xl text-xs transition shadow-sm">
+                            ارسال دیدگاه ↗
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
 {% endblock %}
