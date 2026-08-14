@@ -1,4 +1,9 @@
-from django.contrib import admin
+from pathlib import Path
+
+BASE = Path("/root/rihan-platform")
+admin_file = BASE / "src/apps/orders/admin.py"
+
+content = """from django.contrib import admin
 from django.utils.html import format_html
 from django.urls import path, reverse
 from .models import Order, OrderItem, OrderFinance
@@ -98,3 +103,6 @@ class OrderFinanceAdmin(admin.ModelAdmin):
     @admin.display(description="حاشیه سود")
     def margin_display(self, obj):
         return f"{obj.margin_percent}%"
+"""
+admin_file.write_text(content, encoding="utf-8")
+print("✓ Fixed src/apps/orders/admin.py with correct inline ordering")
