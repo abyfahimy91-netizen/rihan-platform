@@ -30,6 +30,7 @@ INSTALLED_APPS = [
     # Local Apps (AI-VOS Modular Architecture)
     'apps.core',
     'apps.catalog',
+    'apps.orders',
 ]
 
 MIDDLEWARE = [
