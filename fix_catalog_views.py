@@ -1,4 +1,9 @@
-from django.shortcuts import render, redirect, get_object_or_404
+from pathlib import Path
+
+BASE = Path("/root/rihan-platform")
+views_file = BASE / "src/apps/catalog/views.py"
+
+content = """from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from django.views.decorators.http import require_POST
@@ -30,7 +35,7 @@ def product_detail_view(request, slug):
 
 @login_required
 def supplier_dashboard_view(request):
-    """داشبورد اختصاصی تأمین‌کننده با تفکیک کامل دسترسی (M4 - D-051)"""
+    \"\"\"داشبورد اختصاصی تأمین‌کننده با تفکیک کامل دسترسی (M4 - D-051)\"\"\"
     if not hasattr(request.user, 'supplier_profile') and not request.user.is_superuser:
         raise PermissionDenied("دسترسی فقط برای تأمین‌کنندگان مجاز ریهان امکان‌پذیر است.")
 
@@ -94,3 +99,6 @@ class ContentBlockListAPI(generics.ListAPIView):
     serializer_class = ContentBlockSerializer
     def get_queryset(self):
         return ContentBlock.objects.filter(product__slug=self.kwargs.get('product_slug'), is_active=True)
+"""
+views_file.write_text(content, encoding="utf-8")
+print("✓ Successfully updated catalog/views.py with redirect import")
