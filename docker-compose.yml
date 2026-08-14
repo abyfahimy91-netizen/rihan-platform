@@ -1,0 +1,54 @@
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: rihan_web
+    restart: always
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    volumes:
+      - ./src:/app/src
+      - ./deploy:/app/deploy
+      - static_volume:/app/staticfiles
+      - media_volume:/app/media
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
+
+  db:
+    image: postgres:16-alpine
+    container_name: rihan_db
+    restart: always
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-rihan_db}
+      POSTGRES_USER: ${POSTGRES_USER:-rihan_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-rihan_secure_pass_1405}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "127.0.0.1:5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-rihan_user} -d ${POSTGRES_DB:-rihan_db}"]
+      interval: 3s
+      timeout: 3s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    container_name: rihan_redis
+    restart: always
+    volumes:
+      - redis_data:/data
+    ports:
+      - "127.0.0.1:6379:6379"
+
+volumes:
+  postgres_data:
+  redis_data:
+  static_volume:
+  media_volume:
