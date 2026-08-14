@@ -101,3 +101,12 @@ MEDIA_ROOT = Path('/app/media')
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 CORS_ALLOW_ALL_ORIGINS = True
+
+CSRF_TRUSTED_ORIGINS = [
+    'http://rihan360.ir',
+    'https://rihan360.ir',
+    'http://www.rihan360.ir',
+    'https://www.rihan360.ir',
+    'http://146.19.212.212',
+    'http://146.19.212.212:8000',
+]
