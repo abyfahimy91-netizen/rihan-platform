@@ -1,5 +1,6 @@
 from django.shortcuts import render
 from django.http import JsonResponse
+from apps.catalog.models import Category, Product, ProductReview
 
 def health_check(request):
     return JsonResponse({
@@ -12,14 +13,17 @@ def health_check(request):
     })
 
 def home_view(request):
-    return JsonResponse({
-        "message": "به پلتفرم ریهان خوش آمدید",
-        "brand": "RIHAN - Curated Marketplace",
-        "description": "فروشگاه آنلاین اعتمادمحور مبتنی بر سیستم‌عامل AI-VOS",
-        "health_endpoint": "/api/health/",
-        "about_endpoint": "/about/",
-        "catalog_endpoint": "/products/"
-    }, json_dumps_params={'ensure_ascii': False})
+    """صفحه اصلی و لندینگ‌پیج فاخر ریهان (M13 - Home Landing Page)"""
+    categories = Category.objects.filter(is_active=True)
+    featured_products = Product.objects.filter(is_featured=True, is_available=True)[:6]
+    recent_reviews = ProductReview.objects.filter(is_approved=True)[:3]
+
+    context = {
+        'categories': categories,
+        'featured_products': featured_products,
+        'recent_reviews': recent_reviews
+    }
+    return render(request, 'core/home.html', context)
 
 def about_view(request):
     """صفحه اصالت، فلسفه گزینش و داستان برند ریهان (M12 - CENTRAL-STORY.md)"""
