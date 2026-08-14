@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.utils.html import format_html
 from django.urls import path, reverse
-from .models import Order, OrderItem
+from .models import Order, OrderItem, OrderFinance
 from .views import admin_order_invoice_view
 
 class OrderItemInline(admin.TabularInline):
@@ -15,7 +15,7 @@ class OrderAdmin(admin.ModelAdmin):
     list_filter = ['status', 'payment_method', 'created_at']
     search_fields = ['order_number', 'customer_name', 'customer_phone', 'tracking_code', 'shipping_address']
     readonly_fields = ['order_number', 'items_total', 'shipping_cost', 'grand_total', 'created_at', 'updated_at', 'invoice_button']
-    inlines = [OrderItemInline]
+    inlines = [OrderItemInline, OrderFinanceInline]
     actions = ['mark_as_confirmed', 'mark_as_shipped']
 
     def get_urls(self):
@@ -64,3 +64,38 @@ class OrderAdmin(admin.ModelAdmin):
     def mark_as_shipped(self, request, queryset):
         queryset.update(status='shipped')
         self.message_user(request, "وضعیت سفارش‌های انتخاب‌شده به ارسال‌شده تغییر یافت.")
+
+
+class OrderFinanceInline(admin.StackedInline):
+    model = OrderFinance
+    can_delete = False
+    readonly_fields = ['gross_revenue', 'total_supply_cost', 'net_profit', 'margin_percent']
+    extra = 0
+
+@admin.register(OrderFinance)
+class OrderFinanceAdmin(admin.ModelAdmin):
+    list_display = ['order', 'gross_revenue_display', 'supply_cost_display', 'actual_shipping_display', 'net_profit_display', 'margin_display', 'supplier_paid']
+    list_filter = ['supplier_paid', 'order__created_at']
+    search_fields = ['order__order_number', 'order__customer_name']
+    readonly_fields = ['order', 'gross_revenue', 'total_supply_cost', 'net_profit', 'margin_percent']
+
+    @admin.display(description="درآمد فروش")
+    def gross_revenue_display(self, obj):
+        return f"{obj.gross_revenue:,} تومان"
+
+    @admin.display(description="هزینه تأمین")
+    def supply_cost_display(self, obj):
+        return f"{obj.total_supply_cost:,} تومان"
+
+    @admin.display(description="هزینه ارسال")
+    def actual_shipping_display(self, obj):
+        return f"{obj.actual_shipping_cost:,} تومان"
+
+    @admin.display(description="سود خالص واقعی (D-046)")
+    def net_profit_display(self, obj):
+        color = "#198754" if obj.net_profit > 0 else "#dc3545"
+        return format_html('<strong style="color: {};">{:,} تومان</strong>', color, obj.net_profit)
+
+    @admin.display(description="حاشیه سود")
+    def margin_display(self, obj):
+        return f"{obj.margin_percent}%"

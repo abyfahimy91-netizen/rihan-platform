@@ -61,3 +61,5 @@ PluginRegistry.register("M13", "طراحی تجربه کاربری بومی RTL"
 PluginRegistry.register("M14", "معماری افزونه‌محور و Feature Flags", "0.5.6", is_system=True)
 
 PluginRegistry.register("M5", "سیستم کنترل دسترسی نقش‌محور RBAC", "0.5.8", is_system=True)
+
+PluginRegistry.register("M6", "حساب و کتاب مالی و سود ناخالص D-046", "0.5.9", is_system=True)

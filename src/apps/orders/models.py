@@ -71,3 +71,41 @@ class OrderItem(models.Model):
 
     def __str__(self):
         return f"{self.product_title} x {self.quantity}"
+
+
+class OrderFinance(models.Model):
+    """دفتر مالی و محاسبه حاشیه سود سفارش (M6 - D-046 & MVP-SCOPE)"""
+    order = models.OneToOneField('Order', on_delete=models.CASCADE, related_name='finance', verbose_name="سفارش")
+    gross_revenue = models.PositiveBigIntegerField(default=0, verbose_name="درآمد ناخالص (تومان)")
+    total_supply_cost = models.PositiveBigIntegerField(default=0, verbose_name="مجموع هزینه تأمین کالا (تومان)")
+    actual_shipping_cost = models.PositiveBigIntegerField(default=45000, verbose_name="هزینه واقعی ارسال پستی (تومان)")
+    net_profit = models.BigIntegerField(default=0, verbose_name="سود ناخالص واقعی (تومان)")
+    margin_percent = models.FloatField(default=0.0, verbose_name="حاشیه سود واقعی (درصد)")
+    supplier_paid = models.BooleanField(default=False, verbose_name="تسویه با تأمین‌کننده")
+
+    class Meta:
+        verbose_name = "حساب و کتاب مالی سفارش (M6)"
+        verbose_name_plural = "حساب و کتاب مالی سفارش‌ها"
+        ordering = ['-order__created_at']
+
+    def calculate_finance(self):
+        """فرمول رسمی D-046: سود واقعی = قیمت فروش - قیمت تأمین - هزینه واقعی ارسال"""
+        self.gross_revenue = self.order.grand_total
+        supply_sum = 0
+        for item in self.order.items.all():
+            if item.product and item.product.supply_cost:
+                supply_sum += (item.product.supply_cost * item.quantity)
+            else:
+                # حاشیه پیش‌فرض ۲۵٪ در صورت عدم درج هزینه تأمین
+                supply_sum += int(item.unit_price * 0.75) * item.quantity
+        
+        self.total_supply_cost = supply_sum
+        self.net_profit = self.gross_revenue - self.total_supply_cost - self.actual_shipping_cost
+        if self.gross_revenue > 0:
+            self.margin_percent = round((self.net_profit / self.gross_revenue) * 100, 1)
+        else:
+            self.margin_percent = 0.0
+        self.save()
+
+    def __str__(self):
+        return f"مالی {self.order.order_number}: سود {self.net_profit:,} تومان ({self.margin_percent}%)"
