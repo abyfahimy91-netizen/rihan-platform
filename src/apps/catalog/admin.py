@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Category, Product, ProductImage, ContentBlock
+from .models import Category, Product, ProductImage, ContentBlock, ProductBlock
 
 class ProductImageInline(admin.TabularInline):
     model = ProductImage
@@ -21,6 +21,10 @@ class ProductAdmin(admin.ModelAdmin):
     search_fields = ['title', 'sku']
     prepopulated_fields = {'slug': ('title',)}
     inlines = [ProductImageInline, ContentBlockInline]
+
+class ProductBlockInline(admin.TabularInline):
+    model = ProductBlock
+    extra = 1
 
 @admin.register(ContentBlock)
 class ContentBlockAdmin(admin.ModelAdmin):

@@ -113,3 +113,20 @@ class ContentBlock(models.Model):
         verbose_name = "بلوک محتوایی محصول"
         verbose_name_plural = "بلوک‌های محتوایی محصولات"
         ordering = ['sort_order', 'id']
+
+
+class ProductBlock(models.Model):
+    """مدل واسط نگاشت چندبه‌چند بلوک‌های محتوایی به محصولات (ADR-002 & D-080)"""
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='product_block_links', verbose_name="محصول")
+    content_block = models.ForeignKey(ContentBlock, on_delete=models.CASCADE, related_name='product_mappings', verbose_name="بلوک محتوایی")
+    custom_title = models.CharField(max_length=200, blank=True, verbose_name="عنوان سفارشی این محصول")
+    sort_order = models.PositiveIntegerField(default=0, verbose_name="ترتیب نمایش")
+    is_active = models.BooleanField(default=True, verbose_name="فعال")
+
+    class Meta:
+        verbose_name = "نگاشت محصول و بلوک (ProductBlock)"
+        verbose_name_plural = "نگاشت‌های محصولات و بلوک‌ها (ProductBlocks)"
+        ordering = ['sort_order', 'id']
+
+    def __str__(self):
+        return f"{self.product.title} <-> {self.content_block.title}"
