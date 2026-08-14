@@ -1,0 +1,42 @@
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+    {% for product in products %}
+    <div class="bg-white rounded-2xl border border-gray-100 overflow-hidden shadow-sm hover:shadow-md transition flex flex-col justify-between">
+        <div>
+            <div class="relative bg-gray-50 h-56 flex items-center justify-center overflow-hidden">
+                {% if product.primary_image %}
+                <img src="{{ product.primary_image.image_url }}" alt="{{ product.title }}" class="object-cover w-full h-full">
+                {% else %}
+                <div class="text-gray-300 text-5xl">🛍️</div>
+                {% endif %}
+                {% if product.has_discount %}
+                <span class="absolute top-3 right-3 bg-red-600 text-white text-xs font-bold px-2.5 py-1 rounded-full shadow-sm">
+                    {{ product.discount_percent }}% تخفیف
+                </span>
+                {% endif %}
+            </div>
+            <div class="p-5">
+                <span class="text-xs text-rihan-gold font-semibold">{{ product.category.name }}</span>
+                <h3 class="text-base font-bold text-gray-900 mt-1">
+                    <a href="{% url 'product_detail' slug=product.slug %}">{{ product.title }}</a>
+                </h3>
+                <p class="text-gray-500 text-xs mt-2 line-clamp-2 leading-relaxed">{{ product.summary }}</p>
+            </div>
+        </div>
+        <div class="p-5 pt-0 border-t border-gray-50 mt-4 flex items-center justify-between">
+            <div>
+                {% if product.has_discount %}
+                <span class="text-xs text-gray-400 line-through block">{{ product.compare_at_price|floatformat:"0" }} تومان</span>
+                {% endif %}
+                <span class="text-base font-extrabold text-gray-900">{{ product.price|floatformat:"0" }} <span class="text-xs font-normal text-gray-500">تومان</span></span>
+            </div>
+            <a href="{% url 'product_detail' slug=product.slug %}" class="bg-rihan-900 hover:bg-rihan-800 text-white text-xs font-semibold px-4 py-2 rounded-xl transition shadow-sm">
+                مشاهده و انتخاب
+            </a>
+        </div>
+    </div>
+    {% empty %}
+    <div class="col-span-full text-center py-12 bg-white rounded-2xl border border-dashed border-gray-200">
+        <p class="text-gray-500 text-sm">هیچ محصولی یافت نشد.</p>
+    </div>
+    {% endfor %}
+</div>

@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}ریهان | فروشگاه آنلاین اعتمادمحور{% endblock %}</title>
+    <meta name="description" content="{% block meta_description %}پلتفرم خرید اعتمادمحور ریهان با گزینش اصیل‌ترین کالاها{% endblock %}">
+    {% block extra_head %}{% endblock %}
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        rihan: {
+                            50: '#fbf9f6',
+                            100: '#f5f0e8',
+                            600: '#7c5e38',
+                            800: '#43311b',
+                            900: '#23180c',
+                            gold: '#c5a059',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Vazirmatn', 'Tahoma', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <script src="https://unpkg.com/htmx.org@1.9.12"></script>
+    <script defer src="https://unpkg.com/alpinejs@3.14.0/dist/cdn.min.js"></script>
+    <style>
+        @import url('https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css');
+        body { font-family: 'Vazirmatn', sans-serif; }
+    </style>
+</head>
+<body class="bg-rihan-50 text-gray-800 antialiased min-h-screen flex flex-col justify-between">
+    <header class="bg-white border-b border-rihan-100 sticky top-0 z-50 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-20">
+                <div class="flex items-center space-x-6 space-x-reverse">
+                    <a href="/products/" class="flex items-center gap-3">
+                        <span class="text-2xl font-bold tracking-wider text-rihan-900">RIHAN <span class="text-rihan-gold text-lg">ریهان</span></span>
+                    </a>
+                    <nav class="hidden md:flex space-x-6 space-x-reverse text-sm font-medium text-gray-600">
+                        <a href="/products/" class="hover:text-rihan-600 transition">کاتالوگ محصولات</a>
+                        <a href="/api/health/" class="text-xs text-green-600 bg-green-50 px-2.5 py-1 rounded-full border border-green-200">سیستم فعال (v0.5)</a>
+                    </nav>
+                </div>
+                <div class="flex items-center gap-4">
+                    <a href="/products/" class="text-sm font-medium text-rihan-800 hover:text-rihan-gold transition">کاتالوگ و خرید</a>
+                    <a href="/admin/" class="text-xs text-gray-500 hover:text-gray-900 border border-gray-200 px-3 py-1.5 rounded-lg transition">پنل مدیریت</a>
+                </div>
+            </div>
+        </div>
+    </header>
+    <main class="flex-grow">
+        {% block content %}{% endblock %}
+    </main>
+    <footer class="bg-rihan-900 text-rihan-100 py-12 border-t border-rihan-800 mt-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-xs text-gray-400">
+            © ۱۴۰۵ تمامی حقوق برای برند مستقل ریهان محفوظ است. توسعه‌یافته بر پایه استانداردهای هوشمند AI-VOS.
+        </div>
+    </footer>
+</body>
+</html>

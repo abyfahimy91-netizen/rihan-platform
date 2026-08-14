@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+{% block title %}کاتالوگ محصولات گزینش‌شده | ریهان{% endblock %}
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+    <div class="mb-8 text-center sm:text-right">
+        <h1 class="text-3xl font-extrabold text-rihan-900">کاتالوگ محصولات ریهان</h1>
+        <p class="text-gray-500 text-sm mt-2">مجموعه‌ای برگزیده از کالاهای اصیل با ضمانت کیفیت و رضایت</p>
+    </div>
+    <div class="flex flex-wrap gap-2 mb-8 pb-4 border-b border-gray-200" hx-target="#product-grid-container" hx-push-url="true">
+        <a href="{% url 'product_list' %}" hx-get="{% url 'product_list' %}" class="px-4 py-2 rounded-xl text-xs font-semibold transition {% if not selected_category %}bg-rihan-900 text-white shadow-sm{% else %}bg-white text-gray-600 hover:bg-gray-100 border border-gray-200{% endif %}">
+            همه دسته‌ها
+        </a>
+        {% for cat in categories %}
+        <a href="{% url 'product_list' %}?category={{ cat.slug }}" hx-get="{% url 'product_list' %}?category={{ cat.slug }}" class="px-4 py-2 rounded-xl text-xs font-semibold transition {% if selected_category == cat.slug %}bg-rihan-900 text-white shadow-sm{% else %}bg-white text-gray-600 hover:bg-gray-100 border border-gray-200{% endif %}">
+            {{ cat.icon }} {{ cat.name }}
+        </a>
+        {% endfor %}
+    </div>
+    <div id="product-grid-container">
+        {% include 'catalog/partials/product_grid.html' %}
+    </div>
+</div>
+{% endblock %}

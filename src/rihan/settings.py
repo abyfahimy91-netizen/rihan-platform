@@ -23,11 +23,13 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.sitemaps',
     # Third party
     'rest_framework',
     'corsheaders',
-    # Local Apps
+    # Local Apps (AI-VOS Modular Architecture)
     'apps.core',
+    'apps.catalog',
 ]
 
 MIDDLEWARE = [
