@@ -1,4 +1,9 @@
-from django.shortcuts import render
+from pathlib import Path
+
+BASE = Path("/root/rihan-platform")
+views_file = BASE / "src/apps/core/views.py"
+
+content = """from django.shortcuts import render
 from django.http import JsonResponse
 
 def health_check(request):
@@ -22,5 +27,8 @@ def home_view(request):
     }, json_dumps_params={'ensure_ascii': False})
 
 def about_view(request):
-    """صفحه اصالت، فلسفه گزینش و داستان برند ریهان (M12 - CENTRAL-STORY.md)"""
+    \"\"\"صفحه اصالت، فلسفه گزینش و داستان برند ریهان (M12 - CENTRAL-STORY.md)\"\"\"
     return render(request, 'core/about.html')
+"""
+views_file.write_text(content, encoding="utf-8")
+print("✓ Successfully updated src/apps/core/views.py with render import")
