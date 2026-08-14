@@ -115,3 +115,27 @@ class OrderCreateAPI(generics.CreateAPIView):
             )
         cart.clear()
         return Response(OrderSerializer(order).data, status=status.HTTP_201_CREATED)
+
+
+def order_tracking_view(request):
+    order = None
+    error_message = None
+    order_number = request.GET.get('order_number', '').strip()
+    phone = request.GET.get('phone', '').strip()
+
+    if order_number and phone:
+        try:
+            order = Order.objects.prefetch_related('items').get(
+                order_number__iexact=order_number,
+                customer_phone__icontains=phone[-10:] # مقایسه امن ۱۰ رقم آخر موبایل
+            )
+        except Order.DoesNotExist:
+            error_message = "سفارشی با این مشخصات یافت نشد. لطفاً شماره سفارش و موبایل را بررسی فرمایید."
+
+    context = {
+        'order': order,
+        'order_number': order_number,
+        'phone': phone,
+        'error_message': error_message
+    }
+    return render(request, 'orders/tracking.html', context)
