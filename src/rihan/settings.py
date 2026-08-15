@@ -33,6 +33,7 @@ INSTALLED_APPS = [
     'apps.orders',
     'apps.accounts',
     'apps.payments',
+    'modules.visual_identity',  # M13: هویت بصری فاخر
 ]
 
 MIDDLEWARE = [
@@ -94,6 +95,11 @@ USE_I18N = True
 USE_TZ = True
 
 STATIC_URL = '/static/'
+
+STATICFILES_DIRS = [
+    BASE_DIR / 'modules' / 'visual_identity' / 'static',
+]
+
 STATIC_ROOT = Path('/app/staticfiles')
 
 MEDIA_URL = '/media/'

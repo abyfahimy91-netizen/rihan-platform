@@ -1,0 +1,111 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}ریهان - فروشگاه آنلاین اعتمادمحور{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="section">
+    <div class="container">
+        <div style="text-align: center; max-width: 800px; margin: 0 auto;">
+            <h1 style="font-size: 3rem; margin-bottom: var(--spacing-lg);">
+                ریهان
+            </h1>
+            <p style="font-size: 1.25rem; color: var(--color-text-muted); margin-bottom: var(--spacing-xl);">
+                فروشگاه آنلاین اعتمادمحور<br>
+                خشکبار هوراند و محصولات باکیفیت
+            </p>
+            <a href="/products/" class="btn btn-primary btn-lg">
+                مشاهده محصولات
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- Trust Badges -->
+<section class="section-sm" style="background-color: rgba(13, 59, 46, 0.02);">
+    <div class="container">
+        <div class="trust-badges">
+            <div class="trust-badge">
+                <div class="trust-badge-icon">✓</div>
+                <div class="trust-badge-title">پرداخت امن</div>
+                <div class="trust-badge-desc">کارت‌به‌کارت با تأیید ادمین</div>
+            </div>
+            <div class="trust-badge">
+                <div class="trust-badge-icon">↺</div>
+                <div class="trust-badge-title">گارانتی مرجوعی</div>
+                <div class="trust-badge-desc">در صورت عدم رضایت</div>
+            </div>
+            <div class="trust-badge">
+                <div class="trust-badge-icon">📦</div>
+                <div class="trust-badge-title">ارسال مطمئن</div>
+                <div class="trust-badge-desc">پست و تیپاکس</div>
+            </div>
+            <div class="trust-badge">
+                <div class="trust-badge-icon">☎</div>
+                <div class="trust-badge-title">پشتیبانی تلفنی</div>
+                <div class="trust-badge-desc">پاسخگویی سریع</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Featured Products -->
+<section class="section">
+    <div class="container">
+        <h2 style="text-align: center; margin-bottom: var(--spacing-2xl);">
+            محصولات منتخب
+        </h2>
+        
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: var(--spacing-xl);">
+            {% for product in featured_products %}
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">{{ product.name }}</h3>
+                        <p class="card-subtitle">{{ product.category }}</p>
+                    </div>
+                    <div class="card-body">
+                        <p>{{ product.description|truncatewords:20 }}</p>
+                        <p class="text-price" style="font-size: 1.25rem; margin-top: var(--spacing-md);">
+                            {{ product.price|floatformat:0 }} تومان
+                        </p>
+                    </div>
+                    <div class="card-footer">
+                        <a href="{{ product.get_absolute_url }}" class="btn btn-primary" style="width: 100%;">
+                            مشاهده جزئیات
+                        </a>
+                    </div>
+                </div>
+            {% empty %}
+                <p style="text-align: center; color: var(--color-text-muted); grid-column: 1 / -1;">
+                    به زودی محصولات ویژه اضافه می‌شوند
+                </p>
+            {% endfor %}
+        </div>
+        
+        <div style="text-align: center; margin-top: var(--spacing-2xl);">
+            <a href="/products/" class="btn btn-secondary">
+                مشاهده همه محصولات
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- About Preview -->
+<section class="section-sm" style="background-color: rgba(13, 59, 46, 0.02);">
+    <div class="container">
+        <div style="text-align: center; max-width: 700px; margin: 0 auto;">
+            <h2 style="margin-bottom: var(--spacing-lg);">
+                داستان ریهان
+            </h2>
+            <p style="font-size: 1.125rem; color: var(--color-text-muted); margin-bottom: var(--spacing-xl);">
+                خانواده‌ای با اصالت هوراند که سال‌هاست انتخاب‌های خوب را با اطرافیان به اشتراک می‌گذارند.
+                حالا این انتخاب‌ها در قالب یک فروشگاه آنلاین حرفه‌ای در دسترس همه است.
+            </p>
+            <a href="/about/" class="btn btn-secondary">
+                بیشتر بدانید
+            </a>
+        </div>
+    </div>
+</section>
+{% endblock %}

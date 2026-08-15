@@ -1,6 +1,25 @@
-# visual_identity Module Manifest
+# M13: Visual Identity Module Manifest
 name: visual_identity
-version: 0.1.0
-description: ماژول visual_identity ریهان
-dependencies: []
+version: 1.0.0
+description: هویت بصری فاخر ریهان - پالت رنگ، فونت، طراحی
 author: Rihan Team
+phase: 5
+priority: critical
+
+dependencies: []
+
+features:
+  - پالت ۹ رنگ با توکن‌های CSS معنایی
+  - فونت وزیرمتن لوکال (۴ وزن)
+  - طراحی فاخر و مینیمال
+  - لوگو موقت (متن "ریهان")
+  - base.html با ساختار استاندارد
+  - کامپوننت‌های UI (Button, Card, Badge, Trust Badges)
+  - Responsive Design
+  - Accessibility (WCAG AA)
+
+compliance:
+  - VISUAL-IDENTITY.md v1.0
+  - BRAND-IDENTITY.md v1.0
+  - D-079 (برند مستقل)
+  - D-042 (تصمیم رنگ و فونت)

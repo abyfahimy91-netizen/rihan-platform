@@ -1,73 +1,118 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="fa" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}ریهان | فروشگاه آنلاین اعتمادمحور{% endblock %}</title>
-    <meta name="description" content="{% block meta_description %}پلتفرم خرید اعتمادمحور ریهان با گزینش اصیل‌ترین کالاها{% endblock %}">
-    {% block extra_head %}{% endblock %}
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        rihan: {
-                            50: '#fbf9f6',
-                            100: '#f5f0e8',
-                            600: '#7c5e38',
-                            800: '#43311b',
-                            900: '#23180c',
-                            gold: '#c5a059',
-                        }
-                    },
-                    fontFamily: {
-                        sans: ['Vazirmatn', 'Tahoma', 'sans-serif'],
-                    }
-                }
-            }
-        }
-    </script>
-    <script src="https://unpkg.com/htmx.org@1.9.12"></script>
-    <script defer src="https://unpkg.com/alpinejs@3.14.0/dist/cdn.min.js"></script>
-    <style>
-        @import url('https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css');
-        body { font-family: 'Vazirmatn', sans-serif; }
-    </style>
+    <meta name="description" content="{% block meta_description %}ریهان - فروشگاه آنلاین اعتمادمحور، خشکبار هوراند و محصولات باکیفیت{% endblock %}">
+    <meta name="keywords" content="{% block meta_keywords %}ریهان، خشکبار، هوراند، سماق، فروشگاه آنلاین{% endblock %}">
+    
+    <!-- Open Graph -->
+    <meta property="og:title" content="{% block og_title %}ریهان - فروشگاه آنلاین اعتمادمحور{% endblock %}">
+    <meta property="og:description" content="{% block og_description %}خرید خشکبار و محصولات باکیفیت با اطمینان{% endblock %}">
+    <meta property="og:type" content="website">
+    <meta property="og:locale" content="fa_IR">
+    
+    <title>{% block title %}ریهان{% endblock %} | فروشگاه آنلاین اعتمادمحور</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="{% static 'visual_identity/images/favicon.svg' %}">
+    
+    <!-- Main CSS -->
+    <link rel="stylesheet" href="{% static 'visual_identity/css/rihan.css' %}">
+    
+    {% block extra_css %}{% endblock %}
 </head>
-<body class="bg-rihan-50 text-gray-800 antialiased min-h-screen flex flex-col justify-between">
-    <header class="bg-white border-b border-rihan-100 sticky top-0 z-50 shadow-sm">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between items-center h-20">
-                <div class="flex items-center space-x-6 space-x-reverse">
-                    <a href="/products/" class="flex items-center gap-3">
-                        <span class="text-2xl font-bold tracking-wider text-rihan-900">RIHAN <span class="text-rihan-gold text-lg">ریهان</span></span>
-                    </a>
-                    <nav class="hidden md:flex space-x-6 space-x-reverse text-sm font-medium text-gray-600">
-                        <a href="/products/" class="hover:text-rihan-600 transition">کاتالوگ محصولات</a>
-                        <a href="/track/" class="hover:text-rihan-600 transition">پیگیری سفارش</a>
-                        <a href="/api/health/" class="text-xs text-green-600 bg-green-50 px-2.5 py-1 rounded-full border border-green-200">سیستم فعال (v0.5)</a>
-                    </nav>
-                </div>
+<body class="{% block body_class %}{% endblock %}">
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="header-inner">
+                <a href="/" class="logo">
+                    {% block logo %}ریهان{% endblock %}
+                </a>
                 
-                <div class="flex items-center gap-3">
+                <nav class="nav">
+                    <a href="/" class="nav-link {% if request.path == '/' %}active{% endif %}">خانه</a>
+                    <a href="/products/" class="nav-link {% if '/products/' in request.path %}active{% endif %}">محصولات</a>
+                    <a href="/about/" class="nav-link {% if '/about/' in request.path %}active{% endif %}">درباره ریهان</a>
+                    <a href="/contact/" class="nav-link {% if '/contact/' in request.path %}active{% endif %}">تماس</a>
+                    
                     {% if user.is_authenticated %}
-                    <a href="/accounts/profile/" class="text-xs text-rihan-900 font-bold bg-rihan-100 px-3 py-1.5 rounded-lg hover:bg-rihan-200 transition font-mono">{{ user.username }} 👤</a>
+                        <a href="/track/" class="nav-link">پیگیری سفارش</a>
+                        <a href="/logout/" class="btn btn-secondary btn-sm">خروج</a>
                     {% else %}
-                    <a href="/accounts/login/" class="text-xs text-rihan-900 font-semibold border border-gray-200 px-3 py-1.5 rounded-lg hover:border-rihan-gold transition">ورود / حساب کاربری</a>
+                        <a href="/login/" class="btn btn-secondary btn-sm">ورود</a>
                     {% endif %}
-                    <a href="/admin/" class="text-xs text-gray-500 hover:text-gray-900 border border-gray-200 px-3 py-1.5 rounded-lg transition">پنل مدیریت</a>
-                </div>
+                </nav>
             </div>
         </div>
     </header>
-    <main class="flex-grow">
+    
+    <!-- Messages -->
+    {% if messages %}
+        <div class="container mt-md">
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} fade-in">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+    
+    <!-- Main Content -->
+    <main class="main">
         {% block content %}{% endblock %}
     </main>
-    <footer class="bg-rihan-900 text-rihan-100 py-12 border-t border-rihan-800 mt-16">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-xs text-gray-400">
-            © ۱۴۰۵ تمامی حقوق برای برند مستقل ریهان محفوظ است. توسعه‌یافته بر پایه استانداردهای هوشمند AI-VOS.
+    
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-inner">
+                <div class="footer-section">
+                    <h4>ریهان</h4>
+                    <p style="color: rgba(255,255,255,0.8); font-size: 0.875rem;">
+                        فروشگاه آنلاین اعتمادمحور<br>
+                        خشکبار هوراند و محصولات باکیفیت
+                    </p>
+                </div>
+                
+                <div class="footer-section">
+                    <h4>دسترسی سریع</h4>
+                    <ul>
+                        <li><a href="/products/">محصولات</a></li>
+                        <li><a href="/about/">درباره ریهان</a></li>
+                        <li><a href="/track/">پیگیری سفارش</a></li>
+                        <li><a href="/contact/">تماس با ما</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-section">
+                    <h4>خدمات مشتری</h4>
+                    <ul>
+                        <li><a href="/faq/">سوالات متداول</a></li>
+                        <li><a href="/shipping/">شرایط ارسال</a></li>
+                        <li><a href="/returns/">مرجوعی کالا</a></li>
+                        <li><a href="/privacy/">حریم خصوصی</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-section">
+                    <h4>تماس</h4>
+                    <ul>
+                        <li>تبریز، ایران</li>
+                        <li>پشتیبانی: ۰۹۱۲-XXX-XXXX</li>
+                        <li>ایمیل: info@rihan360.ir</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p>© ۱۴۰۵ ریهان. تمامی حقوق محفوظ است.</p>
+            </div>
         </div>
     </footer>
+    
+    {% block extra_js %}{% endblock %}
 </body>
 </html>
