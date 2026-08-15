@@ -34,6 +34,7 @@ INSTALLED_APPS = [
     'apps.accounts',
     'apps.payments',
     'modules.visual_identity',  # M13: هویت بصری فاخر
+    'modules.plugin_arch',  # M14: معماری پلاگین‌محور
 ]
 
 MIDDLEWARE = [
