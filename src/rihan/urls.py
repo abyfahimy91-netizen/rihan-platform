@@ -1,4 +1,16 @@
-from modules.rbac.admin_site import rihan_admin\nfrom django.contrib import admin\nadmin.autodiscover()
+"""
+RIHAN Platform - Main URL Configuration
+
+URL ها بر اساس:
+- M13: هویت بصری
+- M5: RBAC Authentication
+- M14: Plugin Architecture
+- Apps: catalog, orders, accounts, payments
+"""
+from modules.rbac.admin_site import rihan_admin
+from django.contrib import admin
+admin.autodiscover()
+
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
@@ -11,17 +23,17 @@ sitemaps = {
 }
 
 urlpatterns = [
-    # Django Admin
+    # Custom Admin با Dashboard (M5)
     path('admin/', rihan_admin.urls),
     
     # M5: RBAC Authentication
     path('panel/', include('modules.rbac.urls')),
     path('accounts/', include('modules.rbac.urls')),  # Alias
     
-    # Sitemap
+    # Sitemap (M1 - SEO)
     path('sitemap.xml', sitemap, {'sitemaps': sitemaps}, name='django.contrib.sitemaps.views.sitemap'),
     
-    # Apps (ترتیب مهم است - core اول برای home page)
+    # Apps
     path('', include('apps.core.urls')),
     path('', include('apps.catalog.urls')),
     path('', include('apps.orders.urls')),
@@ -29,12 +41,7 @@ urlpatterns = [
     path('', include('apps.payments.urls')),
 ]
 
-# Serve static files in development
+# Serve static and media files in development
 if settings.DEBUG:
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
-
-# Admin customization
-admin.site.site_header = "سامانه مدیریت و پنل خانواده ریهان"
-admin.site.site_title = "پنل خانواده ریهان"
-admin.site.index_title = "داشبورد مدیریت سفارش‌ها و کاتالوگ"
