@@ -1,141 +1,284 @@
 {% extends 'base.html' %}
-{% block title %}ریهان | فروشگاه آنلاین گزینش کالاهای اصیل و اعتمادمحور{% endblock %}
+{% load static %}
+
+{% block title %}ریهان - فروشگاه آنلاین اعتمادمحور{% endblock %}
+
+{% block meta_description %}پلتفرم خرید اعتمادمحور ریهان با گزینش اصیل‌ترین کالاها از هوراند{% endblock %}
+
+{% block extra_css %}
+<style>
+/* Hero Section با رنگ‌های VISUAL-IDENTITY.md */
+.hero {
+    background: linear-gradient(135deg, var(--color-primary) 0%, #0a2f25 100%);
+    color: var(--color-cta-text);
+    padding: var(--spacing-3xl) 0;
+    text-align: center;
+}
+
+.hero h1 {
+    color: var(--color-cta-text);
+    font-size: 3.5rem;
+    margin-bottom: var(--spacing-md);
+}
+
+.hero p {
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 1.25rem;
+    max-width: 600px;
+    margin: 0 auto var(--spacing-xl);
+}
+
+.hero .btn-accent {
+    background-color: var(--color-secondary);
+    color: var(--color-primary);
+    border-color: var(--color-secondary);
+}
+
+.hero .btn-accent:hover {
+    background-color: var(--color-secondary-dark);
+    border-color: var(--color-secondary-dark);
+}
+
+/* Products Grid */
+.products-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: var(--spacing-xl);
+    margin-top: var(--spacing-xl);
+}
+
+.product-card {
+    background-color: white;
+    border-radius: var(--border-radius-lg);
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+    transition: all var(--transition-base);
+}
+
+.product-card:hover {
+    box-shadow: var(--shadow-lg);
+    transform: translateY(-4px);
+}
+
+.product-card-image {
+    width: 100%;
+    height: 220px;
+    object-fit: cover;
+    background-color: #f8f8f8;
+}
+
+.product-card-body {
+    padding: var(--spacing-lg);
+}
+
+.product-card-title {
+    font-size: 1.125rem;
+    font-weight: 700;
+    color: var(--color-text);
+    margin-bottom: var(--spacing-xs);
+}
+
+.product-card-category {
+    color: var(--color-text-muted);
+    font-size: 0.875rem;
+    margin-bottom: var(--spacing-md);
+}
+
+.product-card-price {
+    color: var(--color-price);
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin-bottom: var(--spacing-md);
+}
+
+/* Reviews */
+.reviews-section {
+    background-color: rgba(13, 59, 46, 0.02);
+    padding: var(--spacing-3xl) 0;
+}
+
+.review-card {
+    background-color: white;
+    padding: var(--spacing-xl);
+    border-radius: var(--border-radius-lg);
+    border-right: 4px solid var(--color-secondary);
+    box-shadow: var(--shadow-sm);
+}
+
+.review-author {
+    font-weight: 700;
+    color: var(--color-primary);
+    margin-top: var(--spacing-md);
+}
+
+.review-text {
+    font-style: italic;
+    color: var(--color-text);
+    line-height: 1.8;
+}
+
+/* Categories */
+.categories-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: var(--spacing-lg);
+    margin-top: var(--spacing-xl);
+}
+
+.category-card {
+    background-color: white;
+    padding: var(--spacing-xl);
+    border-radius: var(--border-radius-lg);
+    text-align: center;
+    border: 2px solid var(--color-border);
+    transition: all var(--transition-base);
+    text-decoration: none;
+    color: var(--color-text);
+}
+
+.category-card:hover {
+    border-color: var(--color-primary);
+    box-shadow: var(--shadow-md);
+}
+
+.category-name {
+    font-size: 1.125rem;
+    font-weight: 700;
+    color: var(--color-primary);
+}
+
+.category-count {
+    color: var(--color-text-muted);
+    font-size: 0.875rem;
+    margin-top: var(--spacing-xs);
+}
+</style>
+{% endblock %}
 
 {% block content %}
-<div class="space-y-24 py-12">
-
-    <!-- Hero Section -->
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="bg-white rounded-3xl border border-gray-100 p-8 sm:p-16 shadow-sm text-center space-y-6 relative overflow-hidden">
-            <span class="text-xs font-bold text-rihan-gold uppercase tracking-widest bg-rihan-100 px-4 py-1.5 rounded-full inline-block">
-                پلتفرم گزینش کالاهای اصیل
-            </span>
-            <h1 class="text-3xl sm:text-5xl lg:text-6xl font-black text-rihan-900 leading-tight">
-                ریهان؛ گزینش‌گری امین<br>
-                <span class="text-rihan-gold">از دل طبیعت بکر هوراند و آذربایجان</span>
-            </h1>
-            <p class="text-sm sm:text-base text-gray-600 max-w-2xl mx-auto leading-relaxed">
-                ما فروشگاه انبوه نیستیم؛ ما انتخاب‌های ناب خانوادگی‌مان را که از سخت‌گیرانه‌ترین فیلترهای اصالت و کیفیت عبور کرده‌اند، با کمال احترام با شما به اشتراک می‌گذاریم.
-            </p>
-            <div class="pt-4 flex flex-wrap justify-center gap-4">
-                <a href="{% url 'product_list' %}" class="bg-rihan-900 hover:bg-rihan-800 text-white font-extrabold text-xs sm:text-sm px-8 py-4 rounded-2xl shadow-lg transition flex items-center gap-2">
-                    <span>مشاهده کاتالوگ محصولات</span>
-                    <span>←</span>
-                </a>
-                <a href="{% url 'about' %}" class="bg-rihan-50 hover:bg-rihan-100 text-rihan-900 font-bold text-xs sm:text-sm px-8 py-4 rounded-2xl border border-rihan-200 transition">
-                    روایت اصالت و داستان ما
-                </a>
-            </div>
-        </div>
-    </div>
-
-    <!-- 4 Trust Pillars (D-046 & Principle 11) -->
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            <div class="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm space-y-2 text-center sm:text-right">
-                <span class="text-3xl block mb-2">💎</span>
-                <h3 class="text-sm font-bold text-gray-900">قیمت تمام‌شده و شفاف</h3>
-                <p class="text-xs text-gray-500 leading-relaxed">هزینه ارسال و بسته‌بندی ویژه در قیمت کالا لحاظ شده و هیچ هزینه پنهانی وجود ندارد.</p>
-            </div>
-            <div class="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm space-y-2 text-center sm:text-right">
-                <span class="text-3xl block mb-2">🔬</span>
-                <h3 class="text-sm font-bold text-gray-900">آزمون کیفیت و اصالت</h3>
-                <p class="text-xs text-gray-500 leading-relaxed">تست حضوری و برگه‌های آزمایش معتبر برای محصولات طبیعی (مانند ساکارز عسل سبلان).</p>
-            </div>
-            <div class="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm space-y-2 text-center sm:text-right">
-                <span class="text-3xl block mb-2">🤝</span>
-                <h3 class="text-sm font-bold text-gray-900">حفظ شأن و کرامت خریدار</h3>
-                <p class="text-xs text-gray-500 leading-relaxed">بدون تایمرهای فیک، بدون تبلیغات پیامکی مزاحم و با احترام کامل به آرامش خریدار.</p>
-            </div>
-            <div class="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm space-y-2 text-center sm:text-right">
-                <span class="text-3xl block mb-2">📦</span>
-                <h3 class="text-sm font-bold text-gray-900">ضمانت بازگشت بی‌قیدوشرط</h3>
-                <p class="text-xs text-gray-500 leading-relaxed">در صورت هرگونه نارضایتی از کیفیت یا عطر کالا، وجه سفارش با احترام کامل مسترد می‌گردد.</p>
-            </div>
-        </div>
-    </div>
-
-    <!-- Featured Products Carousel / Grid -->
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
-        <div class="flex justify-between items-end border-b border-gray-200 pb-4">
-            <div>
-                <span class="text-xs font-bold text-rihan-gold uppercase tracking-wider">دست‌چین ویژه</span>
-                <h2 class="text-2xl font-black text-rihan-900 mt-1">محصولات منتخب ریهان</h2>
-            </div>
-            <a href="{% url 'product_list' %}" class="text-xs font-bold text-rihan-800 hover:text-rihan-gold transition">
-                مشاهده همه محصولات کاتالوگ ←
+<!-- Hero Section -->
+<section class="hero">
+    <div class="container">
+        <h1>ریهان</h1>
+        <p>
+            فروشگاه آنلاین اعتمادمحور<br>
+            گزینش اصیل‌ترین کالاها از هوراند
+        </p>
+        <div style="display: flex; gap: var(--spacing-md); justify-content: center; flex-wrap: wrap;">
+            <a href="/products/" class="btn btn-accent btn-lg">
+                مشاهده کاتالوگ
+            </a>
+            <a href="/about/" class="btn btn-secondary btn-lg" style="color: white; border-color: white;">
+                داستان ریهان
             </a>
         </div>
+    </div>
+</section>
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-            {% for product in featured_products %}
-            <div class="bg-white rounded-3xl border border-gray-100 overflow-hidden shadow-sm hover:shadow-md transition flex flex-col justify-between group">
-                <div>
-                    <div class="relative bg-gray-50 h-64 flex items-center justify-center overflow-hidden">
-                        {% if product.primary_image %}
-                        <img src="{{ product.primary_image.image_url }}" alt="{{ product.title }}" class="object-cover w-full h-full group-hover:scale-105 transition duration-300">
-                        {% else %}
-                        <span class="text-5xl text-gray-300">🎁</span>
-                        {% endif %}
-                        
-                        {% if product.has_discount %}
-                        <span class="absolute top-4 right-4 bg-red-600 text-white text-xs font-bold px-3 py-1 rounded-full shadow-sm">
-                            {{ product.discount_percent }}% تخفیف
-                        </span>
-                        {% endif %}
-                    </div>
-                    <div class="p-6">
-                        <span class="text-xs text-rihan-gold font-bold uppercase tracking-wider">{{ product.category.name }}</span>
-                        <h3 class="text-base font-bold text-gray-900 mt-1.5 line-clamp-1 hover:text-rihan-600 transition">
-                            <a href="{% url 'product_detail' slug=product.slug %}">{{ product.title }}</a>
-                        </h3>
-                        <p class="text-gray-500 text-xs mt-2.5 line-clamp-2 leading-relaxed">{{ product.summary }}</p>
-                    </div>
-                </div>
-
-                <div class="p-6 pt-0 border-t border-gray-50 mt-4 flex items-center justify-between">
-                    <div>
-                        {% if product.has_discount %}
-                        <span class="text-xs text-gray-400 line-through block">{{ product.compare_at_price|floatformat:"0" }} تومان</span>
-                        {% endif %}
-                        <span class="text-lg font-black text-gray-900">{{ product.price|floatformat:"0" }} <span class="text-xs font-normal text-gray-500">تومان</span></span>
-                    </div>
-                    <a href="{% url 'product_detail' slug=product.slug %}" class="bg-rihan-900 hover:bg-rihan-800 text-white text-xs font-bold px-5 py-2.5 rounded-xl transition shadow-sm">
-                        مشاهده و انتخاب
-                    </a>
-                </div>
+<!-- Trust Badges -->
+<section class="section-sm">
+    <div class="container">
+        <div class="trust-badges">
+            <div class="trust-badge">
+                <div class="trust-badge-icon">✓</div>
+                <div class="trust-badge-title">پرداخت امن</div>
+                <div class="trust-badge-desc">کارت‌به‌کارت با تأیید ادمین</div>
             </div>
+            <div class="trust-badge">
+                <div class="trust-badge-icon">↺</div>
+                <div class="trust-badge-title">گارانتی مرجوعی</div>
+                <div class="trust-badge-desc">در صورت عدم رضایت</div>
+            </div>
+            <div class="trust-badge">
+                <div class="trust-badge-icon">📦</div>
+                <div class="trust-badge-title">ارسال مطمئن</div>
+                <div class="trust-badge-desc">پست، تیپاکس و باربری</div>
+            </div>
+            <div class="trust-badge">
+                <div class="trust-badge-icon">☎</div>
+                <div class="trust-badge-title">پشتیبانی تلفنی</div>
+                <div class="trust-badge-desc">پاسخگویی سریع</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Categories -->
+{% if categories %}
+<section class="section">
+    <div class="container">
+        <h2 style="text-align: center;">دسته‌بندی محصولات</h2>
+        <div class="categories-grid">
+            {% for category in categories %}
+                <a href="/products/?category={{ category.slug }}" class="category-card">
+                    <div class="category-name">{{ category.name }}</div>
+                    <div class="category-count">{{ category.products.count }} محصول</div>
+                </a>
             {% endfor %}
         </div>
     </div>
+</section>
+{% endif %}
 
-    <!-- Central Story Teaser Box -->
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="bg-rihan-900 text-white rounded-3xl p-8 sm:p-14 grid grid-cols-1 lg:grid-cols-2 gap-10 items-center shadow-xl">
-            <div class="space-y-4">
-                <span class="text-xs font-bold text-rihan-gold uppercase tracking-widest bg-rihan-800 px-3.5 py-1 rounded-full inline-block">خاستگاه و اصالت</span>
-                <h2 class="text-2xl sm:text-3xl font-black leading-tight">چرا ریهان به وجود آمد؟</h2>
-                <p class="text-xs sm:text-sm text-gray-300 leading-loose">
-                    سال‌ها بود که دوستان و همکاران می‌گفتند: «سماق هوراند رفتی برای ما هم بیار»، «عسل طبیعی خوب سراغ داری؟». ما می‌خریدیم، می‌آوردیم و به همان قیمت می‌دادیم؛ چون از تعارف و رویکردهای بازاری خجالت می‌کشیدیم. ریهان ساخته شد تا همان خرید امین، اصیل و باوسواس را با حفظ شأن و احترام به دست همه خانواده‌ها برساند.
-                </p>
-                <div class="pt-2">
-                    <a href="{% url 'about' %}" class="inline-block bg-rihan-gold hover:bg-yellow-600 text-rihan-900 font-extrabold text-xs px-6 py-3 rounded-xl transition shadow-md">
-                        مطالعه متن کامل داستان ریهان →
-                    </a>
+<!-- Featured Products -->
+{% if featured_products %}
+<section class="section" style="background-color: rgba(13, 59, 46, 0.02);">
+    <div class="container">
+        <h2 style="text-align: center;">محصولات منتخب</h2>
+        <div class="products-grid">
+            {% for product in featured_products %}
+                <div class="product-card">
+                    {% if product.images.first %}
+                        <img src="{{ product.images.first.image.url }}" alt="{{ product.name }}" class="product-card-image">
+                    {% else %}
+                        <div class="product-card-image" style="display: flex; align-items: center; justify-content: center; color: var(--color-text-muted);">
+                            بدون تصویر
+                        </div>
+                    {% endif %}
+                    <div class="product-card-body">
+                        <h3 class="product-card-title">{{ product.name }}</h3>
+                        <p class="product-card-category">{{ product.category.name }}</p>
+                        <p class="product-card-price">{{ product.price|floatformat:0 }} تومان</p>
+                        <a href="{{ product.get_absolute_url }}" class="btn btn-primary" style="width: 100%;">
+                            مشاهده جزئیات
+                        </a>
+                    </div>
                 </div>
-            </div>
-
-            <div class="bg-rihan-800 p-8 rounded-2xl border border-rihan-700 space-y-4 text-xs text-gray-200">
-                <h3 class="text-sm font-bold text-white border-b border-rihan-700 pb-2">منشور اعتماد ثابت ریهان:</h3>
-                <ul class="space-y-2.5 leading-relaxed">
-                    <li>✓ محصول متغیر است، اما اعتماد همواره ثابت می‌ماند.</li>
-                    <li>✓ سود واقعی ما در رضایت عمیق و همیشگی شماست.</li>
-                    <li>✓ هیچ کالایی بدون آزمایش و بررسی حضوری عرضه نمی‌شود.</li>
-                    <li>✓ قیمت نهایی شفاف است؛ هیچ هزینه‌ای در لحظه پرداخت اضافه نمی‌شود.</li>
-                </ul>
-            </div>
+            {% endfor %}
+        </div>
+        <div style="text-align: center; margin-top: var(--spacing-xl);">
+            <a href="/products/" class="btn btn-secondary">مشاهده همه محصولات</a>
         </div>
     </div>
+</section>
+{% endif %}
 
-</div>
+<!-- Recent Reviews -->
+{% if recent_reviews %}
+<section class="reviews-section">
+    <div class="container">
+        <h2 style="text-align: center;">نظرات مشتریان</h2>
+        <div class="products-grid" style="margin-top: var(--spacing-xl);">
+            {% for review in recent_reviews %}
+                <div class="review-card">
+                    <p class="review-text">"{{ review.text }}"</p>
+                    <p class="review-author">— {{ review.customer_name }}</p>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<!-- About Preview -->
+<section class="section">
+    <div class="container" style="text-align: center; max-width: 700px; margin: 0 auto;">
+        <h2>داستان ریهان</h2>
+        <p style="font-size: 1.125rem; color: var(--color-text-muted); margin: var(--spacing-lg) 0;">
+            خانواده‌ای با اصالت هوراند که سال‌هاست انتخاب‌های خوب را با اطرافیان به اشتراک می‌گذارند.
+            حالا این انتخاب‌ها در قالب یک فروشگاه آنلاین حرفه‌ای در دسترس همه است.
+        </p>
+        <a href="/about/" class="btn btn-secondary">بیشتر بدانید</a>
+    </div>
+</section>
 {% endblock %}
