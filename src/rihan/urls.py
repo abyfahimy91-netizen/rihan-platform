@@ -27,8 +27,7 @@ urlpatterns = [
     path('admin/', rihan_admin.urls),
     
     # M5: RBAC Authentication
-    path('panel/', include('modules.rbac.urls')),
-    path('accounts/', include('modules.rbac.urls')),  # Alias
+    path('panel/', include('modules.rbac.urls'))
     
     # Sitemap (M1 - SEO)
     path('sitemap.xml', sitemap, {'sitemaps': sitemaps}, name='django.contrib.sitemaps.views.sitemap'),

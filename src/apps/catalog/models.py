@@ -1,6 +1,7 @@
 from django.db import models
 from django.conf import settings
 from django.core.validators import MinValueValidator, MaxValueValidator
+from django.utils import timezone
 import json
 
 
@@ -192,7 +193,7 @@ class ContentBlock(models.Model):
     is_active = models.BooleanField(default=True, verbose_name="فعال")
     is_full_width = models.BooleanField(default=False, verbose_name="تمام عرض")
     
-    created_at = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
