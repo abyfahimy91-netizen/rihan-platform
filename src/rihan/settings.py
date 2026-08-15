@@ -74,12 +74,14 @@ AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',  # Fallback
 ]
 
-# Session Settings (مطابق US-016: ۸ ساعت)
-SESSION_COOKIE_AGE = 8 * 3600  # ۸ ساعت به ثانیه
-SESSION_EXPIRE_AT_BROWSER_CLOSE = True
+# Session Settings (مطابق US-016: ۸ ساعت، remember_me: ۳۰ روز)
+SESSION_COOKIE_AGE = 30 * 24 * 3600  # ۳۰ روز پیش‌فرض (برای remember_me)
+SESSION_EXPIRE_AT_BROWSER_CLOSE = False  # session با بستن browser از بین نرود
 SESSION_COOKIE_NAME = 'rihan_session'
 SESSION_COOKIE_HTTPONLY = True
 SESSION_COOKIE_SECURE = False  # در production True شود
+SESSION_COOKIE_SAMESITE = 'Lax'
+SESSION_SAVE_EVERY_REQUEST = True  # تمدید session در هر request
 
 WSGI_APPLICATION = 'rihan.wsgi.application'
 
