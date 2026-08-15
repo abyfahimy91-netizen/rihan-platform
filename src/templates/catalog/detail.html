@@ -994,10 +994,10 @@
                             <span class="review-date">{{ rev.created_at|date:"Y/m/d" }}</span>
                         </div>
                         <div class="review-text">{{ rev.comment }}</div>
-                        {% if rev.admin_response %}
+                        {% if rev.admin_reply %}
                         <div class="admin-response">
                             <strong>پاسخ مدیریت ریهان:</strong>
-                            {{ rev.admin_response }}
+                            {{ rev.admin_reply }}
                         </div>
                         {% endif %}
                     </div>

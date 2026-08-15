@@ -261,19 +261,18 @@ class ProductReview(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='reviews', verbose_name="محصول")
     author_name = models.CharField(max_length=150, verbose_name="نام خریدار")
     author_phone = models.CharField(max_length=20, blank=True, verbose_name="شماره تماس")
-    author_email = models.EmailField(blank=True, verbose_name="ایمیل")
+    order_number = models.CharField(max_length=50, blank=True, verbose_name="شماره سفارش مرتبط")
     rating = models.PositiveSmallIntegerField(
-        validators=[MinValueValidator(1), MaxValueValidator(5)],
-        verbose_name="امتیاز (۱-۵)"
+        choices=[(1, '1 ستاره'), (2, '2 ستاره'), (3, '3 ستاره'), (4, '4 ستاره'), (5, '5 ستاره')],
+        default=5,
+        verbose_name="امتیاز (۱ تا ۵)"
     )
-    title = models.CharField(max_length=200, blank=True, verbose_name="عنوان نظر")
-    comment = models.TextField(verbose_name="متن نظر")
-    order_number = models.CharField(max_length=50, blank=True, verbose_name="شماره سفارش")
+    comment = models.TextField(verbose_name="متن نظر و تجربه خرید")
+    is_approved = models.BooleanField(default=False, verbose_name="تأییدشده جهت نمایش عمومی")
     is_verified_buyer = models.BooleanField(default=False, verbose_name="خریدار تأییدشده")
-    is_approved = models.BooleanField(default=False, verbose_name="تأییدشده برای انتشار")
-    admin_response = models.TextField(blank=True, verbose_name="پاسخ ادمین")
-    created_at = models.DateTimeField(auto_now_add=True, verbose_name="تاریخ ثبت")
-    updated_at = models.DateTimeField(auto_now=True, verbose_name="تاریخ بروزرسانی")
+    admin_reply = models.TextField(blank=True, verbose_name="پاسخ رسمی مدیریت ریهان")
+    replied_at = models.DateTimeField(blank=True, null=True, verbose_name="زمان پاسخ ادمین")
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="زمان ثبت")
 
     class Meta:
         verbose_name = "نظر محصول"
