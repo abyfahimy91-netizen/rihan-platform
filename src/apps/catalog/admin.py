@@ -53,7 +53,7 @@ class ProductAdmin(admin.ModelAdmin):
     search_fields = ['title', 'sku', 'summary']
     prepopulated_fields = {'slug': ('title',)}
     inlines = [ProductImageInline, ContentBlockInline]
-    readonly_fields = ['created_at', 'updated_at']
+    readonly_fields = ['created_at']
     
     fieldsets = (
         ('اطلاعات پایه', {
@@ -92,7 +92,7 @@ class ContentBlockAdmin(admin.ModelAdmin):
     list_filter = ['block_type', 'is_active', 'product__category']
     search_fields = ['title', 'content', 'product__title']
     list_editable = ['sort_order', 'is_active']
-    readonly_fields = ['created_at', 'updated_at']
+    readonly_fields = ['created_at']
     
     fieldsets = (
         ('نوع و محصول', {
@@ -171,7 +171,7 @@ class ProductReviewAdmin(admin.ModelAdmin):
     list_display = ['product', 'author_name', 'rating', 'is_verified_buyer', 'is_approved', 'created_at']
     list_filter = ['is_approved', 'is_verified_buyer', 'rating', 'created_at']
     search_fields = ['author_name', 'comment', 'order_number', 'product__title']
-    readonly_fields = ['created_at', 'updated_at']
+    readonly_fields = ['created_at']
     actions = ['approve_reviews', 'reject_reviews']
 
     @admin.action(description="تأیید و انتشار عمومی نظرات انتخاب‌شده")
@@ -191,7 +191,7 @@ class LeadCaptureAdmin(admin.ModelAdmin):
     list_filter = ['status', 'created_at']
     search_fields = ['name', 'phone', 'email', 'message']
     list_editable = ['status']
-    readonly_fields = ['created_at', 'updated_at']
+    readonly_fields = ['created_at']
     actions = ['mark_as_contacted', 'mark_as_supplied', 'mark_as_obsolete']
 
     @admin.action(description="علامت‌گذاری به عنوان تماس گرفته‌شده")
