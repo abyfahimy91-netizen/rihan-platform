@@ -1,15 +1,26 @@
 """
 M5: Authentication Views
+
+Fixes:
+- Post-Redirect-Get (PRG) pattern برای جلوگیری از resubmit
+- Logout کامل با session flush
+- Cache control برای جلوگیری از caching login page
+- Session duration بر اساس نقش
 """
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 from django.views.decorators.http import require_http_methods
+from django.views.decorators.cache import never_cache
 from django.utils.translation import gettext as _
+from django.contrib.auth import get_user_model
 
 from .models import UserProfile, LoginAttempt
 
+User = get_user_model()
 
+
+@never_cache
 @require_http_methods(["GET", "POST"])
 def login_view(request):
     """
@@ -18,7 +29,9 @@ def login_view(request):
     منطبق بر:
     - US-016: فرم نام کاربری + رمز عبور
     - M13: هویت بصری فاخر
+    - PRG pattern برای جلوگیری از resubmit
     """
+    # اگر کاربر لاگین است، redirect به admin
     if request.user.is_authenticated:
         return redirect('/admin/')
     
@@ -34,27 +47,29 @@ def login_view(request):
         user = authenticate(request, username=username, password=password)
         
         if user is not None:
+            # Login موفق
             login(request, user)
             
             # تنظیم session duration بر اساس نقش
             try:
                 profile = user.profile
-                if not remember_me:
-                    # اگر remember_me نبود، session ۸ ساعته پیش‌فرض
-                    request.session.set_expiry(profile.role.session_duration_hours * 3600)
-                else:
+                if remember_me:
                     # با remember_me: ۳۰ روز
                     request.session.set_expiry(30 * 24 * 3600)
+                else:
+                    # بدون remember_me: بر اساس نقش (پیش‌فرض ۸ ساعت)
+                    request.session.set_expiry(profile.role.session_duration_hours * 3600)
             except UserProfile.DoesNotExist:
-                pass
+                # اگر profile نداشت، ۸ ساعت پیش‌فرض
+                request.session.set_expiry(8 * 3600)
             
             messages.success(request, f'خوش آمدید، {user.first_name or user.username}!')
             
-            # redirect به next یا admin
-            next_url = request.GET.get('next', '/admin/')
+            # Redirect به next یا admin (PRG pattern)
+            next_url = request.GET.get('next', request.POST.get('next', '/admin/'))
             return redirect(next_url)
         else:
-            # بررسی دلیل شکست
+            # Login ناموفق
             recent_attempt = LoginAttempt.objects.filter(
                 username=username
             ).order_by('-timestamp').first()
@@ -92,12 +107,19 @@ def login_view(request):
             
             return render(request, 'rbac/login.html', {'username': username})
     
-    # GET request
+    # GET request - نمایش فرم خالی
     return render(request, 'rbac/login.html')
 
 
+@never_cache
 def logout_view(request):
-    """خروج از حساب"""
+    """
+    خروج از حساب
+    
+    - پاک کردن کامل session
+    - Activity tracking
+    - Redirect به login با پیام موفقیت
+    """
     if request.user.is_authenticated:
         from modules.plugin_arch.core import log_admin_activity
         log_admin_activity(
@@ -109,6 +131,20 @@ def logout_view(request):
             request=request,
         )
     
+    # Logout کاربر
     logout(request)
+    
+    # پاک کردن کامل session
+    request.session.flush()
+    
     messages.success(request, 'با موفقیت خارج شدید.')
-    return redirect('/panel/login/')
+    
+    # Redirect به login page
+    response = redirect('/panel/login/')
+    
+    # Cache control headers برای جلوگیری از caching
+    response['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+    response['Pragma'] = 'no-cache'
+    response['Expires'] = '0'
+    
+    return response
