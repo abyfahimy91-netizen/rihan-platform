@@ -167,11 +167,12 @@ class SupplierAdmin(admin.ModelAdmin):
 
 
 @admin.register(ProductReview)
+@admin.register(ProductReview)
 class ProductReviewAdmin(admin.ModelAdmin):
     list_display = ['product', 'author_name', 'rating', 'is_verified_buyer', 'is_approved', 'created_at']
     list_filter = ['is_approved', 'is_verified_buyer', 'rating', 'created_at']
     search_fields = ['author_name', 'comment', 'order_number', 'product__title']
-    readonly_fields = ['created_at', 'updated_at']
+    readonly_fields = ['created_at', 'replied_at']
     actions = ['approve_reviews', 'reject_reviews']
 
     @admin.action(description="تأیید و انتشار عمومی نظرات انتخاب‌شده")
