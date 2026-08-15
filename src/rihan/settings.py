@@ -96,10 +96,6 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
-STATICFILES_DIRS = [
-    BASE_DIR / 'modules' / 'visual_identity' / 'static',
-]
-
 STATIC_ROOT = Path('/app/staticfiles')
 
 MEDIA_URL = '/media/'
