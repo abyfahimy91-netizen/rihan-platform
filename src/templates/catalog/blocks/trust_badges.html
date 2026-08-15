@@ -1,0 +1,14 @@
+<div class="content-block trust-badges-block {{ css_class }}">
+    {% if title %}<h3 class="block-title">{{ title }}</h3>{% endif %}
+    <div class="block-trust-badges">
+        {% for badge in extra_data.badges %}
+        <div class="trust-badge-item">
+            <div class="badge-icon">{{ badge.icon|default:"✓" }}</div>
+            <div class="badge-text">
+                <strong>{{ badge.title }}</strong>
+                {% if badge.description %}<p>{{ badge.description }}</p>{% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>

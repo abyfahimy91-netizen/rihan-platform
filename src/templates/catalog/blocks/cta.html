@@ -1,0 +1,6 @@
+<div class="content-block cta-block {{ css_class }}">
+    <a href="{{ link_url }}" class="block-cta-button" target="{{ link_target|default:'_self' }}">
+        {{ link_text|default:title|default:"اقدام" }}
+    </a>
+    {% if subtitle %}<p class="block-description">{{ subtitle }}</p>{% endif %}
+</div>

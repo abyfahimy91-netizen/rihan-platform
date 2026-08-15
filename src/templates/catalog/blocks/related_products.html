@@ -1,0 +1,14 @@
+<div class="content-block related-products-block {{ css_class }}">
+    {% if title %}<h3 class="block-title">{{ title }}</h3>{% endif %}
+    <div class="block-related-products">
+        {% for product in extra_data.products %}
+        <div class="related-product-item">
+            <a href="{{ product.url }}">
+                <img src="{{ product.image }}" alt="{{ product.title }}">
+                <h4>{{ product.title }}</h4>
+                <p class="product-price">{{ product.price }}</p>
+            </a>
+        </div>
+        {% endfor %}
+    </div>
+</div>

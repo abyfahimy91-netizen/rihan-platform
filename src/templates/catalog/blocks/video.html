@@ -1,0 +1,14 @@
+<div class="content-block video-block {{ css_class }}">
+    {% if title %}<h3 class="block-title">{{ title }}</h3>{% endif %}
+    <div class="block-video">
+        {% if video_url %}
+            <iframe src="{{ video_url }}" frameborder="0" allowfullscreen class="video-iframe"></iframe>
+        {% elif video_file %}
+            <video controls class="video-player">
+                <source src="{{ video_file.url }}" type="video/mp4">
+                مرورگر شما از ویدیو پشتیبانی نمی‌کند.
+            </video>
+        {% endif %}
+        {% if subtitle %}<p class="block-caption">{{ subtitle }}</p>{% endif %}
+    </div>
+</div>

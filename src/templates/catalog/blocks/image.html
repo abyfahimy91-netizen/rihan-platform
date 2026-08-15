@@ -1,0 +1,7 @@
+<div class="content-block image-block {{ css_class }} {% if is_full_width %}full-width{% endif %}">
+    {% if title %}<h3 class="block-title">{{ title }}</h3>{% endif %}
+    <figure class="block-figure">
+        <img src="{{ image.url }}" alt="{{ title }}" class="block-image">
+        {% if subtitle %}<figcaption class="block-caption">{{ subtitle }}</figcaption>{% endif %}
+    </figure>
+</div>
