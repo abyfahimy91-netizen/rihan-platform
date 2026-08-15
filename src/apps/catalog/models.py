@@ -261,19 +261,19 @@ class ProductReview(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='reviews', verbose_name="محصول")
     author_name = models.CharField(max_length=150, verbose_name="نام خریدار")
     author_phone = models.CharField(max_length=20, blank=True, verbose_name="شماره تماس")
-    author_email = models.EmailField(blank=True, null=True, verbose_name="ایمیل")
+    author_email = models.EmailField(blank=True, verbose_name="ایمیل")
     rating = models.PositiveSmallIntegerField(
         validators=[MinValueValidator(1), MaxValueValidator(5)],
         verbose_name="امتیاز (۱-۵)"
     )
-    title = models.CharField(max_length=200, blank=True, null=True, verbose_name="عنوان نظر")
+    title = models.CharField(max_length=200, blank=True, verbose_name="عنوان نظر")
     comment = models.TextField(verbose_name="متن نظر")
     order_number = models.CharField(max_length=50, blank=True, verbose_name="شماره سفارش")
     is_verified_buyer = models.BooleanField(default=False, verbose_name="خریدار تأییدشده")
     is_approved = models.BooleanField(default=False, verbose_name="تأییدشده برای انتشار")
-    admin_reply = models.TextField(blank=True, null=True, verbose_name="پاسخ ادمین")
-    replied_at = models.DateTimeField(null=True, blank=True, verbose_name="تاریخ پاسخ")
+    admin_response = models.TextField(blank=True, verbose_name="پاسخ ادمین")
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="تاریخ ثبت")
+    updated_at = models.DateTimeField(auto_now=True, verbose_name="تاریخ بروزرسانی")
 
     class Meta:
         verbose_name = "نظر محصول"
@@ -282,11 +282,6 @@ class ProductReview(models.Model):
 
     def __str__(self):
         return f"{self.author_name} - {self.product.title} ({self.rating}★)"
-    
-    @property
-    def admin_response(self):
-        """Alias برای سازگاری با template های قدیمی"""
-        return self.admin_reply
 
 
 class LeadCapture(models.Model):
