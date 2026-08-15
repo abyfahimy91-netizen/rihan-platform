@@ -1,0 +1,1 @@
+# related_products block
