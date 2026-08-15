@@ -68,6 +68,19 @@ TEMPLATES = [
     },
 ]
 
+# Custom Authentication Backend (M5 - RBAC)
+AUTHENTICATION_BACKENDS = [
+    'modules.rbac.backends.RihanAuthBackend',  # Custom با قفل و tracking
+    'django.contrib.auth.backends.ModelBackend',  # Fallback
+]
+
+# Session Settings (مطابق US-016: ۸ ساعت)
+SESSION_COOKIE_AGE = 8 * 3600  # ۸ ساعت به ثانیه
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True
+SESSION_COOKIE_NAME = 'rihan_session'
+SESSION_COOKIE_HTTPONLY = True
+SESSION_COOKIE_SECURE = False  # در production True شود
+
 WSGI_APPLICATION = 'rihan.wsgi.application'
 
 DATABASES = {

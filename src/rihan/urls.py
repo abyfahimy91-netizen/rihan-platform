@@ -1,4 +1,4 @@
-from django.contrib import admin
+from modules.rbac.admin_site import rihan_admin\nfrom django.contrib import admin\nadmin.autodiscover()
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
@@ -12,7 +12,11 @@ sitemaps = {
 
 urlpatterns = [
     # Django Admin
-    path('admin/', admin.site.urls),
+    path('admin/', rihan_admin.urls),
+    
+    # M5: RBAC Authentication
+    path('panel/', include('modules.rbac.urls')),
+    path('accounts/', include('modules.rbac.urls')),  # Alias
     
     # Sitemap
     path('sitemap.xml', sitemap, {'sitemaps': sitemaps}, name='django.contrib.sitemaps.views.sitemap'),
