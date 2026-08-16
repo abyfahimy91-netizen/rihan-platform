@@ -1,5 +1,5 @@
 from rest_framework import viewsets, status, permissions
-from rest_framework.decorators import action, api_view
+from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth import authenticate, get_user_model
@@ -19,16 +19,16 @@ User = get_user_model()
 class AuthViewSet(viewsets.ViewSet):
     """
     API احراز هویت و مدیریت حساب کاربری
-    - POST /auth/register/         : ثبت‌نام کاربر جدید
-    - POST /auth/login/            : ورود و دریافت JWT
-    - POST /auth/logout/           : خروج
-    - POST /auth/verify-email/     : تایید ایمیل با توکن
+    - POST /auth/register/            : ثبت‌نام کاربر جدید
+    - POST /auth/login/               : ورود و دریافت JWT
+    - POST /auth/logout/              : خروج (بلاک کردن refresh token)
+    - POST /auth/verify-email/        : تایید ایمیل با توکن
     - POST /auth/resend-verification/ : ارسال مجدد ایمیل تایید
-    - POST /auth/forgot-password/  : درخواست بازیابی رمز
-    - POST /auth/reset-password/   : بازیابی رمز با توکن
-    - GET  /auth/me/               : اطلاعات کاربر فعلی
-    - PUT  /auth/me/               : ویرایش پروفایل
-    - POST /auth/change-password/  : تغییر رمز عبور
+    - POST /auth/forgot-password/     : درخواست بازیابی رمز
+    - POST /auth/reset-password/      : بازیابی رمز با توکن
+    - GET  /auth/me/                  : اطلاعات کاربر فعلی
+    - PUT  /auth/me/                  : ویرایش پروفایل
+    - POST /auth/change-password/     : تغییر رمز عبور
     """
     
     @action(detail=False, methods=['post'], permission_classes=[permissions.AllowAny])
@@ -99,6 +99,7 @@ class AuthViewSet(viewsets.ViewSet):
                 'last_name': user.last_name
             }
         })
+
     
     @action(detail=False, methods=['post'])
     def logout(self, request):
@@ -124,7 +125,7 @@ class AuthViewSet(viewsets.ViewSet):
         
         try:
             verify_email_token(token)
-            return Response({'message': 'ایمیل شما با موفقیت تایید شد'})
+            return Response({'message': 'ایمیل شما با موفقیت تایید شد. اکنون می‌توانید وارد شوید.'})
         except Exception as e:
             return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
     
@@ -159,7 +160,7 @@ class AuthViewSet(viewsets.ViewSet):
             return Response({
                 'message': 'ایمیل بازیابی رمز عبور ارسال شد (در صورت وجود کاربر)'
             })
-        except Exception as e:
+        except Exception:
             # برای امنیت، حتی اگر کاربر وجود نداشت، پیام موفقیت برمی‌گردانیم
             return Response({
                 'message': 'اگر کاربری با این ایمیل وجود داشته باشد، ایمیل بازیابی ارسال می‌شود'
@@ -177,9 +178,10 @@ class AuthViewSet(viewsets.ViewSet):
                 token=serializer.validated_data['token'],
                 new_password=serializer.validated_data['new_password']
             )
-            return Response({'message': 'رمز عبور با موفقیت تغییر کرد'})
+            return Response({'message': 'رمز عبور با موفقیت تغییر کرد. اکنون می‌توانید با رمز جدید وارد شوید.'})
         except Exception as e:
             return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
     
     @action(detail=False, methods=['get'])
     def me(self, request):
@@ -199,7 +201,7 @@ class AuthViewSet(viewsets.ViewSet):
             'profile': profile_serializer.data
         })
     
-    @action(detail=False, methods=['put'])
+    @me.mapping.put
     def update_me(self, request):
         """ویرایش پروفایل کاربر فعلی"""
         user = request.user
