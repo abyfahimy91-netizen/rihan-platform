@@ -2,20 +2,13 @@
 Core Module - هسته معماری پلاگین‌محور ریهان
 ========================================
 
-این ماژول شامل:
-- PluginRegistry: ثبت و مدیریت پلاگین‌ها
-- FeatureFlag: مدل پرچم‌های قابلیت (Lazy Load)
-- FeatureFlagService: سرویس بررسی پرچم‌ها (Lazy Load)
-- Middlewareهای هسته (Lazy Load)
-
-منطبق بر:
-- ADR-004 (معماری افزونه‌محور)
-- D-079 (معماری پلاگین‌محور)
-- ARCHITECTURE-PRINCIPLES (الگوی ۵)
-
-نکته مهم: فقط PluginRegistry و PluginManifest به صورت eager import می‌شوند
-چون به Django وابسته نیستند. بقیه موارد lazy import می‌شوند تا
-قبل از django.setup() خطا ایجاد نکنند.
+اجزا:
+- PluginRegistry: ثبت و مدیریت ماژول‌ها
+- HookSystem: ارتباط همگام بین ماژول‌ها
+- EventBus: ارتباط غیرهمگام بین ماژول‌ها
+- FeatureFlag: پرچم‌های قابلیت
+- AuditLog: لاگ ممیزی
+- Middlewareها
 """
 # Eager imports (no Django dependency)
 from .plugin_registry import (
@@ -26,12 +19,27 @@ from .plugin_registry import (
     get_all_plugins,
 )
 
+from .hooks import (
+    HookSystem,
+    HookNames,
+    HOOKS,
+    HookStop,
+    hooks,
+    register_hook,
+)
+
+from .events import (
+    EventBus,
+    EventNames,
+    EVENTS,
+    Event,
+    events,
+    subscribe,
+)
+
 
 def __getattr__(name):
-    """
-    Lazy import for Django-dependent components.
-    This prevents AppRegistryNotReady errors before django.setup().
-    """
+    """Lazy import for Django-dependent components."""
     if name == 'FeatureFlagService':
         from .services import FeatureFlagService
         return FeatureFlagService
@@ -55,17 +63,17 @@ def __getattr__(name):
 
 
 __all__ = [
-    # Eager
-    'PluginRegistry',
-    'PluginManifest',
-    'register_plugin',
-    'get_plugin',
-    'get_all_plugins',
-    # Lazy (via __getattr__)
-    'FeatureFlagService',
-    'feature_flags',
-    'FeatureFlagMiddleware',
-    'AuditLogMiddleware',
-    'FeatureFlag',
-    'AuditLog',
+    # Plugin Registry
+    'PluginRegistry', 'PluginManifest', 'register_plugin',
+    'get_plugin', 'get_all_plugins',
+    # Hook System
+    'HookSystem', 'HookNames', 'HOOKS', 'HookStop',
+    'hooks', 'register_hook',
+    # Event Bus
+    'EventBus', 'EventNames', 'EVENTS', 'Event',
+    'events', 'subscribe',
+    # Lazy (Django-dependent)
+    'FeatureFlagService', 'feature_flags',
+    'FeatureFlagMiddleware', 'AuditLogMiddleware',
+    'FeatureFlag', 'AuditLog',
 ]
