@@ -1,6 +1,8 @@
 """
 Role Service برای ماژول RBAC
 منطبق بر ADR-002 و D-017
+
+FIX: استفاده از update_or_create به‌جای get_or_create در assign_role
 """
 from __future__ import annotations
 
@@ -38,7 +40,7 @@ class RoleService:
             'name': 'مدیر',
             'code': 'admin',
             'description': 'مدیر سیستم با دسترسی کامل',
-            'permissions': ['*'],  # همه مجوزها
+            'permissions': ['*'],
             'is_system': True,
         },
         {
@@ -115,13 +117,16 @@ class RoleService:
     @classmethod
     def assign_role(
         cls,
-        user: User,
+        user,
         role_code: str,
-        granted_by: Optional[User] = None,
+        granted_by=None,
         is_primary: bool = True
-    ) -> UserRole:
+    ):
         """
         اعطای نقش به کاربر.
+        
+        FIX: استفاده از update_or_create به‌جای get_or_create
+        تا is_primary همیشه به‌روز شود.
         
         Args:
             user: کاربر
@@ -130,7 +135,7 @@ class RoleService:
             is_primary: نقش اصلی (در MVP باید True باشد)
             
         Returns:
-            UserRole ایجاد شده
+            UserRole ایجاد یا به‌روز شده
         """
         role = cls.get_role_by_code(role_code)
         if not role:
@@ -140,7 +145,8 @@ class RoleService:
         if is_primary:
             UserRole.objects.filter(user=user, is_primary=True).update(is_primary=False)
         
-        user_role, created = UserRole.objects.get_or_create(
+        # FIX: update_or_create به‌جای get_or_create
+        user_role, created = UserRole.objects.update_or_create(
             user=user,
             role=role,
             defaults={
@@ -151,11 +157,13 @@ class RoleService:
         
         if created:
             logger.info(f"Assigned role '{role.name}' to {user.username}")
+        else:
+            logger.info(f"Updated role '{role.name}' for {user.username} (is_primary={is_primary})")
         
         return user_role
     
     @classmethod
-    def get_user_primary_role(cls, user: User) -> Optional[Role]:
+    def get_user_primary_role(cls, user) -> Optional[Role]:
         """دریافت نقش اصلی کاربر"""
         try:
             user_role = UserRole.objects.get(user=user, is_primary=True)
@@ -164,12 +172,12 @@ class RoleService:
             return None
     
     @classmethod
-    def get_user_roles(cls, user: User) -> List[Role]:
+    def get_user_roles(cls, user) -> List[Role]:
         """دریافت تمام نقش‌های کاربر"""
         return [ur.role for ur in UserRole.objects.filter(user=user)]
     
     @classmethod
-    def has_permission(cls, user: User, permission: str) -> bool:
+    def has_permission(cls, user, permission: str) -> bool:
         """
         بررسی داشتن مجوز.
         
@@ -189,3 +197,21 @@ class RoleService:
             return True
         
         return permission in primary_role.permissions
+    
+    @classmethod
+    def revoke_role(cls, user, role_code: str) -> bool:
+        """
+        لغو نقش کاربر.
+        
+        Returns:
+            True اگر نقش لغو شد
+        """
+        role = cls.get_role_by_code(role_code)
+        if not role:
+            return False
+        
+        deleted_count, _ = UserRole.objects.filter(
+            user=user, role=role
+        ).delete()
+        
+        return deleted_count > 0
