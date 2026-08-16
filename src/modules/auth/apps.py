@@ -6,3 +6,7 @@ class AuthConfig(AppConfig):
     name = 'src.modules.auth'
     label = 'auth_module'
     verbose_name = "ماژول ۳: احراز هویت و پروفایل (M3)"
+    
+    def ready(self):
+        '''ثبت signal ها هنگام راه‌اندازی ماژول'''
+        import src.modules.auth.signals  # noqa
