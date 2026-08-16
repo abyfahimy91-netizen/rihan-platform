@@ -27,6 +27,7 @@ class Cart(models.Model):
     def subtotal(self):
         return sum(item.subtotal for item in self.items.all())
 
+
 class CartItem(models.Model):
     '''اقلام سبد خرید - بدون هزینه پنهان (D-046)'''
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
