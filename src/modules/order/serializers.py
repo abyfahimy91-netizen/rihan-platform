@@ -1,6 +1,7 @@
 from rest_framework import serializers
-from .models import Cart, CartItem, Order, OrderItem
+from .models import Cart, CartItem, Order, OrderItem, Payment, Address
 from src.modules.catalog.models import Product
+
 
 class ProductMinimalSerializer(serializers.ModelSerializer):
     '''نمایش حداقلی محصول در سبد خرید'''
@@ -29,8 +30,6 @@ class CartSerializer(serializers.ModelSerializer):
         model = Cart
         fields = ['id', 'session_key', 'user', 'is_active', 'items', 'total_items', 'subtotal', 'created_at']
         read_only_fields = ['id', 'user', 'created_at']
-from rest_framework import serializers
-from .models import Order, OrderItem
 
 
 class OrderItemSerializer(serializers.ModelSerializer):
