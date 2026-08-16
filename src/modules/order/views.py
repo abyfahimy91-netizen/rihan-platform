@@ -2,8 +2,9 @@ from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.exceptions import ValidationError
-from .services import get_or_create_cart, add_to_cart, update_cart_item, remove_from_cart
-from .serializers import CartSerializer
+from django.conf import settings
+from .services import get_or_create_cart, add_to_cart, update_cart_item, remove_from_cart, create_order_from_cart
+from .serializers import CartSerializer, OrderSerializer
 
 
 class CartViewSet(viewsets.ViewSet):
@@ -11,8 +12,9 @@ class CartViewSet(viewsets.ViewSet):
     API سبد خرید
     - GET  /cart/             : مشاهده سبد
     - POST /cart/add/         : افزودن کالا
-    - PUT  /cart/update/<id>/ : به‌روزرسانی تعداد
-    - DEL  /cart/remove/<id>/ : حذف کالا
+    - PUT  /cart/update_item/ : به‌روزرسانی تعداد
+    - DEL  /cart/remove/      : حذف کالا
+    - POST /cart/checkout/    : نهایی‌سازی سفارش
     '''
     
     def list(self, request):
@@ -84,16 +86,13 @@ class CartViewSet(viewsets.ViewSet):
             })
         except ValidationError as e:
             return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
-
+    
     @action(detail=False, methods=['post'])
     def checkout(self, request):
         '''
         نهایی‌سازی سفارش
         Body: {name, phone, address, postal_code, shipping_cost}
         '''
-        from .services import create_order_from_cart
-        from .serializers import OrderSerializer
-        
         cart = get_or_create_cart(request)
         
         if not cart.items.exists():
@@ -132,13 +131,13 @@ class CartViewSet(viewsets.ViewSet):
 class PaymentViewSet(viewsets.ViewSet):
     '''
     API پرداخت
-    - POST /payment/create/  : ایجاد پرداخت (بازگشت URL درگاه)
-    - POST /payment/verify/  : تایید پرداخت پس از بازگشت از درگاه
+    - POST /payment/initiate/ : ایجاد پرداخت (بازگشت URL درگاه)
+    - POST /payment/verify/   : تایید پرداخت پس از بازگشت از درگاه
     '''
     
     @action(detail=False, methods=['post'])
-    def create(self, request):
-        '''ایجاد تراکنش پرداخت'''
+    def initiate(self, request):
+        '''ایجاد تراکنش پرداخت و دریافت URL درگاه'''
         from .models import Order, Payment
         from .payment_gateway import get_payment_gateway
         
