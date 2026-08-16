@@ -2,6 +2,17 @@ import uuid
 from django.db import models
 from django.conf import settings
 
+def generate_order_number():
+    '''تولید شماره سفارش فرمت RH-1405-XXXXX (منطبق بر D-080)'''
+    # سال جاری شمسی (در فازهای بعد با کتابخانه jdatetime کاملاً پویا می‌شود)
+    year_str = "1405"
+    latest_order = Order.objects.filter(order_number__startswith=f"RH-{year_str}-").order_by('order_number').last()
+    if not latest_order:
+        return f"RH-{year_str}-00001"
+    last_num = int(latest_order.order_number.split('-')[-1])
+    return f"RH-{year_str}-{str(last_num + 1).zfill(5)}"
+
+
 class Cart(models.Model):
     '''سبد خرید - منطبق بر D-079 و D-080'''
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -51,3 +62,78 @@ class CartItem(models.Model):
     def clean(self):
         if self.quantity < 1:
             self.quantity = 1
+
+
+class Order(models.Model):
+    '''سفارش نهایی - منطبق بر ADR-002 با Snapshot مهمان'''
+    class OrderStatus(models.TextChoices):
+        DRAFT = 'DRAFT', 'پیش‌نویس'
+        PENDING = 'PENDING', 'در انتظار پرداخت'
+        PAID = 'PAID', 'پرداخت شده'
+        PROCESSING = 'PROCESSING', 'در حال پردازش'
+        SHIPPED = 'SHIPPED', 'ارسال شده'
+        DELIVERED = 'DELIVERED', 'تحویل داده شده'
+        CANCELLED = 'CANCELLED', 'لغو شده'
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    order_number = models.CharField(max_length=20, unique=True, blank=True, verbose_name="شماره سفارش")
+    
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name='orders')
+    session_key = models.CharField(max_length=100, blank=True, verbose_name="شناسه نشست (برای مهمان)")
+    
+    status = models.CharField(max_length=20, choices=OrderStatus.choices, default=OrderStatus.DRAFT)
+    
+    # Snapshot اطلاعات کاربر مهمان (ADR-002)
+    guest_name = models.CharField(max_length=150, blank=True, verbose_name="نام خریدار (مهمان)")
+    guest_phone = models.CharField(max_length=20, blank=True, verbose_name="تلفن تماس (مهمان)")
+    guest_address = models.TextField(blank=True, verbose_name="آدرس کامل (مهمان)")
+    guest_postal_code = models.CharField(max_length=20, blank=True, verbose_name="کد پستی (مهمان)")
+    
+    subtotal = models.DecimalField(max_digits=10, decimal_places=2, default=0, verbose_name="جمع کل کالاها")
+    shipping_cost = models.DecimalField(max_digits=10, decimal_places=2, default=0, verbose_name="هزینه ارسال")
+    total_price = models.DecimalField(max_digits=10, decimal_places=2, default=0, verbose_name="مبلغ نهایی")
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "سفارش"
+        verbose_name_plural = "سفارشات"
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return self.order_number
+
+    def save(self, *args, **kwargs):
+        if not self.order_number:
+            self.order_number = generate_order_number()
+        super().save(*args, **kwargs)
+
+    def calculate_totals(self):
+        self.subtotal = sum(item.subtotal for item in self.items.all())
+        self.total_price = self.subtotal + self.shipping_cost
+        self.save()
+
+
+class OrderItem(models.Model):
+    '''اقلام سفارش نهایی'''
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='items')
+    product = models.ForeignKey('catalog.Product', on_delete=models.PROTECT, verbose_name="محصول")
+    
+    quantity = models.PositiveIntegerField(default=1)
+    unit_price_at_purchase = models.DecimalField(max_digits=10, decimal_places=2)
+    
+    # Snapshot محصول در لحظه خرید تا در صورت تغییر نام محصول در آینده، فاکتور دست‌نخورده بماند
+    product_name_snapshot = models.CharField(max_length=200, verbose_name="نام محصول در لحظه خرید")
+
+    class Meta:
+        verbose_name = "قلم سفارش"
+        verbose_name_plural = "اقلام سفارش"
+
+    def __str__(self):
+        return f"{self.product_name_snapshot} x {self.quantity}"
+
+    @property
+    def subtotal(self):
+        return self.quantity * self.unit_price_at_purchase
