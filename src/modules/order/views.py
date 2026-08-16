@@ -256,3 +256,41 @@ class AddressViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         """ذخیره آدرس با کاربر فعلی"""
         serializer.save(user=self.request.user)
+
+
+class OrderViewSet(viewsets.ModelViewSet):
+    """
+    API مشاهده سفارشات کاربر (فقط خواندنی)
+    - GET /orders/              : لیست سفارشات کاربر (فقط وضعیت‌های معتبر)
+    - GET /orders/{order_number}/ : جزئیات یک سفارش (مثلاً RH-1405-00001)
+    """
+    serializer_class = OrderSerializer
+    http_method_names = ['get']
+    lookup_field = 'order_number'
+    
+    def get_queryset(self):
+        """فقط سفارشات کاربر فعلی را برگردان"""
+        from .models import Order
+        if self.request.user.is_authenticated:
+            return Order.objects.filter(user=self.request.user).order_by('-created_at')
+        return Order.objects.none()
+    
+    def retrieve(self, request, *args, **kwargs):
+        """نمایش جزئیات یک سفارش خاص (با چک مالکیت)"""
+        order_number = kwargs.get('order_number')
+        from .models import Order
+        try:
+            order = Order.objects.get(order_number=order_number)
+        except Order.DoesNotExist:
+            return Response({'error': 'سفارش یافت نشد'}, status=status.HTTP_404_NOT_FOUND)
+        
+        # چک مالکیت: کاربر لاگین‌کرده یا مهمان با session_key
+        if not request.user.is_authenticated:
+            if order.session_key != request.session.session_key:
+                return Response({'error': 'دسترسی غیرمجاز'}, status=status.HTTP_403_FORBIDDEN)
+        else:
+            if order.user != request.user:
+                return Response({'error': 'دسترسی غیرمجاز'}, status=status.HTTP_403_FORBIDDEN)
+        
+        serializer = OrderSerializer(order)
+        return Response(serializer.data)
