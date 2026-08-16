@@ -20,6 +20,24 @@ logger = logging.getLogger(__name__)
 CACHE_PREFIX = 'rihan:ff:'
 CACHE_TTL = 300  # 5 دقیقه
 
+# ۱۴ ماژول استاندارد ریهان (D-079)
+STANDARD_MODULES = [
+    ('catalog', 'M1', 'کاتالوگ محصول با روایت‌گری اصیل'),
+    ('order', 'M2', 'فرم سفارش و سبد خرید ۳ مرحله‌ای'),
+    ('family_panel', 'M3', 'پنل خانواده (مدیریت سفارش‌ها و فاکتور چاپی)'),
+    ('supplier_panel', 'M4', 'پنل تأمین‌کننده (مشاهده سفارش‌های مرتبط)'),
+    ('rbac', 'M5', 'سیستم دسترسی و نقش‌ها'),
+    ('finance', 'M6', 'حساب و کتاب مالی و حاشیه سود'),
+    ('tracking', 'M7', 'پیگیری سفارش بدون لاگین'),
+    ('reviews', 'M8', 'نظرات، بازخورد و رضایت خریداران'),
+    ('leads', 'M9', 'فرم ثبت سرنخ و اطلاع‌رسانی موجودی'),
+    ('auth', 'M10', 'احراز هویت مشتری (OTP ۶ رقمی + پسورد)'),
+    ('payment', 'M11', 'پرداخت کارت‌به‌کارت و بارگذاری رسید'),
+    ('about', 'M12', 'صفحه اصالت و داستان برند ریهان'),
+    ('design', 'M13', 'طراحی حرفه‌ای و تجربه کاربری بومی'),
+    ('architecture', 'M14', 'معماری افزونه‌محور و Feature Flags'),
+]
+
 
 class FeatureFlagService:
     """
@@ -84,10 +102,7 @@ class FeatureFlagService:
 
     @classmethod
     def get_disabled_flags(cls) -> List[str]:
-        """
-        لیست کد پرچم‌های غیرفعال.
-        اصلاح ناظر: برای داشبورد ادمین لازم است.
-        """
+        """لیست کد پرچم‌های غیرفعال"""
         try:
             return list(
                 FeatureFlag.objects.filter(is_enabled=False)
@@ -110,27 +125,48 @@ class FeatureFlagService:
     @classmethod
     def register_default_flags(cls) -> int:
         """
-        ثبت پرچم‌های پیش‌فرض ۱۴ ماژول (برای شروع پروژه).
-        فقط اگر وجود نداشته باشند ثبت می‌شوند.
-
-        نکته: پرچم‌های ماژول با is_system=False ایجاد می‌شوند
-        تا ادمین بتواند آن‌ها را فعال/غیرفعال کند (ADR-004).
+        ثبت پرچم‌های پیش‌فرض ۱۴ ماژول (D-079).
+        
+        این متد مستقیماً ۱۴ پرچم ماژول را ثبت می‌کند
+        (نه از طریق PluginRegistry که ممکن است خالی باشد).
+        
+        Returns:
+            تعداد پرچم‌های ایجاد شده
         """
-        from .plugin_registry import get_all_plugins
         created = 0
-        for name, manifest in get_all_plugins().items():
-            code = f"MODULE_{name.upper()}"
-            if not FeatureFlag.objects.filter(code=code).exists():
+        for name, code, description in STANDARD_MODULES:
+            flag_code = f"MODULE_{name.upper()}"
+            if not FeatureFlag.objects.filter(code=flag_code).exists():
                 FeatureFlag.objects.create(
-                    code=code,
-                    name=manifest.description or manifest.name,
-                    description=f"فعال‌سازی ماژول {name}",
+                    code=flag_code,
+                    name=description,
+                    description=f"فعال‌سازی ماژول {code}: {description}",
                     category=FeatureFlag.Category.MODULE,
-                    is_enabled=manifest.is_active,
-                    is_system=False,
+                    is_enabled=True,  # پیش‌فرض فعال
+                    is_system=False,  # ادمین می‌تواند غیرفعال کند
                 )
                 created += 1
+                logger.info(f"Registered flag: {flag_code}")
         return created
+
+    @classmethod
+    def get_module_status(cls) -> dict:
+        """
+        دریافت وضعیت تمام ماژول‌ها (برای داشبورد ادمین).
+        
+        Returns:
+            dict با ساختار: {module_name: {'code': ..., 'enabled': bool}}
+        """
+        status = {}
+        for name, code, description in STANDARD_MODULES:
+            flag_code = f"MODULE_{name.upper()}"
+            enabled = cls.is_enabled(flag_code, default=False)
+            status[name] = {
+                'code': code,
+                'description': description,
+                'enabled': enabled,
+            }
+        return status
 
 
 # نمونه سراسری برای استفاده آسان
