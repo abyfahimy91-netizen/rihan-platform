@@ -62,3 +62,8 @@ STATIC_ROOT = BASE_DIR / 'staticfiles'
 MEDIA_URL = 'media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# تنظیمات پرداخت
+FRONTEND_URL = 'http://localhost:3000'
+PAYMENT_GATEWAY = 'MOCK'  # گزینه‌ها: MOCK, ZARINPAL, IDPAY
+ZARINPAL_MERCHANT_ID = ''

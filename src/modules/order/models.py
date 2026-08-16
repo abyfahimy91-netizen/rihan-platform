@@ -137,3 +137,36 @@ class OrderItem(models.Model):
     @property
     def subtotal(self):
         return self.quantity * self.unit_price_at_purchase
+
+
+class Payment(models.Model):
+    '''تراکنش پرداخت - منطبق بر D-079 (شفافیت)'''
+    class PaymentStatus(models.TextChoices):
+        PENDING = 'PENDING', 'در انتظار پرداخت'
+        SUCCESS = 'SUCCESS', 'پرداخت موفق'
+        FAILED = 'FAILED', 'پرداخت ناموفق'
+        CANCELLED = 'CANCELLED', 'لغو شده توسط کاربر'
+    
+    class PaymentGateway(models.TextChoices):
+        MOCK = 'MOCK', 'درگاه شبیه‌سازی شده'
+        ZARINPAL = 'ZARINPAL', 'زرین‌پال'
+        IDPAY = 'IDPAY', 'آیدی‌پی'
+    
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='payments')
+    amount = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="مبلغ پرداختی")
+    status = models.CharField(max_length=20, choices=PaymentStatus.choices, default=PaymentStatus.PENDING)
+    gateway = models.CharField(max_length=20, choices=PaymentGateway.choices, default=PaymentGateway.MOCK)
+    authority = models.CharField(max_length=100, blank=True, verbose_name="شناسه یکتا در درگاه")
+    ref_id = models.CharField(max_length=100, blank=True, verbose_name="کد پیگیری (پس از پرداخت)")
+    gateway_response = models.JSONField(null=True, blank=True, verbose_name="پاسخ کامل درگاه")
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        verbose_name = "تراکنش پرداخت"
+        verbose_name_plural = "تراکنش‌های پرداخت"
+        ordering = ['-created_at']
+    
+    def __str__(self):
+        return f"پرداخت {self.order.order_number} - {self.get_status_display()}"

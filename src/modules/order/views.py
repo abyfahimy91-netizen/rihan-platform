@@ -127,3 +127,109 @@ class CartViewSet(viewsets.ViewSet):
             }, status=status.HTTP_201_CREATED)
         except ValidationError as e:
             return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class PaymentViewSet(viewsets.ViewSet):
+    '''
+    API پرداخت
+    - POST /payment/create/  : ایجاد پرداخت (بازگشت URL درگاه)
+    - POST /payment/verify/  : تایید پرداخت پس از بازگشت از درگاه
+    '''
+    
+    @action(detail=False, methods=['post'])
+    def create(self, request):
+        '''ایجاد تراکنش پرداخت'''
+        from .models import Order, Payment
+        from .payment_gateway import get_payment_gateway
+        
+        order_number = request.data.get('order_number')
+        if not order_number:
+            return Response({'error': 'order_number الزامی است'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        try:
+            order = Order.objects.get(order_number=order_number)
+        except Order.DoesNotExist:
+            return Response({'error': 'سفارش یافت نشد'}, status=status.HTTP_404_NOT_FOUND)
+        
+        # چک مالکیت سفارش
+        if request.user.is_authenticated and order.user != request.user:
+            return Response({'error': 'دسترسی غیرمجاز'}, status=status.HTTP_403_FORBIDDEN)
+        
+        if order.status != Order.OrderStatus.DRAFT:
+            return Response({'error': 'این سفارش قابل پرداخت نیست'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        # ایجاد تراکنش پرداخت
+        payment = Payment.objects.create(
+            order=order,
+            amount=order.total_price,
+            status=Payment.PaymentStatus.PENDING,
+            gateway=get_payment_gateway().__class__.__name__.replace('PaymentGateway', '').upper()
+        )
+        
+        # ایجاد پرداخت در درگاه
+        gateway = get_payment_gateway()
+        callback_url = f"{settings.FRONTEND_URL}/payment/callback"
+        gateway_response = gateway.create_payment(
+            amount=order.total_price,
+            description=f"پرداخت سفارش {order.order_number}",
+            callback_url=callback_url
+        )
+        
+        payment.authority = gateway_response['authority']
+        payment.save()
+        
+        # تغییر وضعیت سفارش به PENDING
+        order.status = Order.OrderStatus.PENDING
+        order.save()
+        
+        return Response({
+            'message': 'تراکنش پرداخت ایجاد شد',
+            'payment_id': payment.id,
+            'payment_url': gateway_response['payment_url'],
+            'gateway_message': gateway_response.get('message', ''),
+            'order_number': order.order_number
+        }, status=status.HTTP_201_CREATED)
+    
+    @action(detail=False, methods=['post'])
+    def verify(self, request):
+        '''تایید پرداخت پس از بازگشت از درگاه'''
+        from .models import Payment, Order
+        from .payment_gateway import get_payment_gateway
+        
+        payment_id = request.data.get('payment_id')
+        if not payment_id:
+            return Response({'error': 'payment_id الزامی است'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        try:
+            payment = Payment.objects.get(id=payment_id)
+        except Payment.DoesNotExist:
+            return Response({'error': 'تراکنش پرداخت یافت نشد'}, status=status.HTTP_404_NOT_FOUND)
+        
+        if payment.status != Payment.PaymentStatus.PENDING:
+            return Response({'error': f'این پرداخت قبلاً {payment.get_status_display()} شده است'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        # تایید پرداخت از درگاه
+        gateway = get_payment_gateway()
+        is_success = gateway.verify_payment(payment)
+        
+        order = payment.order
+        
+        if is_success:
+            order.status = Order.OrderStatus.PAID
+            order.save()
+            
+            return Response({
+                'message': f'پرداخت سفارش {order.order_number} با موفقیت تایید شد',
+                'order_number': order.order_number,
+                'payment_status': payment.get_status_display(),
+                'ref_id': payment.ref_id
+            })
+        else:
+            order.status = Order.OrderStatus.DRAFT
+            order.save()
+            
+            return Response({
+                'message': 'پرداخت ناموفق بود',
+                'order_number': order.order_number,
+                'payment_status': payment.get_status_display()
+            }, status=status.HTTP_400_BAD_REQUEST)
