@@ -1,5 +1,5 @@
-from rest_framework import viewsets, status, permissions
-from rest_framework.decorators import action
+from rest_framework.views import APIView
+from rest_framework import status, permissions
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth import authenticate, get_user_model
@@ -16,24 +16,11 @@ from .services import (
 User = get_user_model()
 
 
-class AuthViewSet(viewsets.ViewSet):
-    """
-    API احراز هویت و مدیریت حساب کاربری
-    - POST /auth/register/            : ثبت‌نام کاربر جدید
-    - POST /auth/login/               : ورود و دریافت JWT
-    - POST /auth/logout/              : خروج (بلاک کردن refresh token)
-    - POST /auth/verify-email/        : تایید ایمیل با توکن
-    - POST /auth/resend-verification/ : ارسال مجدد ایمیل تایید
-    - POST /auth/forgot-password/     : درخواست بازیابی رمز
-    - POST /auth/reset-password/      : بازیابی رمز با توکن
-    - GET  /auth/me/                  : اطلاعات کاربر فعلی
-    - PUT  /auth/me/                  : ویرایش پروفایل
-    - POST /auth/change-password/     : تغییر رمز عبور
-    """
+class RegisterView(APIView):
+    """ثبت‌نام کاربر جدید"""
+    permission_classes = [permissions.AllowAny]
     
-    @action(detail=False, methods=['post'], permission_classes=[permissions.AllowAny])
-    def register(self, request):
-        """ثبت‌نام کاربر جدید"""
+    def post(self, request):
         serializer = UserRegisterSerializer(data=request.data)
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -47,10 +34,13 @@ class AuthViewSet(viewsets.ViewSet):
             'email': user.email,
             'username': user.username
         }, status=status.HTTP_201_CREATED)
+
+
+class LoginView(APIView):
+    """ورود کاربر و دریافت JWT"""
+    permission_classes = [permissions.AllowAny]
     
-    @action(detail=False, methods=['post'], permission_classes=[permissions.AllowAny])
-    def login(self, request):
-        """ورود کاربر و دریافت JWT"""
+    def post(self, request):
         serializer = UserLoginSerializer(data=request.data)
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -100,10 +90,11 @@ class AuthViewSet(viewsets.ViewSet):
             }
         })
 
+
+class LogoutView(APIView):
+    """خروج کاربر (بلاک کردن refresh token)"""
     
-    @action(detail=False, methods=['post'])
-    def logout(self, request):
-        """خروج کاربر (بلاک کردن refresh token)"""
+    def post(self, request):
         try:
             refresh_token = request.data.get('refresh')
             if not refresh_token:
@@ -115,10 +106,13 @@ class AuthViewSet(viewsets.ViewSet):
             return Response({'message': 'خروج موفقیت‌آمیز بود'})
         except Exception as e:
             return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class VerifyEmailView(APIView):
+    """تایید ایمیل با توکن"""
+    permission_classes = [permissions.AllowAny]
     
-    @action(detail=False, methods=['post'], permission_classes=[permissions.AllowAny])
-    def verify_email(self, request):
-        """تایید ایمیل با توکن"""
+    def post(self, request):
         token = request.data.get('token')
         if not token:
             return Response({'error': 'token الزامی است'}, status=status.HTTP_400_BAD_REQUEST)
@@ -128,10 +122,13 @@ class AuthViewSet(viewsets.ViewSet):
             return Response({'message': 'ایمیل شما با موفقیت تایید شد. اکنون می‌توانید وارد شوید.'})
         except Exception as e:
             return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class ResendVerificationView(APIView):
+    """ارسال مجدد ایمیل تایید"""
+    permission_classes = [permissions.AllowAny]
     
-    @action(detail=False, methods=['post'], permission_classes=[permissions.AllowAny])
-    def resend_verification(self, request):
-        """ارسال مجدد ایمیل تایید"""
+    def post(self, request):
         email = request.data.get('email')
         if not email:
             return Response({'error': 'email الزامی است'}, status=status.HTTP_400_BAD_REQUEST)
@@ -145,10 +142,13 @@ class AuthViewSet(viewsets.ViewSet):
             return Response({'message': 'ایمیل تایید مجدداً ارسال شد'})
         except User.DoesNotExist:
             return Response({'error': 'کاربری با این ایمیل یافت نشد'}, status=status.HTTP_404_NOT_FOUND)
+
+
+class ForgotPasswordView(APIView):
+    """درخواست بازیابی رمز عبور"""
+    permission_classes = [permissions.AllowAny]
     
-    @action(detail=False, methods=['post'], permission_classes=[permissions.AllowAny])
-    def forgot_password(self, request):
-        """درخواست بازیابی رمز عبور"""
+    def post(self, request):
         serializer = ForgotPasswordSerializer(data=request.data)
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -165,10 +165,13 @@ class AuthViewSet(viewsets.ViewSet):
             return Response({
                 'message': 'اگر کاربری با این ایمیل وجود داشته باشد، ایمیل بازیابی ارسال می‌شود'
             })
+
+
+class ResetPasswordView(APIView):
+    """بازیابی رمز عبور با توکن"""
+    permission_classes = [permissions.AllowAny]
     
-    @action(detail=False, methods=['post'], permission_classes=[permissions.AllowAny])
-    def reset_password(self, request):
-        """بازیابی رمز عبور با توکن"""
+    def post(self, request):
         serializer = ResetPasswordSerializer(data=request.data)
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -182,9 +185,11 @@ class AuthViewSet(viewsets.ViewSet):
         except Exception as e:
             return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
+
+class MeView(APIView):
+    """مشاهده و ویرایش اطلاعات کاربر فعلی"""
     
-    @action(detail=False, methods=['get'])
-    def me(self, request):
+    def get(self, request):
         """دریافت اطلاعات کاربر فعلی"""
         user = request.user
         profile_serializer = ProfileSerializer(user.profile)
@@ -201,8 +206,7 @@ class AuthViewSet(viewsets.ViewSet):
             'profile': profile_serializer.data
         })
     
-    @me.mapping.put
-    def update_me(self, request):
+    def put(self, request):
         """ویرایش پروفایل کاربر فعلی"""
         user = request.user
         profile = user.profile
@@ -228,10 +232,12 @@ class AuthViewSet(viewsets.ViewSet):
                 'profile': profile_serializer.data
             })
         return Response(profile_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class ChangePasswordView(APIView):
+    """تغییر رمز عبور"""
     
-    @action(detail=False, methods=['post'])
-    def change_password(self, request):
-        """تغییر رمز عبور"""
+    def post(self, request):
         serializer = ChangePasswordSerializer(data=request.data)
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
