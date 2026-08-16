@@ -1,1 +1,0 @@
-# trust_badges block
