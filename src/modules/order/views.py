@@ -4,28 +4,28 @@ from rest_framework.response import Response
 from rest_framework.exceptions import ValidationError
 from django.conf import settings
 from .services import get_or_create_cart, add_to_cart, update_cart_item, remove_from_cart, create_order_from_cart
-from .serializers import CartSerializer, OrderSerializer
+from .serializers import CartSerializer, OrderSerializer, AddressSerializer
 
 
 class CartViewSet(viewsets.ViewSet):
-    '''
+    """
     API سبد خرید
     - GET  /cart/             : مشاهده سبد
     - POST /cart/add/         : افزودن کالا
     - PUT  /cart/update_item/ : به‌روزرسانی تعداد
     - DEL  /cart/remove/      : حذف کالا
     - POST /cart/checkout/    : نهایی‌سازی سفارش
-    '''
+    """
     
     def list(self, request):
-        '''مشاهده سبد خرید فعلی کاربر/مهمان'''
+        """مشاهده سبد خرید فعلی کاربر/مهمان"""
         cart = get_or_create_cart(request)
         serializer = CartSerializer(cart)
         return Response(serializer.data)
     
     @action(detail=False, methods=['post'])
     def add(self, request):
-        '''افزودن کالا به سبد خرید'''
+        """افزودن کالا به سبد خرید"""
         product_id = request.data.get('product_id')
         quantity = int(request.data.get('quantity', 1))
         
@@ -48,7 +48,7 @@ class CartViewSet(viewsets.ViewSet):
     
     @action(detail=False, methods=['put'])
     def update_item(self, request):
-        '''به‌روزرسانی تعداد یک کالا'''
+        """به‌روزرسانی تعداد یک کالا"""
         item_id = request.data.get('item_id')
         quantity = request.data.get('quantity')
         
@@ -71,7 +71,7 @@ class CartViewSet(viewsets.ViewSet):
     
     @action(detail=False, methods=['delete'])
     def remove(self, request):
-        '''حذف یک کالا از سبد'''
+        """حذف یک کالا از سبد"""
         item_id = request.data.get('item_id')
         if not item_id:
             return Response({'error': 'item_id الزامی است'}, status=status.HTTP_400_BAD_REQUEST)
@@ -89,10 +89,10 @@ class CartViewSet(viewsets.ViewSet):
     
     @action(detail=False, methods=['post'])
     def checkout(self, request):
-        '''
+        """
         نهایی‌سازی سفارش
         Body: {name, phone, address, postal_code, shipping_cost}
-        '''
+        """
         cart = get_or_create_cart(request)
         
         if not cart.items.exists():
@@ -129,15 +129,15 @@ class CartViewSet(viewsets.ViewSet):
 
 
 class PaymentViewSet(viewsets.ViewSet):
-    '''
+    """
     API پرداخت
     - POST /payment/initiate/ : ایجاد پرداخت (بازگشت URL درگاه)
     - POST /payment/verify/   : تایید پرداخت پس از بازگشت از درگاه
-    '''
+    """
     
     @action(detail=False, methods=['post'])
     def initiate(self, request):
-        '''ایجاد تراکنش پرداخت و دریافت URL درگاه'''
+        """ایجاد تراکنش پرداخت و دریافت URL درگاه"""
         from .models import Order, Payment
         from .payment_gateway import get_payment_gateway
         
@@ -191,7 +191,7 @@ class PaymentViewSet(viewsets.ViewSet):
     
     @action(detail=False, methods=['post'])
     def verify(self, request):
-        '''تایید پرداخت پس از بازگشت از درگاه'''
+        """تایید پرداخت پس از بازگشت از درگاه"""
         from .models import Payment, Order
         from .payment_gateway import get_payment_gateway
         
@@ -235,24 +235,24 @@ class PaymentViewSet(viewsets.ViewSet):
 
 
 class AddressViewSet(viewsets.ModelViewSet):
-    '''
+    """
     API مدیریت آدرس‌های کاربر
     - GET    /addresses/        : لیست همه آدرس‌ها
     - POST   /addresses/        : ایجاد آدرس جدید
     - GET    /addresses/{id}/   : جزئیات یک آدرس
     - PUT    /addresses/{id}/   : ویرایش آدرس
     - DELETE /addresses/{id}/   : حذف آدرس
-    '''
+    """
     serializer_class = AddressSerializer
     http_method_names = ['get', 'post', 'put', 'delete']
     
     def get_queryset(self):
-        '''فقط آدرس‌های کاربر فعلی را برگردان'''
+        """فقط آدرس‌های کاربر فعلی را برگردان"""
         from .models import Address
         if self.request.user.is_authenticated:
             return Address.objects.filter(user=self.request.user)
         return Address.objects.none()
     
     def perform_create(self, serializer):
-        '''ذخیره آدرس با کاربر فعلی'''
+        """ذخیره آدرس با کاربر فعلی"""
         serializer.save(user=self.request.user)
