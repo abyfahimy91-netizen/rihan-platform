@@ -12,9 +12,13 @@
 """
 from __future__ import annotations
 
+import logging
+
 from django.conf import settings
 from django.db import models
 from django.utils import timezone
+
+logger = logging.getLogger(__name__)
 
 
 class FeatureFlag(models.Model):
@@ -119,7 +123,6 @@ class FeatureFlag(models.Model):
         برای پرچم‌های سیستمی، فقط superuser می‌تواند غیرفعال کند.
         """
         if self.is_system:
-            # برای پرچم‌های سیستمی، بررسی دسترسی superuser
             if user is None or not getattr(user, 'is_superuser', False):
                 raise ValueError(
                     f"Cannot disable system flag '{self.code}' without superuser access"
@@ -157,9 +160,11 @@ class FeatureFlag(models.Model):
                 entity_id=self.pk,
                 changes={'code': self.code, 'is_enabled': self.is_enabled}
             )
-        except Exception:
-            # اگر AuditLog هنوز آماده نباشد، لاگ نمی‌کنیم
-            pass
+        except Exception as e:
+            # اصلاح ناظر: لاگ warning در صورت شکست
+            logger.warning(
+                f"Failed to create AuditLog for {self.code} ({action}): {e}"
+            )
 
 
 class AuditLog(models.Model):

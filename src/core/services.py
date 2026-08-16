@@ -9,11 +9,13 @@ Service Layer هسته ریهان
 """
 from __future__ import annotations
 
+import logging
 from typing import List, Optional
 from django.core.cache import cache
 
 from .models import FeatureFlag
 
+logger = logging.getLogger(__name__)
 
 CACHE_PREFIX = 'rihan:ff:'
 CACHE_TTL = 300  # 5 دقیقه
@@ -41,18 +43,15 @@ class FeatureFlagService:
         اول کش، بعد دیتابیس.
         اگر پرچم وجود نداشت، مقدار پیش‌فرض برمی‌گرداند.
         """
-        # بررسی کش درونی
         if code in cls._cache:
             return cls._cache[code]
 
-        # بررسی کش Django
         cache_key = f"{CACHE_PREFIX}{code}"
         cached = cache.get(cache_key)
         if cached is not None:
             cls._cache[code] = cached
             return cached
 
-        # بررسی دیتابیس
         try:
             flag = FeatureFlag.objects.filter(code=code).only('is_enabled').first()
             if flag is None:
@@ -61,8 +60,8 @@ class FeatureFlagService:
             cache.set(cache_key, result, CACHE_TTL)
             cls._cache[code] = result
             return result
-        except Exception:
-            # اگر دیتابیس آماده نباشد (مثلاً در migration)
+        except Exception as e:
+            logger.warning(f"Error checking feature flag {code}: {e}")
             return default
 
     @classmethod
@@ -84,10 +83,23 @@ class FeatureFlagService:
             return []
 
     @classmethod
+    def get_disabled_flags(cls) -> List[str]:
+        """
+        لیست کد پرچم‌های غیرفعال.
+        اصلاح ناظر: برای داشبورد ادمین لازم است.
+        """
+        try:
+            return list(
+                FeatureFlag.objects.filter(is_enabled=False)
+                .values_list('code', flat=True)
+            )
+        except Exception:
+            return []
+
+    @classmethod
     def clear_cache(cls) -> None:
         """پاکسازی کش (برای تست یا پس از تغییر در ادمین)"""
         cls._cache.clear()
-        # پاکسازی کش Django برای تمام کدها
         try:
             codes = FeatureFlag.objects.values_list('code', flat=True)
             for code in codes:
@@ -115,7 +127,7 @@ class FeatureFlagService:
                     description=f"فعال‌سازی ماژول {name}",
                     category=FeatureFlag.Category.MODULE,
                     is_enabled=manifest.is_active,
-                    is_system=False,  # ✅ اصلاح: ماژول‌ها قابل غیرفعال‌سازی هستند
+                    is_system=False,
                 )
                 created += 1
         return created
