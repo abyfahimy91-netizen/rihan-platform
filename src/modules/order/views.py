@@ -84,3 +84,46 @@ class CartViewSet(viewsets.ViewSet):
             })
         except ValidationError as e:
             return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+    @action(detail=False, methods=['post'])
+    def checkout(self, request):
+        '''
+        نهایی‌سازی سفارش
+        Body: {name, phone, address, postal_code, shipping_cost}
+        '''
+        from .services import create_order_from_cart
+        from .serializers import OrderSerializer
+        
+        cart = get_or_create_cart(request)
+        
+        if not cart.items.exists():
+            return Response(
+                {'error': 'سبد خرید خالی است'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        guest_info = {
+            'name': request.data.get('name', ''),
+            'phone': request.data.get('phone', ''),
+            'address': request.data.get('address', ''),
+            'postal_code': request.data.get('postal_code', ''),
+            'shipping_cost': request.data.get('shipping_cost', 0),
+        }
+        
+        # اعتبارسنجی اطلاعات مهمان (برای کاربر لاگین‌کرده اجباری نیست)
+        if not request.user.is_authenticated:
+            if not guest_info['name'] or not guest_info['phone'] or not guest_info['address']:
+                return Response(
+                    {'error': 'برای خرید مهمان، نام، تلفن و آدرس الزامی است'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+        
+        try:
+            order = create_order_from_cart(cart, guest_info)
+            serializer = OrderSerializer(order)
+            return Response({
+                'message': f'سفارش {order.order_number} با موفقیت ثبت شد',
+                'order': serializer.data
+            }, status=status.HTTP_201_CREATED)
+        except ValidationError as e:
+            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)

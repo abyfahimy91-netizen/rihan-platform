@@ -95,3 +95,54 @@ def update_cart_item(cart, item_id, quantity):
 def remove_from_cart(cart, item_id):
     '''حذف کالا از سبد'''
     CartItem.objects.filter(id=item_id, cart=cart).delete()
+
+
+def create_order_from_cart(cart, guest_info=None):
+    '''
+    ساخت سفارش نهایی از سبد خرید
+    منطبق بر ADR-002 (Snapshot مهمان و محصولات)
+    '''
+    from .models import Order, OrderItem
+    
+    if not cart.items.exists():
+        raise ValidationError("سبد خرید خالی است")
+    
+    # ایجاد Order
+    order = Order.objects.create(
+        user=cart.user if cart.user else None,
+        session_key=cart.session_key if not cart.user else '',
+        status=Order.OrderStatus.DRAFT,
+        guest_name=(guest_info or {}).get('name', ''),
+        guest_phone=(guest_info or {}).get('phone', ''),
+        guest_address=(guest_info or {}).get('address', ''),
+        guest_postal_code=(guest_info or {}).get('postal_code', ''),
+        shipping_cost=(guest_info or {}).get('shipping_cost', 0),
+    )
+    
+    # Snapshot کالاها
+    order_items = []
+    for cart_item in cart.items.all():
+        order_items.append(OrderItem(
+            order=order,
+            product=cart_item.product,
+            product_name_snapshot=cart_item.product.name,  # Snapshot نام محصول
+            quantity=cart_item.quantity,
+            unit_price_at_purchase=cart_item.unit_price_at_add,
+        ))
+    
+    OrderItem.objects.bulk_create(order_items)
+    
+    # محاسبه جمع کل
+    order.calculate_totals()
+    
+    # کاهش موجودی انبار
+    for order_item in order_items:
+        product = order_item.product
+        product.stock_quantity -= order_item.quantity
+        product.save(update_fields=['stock_quantity'])
+    
+    # غیرفعال کردن سبد (نه حذف، برای سابقه)
+    cart.is_active = False
+    cart.save()
+    
+    return order
