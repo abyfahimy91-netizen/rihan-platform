@@ -77,3 +77,32 @@ class Product(models.Model):
         self.deleted_at = timezone.now()
         self.status = 'inactive'
         self.save()
+
+class ContentBlock(models.Model):
+    BLOCK_TYPES = [('text', 'Text'), ('image', 'Image'), ('video', 'Video'), ('quote', 'Quote')]
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, null=True, blank=True, related_name='direct_blocks')
+    block_type = models.CharField(max_length=50, choices=BLOCK_TYPES)
+    content = models.JSONField(default=dict, blank=True)
+    sort_order = models.PositiveIntegerField(default=0)
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['sort_order']
+
+    def __str__(self):
+        return f"{self.block_type} block"
+
+class ProductBlock(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='product_blocks')
+    block = models.ForeignKey(ContentBlock, on_delete=models.CASCADE, related_name='product_links')
+    sort_order = models.PositiveIntegerField(default=0)
+
+    class Meta:
+        ordering = ['sort_order']
+        constraints = [
+            models.UniqueConstraint(fields=['product', 'block'], name='unique_product_block_link')
+        ]
