@@ -232,3 +232,27 @@ class PaymentViewSet(viewsets.ViewSet):
                 'order_number': order.order_number,
                 'payment_status': payment.get_status_display()
             }, status=status.HTTP_400_BAD_REQUEST)
+
+
+class AddressViewSet(viewsets.ModelViewSet):
+    '''
+    API مدیریت آدرس‌های کاربر
+    - GET    /addresses/        : لیست همه آدرس‌ها
+    - POST   /addresses/        : ایجاد آدرس جدید
+    - GET    /addresses/{id}/   : جزئیات یک آدرس
+    - PUT    /addresses/{id}/   : ویرایش آدرس
+    - DELETE /addresses/{id}/   : حذف آدرس
+    '''
+    serializer_class = AddressSerializer
+    http_method_names = ['get', 'post', 'put', 'delete']
+    
+    def get_queryset(self):
+        '''فقط آدرس‌های کاربر فعلی را برگردان'''
+        from .models import Address
+        if self.request.user.is_authenticated:
+            return Address.objects.filter(user=self.request.user)
+        return Address.objects.none()
+    
+    def perform_create(self, serializer):
+        '''ذخیره آدرس با کاربر فعلی'''
+        serializer.save(user=self.request.user)

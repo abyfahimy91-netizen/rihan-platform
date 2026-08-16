@@ -52,3 +52,17 @@ class OrderSerializer(serializers.ModelSerializer):
             'created_at', 'updated_at'
         ]
         read_only_fields = ['id', 'order_number', 'user', 'subtotal', 'total_price', 'created_at']
+
+
+class AddressSerializer(serializers.ModelSerializer):
+    '''نمایش آدرس‌های کاربر'''
+    address_type_display = serializers.CharField(source='get_address_type_display', read_only=True)
+    
+    class Meta:
+        model = Address
+        fields = [
+            'id', 'title', 'address_type', 'address_type_display',
+            'full_name', 'phone', 'province', 'city', 'postal_code',
+            'detailed_address', 'is_default', 'created_at', 'updated_at'
+        ]
+        read_only_fields = ['id', 'user', 'created_at', 'updated_at']

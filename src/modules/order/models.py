@@ -170,3 +170,46 @@ class Payment(models.Model):
     
     def __str__(self):
         return f"پرداخت {self.order.order_number} - {self.get_status_display()}"
+import uuid
+from django.db import models
+from django.conf import settings
+
+
+class Address(models.Model):
+    '''آدرس‌های کاربر - برای استفاده مجدد در خریدهای بعدی'''
+    class AddressType(models.TextChoices):
+        HOME = 'HOME', 'منزل'
+        WORK = 'WORK', 'محل کار'
+        OTHER = 'OTHER', 'سایر'
+    
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='addresses')
+    
+    # اطلاعات آدرس
+    title = models.CharField(max_length=50, verbose_name="عنوان آدرس")
+    address_type = models.CharField(max_length=10, choices=AddressType.choices, default=AddressType.HOME)
+    full_name = models.CharField(max_length=150, verbose_name="نام و نام خانوادگی گیرنده")
+    phone = models.CharField(max_length=20, verbose_name="شماره تماس گیرنده")
+    province = models.CharField(max_length=50, verbose_name="استان")
+    city = models.CharField(max_length=50, verbose_name="شهر")
+    postal_code = models.CharField(max_length=20, verbose_name="کد پستی")
+    detailed_address = models.TextField(verbose_name="آدرس دقیق")
+    
+    # تنظیمات
+    is_default = models.BooleanField(default=False, verbose_name="آدرس پیش‌فرض")
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        verbose_name = "آدرس"
+        verbose_name_plural = "آدرس‌ها"
+        ordering = ['-is_default', '-created_at']
+    
+    def __str__(self):
+        return f"{self.title} - {self.full_name}"
+    
+    def save(self, *args, **kwargs):
+        # اگر این آدرس پیش‌فرض شد، آدرس‌های دیگر را غیرپیش‌فرض کن
+        if self.is_default:
+            Address.objects.filter(user=self.user, is_default=True).exclude(id=self.id).update(is_default=False)
+        super().save(*args, **kwargs)
