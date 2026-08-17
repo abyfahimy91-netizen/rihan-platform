@@ -23,13 +23,14 @@ INSTALLED_APPS = [
     
     # ✅ ماژول احراز هویت (M10)
     'src.modules.auth',
+    'src.modules.catalog',
     
     # ✅ ماژول RBAC (M5)
     'src.modules.rbac',
     
     # ماژول‌های ریهان (بر اساس D-079 - ۱۴ ماژول)
-    # 'src.modules.catalog',   # M1 - غیرفعال تا تکمیل بازنویسی
-    # 'src.modules.order',     # M2 - غیرفعال تا تکمیل بازنویسی
+    #    # M1 - غیرفعال تا تکمیل بازنویسی
+    'src.modules.order',     # M2 - غیرفعال تا تکمیل بازنویسی
 ]
 
 MIDDLEWARE = [
