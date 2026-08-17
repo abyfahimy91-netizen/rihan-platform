@@ -193,3 +193,64 @@
 - ایجاد `InventoryService` برای عملیات موجودی (Service Layer)
 - اتصال به ماژول Order برای رزرو خودکار هنگام ثبت سفارش
 - اتصال به پنل ادمین برای ورود دستی موجودی
+
+
+### 2026-08-17 — Phase 5: تکمیل InventoryService Layer
+
+**اقدامات انجام شده:**
+1. ✅ ایجاد `src/modules/catalog/services/inventory_service.py`
+   - InventoryService به عنوان API مرکزی برای عملیات موجودی
+   - ۹ متد اصلی با `@transaction.atomic`:
+     * `add_stock()` - افزودن دستی موجودی
+     * `reserve_for_order()` - رزرو هنگام ثبت سفارش (۲۴ ساعت)
+     * `confirm_sale()` - تأیید فروش پس از پرداخت
+     * `release_reservation()` - آزادسازی رزرو در لغو سفارش
+     * `return_stock()` - بازگشت موجودی پس از مرجوعی
+     * `adjust_stock()` - اصلاح موجودی در شمارش فیزیکی
+     * `check_availability()` - بررسی موجودی قابل فروش
+     * `get_low_stock_products()` - لیست محصولات کم‌موجود
+     * `get_product_history()` - تاریخچه تراکنش‌ها
+   - Hook integration برای اطلاع‌رسانی به سایر ماژول‌ها
+   - Low stock alert خودکار
+
+2. ✅ ایجاد `src/modules/catalog/services/exceptions.py`
+   - `InventoryError` (پایه)
+   - `InsufficientStockError` (موجودی ناکافی)
+   - `InventoryValidationError` (خطای اعتبارسنجی)
+   - `ProductNotFoundError` (محصول بدون inventory)
+
+3. ✅ ایجاد `src/modules/catalog/tests/test_inventory_service.py`
+   - ۱۳ تست جامع (همه پاس شدند)
+   - پوشش کامل سناریوهای D-045:
+     * افزودن موجودی
+     * رزرو و کمبود موجودی
+     * تأیید فروش
+     * لغو سفارش و آزادسازی
+     * مرجوعی
+     * اصلاح موجودی
+     * بررسی موجودی و هشدار
+
+4. ✅ اصلاح `InventoryTransaction.reference_id`
+   - تغییر از `UUIDField` به `CharField(max_length=100)`
+   - دلیل: شماره سفارش با فرمت `RH-1405-XXXXX` است (D-080)
+   - Migration 0003 ایجاد و اعمال شد
+
+**انطباق با مستندات:**
+- ✅ ADR-002 (Database architecture)
+- ✅ D-045 (Inventory flow)
+- ✅ INVENTORY-FLOW.md (Business rules)
+- ✅ D-080 (Order number format)
+- ✅ اصل ۱۰ (کنترل کامل ادمین)
+- ✅ اصل ۱۱ (کرامت مشتری - بدون oversell)
+
+**نتیجه:**
+- ۱۳ تست پاس شدند
+- System Check: بدون مشکل
+- Inventory Service: ۱۰۰٪ آماده برای اتصال به Order Module
+
+**Commit:** `059c6c6` - feat(M1): افزودن InventoryService کامل با ۱۳ تست
+
+**مرحله بعدی:**
+- اتصال InventoryService به Order Module
+- CheckoutService برای مدیریت فرآیند سفارش
+- Hook integration برای رویدادهای ORDER_CREATED, ORDER_CONFIRMED, ORDER_CANCELLED
