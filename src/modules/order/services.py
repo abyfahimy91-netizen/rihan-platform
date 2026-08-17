@@ -145,7 +145,7 @@ def create_order_from_cart(cart, guest_info=None, user=None):
     )
 
 
-def confirm_payment(order, payment_data=None):
+def confirm_payment(order, payment_data=None, admin_user=None):
     """
     Confirm payment and convert reservation to sale.
     
@@ -154,26 +154,28 @@ def confirm_payment(order, payment_data=None):
     Args:
         order: Order instance
         payment_data: Optional payment info
+        admin_user: User confirming the payment
         
     Returns:
         Updated Order with PAID status
     """
     from .checkout_service import CheckoutService
     
-    return CheckoutService.confirm_payment(order, payment_data)
+    return CheckoutService.confirm_payment(order, payment_data, admin_user)
 
 
-def cancel_order(order, reason='Customer request'):
+def cancel_order(order, reason='Customer request', user=None):
     """
     Cancel order and release reservation.
     
     Args:
         order: Order instance
         reason: Reason for cancellation
+        user: User performing cancellation
         
     Returns:
         Updated Order with CANCELLED status
     """
     from .checkout_service import CheckoutService
     
-    return CheckoutService.cancel_order(order, reason)
+    return CheckoutService.cancel_order(order, reason, user)
