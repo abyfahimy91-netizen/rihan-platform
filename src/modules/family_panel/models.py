@@ -227,3 +227,161 @@ class SiteSettings(models.Model):
         if settings is None:
             settings = cls.objects.create()
         return settings
+
+
+class ProductContent(models.Model):
+    """
+    محتوای بلوک‌محور محصول.
+    
+    منطبق بر US-055:
+    - هر محصول می‌تواند تعداد نامحدود بلوک داشته باشد
+    - ذخیره draft و published
+    - اتصال به M14 BlockRegistry برای اعتبارسنجی
+    
+    نکته: product_id فعلاً INTEGER است.
+    پس از بازنویسی M1، به FK تبدیل می‌شود.
+    """
+    
+    STATUS_CHOICES = [
+        ('draft', 'پیش‌نویس'),
+        ('published', 'منتشر شده'),
+        ('archived', 'بایگانی شده'),
+    ]
+    
+    id = models.UUIDField(
+        primary_key=True,
+        default=uuid.uuid4,
+        editable=False,
+        verbose_name='شناسه'
+    )
+    product_id = models.IntegerField(
+        db_index=True,
+        verbose_name='شناسه محصول',
+        help_text='در آینده به FK محصول (M1) تبدیل می‌شود'
+    )
+    blocks = models.JSONField(
+        default=list,
+        blank=True,
+        verbose_name='لیست بلوک‌ها',
+        help_text='لیست بلوک‌ها به ترتیب نمایش'
+    )
+    status = models.CharField(
+        max_length=20,
+        choices=STATUS_CHOICES,
+        default='draft',
+        verbose_name='وضعیت'
+    )
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='created_product_contents',
+        verbose_name='ایجادکننده'
+    )
+    updated_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='updated_product_contents',
+        verbose_name='آخرین ویرایش‌کننده'
+    )
+    published_at = models.DateTimeField(
+        null=True,
+        blank=True,
+        verbose_name='تاریخ انتشار'
+    )
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name='تاریخ ایجاد'
+    )
+    updated_at = models.DateTimeField(
+        auto_now=True,
+        verbose_name='آخرین به‌روزرسانی'
+    )
+    
+    class Meta:
+        app_label = 'family_panel'
+        verbose_name = 'محتوای محصول'
+        verbose_name_plural = 'محتوای محصولات'
+        ordering = ['-updated_at']
+        constraints = [
+            models.UniqueConstraint(
+                fields=['product_id'],
+                condition=models.Q(status__in=['draft', 'published']),
+                name='unique_active_content_per_product'
+            ),
+        ]
+    
+    def __str__(self) -> str:
+        return f"محتوای محصول {self.product_id} ({self.get_status_display()})"
+    
+    @property
+    def blocks_count(self) -> int:
+        return len(self.blocks) if self.blocks else 0
+    
+    def add_block(self, block_type: str, data: dict, order: int = None) -> dict:
+        """افزودن بلوک جدید"""
+        if self.blocks is None:
+            self.blocks = []
+        
+        if order is None:
+            order = len(self.blocks)
+        
+        block = {
+            'id': str(uuid.uuid4()),
+            'type': block_type,
+            'order': order,
+            'data': data,
+        }
+        self.blocks.append(block)
+        return block
+    
+    def get_block(self, block_id: str) -> dict:
+        """دریافت یک بلوک بر اساس ID"""
+        if not self.blocks:
+            return None
+        for block in self.blocks:
+            if block.get('id') == block_id:
+                return block
+        return None
+    
+    def update_block(self, block_id: str, data: dict) -> bool:
+        """به‌روزرسانی داده‌های یک بلوک"""
+        block = self.get_block(block_id)
+        if block:
+            block['data'] = data
+            return True
+        return False
+    
+    def remove_block(self, block_id: str) -> bool:
+        """حذف یک بلوک"""
+        if not self.blocks:
+            return False
+        original_count = len(self.blocks)
+        self.blocks = [b for b in self.blocks if b.get('id') != block_id]
+        return len(self.blocks) < original_count
+    
+    def reorder_blocks(self, block_ids: list) -> bool:
+        """تغییر ترتیب بلوک‌ها"""
+        if not self.blocks:
+            return False
+        
+        # ساخت دیکشنری از بلوک‌ها بر اساس ID
+        blocks_dict = {b['id']: b for b in self.blocks}
+        
+        # بررسی اینکه همه IDها وجود دارند
+        for block_id in block_ids:
+            if block_id not in blocks_dict:
+                return False
+        
+        # به‌روزرسانی ترتیب
+        new_blocks = []
+        for order, block_id in enumerate(block_ids):
+            block = blocks_dict[block_id]
+            block['order'] = order
+            new_blocks.append(block)
+        
+        self.blocks = new_blocks
+        return True

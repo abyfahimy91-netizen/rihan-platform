@@ -14,6 +14,17 @@ from .activity_log import (
     activity_log_list,
     activity_log_stats,
 )
+from .block_editor import (
+    get_available_blocks,
+    get_product_blocks,
+    add_product_block,
+    update_product_block,
+    remove_product_block,
+    reorder_product_blocks,
+    preview_product,
+    publish_product,
+    save_draft,
+)
 
 __all__ = [
     # Dashboard
@@ -28,4 +39,14 @@ __all__ = [
     # Activity Log
     'activity_log_list',
     'activity_log_stats',
+    # Block Editor
+    'get_available_blocks',
+    'get_product_blocks',
+    'add_product_block',
+    'update_product_block',
+    'remove_product_block',
+    'reorder_product_blocks',
+    'preview_product',
+    'publish_product',
+    'save_draft',
 ]
