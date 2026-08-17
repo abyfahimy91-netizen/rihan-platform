@@ -342,3 +342,41 @@
 **مرحله بعدی:**
 - انتخاب مسیر: عمودی (M1+M2+M11+M13 با UI) یا ادامه Backend
 - توصیه ناظر: مسیر عمودی برای داشتن MVP قابل تست با کاربران واقعی
+
+---
+
+## 📝 جلسه نهایی — 2026-08-17
+
+### دستاوردهای این جلسه (پاکسازی و رفع نواقص):
+
+1. ✅ **رفع ۱۴ RuntimeWarning** با انتقال DB queries به `post_migrate` signal
+2. ✅ **ایجاد InventorySystem کامل** مطابق ADR-002 و INVENTORY-FLOW.md
+   - Inventory model با سیستم رزرو و `available_quantity` محاسبه‌ای
+   - InventoryTransaction برای تاریخچه کامل
+   - InventoryService با ۹ متد اصلی
+3. ✅ **بازنویسی Order Module** با یکپارچگی InventoryService
+   - CheckoutService با ۴ متد اصلی (create/confirm/cancel/return)
+   - Hook integration برای رویدادهای سفارش
+4. ✅ **پاکسازی ۱۳ تست قدیمی نادرست** از Git history
+5. ✅ **رفع TypeError** در `confirm_payment` و `cancel_order`
+6. ✅ **ایجاد ۲۲ تست معتبر** (۱۳ inventory + ۹ integration)
+7. ✅ **به‌روزرسانی .gitignore** برای جلوگیری از commit فایل‌های موقتی
+
+### وضعیت نهایی پروژه:
+| معیار | مقدار |
+|-------|-------|
+| ماژول‌های Backend کامل | ۵ از ۱۴ (M5, M10, M14 + M1/M2 backend) |
+| ماژول‌های UI کامل | ۰ از ۱۴ |
+| تست‌های معتبر | 22 |
+| RuntimeWarnings | ۰ |
+| پیشرفت کلی MVP | ۳۰٪ |
+
+### مرحله بعدی (برای جلسه آینده):
+**مسیر عمودی (Vertical Slice)** برای ساخت MVP قابل تست:
+1. M13 هویت بصری (قالب‌های HTML فاخر + CSS RTL)
+2. M1 کاتالوگ UI (صفحه لیست + صفحه محصول بلوک‌محور)
+3. M2 سفارش UI (سبد خرید + Checkout ۳ مرحله‌ای)
+4. M11 پرداخت (بارگذاری فیش + تأیید ادمین)
+5. M7 پیگیری (صفحه /track/ بدون لاگین)
+
+**هدف:** یک مسیر کامل از بازدید تا خرید برای تست با محصولات واقعی (سماق هوراند)
