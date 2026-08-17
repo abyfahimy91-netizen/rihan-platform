@@ -115,3 +115,81 @@
 | تست‌های پاس‌شده | ۷۰+ |
 | انطباق با ADR | ۱۰۰٪ |
 | Commits | ۱۲ |
+
+
+### 2026-08-17 — Phase 5: رفع انحرافات بحرانی و تکمیل Inventory System
+
+**اقدامات انجام شده:**
+1. ✅ بازنویسی کامل `src/modules/catalog/models.py` مطابق ADR-002 و INVENTORY-FLOW.md
+   - افزودن مدل `Inventory` با سیستم رزرو و `available_quantity` محاسبه‌ای
+   - افزودن مدل `InventoryTransaction` برای تاریخچه کامل تغییرات موجودی
+   - افزودن ۱۲ نوع `ContentBlock` مطابق D-079
+   - ایجاد خودکار `Inventory` پس از ساخت `Product` با `post_save` signal
+   - متدهای `reserve()`, `release_reservation()`, `confirm_sale()`, `return_stock()`, `add_stock()`
+   - بررسی `can_reserve()` برای جلوگیری از oversell
+   - محاسبه `is_low_stock` بر اساس ۲۰٪ یا ۲ واحد
+
+2. ✅ رفع کامل ۱۴ `RuntimeWarning` درباره database initialization
+   - انتقال `FeatureFlagService.register_default_flags()` از `ready()` به `post_migrate` signal
+   - انتقال `RoleService.create_system_roles()` از `ready()` به `post_migrate` signal
+   - ایجاد `src/core/signals.py` و `src/modules/rbac/signals.py`
+   - بازنویسی `src/core/apps.py` و `src/modules/rbac/apps.py`
+
+3. ✅ اصلاح `src/config/settings.py`
+   - حذف تکرار `src.modules.catalog`
+   - فعال‌سازی `src.modules.catalog` و `src.modules.order`
+
+4. ✅ Migration 0002 ایجاد و اعمال شد
+   - ایجاد جداول `catalog_inventory` و `catalog_inventorytransaction`
+   - اصلاح فیلدهای مدل‌های موجود
+
+**نتیجه:**
+- RuntimeWarning: ۱۴ → ۰
+- System Check: بدون مشکل
+- Inventory System: ۱۰۰٪ مطابق ADR-002 و INVENTORY-FLOW.md
+
+**Commit:** `2f90f69` - fix(M1): بازنویسی کامل مدل Product با Inventory + رفع همه RuntimeWarnings
+
+**مرحله بعدی:**
+- ایجاد `InventoryService` برای عملیات موجودی (Service Layer)
+- اتصال به ماژول Order برای رزرو خودکار هنگام ثبت سفارش
+- اتصال به پنل ادمین برای ورود دستی موجودی
+
+
+### 2026-08-17 — Phase 5: رفع انحرافات بحرانی و تکمیل Inventory System
+
+**اقدامات انجام شده:**
+1. ✅ بازنویسی کامل `src/modules/catalog/models.py` مطابق ADR-002 و INVENTORY-FLOW.md
+   - افزودن مدل `Inventory` با سیستم رزرو و `available_quantity` محاسبه‌ای
+   - افزودن مدل `InventoryTransaction` برای تاریخچه کامل تغییرات موجودی
+   - افزودن ۱۲ نوع `ContentBlock` مطابق D-079
+   - ایجاد خودکار `Inventory` پس از ساخت `Product` با `post_save` signal
+   - متدهای `reserve()`, `release_reservation()`, `confirm_sale()`, `return_stock()`, `add_stock()`
+   - بررسی `can_reserve()` برای جلوگیری از oversell
+   - محاسبه `is_low_stock` بر اساس ۲۰٪ یا ۲ واحد
+
+2. ✅ رفع کامل ۱۴ `RuntimeWarning` درباره database initialization
+   - انتقال `FeatureFlagService.register_default_flags()` از `ready()` به `post_migrate` signal
+   - انتقال `RoleService.create_system_roles()` از `ready()` به `post_migrate` signal
+   - ایجاد `src/core/signals.py` و `src/modules/rbac/signals.py`
+   - بازنویسی `src/core/apps.py` و `src/modules/rbac/apps.py`
+
+3. ✅ اصلاح `src/config/settings.py`
+   - حذف تکرار `src.modules.catalog`
+   - فعال‌سازی `src.modules.catalog` و `src.modules.order`
+
+4. ✅ Migration 0002 ایجاد و اعمال شد
+   - ایجاد جداول `catalog_inventory` و `catalog_inventorytransaction`
+   - اصلاح فیلدهای مدل‌های موجود
+
+**نتیجه:**
+- RuntimeWarning: ۱۴ → ۰
+- System Check: بدون مشکل
+- Inventory System: ۱۰۰٪ مطابق ADR-002 و INVENTORY-FLOW.md
+
+**Commit:** `2f90f69` - fix(M1): بازنویسی کامل مدل Product با Inventory + رفع همه RuntimeWarnings
+
+**مرحله بعدی:**
+- ایجاد `InventoryService` برای عملیات موجودی (Service Layer)
+- اتصال به ماژول Order برای رزرو خودکار هنگام ثبت سفارش
+- اتصال به پنل ادمین برای ورود دستی موجودی
