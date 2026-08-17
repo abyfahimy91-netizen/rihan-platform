@@ -254,3 +254,53 @@
 - اتصال InventoryService به Order Module
 - CheckoutService برای مدیریت فرآیند سفارش
 - Hook integration برای رویدادهای ORDER_CREATED, ORDER_CONFIRMED, ORDER_CANCELLED
+
+
+### 2026-08-17 — Phase 5: تکمیل Order-Inventory Integration
+
+**اقدامات انجام شده:**
+1. ✅ بازنویسی `src/modules/order/services.py`
+   - حذف استفاده از `product.stock_quantity` (منسوخ)
+   - استفاده از `InventoryService` برای همه عملیات موجودی
+   - افزودن چک موجودی در `add_to_cart` و `update_cart_item`
+
+2. ✅ ایجاد `src/modules/order/checkout_service.py`
+   - CheckoutService به عنوان orchestrator فرآیند سفارش
+   - ۴ متد اصلی:
+     * `create_order()` - ایجاد سفارش + رزرو موجودی
+     * `confirm_payment()` - تأیید پرداخت + تبدیل رزرو به فروش
+     * `cancel_order()` - لغو سفارش + آزادسازی رزرو
+     * `process_return()` - مرجوعی + بازگشت موجودی
+   - همه عملیات با `@transaction.atomic`
+
+3. ✅ ایجاد `src/modules/order/hooks.py`
+   - ۴ hook جدید برای اطلاع‌رسانی رویدادها:
+     * `ORDER_CREATED`, `ORDER_CONFIRMED`
+     * `ORDER_CANCELLED`, `ORDER_RETURNED`
+
+4. ✅ ایجاد `src/modules/order/tests/test_order_inventory_integration.py`
+   - ۹ تست integration کامل (همه پاس شدند)
+   - پوشش کامل سناریوهای D-045:
+     * افزودن به سبد (بدون رزرو)
+     * ایجاد سفارش (با رزرو)
+     * تأیید پرداخت (تبدیل به فروش)
+     * لغو سفارش (آزادسازی)
+     * مرجوعی (بازگشت موجودی)
+     * سفارش چند محصولی
+     * خرید مهمان
+
+**انطباق با مستندات:**
+- ✅ D-045 (Inventory Flow)
+- ✅ D-080 (Order Architecture)
+- ✅ INVENTORY-FLOW.md (Business Rules)
+- ✅ ADR-002 (Database Architecture)
+
+**نتیجه:**
+- ۹ تست integration پاس شدند
+- ۱۳ تست catalog هنوز پاس می‌شوند (regression)
+- System Check: بدون مشکل
+- RuntimeWarnings: ۰
+
+**مرحله بعدی:**
+- اتصال InventoryService به پنل ادمین (M3)
+- یا تکمیل M1 (کاتالوگ) با Views و SEO
