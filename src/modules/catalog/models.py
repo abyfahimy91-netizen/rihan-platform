@@ -240,7 +240,7 @@ class InventoryTransaction(models.Model):
     quantity_change = models.DecimalField(max_digits=10, decimal_places=2)
     reason = models.TextField(blank=True)
     reference_type = models.CharField(max_length=50, blank=True)
-    reference_id = models.UUIDField(null=True, blank=True)
+    reference_id = models.CharField(max_length=100, null=True, blank=True, verbose_name='Reference ID')
     stock_before = models.DecimalField(max_digits=10, decimal_places=2)
     stock_after = models.DecimalField(max_digits=10, decimal_places=2)
     created_at = models.DateTimeField(auto_now_add=True)
