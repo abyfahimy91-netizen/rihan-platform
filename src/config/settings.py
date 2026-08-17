@@ -24,7 +24,10 @@ INSTALLED_APPS = [
     # ماژول‌های ریهان (بر اساس D-079 - ۱۴ ماژول)
     # 'src.modules.catalog',   # M1 - غیرفعال تا تکمیل بازنویسی
     # 'src.modules.order',     # M2 - غیرفعال تا تکمیل بازنویسی
-    # 'src.modules.auth',      # M10 - غیرفعال تا بازنویسی مطابق ADR-006
+    # 'src.modules.auth',
+    
+    # ماژول RBAC (M5)
+    'src.modules.rbac',      # M10 - غیرفعال تا بازنویسی مطابق ADR-006
 ]
 
 MIDDLEWARE = [

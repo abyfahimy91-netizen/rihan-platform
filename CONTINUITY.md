@@ -1,7 +1,7 @@
 # CONTINUITY — وضعیت فعلی و اقدام بعدی
 
 **آخرین بهروزرسانی:** 2026-08-16
-**نسخه پروژه:** 0.6.2-mvp
+**نسخه پروژه:** 0.6.3-mvp
 **فاز فعال:** فاز ۵ (MVP Development) — بازسازی کامل مطابق D-079
 
 ---
@@ -14,7 +14,7 @@
 | M2 سفارش | ⏳ نیاز به بازنویسی | کار موازی قبلی |
 | M3 پنل خانواده | ❌ ساخته نشده | بحرانی‌ترین |
 | M4 پنل تأمین‌کننده | ❌ ساخته نشده | |
-| M5 RBAC | ❌ ساخته نشده | |
+| **M5 RBAC** | **✅ کامل** | **Chunk 4A-4C** |
 | M6 مالی | ❌ ساخته نشده | |
 | M7 پیگیری سفارش | ❌ ساخته نشده | |
 | M8 نظرات معتمد | ❌ ساخته نشده | |
@@ -42,41 +42,46 @@
 - ✅ Chunk 3C: DeviceToken + Session + Guest Checkout
 - ✅ Chunk 3D: Admin + Migrations + Integration
 
+### M5 (RBAC) — ۱۰۰٪ کامل
+- ✅ Chunk 4A: Models (Role, UserRole) + RoleService
+- ✅ Chunk 4B: Decorators + Middleware + Admin
+- ✅ Chunk 4C: Views + URLs + Hooks + Integration
+
 ---
 
-## 📋 ویژگی‌های M10 (احراز هویت)
+## 📋 ویژگی‌های M5 (RBAC)
 
-### OTP (ADR-006 بخش ۲)
-- ✅ OTP ۶ رقمی با hash bcrypt
-- ✅ طول عمر: ۲ دقیقه
-- ✅ ۳ تلاش مجاز
-- ✅ قفل موقت: ۳۰ دقیقه
-- ✅ اعتبارسنجی شماره موبایل ایرانی
+### Role Model (ADR-002 بخش ۲.۱)
+- ✅ UUID PK
+- ✅ name, code (UNIQUE)
+- ✅ permissions (JSONField)
+- ✅ is_system (نقش‌های سیستمی غیرقابل حذف)
 
-### Device Remembering (ADR-006 بخش ۲.۲)
-- ✅ طول عمر: ۳۰ روز
-- ✅ فرمت: UUID v4
-- ✅ حداکثر ۵ دستگاه per کاربر
-- ✅ ابطال دستی و سراسری
+### UserRole Model (ADR-002 بخش ۲.۳)
+- ✅ Many-to-Many با User
+- ✅ granted_by (اعطاکننده)
+- ✅ is_primary (نقش اصلی)
+- ✅ UNIQUE(user, role) constraint
 
-### Guest Checkout (ADR-006 بخش ۳)
-- ✅ سقف: ۵ سفارش مهمان
-- ✅ Guest Review با توکن ۷ روزه
+### ۶ نقش سیستمی (D-017)
+- ✅ customer (مشتری)
+- ✅ admin (مدیر)
+- ✅ family_admin (مدیر خانواده)
+- ✅ family_member (عضو خانواده)
+- ✅ observer (ناظر)
+- ✅ supplier (تأمین‌کننده)
 
-### Rate Limiting (ADR-006 بخش ۴)
-- ✅ ۳ درخواست در ۱۰ دقیقه per شماره
-- ✅ ۱۰ درخواست در ساعت per IP
+### Decorators
+- ✅ @require_permission
+- ✅ @require_role
+- ✅ @require_family, @require_admin, @require_supplier, @require_customer
 
-### SMS Providers (ADR-006 بخش ۶)
-- ✅ SmsProvider Interface (Strategy Pattern)
-- ✅ MockSmsProvider برای توسعه
-- ✅ KavenegarProvider (ایرانی)
-- ✅ حذف ManualSmsProvider
-
-### Admin Panel (ADR-006 بخش ۷)
-- ✅ مدیریت PhoneOTP
-- ✅ مدیریت DeviceToken
-- ✅ مشاهده LoginAttempt (فقط خواندنی)
+### API Endpoints (ADR-003)
+- ✅ GET /api/v1/rbac/roles/
+- ✅ GET /api/v1/rbac/roles/<code>/
+- ✅ GET /api/v1/rbac/my-role/
+- ✅ POST /api/v1/rbac/assign/
+- ✅ POST /api/v1/rbac/revoke/
 
 ---
 
@@ -85,7 +90,7 @@
 **اولویت ۱:** بازنویسی M1 (کاتالوگ) با بلوک‌محور
 **اولویت ۲:** بازنویسی M2 (سفارش) با D-080
 **اولویت ۳:** ساخت M3 (پنل خانواده) — بحرانی‌ترین
-**اولویت ۴:** ساخت M5 (RBAC)
+**اولویت ۴:** ساخت M4 (پنل تأمین‌کننده)
 
 ---
 
@@ -97,6 +102,7 @@
 | 2026-08-16 | حذف JWT و بازگشت به OTP (ADR-006) | ✅ اجرا شد |
 | 2026-08-16 | M14 کامل شد | ✅ تأیید شد |
 | 2026-08-16 | M10 کامل شد | ✅ تأیید شد |
+| 2026-08-16 | M5 کامل شد | ✅ تأیید شد |
 
 ---
 
@@ -104,8 +110,8 @@
 
 | معیار | مقدار |
 |---|---|
-| ماژول‌های کامل | ۲ از ۱۴ (M10, M14) |
-| Chunks تکمیل‌شده | ۹ |
-| تست‌های پاس‌شده | ۵۰+ |
+| ماژول‌های کامل | ۳ از ۱۴ (M5, M10, M14) |
+| Chunks تکمیل‌شده | ۱۲ |
+| تست‌های پاس‌شده | ۷۰+ |
 | انطباق با ADR | ۱۰۰٪ |
-| Commits | ۹ |
+| Commits | ۱۲ |
