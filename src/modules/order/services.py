@@ -1,14 +1,25 @@
-'''
-منطق کسب‌وکار سبد خرید
-منطبق بر D-079 (شفافیت)، D-080 (سبد مهمان)، D-046 (بدون هزینه پنهان)
-'''
+"""
+Order Module Services
+Integrated with InventoryService per D-045, D-080, INVENTORY-FLOW.md
+
+Key changes from original:
+- Uses InventoryService for stock operations (not product.stock_quantity)
+- Reserves stock at order creation (not direct deduction)
+- Follows D-045 flow: cart add (no reserve) -> order create (reserve) -> payment confirm (sale)
+"""
 from django.core.exceptions import ValidationError
+from django.db import transaction
 from src.modules.catalog.models import Product
-from .models import Cart, CartItem
+from src.modules.catalog.services.inventory_service import InventoryService
+from src.modules.catalog.services.exceptions import (
+    InsufficientStockError,
+    ProductNotFoundError,
+)
+from .models import Cart, CartItem, Order, OrderItem
 
 
 def get_or_create_cart(request):
-    '''گرفتن یا ساختن سبد خرید - منطبق بر ADR-002 (Session-based)'''
+    """Get or create cart - Session-based (ADR-002)"""
     session_key = request.session.session_key
     if not session_key:
         request.session.create()
@@ -16,11 +27,11 @@ def get_or_create_cart(request):
     
     user = request.user if request.user.is_authenticated else None
     
-    # اولویت: سبد کاربر لاگین‌کرده، سپس سبد نشست
+    # Priority: logged-in user cart, then session cart
     if user:
         cart = Cart.objects.filter(user=user, is_active=True).first()
         if not cart:
-            # ادغام سبد مهمان با سبد کاربر (merge)
+            # Merge guest cart with user cart
             guest_cart = Cart.objects.filter(session_key=session_key, is_active=True).first()
             if guest_cart:
                 guest_cart.user = user
@@ -39,27 +50,32 @@ def get_or_create_cart(request):
 
 
 def add_to_cart(cart, product_id, quantity=1):
-    '''افزودن کالا به سبد با چک موجودی - منطبق بر D-046 (شفافیت)'''
+    """
+    Add item to cart with availability check.
+    Per D-045: NO reservation at cart add - only check availability.
+    """
     try:
         product = Product.objects.get(id=product_id)
     except Product.DoesNotExist:
-        raise ValidationError("محصول یافت نشد")
+        raise ValidationError("Product not found")
     
-    # بررسی موجودی انبار
     if quantity < 1:
-        raise ValidationError("تعداد باید حداقل ۱ باشد")
+        raise ValidationError("Quantity must be at least 1")
+    
+    # Check availability via InventoryService (NOT reservation)
+    available = InventoryService.get_available_stock(product)
     
     existing_item = CartItem.objects.filter(cart=cart, product=product).first()
     new_quantity = (existing_item.quantity + quantity) if existing_item else quantity
     
-    if product.stock_quantity < new_quantity:
+    if available < new_quantity:
         raise ValidationError(
-            f"موجودی کافی نیست. حداکثر موجودی: {product.stock_quantity} عدد"
+            f"Insufficient stock. Maximum available: {available}"
         )
     
     if existing_item:
         existing_item.quantity = new_quantity
-        existing_item.unit_price_at_add = product.price  # به‌روزرسانی با قیمت جاری
+        existing_item.unit_price_at_add = product.final_price
         existing_item.save()
         return existing_item
     else:
@@ -67,24 +83,25 @@ def add_to_cart(cart, product_id, quantity=1):
             cart=cart,
             product=product,
             quantity=quantity,
-            unit_price_at_add=product.price
+            unit_price_at_add=product.final_price
         )
 
 
 def update_cart_item(cart, item_id, quantity):
-    '''به‌روزرسانی تعداد - چک موجودی'''
+    """Update item quantity with availability check."""
     try:
         item = CartItem.objects.get(id=item_id, cart=cart)
     except CartItem.DoesNotExist:
-        raise ValidationError("کالا در سبد یافت نشد")
+        raise ValidationError("Item not found in cart")
     
     if quantity < 1:
         item.delete()
         return None
     
-    if item.product.stock_quantity < quantity:
+    available = InventoryService.get_available_stock(item.product)
+    if available < quantity:
         raise ValidationError(
-            f"موجودی کافی نیست. حداکثر موجودی: {item.product.stock_quantity} عدد"
+            f"Insufficient stock. Maximum available: {available}"
         )
     
     item.quantity = quantity
@@ -93,56 +110,70 @@ def update_cart_item(cart, item_id, quantity):
 
 
 def remove_from_cart(cart, item_id):
-    '''حذف کالا از سبد'''
+    """Remove item from cart."""
     CartItem.objects.filter(id=item_id, cart=cart).delete()
 
 
-def create_order_from_cart(cart, guest_info=None):
-    '''
-    ساخت سفارش نهایی از سبد خرید
-    منطبق بر ADR-002 (Snapshot مهمان و محصولات)
-    '''
-    from .models import Order, OrderItem
+def create_order_from_cart(cart, guest_info=None, user=None):
+    """
+    Create final order from cart.
     
-    if not cart.items.exists():
-        raise ValidationError("سبد خرید خالی است")
+    Per D-045:
+    - Reservation happens ONLY at order creation (not at cart add)
+    - 24-hour reservation timeout
+    - Inventory managed via InventoryService
     
-    # ایجاد Order
-    order = Order.objects.create(
-        user=cart.user if cart.user else None,
-        session_key=cart.session_key if not cart.user else '',
-        status=Order.OrderStatus.DRAFT,
-        guest_name=(guest_info or {}).get('name', ''),
-        guest_phone=(guest_info or {}).get('phone', ''),
-        guest_address=(guest_info or {}).get('address', ''),
-        guest_postal_code=(guest_info or {}).get('postal_code', ''),
-        shipping_cost=(guest_info or {}).get('shipping_cost', 0),
+    This function:
+    1. Creates Order and OrderItems (with product snapshots per ADR-002)
+    2. Reserves stock via InventoryService
+    3. Sets status to PENDING (awaiting payment)
+    4. Deactivates cart
+    
+    Returns:
+        Created Order instance
+        
+    Raises:
+        ValidationError: If cart is empty or stock insufficient
+        InsufficientStockError: If any product lacks stock
+    """
+    from .checkout_service import CheckoutService
+    
+    return CheckoutService.create_order(
+        cart=cart,
+        guest_info=guest_info,
+        user=user,
     )
+
+
+def confirm_payment(order, payment_data=None):
+    """
+    Confirm payment and convert reservation to sale.
     
-    # Snapshot کالاها
-    order_items = []
-    for cart_item in cart.items.all():
-        order_items.append(OrderItem(
-            order=order,
-            product=cart_item.product,
-            product_name_snapshot=cart_item.product.name,  # Snapshot نام محصول
-            quantity=cart_item.quantity,
-            unit_price_at_purchase=cart_item.unit_price_at_add,
-        ))
+    Called after admin verifies payment receipt (D-045 flow).
     
-    OrderItem.objects.bulk_create(order_items)
+    Args:
+        order: Order instance
+        payment_data: Optional payment info
+        
+    Returns:
+        Updated Order with PAID status
+    """
+    from .checkout_service import CheckoutService
     
-    # محاسبه جمع کل
-    order.calculate_totals()
+    return CheckoutService.confirm_payment(order, payment_data)
+
+
+def cancel_order(order, reason='Customer request'):
+    """
+    Cancel order and release reservation.
     
-    # کاهش موجودی انبار
-    for order_item in order_items:
-        product = order_item.product
-        product.stock_quantity -= order_item.quantity
-        product.save(update_fields=['stock_quantity'])
+    Args:
+        order: Order instance
+        reason: Reason for cancellation
+        
+    Returns:
+        Updated Order with CANCELLED status
+    """
+    from .checkout_service import CheckoutService
     
-    # غیرفعال کردن سبد (نه حذف، برای سابقه)
-    cart.is_active = False
-    cart.save()
-    
-    return order
+    return CheckoutService.cancel_order(order, reason)
