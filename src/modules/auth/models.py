@@ -68,7 +68,7 @@ class PhoneOTP(models.Model):
     )
     
     class Meta:
-        app_label = 'auth'
+        app_label = 'rihan_auth'
         verbose_name = 'کد یکبارمصرف'
         verbose_name_plural = 'کدهای یکبارمصرف'
         ordering = ['-created_at']
@@ -177,7 +177,7 @@ class DeviceToken(models.Model):
     )
     
     class Meta:
-        app_label = 'auth'
+        app_label = 'rihan_auth'
         verbose_name = 'توکن دستگاه'
         verbose_name_plural = 'توکن‌های دستگاه'
         ordering = ['-last_used_at']
@@ -292,7 +292,7 @@ class LoginAttempt(models.Model):
     )
     
     class Meta:
-        app_label = 'auth'
+        app_label = 'rihan_auth'
         verbose_name = 'تلاش ورود'
         verbose_name_plural = 'تلاش‌های ورود'
         ordering = ['-created_at']

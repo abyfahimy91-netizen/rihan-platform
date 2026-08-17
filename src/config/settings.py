@@ -21,13 +21,15 @@ INSTALLED_APPS = [
     # ✅ ریهان Core (M14 - معماری پلاگین‌محور)
     'src.core',
     
+    # ✅ ماژول احراز هویت (M10)
+    'src.modules.auth',
+    
+    # ✅ ماژول RBAC (M5)
+    'src.modules.rbac',
+    
     # ماژول‌های ریهان (بر اساس D-079 - ۱۴ ماژول)
     # 'src.modules.catalog',   # M1 - غیرفعال تا تکمیل بازنویسی
     # 'src.modules.order',     # M2 - غیرفعال تا تکمیل بازنویسی
-    # 'src.modules.auth',
-    
-    # ماژول RBAC (M5)
-    'src.modules.rbac',      # M10 - غیرفعال تا بازنویسی مطابق ADR-006
 ]
 
 MIDDLEWARE = [
@@ -42,6 +44,9 @@ MIDDLEWARE = [
     # ✅ Middlewareهای ریهان (M14)
     'src.core.middleware.FeatureFlagMiddleware',
     'src.core.middleware.AuditLogMiddleware',
+    
+    # ✅ Middlewareهای RBAC (M5)
+    'src.modules.rbac.middleware.RbacMiddleware',
 ]
 
 ROOT_URLCONF = 'src.config.urls'
@@ -95,7 +100,6 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework.authentication.SessionAuthentication',
-        # JWT بعد از بازنویسی auth اضافه می‌شود
     ],
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticatedOrReadOnly',
