@@ -153,6 +153,7 @@ class CheckoutService:
     def confirm_payment(
         cls,
         order: Order,
+        payment: 'Payment' = None,
         payment_data: Optional[Dict] = None,
         admin_user=None,
     ) -> Order:
@@ -163,7 +164,8 @@ class CheckoutService:
         
         Args:
             order: Order instance (must be PENDING)
-            payment_data: Optional dict with payment info
+            payment: Payment instance (if provided, will be updated - recommended)
+            payment_data: Optional dict with payment info (for creating new payment)
             admin_user: User confirming the payment
             
         Returns:
@@ -175,8 +177,17 @@ class CheckoutService:
                 f"got {order.status}"
             )
         
-        # Step 1: Create payment record if data provided
-        if payment_data:
+        # Step 1: Update existing Payment OR create new one
+        if payment:
+            # Update existing payment (e.g., card-to-card with evidence)
+            # This preserves sender_card_last4, transfer_time, receipt_image
+            payment.status = Payment.PaymentStatus.SUCCESS
+            payment.reviewed_by = admin_user
+            payment.reviewed_at = timezone.now()
+            payment.admin_notes = (payment_data or {}).get('notes', 'تایید از طریق پنل ادمین')
+            payment.save()
+        elif payment_data:
+            # Create new payment (legacy behavior)
             Payment.objects.create(
                 order=order,
                 amount=payment_data.get('amount', order.total_price),

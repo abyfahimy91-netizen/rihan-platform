@@ -281,17 +281,36 @@ class PaymentAdmin(admin.ModelAdmin):
     # Actions برای تایید/رد پرداخت
     @admin.action(description='✅ تایید پرداخت‌های انتخاب‌شده')
     def confirm_payment(self, request, queryset):
+        """
+        تایید پرداخت و تبدیل reservation به sale (مطابق D-045)
+        از CheckoutService.confirm_payment استفاده می‌کند
+        """
+        from .checkout_service import CheckoutService
+        
         confirmed_count = 0
         for payment in queryset.filter(status=Payment.PaymentStatus.PENDING_REVIEW):
-            payment.confirm(admin_user=request.user, notes='تایید از طریق پنل ادمین')
-            
-            # به‌روزرسانی وضعیت سفارش به PAID
-            payment.order.status = Order.OrderStatus.PAID
-            payment.order.save()
-            
-            confirmed_count += 1
+            try:
+                # استفاده از CheckoutService برای تایید کامل
+                # Payment object مستقیم ارسال می‌شود تا evidence حفظ شود
+                CheckoutService.confirm_payment(
+                    order=payment.order,
+                    payment=payment,  # ارسال مستقیم Payment
+                    payment_data={
+                        'notes': 'تایید از طریق پنل ادمین',
+                    },
+                    admin_user=request.user,
+                )
+                
+                confirmed_count += 1
+            except Exception as e:
+                self.message_user(
+                    request,
+                    f'خطا در تایید پرداخت {payment.id}: {str(e)}',
+                    level='error'
+                )
         
-        self.message_user(request, f'{confirmed_count} پرداخت با موفقیت تایید شد.')
+        if confirmed_count > 0:
+            self.message_user(request, f'{confirmed_count} پرداخت با موفقیت تایید شد.')
     
     @admin.action(description='❌ رد پرداخت‌های انتخاب‌شده')
     def reject_payment(self, request, queryset):
