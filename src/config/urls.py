@@ -19,6 +19,8 @@ urlpatterns = [
     
     # Catalog at root (Homepage)
     path('', include('src.modules.catalog.urls')),
+    # Order Pages (HTML) - مسیرهای زیبا برای مشتری
+    path('order/', include('src.modules.order.page_urls')),
     
     # Admin
     path('admin/', admin.site.urls),

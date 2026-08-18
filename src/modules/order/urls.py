@@ -1,15 +1,19 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from .views import CartViewSet, PaymentViewSet, AddressViewSet, OrderViewSet
+from . import views
 
 app_name = 'order'
 
+# API Router (برای endpoints برنامه‌ای)
 router = DefaultRouter()
-router.register(r'cart', CartViewSet, basename='cart')
-router.register(r'payment', PaymentViewSet, basename='payment')
-router.register(r'addresses', AddressViewSet, basename='addresses')
-router.register(r'orders', OrderViewSet, basename='orders')
+router.register(r'cart', views.CartViewSet, basename='cart')
+router.register(r'payment', views.PaymentViewSet, basename='payment')
+router.register(r'addresses', views.AddressViewSet, basename='addresses')
+router.register(r'orders', views.OrderViewSet, basename='orders')
 
 urlpatterns = [
+    # ═══════════════════════════════════════════════════════════════
+    # API Routes (JSON) - برای ارتباط با فرانت‌اند
+    # ═══════════════════════════════════════════════════════════════
     path('', include(router.urls)),
 ]

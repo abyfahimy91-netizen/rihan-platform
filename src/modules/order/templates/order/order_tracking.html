@@ -1,0 +1,327 @@
+{% extends "catalog/base.html" %}
+
+{% block title %}پیگیری سفارش {{ order.order_number }} | ریهان{% endblock %}
+
+{% block extra_css %}
+<style>
+    .tracking-container {
+        max-width: 800px;
+        margin: 0 auto;
+    }
+    
+    .order-header {
+        background: #fff;
+        border-radius: 16px;
+        padding: 30px;
+        margin-bottom: 30px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+    
+    .order-number {
+        font-size: 24px;
+        font-weight: 700;
+        color: #1a1a1a;
+        margin-bottom: 10px;
+    }
+    
+    .order-status {
+        display: inline-block;
+        padding: 6px 16px;
+        border-radius: 20px;
+        font-size: 14px;
+        font-weight: 600;
+        color: #fff;
+    }
+    
+    .status-DRAFT { background: #6c757d; }
+    .status-PENDING { background: #ffc107; color: #000; }
+    .status-PAID { background: #28a745; }
+    .status-PROCESSING { background: #17a2b8; }
+    .status-SHIPPED { background: #007bff; }
+    .status-DELIVERED { background: #28a745; }
+    .status-CANCELLED { background: #dc3545; }
+    
+    /* Timeline */
+    .timeline {
+        position: relative;
+        padding: 20px 0;
+    }
+    
+    .timeline::before {
+        content: '';
+        position: absolute;
+        right: 24px;
+        top: 0;
+        bottom: 0;
+        width: 2px;
+        background: #e0e0e0;
+    }
+    
+    .timeline-item {
+        position: relative;
+        padding-right: 70px;
+        padding-bottom: 30px;
+    }
+    
+    .timeline-item:last-child {
+        padding-bottom: 0;
+    }
+    
+    .timeline-marker {
+        position: absolute;
+        right: 15px;
+        top: 0;
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        background: #e0e0e0;
+        border: 3px solid #fff;
+        box-shadow: 0 0 0 2px #e0e0e0;
+    }
+    
+    .timeline-item.completed .timeline-marker {
+        background: #2d5a2d;
+        box-shadow: 0 0 0 2px #2d5a2d;
+    }
+    
+    .timeline-item.active .timeline-marker {
+        background: #ffc107;
+        box-shadow: 0 0 0 2px #ffc107;
+        animation: pulse 2s infinite;
+    }
+    
+    @keyframes pulse {
+        0%, 100% { box-shadow: 0 0 0 2px #ffc107; }
+        50% { box-shadow: 0 0 0 6px rgba(255, 193, 7, 0.3); }
+    }
+    
+    .timeline-content {
+        background: #fff;
+        border-radius: 12px;
+        padding: 20px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+    
+    .timeline-item.completed .timeline-content {
+        border-right: 3px solid #2d5a2d;
+    }
+    
+    .timeline-item.active .timeline-content {
+        border-right: 3px solid #ffc107;
+    }
+    
+    .timeline-title {
+        font-size: 16px;
+        font-weight: 700;
+        margin-bottom: 8px;
+        color: #1a1a1a;
+    }
+    
+    .timeline-description {
+        font-size: 14px;
+        color: #666;
+        line-height: 1.6;
+    }
+    
+    .timeline-date {
+        font-size: 12px;
+        color: #888;
+        margin-top: 8px;
+    }
+    
+    /* Order Details */
+    .order-details {
+        background: #fff;
+        border-radius: 16px;
+        padding: 30px;
+        margin-top: 30px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+    
+    .order-details h2 {
+        font-size: 20px;
+        font-weight: 700;
+        margin-bottom: 20px;
+    }
+    
+    .order-items {
+        border-top: 1px solid #eee;
+    }
+    
+    .order-item {
+        display: flex;
+        justify-content: space-between;
+        padding: 16px 0;
+        border-bottom: 1px solid #eee;
+    }
+    
+    .order-item:last-child {
+        border-bottom: none;
+    }
+    
+    .order-item-name {
+        font-weight: 600;
+        color: #1a1a1a;
+    }
+    
+    .order-item-qty {
+        font-size: 14px;
+        color: #888;
+    }
+    
+    .order-item-price {
+        font-weight: 700;
+        color: #2d5a2d;
+    }
+    
+    .order-total {
+        display: flex;
+        justify-content: space-between;
+        padding: 20px 0;
+        border-top: 2px solid #1a1a1a;
+        margin-top: 10px;
+        font-size: 18px;
+        font-weight: 700;
+    }
+    
+    .order-total-value {
+        color: #2d5a2d;
+    }
+    
+    .shipping-badge {
+        display: inline-block;
+        background: #d4edda;
+        color: #155724;
+        padding: 4px 12px;
+        border-radius: 12px;
+        font-size: 12px;
+        margin-right: 8px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="tracking-container">
+    <div class="order-header">
+        <h1 class="order-number">سفارش {{ order.order_number }}</h1>
+        <span class="order-status status-{{ order.status }}">{{ order.get_status_display }}</span>
+        <p style="color:#888; margin-top:15px; font-size:14px;">
+            تاریخ ثبت: {{ order.created_at|date:"Y/m/d H:i" }}
+        </p>
+    </div>
+    
+    <!-- Timeline 5 مرحله‌ای -->
+    <div class="timeline">
+        {% with status=order.status %}
+        
+        <!-- مرحله ۱: ثبت سفارش -->
+        <div class="timeline-item completed">
+            <div class="timeline-marker"></div>
+            <div class="timeline-content">
+                <div class="timeline-title">✅ سفارش ثبت شد</div>
+                <div class="timeline-description">سفارش شما با موفقیت در سیستم ثبت شد</div>
+                <div class="timeline-date">{{ order.created_at|date:"Y/m/d H:i" }}</div>
+            </div>
+        </div>
+        
+        <!-- مرحله ۲: انتظار پرداخت -->
+        <div class="timeline-item {% if status == 'PENDING' %}active{% elif status != 'DRAFT' %}completed{% endif %}">
+            <div class="timeline-marker"></div>
+            <div class="timeline-content">
+                <div class="timeline-title">
+                    {% if status == 'PENDING' %}⏳{% else %}✅{% endif %}
+                    در انتظار پرداخت
+                </div>
+                <div class="timeline-description">
+                    {% if status == 'PENDING' %}
+                        لطفاً پرداخت را تکمیل کنید تا سفارش شما پردازش شود.
+                        <br><a href="/order/payment/{{ order.order_number }}/" style="color:#2d5a2d; font-weight:600;">تکمیل پرداخت →</a>
+                    {% else %}
+                        پرداخت شما ثبت شد
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- مرحله ۳: تایید پرداخت -->
+        <div class="timeline-item {% if status == 'PAID' %}completed{% elif status == 'PROCESSING' or status == 'SHIPPED' or status == 'DELIVERED' %}completed{% endif %}">
+            <div class="timeline-marker"></div>
+            <div class="timeline-content">
+                <div class="timeline-title">
+                    {% if status == 'PAID' or status == 'PROCESSING' or status == 'SHIPPED' or status == 'DELIVERED' %}✅{% else %}⏸️{% endif %}
+                    تایید پرداخت توسط ریهان
+                </div>
+                <div class="timeline-description">
+                    {% if status == 'PAID' or status == 'PROCESSING' or status == 'SHIPPED' or status == 'DELIVERED' %}
+                        پرداخت شما توسط تیم ریهان تایید شد
+                    {% else %}
+                        پس از تایید پرداخت توسط تیم ریهان، این مرحله تکمیل می‌شود
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- مرحله ۴: آماده‌سازی و ارسال -->
+        <div class="timeline-item {% if status == 'SHIPPED' or status == 'DELIVERED' %}completed{% elif status == 'PROCESSING' %}active{% endif %}">
+            <div class="timeline-marker"></div>
+            <div class="timeline-content">
+                <div class="timeline-title">
+                    {% if status == 'SHIPPED' or status == 'DELIVERED' %}✅{% elif status == 'PROCESSING' %}📦{% else %}⏸️{% endif %}
+                    آماده‌سازی و ارسال
+                </div>
+                <div class="timeline-description">
+                    {% if status == 'PROCESSING' %}
+                        سفارش شما در حال بسته‌بندی و آماده‌سازی است
+                    {% elif status == 'SHIPPED' or status == 'DELIVERED' %}
+                        سفارش شما ارسال شده است
+                    {% else %}
+                        پس از تایید پرداخت، سفارش شما بسته‌بندی و ارسال می‌شود
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- مرحله ۵: تحویل -->
+        <div class="timeline-item {% if status == 'DELIVERED' %}completed{% endif %}">
+            <div class="timeline-marker"></div>
+            <div class="timeline-content">
+                <div class="timeline-title">
+                    {% if status == 'DELIVERED' %}🎉{% else %}⏸️{% endif %}
+                    تحویل به شما
+                </div>
+                <div class="timeline-description">
+                    {% if status == 'DELIVERED' %}
+                        سفارش با موفقیت تحویل شما شد. از خرید شما متشکریم!
+                    {% else %}
+                        سفارش به آدرس شما تحویل داده خواهد شد
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        {% endwith %}
+    </div>
+    
+    <!-- جزئیات سفارش -->
+    <div class="order-details">
+        <h2>📋 جزئیات سفارش</h2>
+        
+        <div class="order-items">
+            {% for item in order.items.all %}
+            <div class="order-item">
+                <div>
+                    <div class="order-item-name">{{ item.product_name_snapshot }}</div>
+                    <div class="order-item-qty">تعداد: {{ item.quantity }}</div>
+                </div>
+                <div class="order-item-price">{{ item.subtotal|floatformat:0 }} تومان</div>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <div class="order-total">
+            <span>مبلغ نهایی <span class="shipping-badge">🚚 ارسال رایگان</span></span>
+            <span class="order-total-value">{{ order.total_price|floatformat:0 }} تومان</span>
+        </div>
+    </div>
+</div>
+{% endblock %}
