@@ -28,6 +28,9 @@ INSTALLED_APPS = [
     # ✅ ماژول RBAC (M5)
     'src.modules.rbac',
     
+    # ✅ ماژول Audit Log (اسپرینت ۱)
+    'src.modules.audit',
+    
     # ماژول‌های ریهان (بر اساس D-079 - ۱۴ ماژول)
     #    # M1 - غیرفعال تا تکمیل بازنویسی
     'src.modules.order',     # M2 - غیرفعال تا تکمیل بازنویسی
