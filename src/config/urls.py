@@ -17,11 +17,14 @@ urlpatterns = [
     path('sitemap.xml', sitemap, {'sitemaps': sitemaps}, name='django.contrib.sitemaps.views.sitemap'),
     path('robots.txt', robots_txt, name='robots_txt'),
     
+    # Catalog at root (Homepage)
+    path('', include('src.modules.catalog.urls')),
+    
     # Admin
     path('admin/', admin.site.urls),
     
     # API endpoints
-    path('api/v1/catalog/', include('src.modules.catalog.urls')),
+    path('api/v1/catalog/', include('src.modules.catalog.urls_api')),
     path('api/v1/order/', include('src.modules.order.urls')),
     path('api/v1/auth/', include('src.modules.auth.urls')),
 ]
