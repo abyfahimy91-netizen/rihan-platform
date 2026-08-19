@@ -1,6 +1,7 @@
 """
 Core Module AppConfig
 FIX: No database operations in ready() - all moved to signals.py
+FIX D-081: Import blocks in ready() to register them in block_registry
 """
 from django.apps import AppConfig
 
@@ -13,8 +14,11 @@ class CoreConfig(AppConfig):
 
     def ready(self):
         """
-        Only import signals here.
+        Only import signals and blocks here.
         Database operations moved to post_migrate signal.
         """
         # Import signal handlers to register them
         from . import signals  # noqa: F401
+        
+        # Import blocks to register them in block_registry (D-081)
+        from . import blocks  # noqa: F401

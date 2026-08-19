@@ -1,90 +1,52 @@
-# CONTINUITY — وضعیت فعلی و اقدام بعدی
+**Last Update:** 2026-08-20
+**Project Version:** 0.8.1-mvp (D-081 Applied)
+**Active Phase:** Phase 5 (MVP Development)
 
-**آخرین بهروزرسانی:** 2026-08-18
-**نسخه پروژه:** 0.7.0-mvp (Sprint 2 Completed)
-**فاز فعال:** فاز ۵ (MVP Development) — اسپرینت ۱ آماده شروع
+## Module Status (14 modules per D-079)
 
----
+| Module | Status |
+|--------|--------|
+| M1 Catalog | Complete (Category, Supplier, Product models) |
+| M2 Order | Complete (Cart, CartItem, Order models) |
+| M3 Family Panel | Complete + Real Interfaces (D-081) |
+| M5 RBAC | Complete |
+| M10 Authentication | Complete |
+| M14 Plugin Architecture | Complete |
 
-## 🎯 وضعیت ماژول‌های ۱۴گانه (D-079)
+## Achievements This Session (2026-08-20)
 
-| ماژول | وضعیت | یادداشت |
-|---|---|---|
-| M1 کاتالوگ | ⚠️ ۷۰٪ کامل | اسپرینت ۱: ۱۲ بلوک + Trust Validation + API |
-| M2 سفارش | ✅ کامل | اسپرینت ۲: کارت‌به‌کارت + Reservation/Sale + ۳ صفحه + ۱۴ تست |
-| M3 پنل خانواده | ❌ ساخته نشده | اسپرینت ۳: Trust Checklist الزامی |
-| M4 پنل تأمین‌کننده | ❌ ساخته نشده | اسپرینت ۳ |
-| **M5 RBAC** | **✅ کامل** | Chunk 4A-4C |
-| M6 مالی | ❌ ساخته نشده | اسپرینت ۵ |
-| M7 پیگیری سفارش | ⚠️ ۵۰٪ کامل | اسپرینت ۲: تایم‌لاین ۵ مرحله‌ای ساخته شد |
-| M8 نظرات معتمد | ❌ ساخته نشده | اسپرینت ۴: Empty State الزامی |
-| M9 فرم سرنخ | ❌ ساخته نشده | اسپرینت ۴ |
-| **M10 احراز هویت** | **✅ کامل** | Chunk 3A-3D (نیاز به Fallback SMS) |
-| M11 پرداخت | ❌ ساخته نشده | اسپرینت ۲ |
-| M12 درباره برند | ❌ ساخته نشده | اسپرینت ۴: ساعات پاسخگویی ۱۱-۱۹ |
-| M13 هویت بصری | ❌ ساخته نشده | اسپرینت ۶ |
-| **M14 معماری پلاگین** | **✅ کامل** | Chunk 1 + 2A-2D (نیاز به AuditLog) |
+### D-081: Remove Mock Mode from M3 Interfaces
+- M1Interface connected to real M1 models
+- M2Interface connected to real M2 models
+- Safe Mode Pattern with safe fallback
+- 15 comprehensive tests added
+- Defensive Programming with try-except
 
----
+## Problems Solved
 
-## 🏆 دستاوردهای تکمیل‌شده
+| Problem | Solution |
+|---------|----------|
+| Mock Mode in M1Interface | Connected to Product, Category, Supplier |
+| Mock Mode in M2Interface | Connected to Order, Cart, Payment |
+| No tests for M3 | 15 tests added |
 
-### M14 (معماری پلاگین‌محور) — ۱۰۰٪ کامل
-- ✅ Chunk 1: PluginRegistry + FeatureFlag
-- ✅ Chunk 2A: HookSystem + EventBus
-- ✅ Chunk 2B: BlockRegistry + ۱۲ بلوک
-- ✅ Chunk 2C: Admin + Migrations
-- ✅ Chunk 2D: ثبت ۱۴ پرچم ماژول
+## Next Major Actions
 
-### M10 (احراز هویت) — ۱۰۰٪ کامل
-- ✅ Chunk 3A: ساختار پایه (Models + SMS Providers)
-- ✅ Chunk 3B: OtpService + Rate Limiting + Views
-- ✅ Chunk 3C: DeviceToken + Session + Guest Checkout
-- ✅ Chunk 3D: Admin + Migrations + Integration
+**Priority 1:** Run tests and verify D-081 correctness
+**Priority 2:** M7 (Order Tracking) - remaining parts
+**Priority 3:** M4 (Supplier Panel)
+**Priority 4:** M6 (Finance)
+**Priority 5:** M8 (Reviews)
 
-### M5 (RBAC) — ۱۰۰٪ کامل
-- ✅ Chunk 4A: Models (Role, UserRole) + RoleService
-- ✅ Chunk 4B: Decorators + Middleware + Admin
-- ✅ Chunk 4C: Views + URLs + Hooks + Integration
+## Overall Phase 5 Progress
 
----
+**Completed Modules:** 6 of 14 (M1, M2, M3, M5, M10, M14)
+**Progress:** ~45%
 
-## 📝 تصمیمات مهم این جلسه
+## Recent Decisions
 
-| تاریخ | تصمیم | وضعیت |
-|---|---|---|
-| 2026-08-18 | تصویب برنامه ۶ اسپرینتی فاز ۵ (PHASE5-MASTER-PLAN.md) | ✅ تأیید بنیان‌گذار |
-| 2026-08-18 | شناسایی ۵ نقطه کور: AuditLog, Empty States, Trust Validation, Inventory Flow, SMS Fallback | ✅ ثبت در PHASE5-MASTER-PLAN.md |
-| 2026-08-16 | گزینه A: ادغام هوشمندانه + بازنویسی Auth | ✅ تأیید بنیان‌گذار |
-| 2026-08-16 | حذف JWT و بازگشت به OTP (ADR-006) | ✅ اجرا شد |
-| 2026-08-16 | M14 کامل شد | ✅ تأیید شد |
-| 2026-08-16 | M10 کامل شد | ✅ تأیید شد |
-| 2026-08-16 | M5 کامل شد | ✅ تأیید شد |
-| 2026-08-18 | تایید گزینه A: بازنویسی کامل M2 مطابق ADR-005 | ✅ تأیید بنیان‌گذار |
-
----
-
-## 📊 آمار کلی
-
-| معیار | مقدار |
-|---|---|
-| ماژول‌های کامل | ۳ از ۱۴ (M5, M10, M14) |
-| Chunks تکمیل‌شده | ۱۲ |
-| تست‌های پاس‌شده | ۷۰+ |
-| انطباق با ADR | ۱۰۰٪ |
-| Commits | ۱۲ |
-
----
-
-## 🚀 اقدام بعدی کلان
-
-**اولویت ۱:** شروع اسپرینت ۳ — ساخت M3 (پنل خانواده)
-- گزارش کامل اسپرینت ۲: `docs/SPRINT-2-COMPLETION-REPORT.md`
-- اسناد M3: `docs/MVP-SCOPE.md`, `docs/USER-STORIES.md`
-- Trust Checklist الزامی است (مطابق D-079)
-
-**اولویت ۲:** تکمیل M7 (پیگیری سفارش) — بخش‌های باقی‌مانده
-
-**اولویت ۳:** M4 (پنل تأمین‌کننده) — موازی با M3
-
----
+| Date | Decision |
+|------|----------|
+| 2026-08-20 | D-081: Remove Mock Mode |
+| 2026-08-20 | M3 completed (retrospective registration) |
+| 2026-08-18 | D-079: Return to Original Vision |
