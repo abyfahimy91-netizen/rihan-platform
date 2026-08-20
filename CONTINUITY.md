@@ -1,5 +1,5 @@
-**Last Update:** 2026-08-20
-**Project Version:** 0.10.0-mvp (M8 Completed)
+**Last Update:** 2026-08-21
+**Project Version:** 0.11.0-mvp (M9 Completed)
 **Active Phase:** Phase 5 (MVP Development)
 
 ## Module Status (14 modules per D-079)
@@ -12,10 +12,11 @@
 | M5 RBAC | Complete |
 | M7 Order Tracking | Complete (D-082) |
 | M8 Reviews | Complete (D-083) |
+| M9 Leads | Complete (D-084) |
 | M10 Authentication | Complete |
 | M14 Plugin Architecture | Complete |
 
-## Achievements This Session (2026-08-20)
+## Achievements This Session (2026-08-20/21)
 
 ### D-081: Remove Mock Mode from M3 Interfaces
 - M1Interface connected to real M1 models
@@ -40,6 +41,14 @@
 - API endpoint for product reviews
 - 23 comprehensive tests, all passing
 
+### D-084: Leads Module Implementation (M9)
+- Lead model with status workflow
+- Auto-notification signal when product available
+- Conversion tracking when lead becomes purchase
+- Admin panel with Jalali dates
+- Integration with product page (out-of-stock CTA)
+- 27 comprehensive tests, all passing
+
 ## Problems Solved
 
 | Problem | Solution |
@@ -53,24 +62,27 @@
 | English status labels | Persian labels in HistoryStatus |
 | No reviews system | Complete M8 module with approval workflow |
 | No guest reviews | One-time token system with 7 days validity |
+| No leads system | Complete M9 module with auto-notification |
+| No conversion tracking | Signal-based lead conversion tracking |
 
 ## Next Major Actions
 
-**Priority 1:** M9 (Leads) - Product availability notifications
-**Priority 2:** M4 (Supplier Panel) - Tracking code submission
-**Priority 3:** M6 (Finance) - Revenue reports
-**Priority 4:** US-058 (Trust Badges) - Iranian trust badges
-**Priority 5:** M12 (About) + M13 (Design) - Frontend polish
+**Priority 1:** M4 (Supplier Panel) - Tracking code submission
+**Priority 2:** M6 (Finance) - Revenue reports
+**Priority 3:** US-058 (Trust Badges) - Iranian trust badges
+**Priority 4:** M12 (About) + M13 (Design) - Frontend polish
+**Priority 5:** Integration testing - Full flow test
 
 ## Overall Phase 5 Progress
 
-**Completed Modules:** 8 of 14 (M1, M2, M3, M5, M7, M8, M10, M14)
-**Progress:** ~57%
+**Completed Modules:** 9 of 14 (M1, M2, M3, M5, M7, M8, M9, M10, M14)
+**Progress:** ~64%
 
 ## Recent Decisions
 
 | Date | Decision |
 |------|----------|
+| 2026-08-21 | D-084: Leads Module Implementation |
 | 2026-08-20 | D-083: Reviews Module Implementation |
 | 2026-08-20 | D-082: Order Tracking Implementation |
 | 2026-08-20 | D-081: Remove Mock Mode |

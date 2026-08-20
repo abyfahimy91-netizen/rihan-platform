@@ -25,6 +25,9 @@ urlpatterns = [
     # Reviews (M8 - US-009)
     path('reviews/', include('src.modules.reviews.urls')),
     
+    # Leads (M9 - US-010)
+    path('leads/', include('src.modules.leads.urls')),
+    
     # Admin
     path('admin/', admin.site.urls),
     

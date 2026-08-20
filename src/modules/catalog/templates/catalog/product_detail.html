@@ -231,7 +231,14 @@
     
     <div class="product-price-box">
         <span class="product-price">{{ product.final_price|floatformat:0 }} تومان</span>
-        <button class="btn">افزودن به سبد خرید</button>
+        
+        {% if product.inventory and product.inventory.available_quantity > 0 %}
+            <button class="btn">افزودن به سبد خرید</button>
+        {% else %}
+            <a href="{% url 'leads:lead_form_product' product.slug %}" class="btn" style="background-color: #f0f7f0; color: #2d5a2d; border: 1px solid #2d5a2d; text-decoration: none; display: inline-block; padding: 12px 32px; border-radius: 8px; font-size: 16px; font-weight: 600;">
+                🔔 اطلاع از موجودی
+            </a>
+        {% endif %}
     </div>
 </div>
 

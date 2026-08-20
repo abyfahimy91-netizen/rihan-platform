@@ -1,0 +1,26 @@
+{% extends "catalog/base.html" %}
+
+{% block title %}ثبت شد | ریهان{% endblock %}
+
+{% block content %}
+<div style="max-width: 500px; margin: 60px auto; background: #fff; padding: 40px; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); text-align: center;">
+    <div style="font-size: 60px; margin-bottom: 20px;">✅</div>
+    <h1 style="font-size: 22px; color: #2d5a2d; margin-bottom: 15px;">ثبت شد. اطلاع می‌دهیم.</h1>
+    <p style="color: #666; line-height: 1.8; margin-bottom: 25px;">
+        درخواست شما با موفقیت ثبت شد.
+        <br>به محض موجود شدن محصول، از طریق پیامک به شما اطلاع خواهیم داد.
+    </p>
+    
+    {% if product %}
+    <div style="background: #f0f7f0; padding: 16px; border-radius: 12px; margin-bottom: 25px;">
+        <strong>محصول:</strong> {{ product.name }}
+    </div>
+    {% endif %}
+    
+    <div style="background: #f8f9fa; padding: 16px; border-radius: 12px; font-size: 14px; color: #666;">
+        شماره موبایل: <code style="direction: ltr; display: inline-block;">{{ lead.phone }}</code>
+    </div>
+    
+    <a href="/" style="display: inline-block; margin-top: 25px; padding: 12px 32px; background: #2d5a2d; color: #fff; text-decoration: none; border-radius: 8px;">بازگشت به صفحه اصلی</a>
+</div>
+{% endblock %}
