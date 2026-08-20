@@ -105,7 +105,26 @@ class Order(models.Model):
 
     def __str__(self):
         return self.order_number
-
+    
+    # M7 - Tracking fields (D-082)
+    tracking_code = models.CharField(
+        max_length=100, blank=True,
+        verbose_name="کد رهگیری پست/باربری"
+    )
+    shipping_method = models.CharField(
+        max_length=50, blank=True,
+        verbose_name="روش ارسال",
+        help_text="پست، تیپاکس، باربری، پیک"
+    )
+    shipped_at = models.DateTimeField(
+        null=True, blank=True,
+        verbose_name="تاریخ ارسال"
+    )
+    delivered_at = models.DateTimeField(
+        null=True, blank=True,
+        verbose_name="تاریخ تحویل"
+    )
+    
     def save(self, *args, **kwargs):
         if not self.order_number:
             self.order_number = generate_order_number()
@@ -295,3 +314,54 @@ class Address(models.Model):
         if self.is_default:
             Address.objects.filter(user=self.user, is_default=True).exclude(id=self.id).update(is_default=False)
         super().save(*args, **kwargs)
+
+
+class OrderStatusHistory(models.Model):
+    """
+    History of order status changes (M7 - D-082)
+    
+    Every time order status changes, a record is created here.
+    Used to show real timeline on tracking page.
+    """
+    class HistoryStatus(models.TextChoices):
+        ORDER_CREATED = 'ORDER_CREATED', 'سفارش ثبت شد'
+        PENDING_PAYMENT = 'PENDING_PAYMENT', 'در انتظار پرداخت'
+        PAYMENT_SUBMITTED = 'PAYMENT_SUBMITTED', 'پرداخت ارسال شد'
+        PAYMENT_CONFIRMED = 'PAYMENT_CONFIRMED', 'پرداخت تایید شد'
+        PAYMENT_REJECTED = 'PAYMENT_REJECTED', 'پرداخت رد شد'
+        PROCESSING = 'PROCESSING', 'در حال آماده‌سازی'
+        SHIPPED = 'SHIPPED', 'ارسال شد'
+        DELIVERED = 'DELIVERED', 'تحویل داده شد'
+        CANCELLED = 'CANCELLED', 'لغو شد'
+    
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    order = models.ForeignKey(
+        Order,
+        on_delete=models.CASCADE,
+        related_name='status_history'
+    )
+    status = models.CharField(
+        max_length=30,
+        choices=HistoryStatus.choices,
+        verbose_name="Status"
+    )
+    description = models.TextField(blank=True, verbose_name="Description")
+    tracking_code = models.CharField(
+        max_length=100, blank=True,
+        verbose_name="Tracking Code"
+    )
+    changed_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True, blank=True,
+        verbose_name="Changed By"
+    )
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Created At")
+    
+    class Meta:
+        verbose_name = "Order Status History"
+        verbose_name_plural = "Order Status Histories"
+        ordering = ['created_at']
+    
+    def __str__(self):
+        return f"{self.order.order_number} - {self.get_status_display()}"

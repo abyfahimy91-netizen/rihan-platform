@@ -25,4 +25,10 @@ urlpatterns = [
         page_views.payment_success_page,
         name='payment_success'
     ),
+    path(
+        'lookup/',
+        page_views.tracking_lookup_page,
+        name='tracking_lookup'
+    ),
+
 ]

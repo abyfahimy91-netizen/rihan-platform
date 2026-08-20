@@ -41,35 +41,43 @@
     .status-DELIVERED { background: #28a745; }
     .status-CANCELLED { background: #dc3545; }
     
-    /* Timeline */
+    /* Timeline - Real History Based */
     .timeline {
         position: relative;
         padding: 20px 0;
+        background: #fff;
+        border-radius: 16px;
+        padding: 30px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.06);
     }
     
-    .timeline::before {
-        content: '';
-        position: absolute;
-        right: 24px;
-        top: 0;
-        bottom: 0;
-        width: 2px;
-        background: #e0e0e0;
+    .timeline-title {
+        font-size: 18px;
+        font-weight: 700;
+        margin-bottom: 25px;
+        color: #1a1a1a;
     }
     
     .timeline-item {
         position: relative;
-        padding-right: 70px;
-        padding-bottom: 30px;
+        padding-right: 50px;
+        padding-bottom: 25px;
+        border-right: 2px solid #e0e0e0;
+        margin-right: 10px;
     }
     
     .timeline-item:last-child {
         padding-bottom: 0;
+        border-right: 2px solid transparent;
+    }
+    
+    .timeline-item.completed {
+        border-right-color: #2d5a2d;
     }
     
     .timeline-marker {
         position: absolute;
-        right: 15px;
+        right: -11px;
         top: 0;
         width: 20px;
         height: 20px;
@@ -96,37 +104,72 @@
     }
     
     .timeline-content {
-        background: #fff;
+        background: #f8f9fa;
         border-radius: 12px;
-        padding: 20px;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        padding: 16px 20px;
     }
     
     .timeline-item.completed .timeline-content {
+        background: #f0f7f0;
         border-right: 3px solid #2d5a2d;
     }
     
     .timeline-item.active .timeline-content {
+        background: #fff9e6;
         border-right: 3px solid #ffc107;
     }
     
-    .timeline-title {
-        font-size: 16px;
+    .timeline-status {
+        font-size: 15px;
         font-weight: 700;
-        margin-bottom: 8px;
+        margin-bottom: 6px;
         color: #1a1a1a;
     }
     
     .timeline-description {
-        font-size: 14px;
+        font-size: 13px;
         color: #666;
-        line-height: 1.6;
+        line-height: 1.5;
     }
     
     .timeline-date {
         font-size: 12px;
         color: #888;
         margin-top: 8px;
+    }
+    
+    .timeline-tracking {
+        display: inline-block;
+        background: #e3f2fd;
+        color: #1565c0;
+        padding: 4px 12px;
+        border-radius: 12px;
+        font-size: 12px;
+        margin-top: 8px;
+        direction: ltr;
+    }
+    
+    /* Tracking Code Box */
+    .tracking-code-box {
+        background: #e3f2fd;
+        border-radius: 12px;
+        padding: 20px;
+        margin-top: 20px;
+        text-align: center;
+    }
+    
+    .tracking-code-label {
+        font-size: 13px;
+        color: #666;
+        margin-bottom: 8px;
+    }
+    
+    .tracking-code-value {
+        font-size: 20px;
+        font-weight: 700;
+        color: #1565c0;
+        direction: ltr;
+        letter-spacing: 2px;
     }
     
     /* Order Details */
@@ -197,112 +240,90 @@
         font-size: 12px;
         margin-right: 8px;
     }
+    
+    /* Support Box */
+    .support-box {
+        background: #fff;
+        border-radius: 16px;
+        padding: 25px;
+        margin-top: 30px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        text-align: center;
+    }
+    
+    .support-title {
+        font-size: 16px;
+        font-weight: 700;
+        margin-bottom: 10px;
+        color: #1a1a1a;
+    }
+    
+    .support-phone {
+        font-size: 20px;
+        font-weight: 700;
+        color: #2d5a2d;
+        direction: ltr;
+        display: inline-block;
+        margin-top: 5px;
+    }
+    
+    .support-note {
+        font-size: 13px;
+        color: #888;
+        margin-top: 10px;
+    }
 </style>
 {% endblock %}
 
 {% block content %}
 <div class="tracking-container">
+    <!-- Order Header -->
     <div class="order-header">
         <h1 class="order-number">سفارش {{ order.order_number }}</h1>
         <span class="order-status status-{{ order.status }}">{{ order.get_status_display }}</span>
         <p style="color:#888; margin-top:15px; font-size:14px;">
             تاریخ ثبت: {{ order.created_at|date:"Y/m/d H:i" }}
         </p>
+        
+        {% if order.tracking_code %}
+        <div class="tracking-code-box">
+            <div class="tracking-code-label">کد رهگیری {{ order.shipping_method|default:"پست" }}</div>
+            <div class="tracking-code-value">{{ order.tracking_code }}</div>
+        </div>
+        {% endif %}
     </div>
     
-    <!-- Timeline 5 مرحله‌ای -->
+    <!-- Real Timeline from OrderStatusHistory -->
     <div class="timeline">
-        {% with status=order.status %}
+        <div class="timeline-title">📋 تاریخچه سفارش شما</div>
         
-        <!-- مرحله ۱: ثبت سفارش -->
+        {% for event in status_history reversed %}
         <div class="timeline-item completed">
             <div class="timeline-marker"></div>
             <div class="timeline-content">
-                <div class="timeline-title">✅ سفارش ثبت شد</div>
-                <div class="timeline-description">سفارش شما با موفقیت در سیستم ثبت شد</div>
-                <div class="timeline-date">{{ order.created_at|date:"Y/m/d H:i" }}</div>
+                <div class="timeline-status">
+                    {% if event.status == 'ORDER_CREATED' %}📝{% elif event.status == 'PENDING_PAYMENT' %}⏳{% elif event.status == 'PAYMENT_SUBMITTED' %}💳{% elif event.status == 'PAYMENT_CONFIRMED' %}✅{% elif event.status == 'PROCESSING' %}📦{% elif event.status == 'SHIPPED' %}🚚{% elif event.status == 'DELIVERED' %}🎉{% elif event.status == 'CANCELLED' %}❌{% else %}📌{% endif %}
+                    {{ event.get_status_display }}
+                </div>
+                {% if event.description %}
+                <div class="timeline-description">{{ event.description }}</div>
+                {% endif %}
+                {% if event.tracking_code %}
+                <span class="timeline-tracking">کد رهگیری: {{ event.tracking_code }}</span>
+                {% endif %}
+                <div class="timeline-date">{{ event.created_at|date:"Y/m/d H:i" }}</div>
             </div>
         </div>
-        
-        <!-- مرحله ۲: انتظار پرداخت -->
-        <div class="timeline-item {% if status == 'PENDING' %}active{% elif status != 'DRAFT' %}completed{% endif %}">
-            <div class="timeline-marker"></div>
+        {% empty %}
+        <div class="timeline-item">
             <div class="timeline-content">
-                <div class="timeline-title">
-                    {% if status == 'PENDING' %}⏳{% else %}✅{% endif %}
-                    در انتظار پرداخت
-                </div>
-                <div class="timeline-description">
-                    {% if status == 'PENDING' %}
-                        لطفاً پرداخت را تکمیل کنید تا سفارش شما پردازش شود.
-                        <br><a href="/order/payment/{{ order.order_number }}/" style="color:#2d5a2d; font-weight:600;">تکمیل پرداخت →</a>
-                    {% else %}
-                        پرداخت شما ثبت شد
-                    {% endif %}
-                </div>
+                <div class="timeline-status">در حال بارگذاری...</div>
             </div>
         </div>
-        
-        <!-- مرحله ۳: تایید پرداخت -->
-        <div class="timeline-item {% if status == 'PAID' %}completed{% elif status == 'PROCESSING' or status == 'SHIPPED' or status == 'DELIVERED' %}completed{% endif %}">
-            <div class="timeline-marker"></div>
-            <div class="timeline-content">
-                <div class="timeline-title">
-                    {% if status == 'PAID' or status == 'PROCESSING' or status == 'SHIPPED' or status == 'DELIVERED' %}✅{% else %}⏸️{% endif %}
-                    تایید پرداخت توسط ریهان
-                </div>
-                <div class="timeline-description">
-                    {% if status == 'PAID' or status == 'PROCESSING' or status == 'SHIPPED' or status == 'DELIVERED' %}
-                        پرداخت شما توسط تیم ریهان تایید شد
-                    {% else %}
-                        پس از تایید پرداخت توسط تیم ریهان، این مرحله تکمیل می‌شود
-                    {% endif %}
-                </div>
-            </div>
-        </div>
-        
-        <!-- مرحله ۴: آماده‌سازی و ارسال -->
-        <div class="timeline-item {% if status == 'SHIPPED' or status == 'DELIVERED' %}completed{% elif status == 'PROCESSING' %}active{% endif %}">
-            <div class="timeline-marker"></div>
-            <div class="timeline-content">
-                <div class="timeline-title">
-                    {% if status == 'SHIPPED' or status == 'DELIVERED' %}✅{% elif status == 'PROCESSING' %}📦{% else %}⏸️{% endif %}
-                    آماده‌سازی و ارسال
-                </div>
-                <div class="timeline-description">
-                    {% if status == 'PROCESSING' %}
-                        سفارش شما در حال بسته‌بندی و آماده‌سازی است
-                    {% elif status == 'SHIPPED' or status == 'DELIVERED' %}
-                        سفارش شما ارسال شده است
-                    {% else %}
-                        پس از تایید پرداخت، سفارش شما بسته‌بندی و ارسال می‌شود
-                    {% endif %}
-                </div>
-            </div>
-        </div>
-        
-        <!-- مرحله ۵: تحویل -->
-        <div class="timeline-item {% if status == 'DELIVERED' %}completed{% endif %}">
-            <div class="timeline-marker"></div>
-            <div class="timeline-content">
-                <div class="timeline-title">
-                    {% if status == 'DELIVERED' %}🎉{% else %}⏸️{% endif %}
-                    تحویل به شما
-                </div>
-                <div class="timeline-description">
-                    {% if status == 'DELIVERED' %}
-                        سفارش با موفقیت تحویل شما شد. از خرید شما متشکریم!
-                    {% else %}
-                        سفارش به آدرس شما تحویل داده خواهد شد
-                    {% endif %}
-                </div>
-            </div>
-        </div>
-        
-        {% endwith %}
+        {% endfor %}
     </div>
     
-    <!-- جزئیات سفارش -->
+    <!-- Order Details -->
     <div class="order-details">
         <h2>📋 جزئیات سفارش</h2>
         
@@ -315,12 +336,27 @@
                 </div>
                 <div class="order-item-price">{{ item.subtotal|floatformat:0 }} تومان</div>
             </div>
+            {% empty %}
+            <p style="color:#888; padding:20px 0;">هیچ کالایی در این سفارش نیست</p>
             {% endfor %}
         </div>
         
         <div class="order-total">
             <span>مبلغ نهایی <span class="shipping-badge">🚚 ارسال رایگان</span></span>
             <span class="order-total-value">{{ order.total_price|floatformat:0 }} تومان</span>
+        </div>
+    </div>
+    
+    <!-- Support Box -->
+    <div class="support-box">
+        <div class="support-title">📞 نیاز به کمک دارید؟</div>
+        {% if support_phone %}
+        <a href="tel:{{ support_phone }}" class="support-phone">{{ support_phone }}</a>
+        {% else %}
+        <div class="support-phone">با ما تماس بگیرید</div>
+        {% endif %}
+        <div class="support-note">
+            تیم پشتیبانی ریهان آماده پاسخگویی به سؤالات شماست
         </div>
     </div>
 </div>

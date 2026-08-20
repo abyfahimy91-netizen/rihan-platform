@@ -89,8 +89,23 @@ def order_tracking_page(request, order_number):
         if order.session_key != request.session.session_key:
             return HttpResponseForbidden("دسترسی غیرمجاز. لینک پیگیری فقط برای خریدار در دسترس است.")
     
+    # M7 - D-082: Get real status history for timeline
+    status_history = order.status_history.order_by('created_at')
+    
+    # Get support phone from SiteSettings (if available)
+    support_phone = ''
+    try:
+        from src.modules.family_panel.models import SiteSettings
+        settings_obj = SiteSettings.objects.first()
+        if settings_obj:
+            support_phone = settings_obj.contact_phone or ''
+    except Exception:
+        pass
+    
     context = {
         'order': order,
+        'status_history': status_history,
+        'support_phone': support_phone,
     }
     
     return render(request, 'order/order_tracking.html', context)
@@ -125,3 +140,70 @@ def payment_success_page(request, order_number):
     }
     
     return render(request, 'order/payment_success.html', context)
+
+
+def tracking_lookup_page(request):
+    """
+    M7 - Tracking lookup by phone + order number (US-008)
+    
+    Allows customer to access tracking page WITHOUT login.
+    Only needs phone number + order number.
+    
+    GET: Show form
+    POST: Validate and redirect to tracking page
+    """
+    from django.shortcuts import redirect
+    from django.contrib import messages
+    
+    error_message = None
+    
+    if request.method == 'POST':
+        phone = request.POST.get('phone', '').strip()
+        order_number = request.POST.get('order_number', '').strip()
+        
+        # Validation
+        if not phone or not order_number:
+            error_message = 'لطفاً شماره موبایل و شماره سفارش را وارد کنید'
+        
+        else:
+            # Find order
+            try:
+                order = Order.objects.get(order_number=order_number)
+            except Order.DoesNotExist:
+                error_message = 'سفارش با این شماره یافت نشد'
+                order = None
+            
+            if order and not error_message:
+                # Check phone matches (either user phone or guest phone)
+                phone_matches = False
+                
+                # Check 1: User phone (if authenticated user)
+                if order.user and order.user.username == phone:
+                    phone_matches = True
+                
+                # Check 2: Guest phone (snapshot)
+                elif order.guest_phone == phone:
+                    phone_matches = True
+                
+                # Check 3: User profile phone (if different from username)
+                elif order.user and hasattr(order.user, 'phone') and order.user.phone == phone:
+                    phone_matches = True
+                
+                if phone_matches:
+                    # Set session_key to allow tracking page access
+                    # This matches how cart/checkout works for guests
+                    if not request.session.session_key:
+                        request.session.create()
+                    
+                    # Update order's session_key to match current session
+                    order.session_key = request.session.session_key
+                    order.save(update_fields=['session_key'])
+                    
+                    # Redirect to tracking page
+                    return redirect('order_pages:order_tracking', order_number=order_number)
+                else:
+                    error_message = 'شماره موبایل با این سفارش مطابقت ندارد'
+    
+    return render(request, 'order/tracking_lookup.html', {
+        'error': error_message,
+    })
