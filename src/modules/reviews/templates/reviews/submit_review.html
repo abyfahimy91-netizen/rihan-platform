@@ -1,0 +1,231 @@
+{% extends "catalog/base.html" %}
+
+{% block title %}ثبت نظر برای {{ product.name }} | ریهان{% endblock %}
+
+{% block extra_css %}
+<style>
+    .review-form-container {
+        max-width: 700px;
+        margin: 40px auto;
+        background: #fff;
+        border-radius: 16px;
+        padding: 40px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    }
+    
+    .form-title {
+        font-size: 22px;
+        font-weight: 700;
+        margin-bottom: 10px;
+        color: #1a1a1a;
+    }
+    
+    .form-subtitle {
+        color: #666;
+        margin-bottom: 30px;
+        font-size: 14px;
+    }
+    
+    .product-info {
+        background: #f8f9fa;
+        border-radius: 12px;
+        padding: 20px;
+        margin-bottom: 30px;
+    }
+    
+    .product-name {
+        font-size: 16px;
+        font-weight: 600;
+        color: #2d5a2d;
+    }
+    
+    .rating-input {
+        display: flex;
+        flex-direction: row-reverse;
+        gap: 8px;
+        margin-bottom: 20px;
+        justify-content: flex-end;
+    }
+    
+    .rating-input input {
+        display: none;
+    }
+    
+    .rating-input label {
+        font-size: 32px;
+        color: #ddd;
+        cursor: pointer;
+        transition: color 0.2s;
+    }
+    
+    .rating-input input:checked ~ label,
+    .rating-input label:hover,
+    .rating-input label:hover ~ label {
+        color: #ffc107;
+    }
+    
+    .form-group {
+        margin-bottom: 20px;
+    }
+    
+    .form-label {
+        display: block;
+        font-size: 14px;
+        font-weight: 600;
+        margin-bottom: 8px;
+        color: #1a1a1a;
+    }
+    
+    .form-input,
+    .form-textarea {
+        width: 100%;
+        padding: 12px 16px;
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        font-size: 14px;
+        font-family: inherit;
+        transition: border-color 0.2s;
+    }
+    
+    .form-input:focus,
+    .form-textarea:focus {
+        outline: none;
+        border-color: #2d5a2d;
+        box-shadow: 0 0 0 3px rgba(45, 90, 45, 0.1);
+    }
+    
+    .form-textarea {
+        resize: vertical;
+        min-height: 120px;
+    }
+    
+    .char-counter {
+        text-align: left;
+        font-size: 12px;
+        color: #888;
+        margin-top: 4px;
+    }
+    
+    .char-counter.warning {
+        color: #dc3545;
+    }
+    
+    .error-message {
+        background: #fff3cd;
+        color: #856404;
+        padding: 12px;
+        border-radius: 8px;
+        font-size: 13px;
+        margin-bottom: 16px;
+        border-right: 3px solid #ffc107;
+    }
+    
+    .submit-btn {
+        width: 100%;
+        padding: 14px;
+        background: #2d5a2d;
+        color: #fff;
+        border: none;
+        border-radius: 8px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background 0.2s;
+    }
+    
+    .submit-btn:hover {
+        background: #1a3a1a;
+    }
+    
+    .success-note {
+        background: #d4edda;
+        color: #155724;
+        padding: 16px;
+        border-radius: 8px;
+        margin-top: 20px;
+        font-size: 14px;
+        text-align: center;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="review-form-container">
+    <h1 class="form-title">ثبت نظر برای محصول</h1>
+    <p class="form-subtitle">تجربه خود را با دیگر مشتریان به اشتراک بگذارید</p>
+    
+    <div class="product-info">
+        <div class="product-name">{{ product.name }}</div>
+    </div>
+    
+    {% if errors %}
+    <div class="error-message">
+        {% for error in errors %}
+            <div>{{ error }}</div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    
+    <form method="post" action="{% url 'reviews:submit_review' product.slug %}">
+        {% csrf_token %}
+        
+        {% if orders|length > 1 %}
+        <div class="form-group">
+            <label class="form-label">سفارش مربوطه</label>
+            <select name="order_number" class="form-input">
+                {% for order in orders %}
+                <option value="{{ order.order_number }}">{{ order.order_number }} - {{ order.created_at|date:"Y/m/d" }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        {% endif %}
+        
+        <div class="form-group">
+            <label class="form-label">امتیاز شما</label>
+            <div class="rating-input">
+                {% for i in "54321" %}
+                <input type="radio" id="star{{ i }}" name="rating" value="{{ i }}" {% if form_data.rating == i %}checked{% endif %}>
+                <label for="star{{ i }}">★</label>
+                {% endfor %}
+            </div>
+        </div>
+        
+        <div class="form-group">
+            <label class="form-label">عنوان نظر (اختیاری)</label>
+            <input type="text" name="title" class="form-input" maxlength="100" 
+                   value="{{ form_data.title|default:'' }}" placeholder="مثال: کیفیت عالی">
+        </div>
+        
+        <div class="form-group">
+            <label class="form-label">متن نظر</label>
+            <textarea name="text" class="form-textarea" maxlength="500" required 
+                      placeholder="تجربه خود را بنویسید...">{{ form_data.text|default:'' }}</textarea>
+            <div class="char-counter" id="charCounter">0 / 500</div>
+        </div>
+        
+        <button type="submit" class="submit-btn">ثبت نظر</button>
+        
+        <div class="success-note">
+            ℹ️ نظر شما پس از تأیید تیم ریهان نمایش داده می‌شود
+        </div>
+    </form>
+</div>
+
+<script>
+const textarea = document.querySelector('textarea[name="text"]');
+const counter = document.getElementById('charCounter');
+
+function updateCounter() {
+    const len = textarea.value.length;
+    counter.textContent = len + ' / 500';
+    if (len > 450) {
+        counter.classList.add('warning');
+    } else {
+        counter.classList.remove('warning');
+    }
+}
+
+textarea.addEventListener('input', updateCounter);
+updateCounter();
+</script>
+{% endblock %}

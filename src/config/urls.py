@@ -22,6 +22,9 @@ urlpatterns = [
     # Order Pages (HTML) - مسیرهای زیبا برای مشتری
     path('order/', include('src.modules.order.page_urls')),
     
+    # Reviews (M8 - US-009)
+    path('reviews/', include('src.modules.reviews.urls')),
+    
     # Admin
     path('admin/', admin.site.urls),
     

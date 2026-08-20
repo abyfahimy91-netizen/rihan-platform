@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     
     # ✅ ماژول پنل خانواده (M3) - اسپرینت ۳
     'src.modules.family_panel',
+    'src.modules.reviews',
 ]
 
 MIDDLEWARE = [
