@@ -41,6 +41,10 @@
 | `src/apps/orders/views.py` | **M2, M7** | ویوهای سبد خرید، تسویه‌حساب و استعلام /track/ |
 | `src/apps/accounts/models.py` | **M10** | مدل کدهای یکبارمصرف (PhoneOTP ۶ رقمی) |
 | `src/apps/accounts/services.py` | **M10** | سرویس پیامکی OTP ردیس و انتزاع کاوه‌نگار |
+| `src/modules/finance/models.py` | **M6** | SupplierLedger، SupplierTransaction، Settlement |
+| `src/modules/finance/services.py` | **M6** | FinanceService - محاسبات مالی و آمار داشبورد |
+| `src/modules/finance/views.py` | **M6** | داشبورد مالی ادمین و تأمین‌کننده |
+| `src/modules/finance/signals.py` | **M6** | سیگنال ثبت خودکار تراکنش فروش |
 | `src/apps/accounts/views.py` | **M10** | ورود پیامکی پیش‌فرض + ورود با پسورد پشتیبان (Fallback) |
 
 ---

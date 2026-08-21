@@ -1,5 +1,5 @@
 **Last Update:** 2026-08-21
-**Project Version:** 0.12.0-mvp (M4 Completed)
+**Project Version:** 0.13.0-mvp (M6 Completed)
 **Active Phase:** Phase 5 (MVP Development)
 
 ## Module Status (14 modules per D-079)
@@ -11,6 +11,7 @@
 | M3 Family Panel | Complete + Real Interfaces (D-081) |
 | M4 Supplier Panel | Complete (D-085) |
 | M5 RBAC | Complete |
+| **M6 Finance** | **Complete (D-086)** |
 | M7 Order Tracking | Complete (D-082) |
 | M8 Reviews | Complete (D-083) |
 | M9 Leads | Complete (D-084) |
@@ -18,6 +19,17 @@
 | M14 Plugin Architecture | Complete |
 
 ## Achievements This Session (2026-08-21)
+
+### D-086: Finance Module Implementation (M6)
+- SupplierLedger model: دفتر حساب یک‌به‌یک برای هر تأمین‌کننده
+- SupplierTransaction model: ثبت تراکنش‌های فروش/تسویه/مرجوعی
+- Settlement model: مدیریت تسویه‌های مالی
+- FinanceService: کلاس سرویس محاسباتی مرکزی
+- Auto-signal: ثبت تراکنش فروش هنگام DELIVERED شدن سفارش
+- Admin Dashboard: /finance/admin/ (US-021)
+- Supplier Dashboard: /finance/supplier/ (US-030)
+- ۱۱ comprehensive tests, all passing
+- Bootstrap 5 RTL templates
 
 ### D-085: Supplier Panel with User-Supplier Link (M4)
 - Hybrid architecture: RBAC + User-Supplier Link
@@ -61,6 +73,14 @@
 
 | Problem | Solution |
 |---------|----------|
+| No finance module | Complete M6 with dashboard for admin + supplier |
+| Missing supplier accounting | SupplierLedger + Transaction system |
+| Manual revenue calculation | Auto-aggregation in FinanceService |
+| Missing admin financial view | /finance/admin/ with stats cards |
+| No supplier view of own account | /finance/supplier/ with monthly report |
+| App label conflict in settings | Deduplication logic for INSTALLED_APPS |
+| NoReverseMatch in redirects | Use / instead of named URL home |
+| RelatedObjectDoesNotExist | Use hasattr() pattern |
 | No supplier panel | Complete M4 module with hybrid RBAC |
 | IDOR vulnerability | Suppliers only see their own orders |
 | Mock Mode in M1Interface | Connected to Product, Category, Supplier |
@@ -77,23 +97,34 @@
 
 ## Next Major Actions
 
-**Priority 1:** M6 (Finance) - Revenue reports, supplier accounts
-**Priority 2:** US-058 (Trust Badges) - Iranian trust badges
-**Priority 3:** M12 (About) + M13 (Design) - Frontend polish
-**Priority 4:** Integration testing - Full flow test
+**Priority 1:** US-058 (Trust Badges) - Iranian trust badges in product page
+**Priority 2:** M12 (About) - About brand page
+**Priority 3:** M13 (Design) - Frontend polish (base.html, UI)
+**Priority 4:** US-031 (Should) - Excel export for finance reports
+**Priority 5:** Integration testing - Full flow test (browse > order > deliver > settle)
 
 ## Overall Phase 5 Progress
 
-**Completed Modules:** 10 of 14 (M1, M2, M3, M4, M5, M7, M8, M9, M10, M14)
-**Progress:** ~71%
+**Completed Modules:** 11 of 14 (M1, M2, M3, M4, M5, M6, M7, M8, M9, M10, M14)
+**Progress:** ~78%
 
 ## Recent Decisions
 
 | Date | Decision |
 |------|----------|
+| 2026-08-21 | D-086: Finance Module Implementation (M6) |
 | 2026-08-21 | D-085: Supplier Panel with User-Supplier Link |
 | 2026-08-21 | D-084: Leads Module Implementation |
 | 2026-08-20 | D-083: Reviews Module Implementation |
 | 2026-08-20 | D-082: Order Tracking Implementation |
 | 2026-08-20 | D-081: Remove Mock Mode |
 | 2026-08-18 | D-079: Return to Original Vision |
+
+## Known Technical Debt
+
+| Item | Severity | Notes |
+|------|----------|-------|
+| RuntimeWarning naive datetime | Low | jdatetime integration needed |
+| PROJECT-INDEX.md uses src/apps/ | Medium | Real structure is src/modules/ - need full update |
+| US-031 Excel export not done | Low | Should Have, can be deferred |
+| No refund signal | Medium | TODO: connect Order cancellation to finance |
