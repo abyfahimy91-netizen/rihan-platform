@@ -1,0 +1,263 @@
+{#
+    Trust Badges ایرانی - US-058
+    جزئیات: https://github.com/abyfahimy91-netizen/rihan-platform/blob/main/docs/USER-STORIES.md#us-058
+    
+    این partial را در templateهای دیگر با این دستور include کنید:
+    
+    ویژگی‌ها:
+        - ۴ badge ایرانی: پرداخت امن، گارانتی مرجوعی، ارسال مطمئن، پشتیبانی تلفنی
+        - آیکون‌های inline SVG (بدون CDN خارجی)
+        - Modal Bootstrap برای توضیحات هر badge
+        - طراحی مینیمال و باوقار (CENTRAL-STORY)
+        - سازگار با RTL
+#}
+
+<!-- Trust Badges (US-058) -->
+<div class="rihan-trust-section">
+    <div class="rihan-trust-grid">
+        
+        <!-- Badge 1: پرداخت امن -->
+        <div class="rihan-trust-badge" data-bs-toggle="modal" data-bs-target="#trustModal1">
+            <div class="rihan-trust-icon">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 2L4 6v6c0 5.5 3.8 10.7 8 12 4.2-1.3 8-6.5 8-12V6l-8-4z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M9 12l2 2 4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </div>
+            <div class="rihan-trust-text">
+                <strong>پرداخت امن</strong>
+                <small>کارت‌به‌کارت با رسید</small>
+            </div>
+        </div>
+        
+        <!-- Badge 2: گارانتی مرجوعی -->
+        <div class="rihan-trust-badge" data-bs-toggle="modal" data-bs-target="#trustModal2">
+            <div class="rihan-trust-icon">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M3 3v5h5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </div>
+            <div class="rihan-trust-text">
+                <strong>گارانتی مرجوعی</strong>
+                <small>۷ روز بدون سؤال</small>
+            </div>
+        </div>
+        
+        <!-- Badge 3: ارسال مطمئن -->
+        <div class="rihan-trust-badge" data-bs-toggle="modal" data-bs-target="#trustModal3">
+            <div class="rihan-trust-icon">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <rect x="1" y="3" width="15" height="13" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M16 8h4l3 3v5h-7V8z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <circle cx="5.5" cy="18.5" r="2.5" stroke="currentColor" stroke-width="2"/>
+                    <circle cx="18.5" cy="18.5" r="2.5" stroke="currentColor" stroke-width="2"/>
+                </svg>
+            </div>
+            <div class="rihan-trust-text">
+                <strong>ارسال مطمئن</strong>
+                <small>بسته‌بندی ویژه</small>
+            </div>
+        </div>
+        
+        <!-- Badge 4: پشتیبانی تلفنی -->
+        <div class="rihan-trust-badge" data-bs-toggle="modal" data-bs-target="#trustModal4">
+            <div class="rihan-trust-icon">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </div>
+            <div class="rihan-trust-text">
+                <strong>پشتیبانی تلفنی</strong>
+                <small>۱۱ صبح تا ۷ عصر</small>
+            </div>
+        </div>
+        
+    </div>
+</div>
+
+<!-- Modal 1: پرداخت امن -->
+<div class="modal fade" id="trustModal1" tabindex="-1" aria-labelledby="trustModal1Label" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="trustModal1Label">پرداخت امن</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="بستن"></button>
+            </div>
+            <div class="modal-body">
+                <p>پرداخت شما از طریق <strong>کارت‌به‌کارت</strong> انجام می‌شود.</p>
+                <ul>
+                    <li>شماره کارت و نام صاحب حساب در صفحه تسویه نمایش داده می‌شود</li>
+                    <li>پس از واریز، تصویر رسید را آپلود می‌کنید</li>
+                    <li>ادمین رسید را بررسی و سفارش را تأیید می‌کند</li>
+                    <li>در صورت عدم تأیید، مبلغ به حساب شما بازگردانده می‌شود</li>
+                </ul>
+                <p class="text-muted"><small>این روش برای حفظ امنیت و اعتماد متقابل طراحی شده است.</small></p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal 2: گارانتی مرجوعی -->
+<div class="modal fade" id="trustModal2" tabindex="-1" aria-labelledby="trustModal2Label" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="trustModal2Label">گارانتی مرجوعی ۷ روزه</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="بستن"></button>
+            </div>
+            <div class="modal-body">
+                <p>اگر از خرید خود راضی نبودید، <strong>تا ۷ روز</strong> فرصت مرجوعی دارید.</p>
+                <ul>
+                    <li>بدون نیاز به توضیح دلیل</li>
+                    <li>فقط کافی است محصول را در بسته‌بندی اصلی نگه دارید</li>
+                    <li>با پشتیبانی تماس بگیرید تا هماهنگی ارسال انجام شود</li>
+                    <li>پس از تأیید سلامت محصول، مبلغ به حساب شما بازگردانده می‌شود</li>
+                </ul>
+                <p class="text-muted"><small>هزینه ارسال مرجوعی بر عهده مشتری است.</small></p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal 3: ارسال مطمئن -->
+<div class="modal fade" id="trustModal3" tabindex="-1" aria-labelledby="trustModal3Label" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="trustModal3Label">ارسال مطمئن</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="بستن"></button>
+            </div>
+            <div class="modal-body">
+                <p>تمام محصولات با <strong>بسته‌بندی ویژه</strong> ارسال می‌شوند.</p>
+                <ul>
+                    <li>محصولات حساس (مثل خشکبار) در بسته‌بندی ضد رطوبت</li>
+                    <li>محصولات شکننده با محافظ اضافه</li>
+                    <li>ارسال از طریق پست پیشتاز یا تیپاکس</li>
+                    <li>کد رهگیری پس از ارسال از طریق پیامک ارسال می‌شود</li>
+                </ul>
+                <p class="text-muted"><small>زمان تقریبی تحویل: ۲ تا ۵ روز کاری</small></p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal 4: پشتیبانی تلفنی -->
+<div class="modal fade" id="trustModal4" tabindex="-1" aria-labelledby="trustModal4Label" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="trustModal4Label">پشتیبانی تلفنی</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="بستن"></button>
+            </div>
+            <div class="modal-body">
+                <p>تیم پشتیبانی ریهان <strong>هر روز از ۱۱ صبح تا ۷ عصر</strong> آماده پاسخگویی است.</p>
+                <ul>
+                    <li>پاسخگویی به سؤالات قبل از خرید</li>
+                    <li>پیگیری سفارش‌ها</li>
+                    <li>هماهنگی مرجوعی</li>
+                    <li>رسیدگی به مشکلات پس از خرید</li>
+                </ul>
+                <p class="mt-3">
+                    <strong>شماره تماس:</strong> <a href="tel:09123456789">۰۹۱۲-۳۴۵-۶۷۸۹</a>
+                </p>
+                <p class="text-muted"><small>پاسخگویی در اسرع وقت انجام می‌شود.</small></p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- CSS برای Trust Badges -->
+<style>
+.rihan-trust-section {
+    margin: 2rem 0;
+    padding: 1.5rem 0;
+    border-top: 1px solid #e9ecef;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.rihan-trust-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 1rem;
+}
+
+.rihan-trust-badge {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 1rem 0.5rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border-radius: 8px;
+}
+
+.rihan-trust-badge:hover {
+    background-color: #f8f9fa;
+    transform: translateY(-2px);
+}
+
+.rihan-trust-icon {
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 0.5rem;
+    color: #2d5a2d;
+}
+
+.rihan-trust-text {
+    font-size: 0.875rem;
+}
+
+.rihan-trust-text strong {
+    display: block;
+    color: #212529;
+    margin-bottom: 0.25rem;
+}
+
+.rihan-trust-text small {
+    color: #6c757d;
+}
+
+/* Responsive */
+@media (max-width: 576px) {
+    .rihan-trust-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .rihan-trust-icon {
+        width: 40px;
+        height: 40px;
+    }
+    
+    .rihan-trust-text {
+        font-size: 0.75rem;
+    }
+}
+
+/* Modal styles */
+.modal-content {
+    border-radius: 12px;
+    border: none;
+}
+
+.modal-header {
+    border-bottom: 1px solid #e9ecef;
+}
+
+.modal-body {
+    padding: 1.5rem;
+}
+
+.modal-body ul {
+    padding-right: 1.5rem;
+    margin: 1rem 0;
+}
+
+.modal-body li {
+    margin-bottom: 0.5rem;
+}
+</style>

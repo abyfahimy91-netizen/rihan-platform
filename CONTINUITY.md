@@ -97,11 +97,11 @@
 
 ## Next Major Actions
 
-**Priority 1:** US-058 (Trust Badges) - Iranian trust badges in product page
-**Priority 2:** M12 (About) - About brand page
-**Priority 3:** M13 (Design) - Frontend polish (base.html, UI)
-**Priority 4:** US-031 (Should) - Excel export for finance reports
-**Priority 5:** Integration testing - Full flow test (browse > order > deliver > settle)
+**Priority 1:** M12 (About) - About brand page
+**Priority 2:** M13 (Design) - Frontend polish
+**Priority 3:** US-031 (Should) - Excel export
+**Priority 4:** Integration testing
+**Priority 5:** UI سبد خرید - ساخت cart.html
 
 ## Overall Phase 5 Progress
 
@@ -112,6 +112,7 @@
 
 | Date | Decision |
 |------|----------|
+| 2026-08-21 | D-087: Trust Badges ایرانی (US-058) |
 | 2026-08-21 | D-086: Finance Module Implementation (M6) |
 | 2026-08-21 | D-085: Supplier Panel with User-Supplier Link |
 | 2026-08-21 | D-084: Leads Module Implementation |
