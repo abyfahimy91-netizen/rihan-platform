@@ -2,6 +2,7 @@
 Cart Page Views (HTML) - UI سبد خرید
 """
 from django.shortcuts import render, redirect
+from django.core.exceptions import ValidationError
 from django.contrib import messages
 from django.views.decorators.http import require_GET, require_POST
 
@@ -44,8 +45,10 @@ def add_to_cart_view(request):
         messages.success(request, f'{product.name} به سبد خرید اضافه شد.')
     except Product.DoesNotExist:
         messages.error(request, 'محصول مورد نظر یافت نشد.')
+    except ValidationError as e:
+        messages.error(request, f'خطا در افزودن: {e}')
     except Exception as e:
-        messages.error(request, f'خطا: {e}')
+        messages.error(request, f'خطای غیرمنتظره: {e}')
     
     return redirect('order_pages:cart_page')
 
