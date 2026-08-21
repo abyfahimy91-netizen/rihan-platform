@@ -12,4 +12,7 @@ urlpatterns = [
     
     # داشبورد تأمین‌کننده (US-030)
     path('supplier/', views.finance_dashboard_supplier, name='supplier_dashboard'),
+    
+    # Export (US-031)
+    path('export/excel/', views.finance_export_excel, name='export_excel'),
 ]

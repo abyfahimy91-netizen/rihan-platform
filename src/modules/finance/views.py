@@ -6,6 +6,7 @@ Viewهای ماژول مالی (M6)
 - US-030: حساب ماهانه تأمین‌کننده (داشبورد تأمین‌کننده)
 """
 from django.shortcuts import render, redirect
+from django.http import HttpResponse
 from django.contrib import messages
 from django.contrib.auth.decorators import user_passes_test
 from django.core.exceptions import ObjectDoesNotExist
@@ -13,6 +14,7 @@ from functools import wraps
 
 from src.modules.catalog.models import Supplier
 from .services import FinanceService
+from .exports import FinanceExporter
 from .models import SupplierLedger
 
 
@@ -116,3 +118,27 @@ def finance_dashboard_supplier(request):
     }
     
     return render(request, 'finance/supplier_dashboard.html', context)
+
+
+
+def finance_export_excel(request):
+    """
+    Export گزارش مالی به اکسل
+    US-031: خروجی اکسل گزارش مالی
+    """
+    if not request.user.is_authenticated or not request.user.is_staff:
+        messages.error(request, 'دسترسی غیرمجاز.')
+        return redirect('/')
+    
+    import jdatetime
+    today = jdatetime.date.today()
+    filename = f'finance-report-{today.strftime("%Y-%m-%d")}.xlsx'
+    
+    output = FinanceExporter.export_all_transactions()
+    
+    response = HttpResponse(
+        output.read(),
+        content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    )
+    response['Content-Disposition'] = f'attachment; filename="{filename}"'
+    return response
