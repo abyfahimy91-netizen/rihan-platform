@@ -34,13 +34,13 @@ INSTALLED_APPS = [
     'src.modules.audit',
     
     # ماژول‌های ریهان (بر اساس D-079 - ۱۴ ماژول)
-    #    # M1 - غیرفعال تا تکمیل بازنویسی
-    'src.modules.order',     # M2 - غیرفعال تا تکمیل بازنویسی
+    'src.modules.order',      # M2 - ماژول سفارشات
     
     # ✅ ماژول پنل خانواده (M3) - اسپرینت ۳
     'src.modules.family_panel',
     'src.modules.reviews',
     'src.modules.leads',
+    'src.modules.finance',  # M6 - ماژول مالی
 ]
 
 MIDDLEWARE = [
