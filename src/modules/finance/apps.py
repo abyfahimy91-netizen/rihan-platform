@@ -8,5 +8,5 @@ class FinanceConfig(AppConfig):
     verbose_name = "ماژول مالی (M6)"
 
     def ready(self):
-        # Import signals here if needed
-        pass
+        # Import signals
+        import src.modules.finance.signals  # noqa: F401
