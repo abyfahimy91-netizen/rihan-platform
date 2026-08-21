@@ -1,0 +1,35 @@
+{% extends "supplier_panel/base.html" %}
+{% block title %}داشبورد تأمین‌کننده | ریهان{% endblock %}
+
+{% block content %}
+<div class="container mt-4" dir="rtl">
+    <h1 class="mb-4">پنل تأمین‌کننده</h1>
+    
+    <div class="alert alert-info">
+        <strong>{{ supplier.title }}</strong> — {{ supplier.city }}
+    </div>
+    
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card bg-warning text-dark">
+                <div class="card-body text-center">
+                    <h2>{{ pending_orders }}</h2>
+                    <p>سفارش در انتظار ارسال</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card bg-success text-white">
+                <div class="card-body text-center">
+                    <h2>{{ shipped_orders }}</h2>
+                    <p>سفارش ارسال شده</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <a href="{% url 'supplier_panel:order_list' %}" class="btn btn-primary btn-lg">
+        مشاهده سفارشات
+    </a>
+</div>
+{% endblock %}

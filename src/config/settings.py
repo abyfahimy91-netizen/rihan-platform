@@ -28,6 +28,7 @@ INSTALLED_APPS = [
     
     # ✅ ماژول RBAC (M5)
     'src.modules.rbac',
+    'src.modules.supplier_panel',
     
     # ✅ ماژول Audit Log (اسپرینت ۱)
     'src.modules.audit',

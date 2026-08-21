@@ -13,6 +13,7 @@ sitemaps = {
 }
 
 urlpatterns = [
+    path('supplier/', include('src.modules.supplier_panel.urls')),
     # SEO endpoints (D-079)
     path('sitemap.xml', sitemap, {'sitemaps': sitemaps}, name='django.contrib.sitemaps.views.sitemap'),
     path('robots.txt', robots_txt, name='robots_txt'),
