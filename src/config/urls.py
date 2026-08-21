@@ -32,6 +32,9 @@ urlpatterns = [
     # Admin
     path('admin/', admin.site.urls),
     
+    # Finance (M6)
+    path('finance/', include('src.modules.finance.urls')),
+
     # API endpoints
     path('api/v1/catalog/', include('src.modules.catalog.urls_api')),
     path('api/v1/order/', include('src.modules.order.urls')),

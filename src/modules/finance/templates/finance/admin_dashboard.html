@@ -1,0 +1,81 @@
+{% extends "finance/base.html" %}
+{% block title %}داشبورد مالی ادمین | ریهان{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">📊 داشبورد مالی</h1>
+
+<!-- آمار کلی -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card stat-card bg-success text-white">
+            <div class="card-body text-center">
+                <h2>{{ stats.total_revenue|floatformat:0 }}</h2>
+                <p>درآمد (۳۰ روز گذشته)</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card stat-card bg-primary text-white">
+            <div class="card-body text-center">
+                <h2>{{ stats.order_count }}</h2>
+                <p>تعداد سفارش</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card stat-card bg-info text-dark">
+            <div class="card-body text-center">
+                <h2>{{ stats.avg_order_value|floatformat:0 }}</h2>
+                <p>میانگین ارزش سفارش</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card stat-card bg-warning text-dark">
+            <div class="card-body text-center">
+                <h2>{{ stats.total_supplier_debt|floatformat:0 }}</h2>
+                <p>بدهی به تأمین‌کنندگان</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- لیست دفاتر حساب تأمین‌کنندگان -->
+<div class="card">
+    <div class="card-header bg-dark text-white">
+        <h5 class="mb-0">دفاتر حساب تأمین‌کنندگان</h5>
+    </div>
+    <div class="card-body">
+        {% if ledgers %}
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th>تأمین‌کننده</th>
+                    <th>جمع فروش</th>
+                    <th>جمع تسویه</th>
+                    <th>موجودی (طلب)</th>
+                    <th>اقدامات</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for ledger in ledgers %}
+                <tr>
+                    <td>{{ ledger.supplier.title }}</td>
+                    <td>{{ ledger.total_sales|floatformat:0 }}</td>
+                    <td>{{ ledger.total_settlements|floatformat:0 }}</td>
+                    <td class="{% if ledger.balance > 0 %}text-success{% else %}text-danger{% endif %}">
+                        {{ ledger.balance|floatformat:0 }}
+                    </td>
+                    <td>
+                        <a href="#" class="btn btn-sm btn-outline-primary">جزئیات</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p class="text-muted">هنوز دفتری برای تأمین‌کنندگان ایجاد نشده است.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
