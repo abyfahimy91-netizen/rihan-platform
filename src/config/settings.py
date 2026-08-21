@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'src.modules.family_panel',
     'src.modules.reviews',
     'src.modules.leads',
+    'src.modules.pages',  # M12 - صفحات عمومی (About, Contact, Return Policy)
     'src.modules.finance',  # M6 - ماژول مالی
 ]
 

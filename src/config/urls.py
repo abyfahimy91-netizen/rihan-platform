@@ -29,6 +29,9 @@ urlpatterns = [
     # Leads (M9 - US-010)
     path('leads/', include('src.modules.leads.urls')),
     
+    # Pages (M12) - About, Contact, Return Policy
+    path('', include('src.modules.pages.urls')),
+    
     # Admin
     path('admin/', admin.site.urls),
     
