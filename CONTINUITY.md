@@ -17,7 +17,7 @@
 | M9 Leads | Complete (D-084) |
 | M10 Authentication | Complete |
 | M12 About | Complete (D-088) |
-| M13 Design | Pending |
+| M13 Design | Complete (D-090) |
 | M14 Plugin Architecture | Complete |
 
 ## Achievements This Session (2026-08-21)
@@ -101,19 +101,20 @@
 
 **Priority 1:** M13 (Design) - بهبود base.html با فوتر
 **Priority 2:** UI سبد خرید - ساخت cart.html
-**Priority 3:** US-031 (Should) - Excel export
-**Priority 4:** Integration testing
+**Priority 3:** US-059 - قیف فروش کامل
+**Priority 4:** UI سبد خرید - ساخت cart.html
 **Priority 5:** UI سبد خرید - ساخت cart.html
 
 ## Overall Phase 5 Progress
 
-**Completed Modules:** 12 of 14 (M1, M2, M3, M4, M5, M6, M7, M8, M9, M10, M14)
-**Progress:** ~85%
+**Completed Modules:** 13 of 14 (M1, M2, M3, M4, M5, M6, M7, M8, M9, M10, M14)
+**Progress:** ~92%
 
 ## Recent Decisions
 
 | Date | Decision |
 |------|----------|
+| 2026-08-21 | D-089: Excel Export (US-031) |
 | 2026-08-21 | D-088: Integration Testing |
 | 2026-08-21 | D-087: Trust Badges ایرانی (US-058) |
 | 2026-08-21 | D-086: Finance Module Implementation (M6) |
