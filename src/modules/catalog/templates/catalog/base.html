@@ -6,12 +6,26 @@
     <title>{% block title %}ریهان - فروشگاه آنلاین اعتمادمحور{% endblock %}</title>
     <meta name="description" content="{% block meta_description %}ریهان - انتخاب مطمئن، هر محصولی که باشد{% endblock %}">
     
-    <!-- Open Graph (D-079 - Social Sharing) -->
+    <- src/modules/supplier_panel/: New app for Open Graph (D-079 - Social Sharing) -->
     <meta property="og:title" content="{% block og_title %}ریهان{% endblock %}">
     <meta property="og:description" content="{% block og_description %}انتخاب مطمئن، هر محصولی که باشد{% endblock %}">
     <meta property="og:type" content="website">
     
+    <- src/modules/supplier_panel/: New app for Vazirmatn Font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet" type="text/css" />
+    
     <style>
+        :root {
+            --primary: #2d5a2d;
+            --primary-dark: #1a3d1a;
+            --text-dark: #1a1a1a;
+            --text-muted: #666;
+            --border: #e8e8e8;
+            --bg-light: #fafafa;
+        }
+        
         * {
             margin: 0;
             padding: 0;
@@ -21,8 +35,8 @@
         body {
             font-family: 'Vazirmatn', 'Segoe UI', Tahoma, sans-serif;
             line-height: 1.8;
-            color: #2d2d2d;
-            background-color: #fafafa;
+            color: var(--text-dark);
+            background-color: var(--bg-light);
             direction: rtl;
         }
         
@@ -35,24 +49,47 @@
         /* Header */
         header {
             background: #fff;
-            border-bottom: 1px solid #e8e8e8;
+            border-bottom: 1px solid var(--border);
             padding: 20px 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.03);
         }
         
         .header-content {
             display: flex;
             justify-content: space-between;
             align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
         }
         
         .logo {
             font-size: 28px;
             font-weight: 700;
-            color: #1a1a1a;
+            color: var(--primary);
             text-decoration: none;
         }
         
-        /* Main Content */
+        .nav-links {
+            display: flex;
+            gap: 30px;
+            align-items: center;
+        }
+        
+        .nav-links a {
+            color: var(--text-dark);
+            text-decoration: none;
+            font-size: 15px;
+            transition: color 0.2s;
+        }
+        
+        .nav-links a:hover {
+            color: var(--primary);
+        }
+        
+        /* Main */
         main {
             padding: 40px 0;
             min-height: 60vh;
@@ -62,13 +99,74 @@
         footer {
             background: #1a1a1a;
             color: #fff;
-            padding: 30px 0;
-            margin-top: 60px;
+            padding: 50px 0 20px;
+            margin-top: 80px;
         }
         
-        .footer-content {
+        .footer-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr;
+            gap: 40px;
+            margin-bottom: 30px;
+        }
+        
+        .footer-col h4 {
+            color: #fff;
+            font-size: 16px;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+        
+        .footer-col p,
+        .footer-col a {
+            color: #aaa;
+            font-size: 14px;
+            line-height: 2;
+            text-decoration: none;
+            display: block;
+        }
+        
+        .footer-col a:hover {
+            color: #fff;
+        }
+        
+        .footer-brand {
+            font-size: 24px;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 10px;
+        }
+        
+        .footer-tagline {
+            color: #888;
+            font-size: 14px;
+            font-style: italic;
+        }
+        
+        .footer-bottom {
+            border-top: 1px solid #333;
+            padding-top: 20px;
             text-align: center;
-            color: #999;
+            color: #777;
+            font-size: 13px;
+        }
+        
+        /* Buttons */
+        .btn {
+            display: inline-block;
+            padding: 12px 32px;
+            background: var(--primary);
+            color: #fff;
+            text-decoration: none;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background 0.3s;
+        }
+        
+        .btn:hover {
+            background: var(--primary-dark);
         }
         
         /* Trust Badges */
@@ -88,32 +186,22 @@
             background: #f0f7f0;
             border-radius: 8px;
             font-size: 14px;
-            color: #2d5a2d;
-        }
-        
-        /* Buttons */
-        .btn {
-            display: inline-block;
-            padding: 12px 32px;
-            background: #1a1a1a;
-            color: #fff;
-            text-decoration: none;
-            border-radius: 8px;
-            border: none;
-            cursor: pointer;
-            font-size: 16px;
-            transition: background 0.3s;
-        }
-        
-        .btn:hover {
-            background: #333;
+            color: var(--primary);
         }
         
         /* Responsive */
         @media (max-width: 768px) {
-            .container {
-                padding: 0 15px;
+            .container { padding: 0 15px; }
+            .header-content { flex-direction: column; }
+            .nav-links { flex-wrap: wrap; justify-content: center; gap: 15px; }
+            .footer-grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 30px;
             }
+        }
+        
+        @media (max-width: 480px) {
+            .footer-grid { grid-template-columns: 1fr; }
         }
     </style>
     
@@ -123,7 +211,13 @@
     <header>
         <div class="container">
             <div class="header-content">
-                <a href="/" class="logo">ریهان</a>
+                <a href="/" class="logo">🌿 ریهان</a>
+                <nav class="nav-links">
+                    <a href="/">محصولات</a>
+                    <a href="{% url 'pages:about' %}">درباره ما</a>
+                    <a href="{% url 'pages:contact' %}">تماس</a>
+                    <a href="/order/tracking/">پیگیری سفارش</a>
+                </nav>
             </div>
         </div>
     </header>
@@ -136,8 +230,37 @@
     
     <footer>
         <div class="container">
-            <div class="footer-content">
-                <p>ریهان - انتخاب مطمئن، هر محصولی که باشد</p>
+            <div class="footer-grid">
+                <div class="footer-col">
+                    <div class="footer-brand">🌿 ریهان</div>
+                    <p class="footer-tagline">انتخاب مطمئن، هر محصولی که باشد</p>
+                    <p style="margin-top: 15px;">فروشگاه آنلاین اعتمادمحور با محصولات اصیل و با کیفیت</p>
+                </div>
+                
+                <div class="footer-col">
+                    <h4>دسترسی سریع</h4>
+                    <a href="/">محصولات</a>
+                    <a href="{% url 'pages:about' %}">درباره ما</a>
+                    <a href="{% url 'pages:contact' %}">تماس با ما</a>
+                </div>
+                
+                <div class="footer-col">
+                    <h4>راهنما</h4>
+                    <a href="/order/tracking/">پیگیری سفارش</a>
+                    <a href="{% url 'pages:return_policy' %}">سیاست مرجوعی</a>
+                    <a href="{% url 'pages:contact' %}">سؤالات متداول</a>
+                </div>
+                
+                <div class="footer-col">
+                    <h4>تماس</h4>
+                    <a href="tel:09123456789">۰۹۱۲-۳۴۵-۶۷۸۹</a>
+                    <p>هر روز ۱۱ تا ۱۹</p>
+                    <p>هوراند، آذربایجان شرقی</p>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p>© ۱۴۰۵ ریهان. تمام حقوق محفوظ است.</p>
             </div>
         </div>
     </footer>
