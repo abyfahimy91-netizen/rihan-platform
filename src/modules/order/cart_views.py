@@ -47,7 +47,7 @@ def add_to_cart_view(request):
     except Exception as e:
         messages.error(request, f'خطا: {e}')
     
-    return redirect('order:cart_page')
+    return redirect('order_pages:cart_page')
 
 
 @require_POST
@@ -63,7 +63,7 @@ def update_cart_item_view(request):
     except Exception as e:
         messages.error(request, f'خطا: {e}')
     
-    return redirect('order:cart_page')
+    return redirect('order_pages:cart_page')
 
 
 @require_POST
@@ -78,4 +78,4 @@ def remove_from_cart_view(request):
     except Exception as e:
         messages.error(request, f'خطا: {e}')
     
-    return redirect('order:cart_page')
+    return redirect('order_pages:cart_page')
