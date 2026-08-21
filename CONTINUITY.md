@@ -82,6 +82,7 @@
 
 | Date | Decision |
 |------|----------|
+| 2026-08-21 | D-085: User-Supplier Link for M4 |
 | 2026-08-21 | D-084: Leads Module Implementation |
 | 2026-08-20 | D-083: Reviews Module Implementation |
 | 2026-08-20 | D-082: Order Tracking Implementation |
