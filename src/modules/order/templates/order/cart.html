@@ -1,0 +1,191 @@
+{% extends "catalog/base.html" %}
+
+{% block title %}سبد خرید | ریهان{% endblock %}
+{% block meta_description %}سبد خرید شما در فروشگاه ریهان{% endblock %}
+
+{% block extra_css %}
+<style>
+.cart-container { max-width: 1000px; margin: 0 auto; }
+.cart-item {
+    display: grid;
+    grid-template-columns: 80px 2fr 1fr 1fr auto;
+    gap: 20px;
+    align-items: center;
+    padding: 20px;
+    background: #fff;
+    border-radius: 8px;
+    margin-bottom: 15px;
+    border: 1px solid #e8e8e8;
+}
+.cart-item-image {
+    width: 80px;
+    height: 80px;
+    background: #f0f7f0;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 30px;
+}
+.cart-item-name { font-weight: 600; font-size: 16px; }
+.cart-item-price { color: #666; font-size: 14px; }
+.quantity-control {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.quantity-btn {
+    width: 32px;
+    height: 32px;
+    border: 1px solid #ddd;
+    background: #fff;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 18px;
+}
+.quantity-input {
+    width: 50px;
+    text-align: center;
+    padding: 6px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+.cart-summary {
+    background: #fff;
+    padding: 25px;
+    border-radius: 8px;
+    border: 1px solid #e8e8e8;
+    margin-top: 30px;
+}
+.summary-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 0;
+    border-bottom: 1px solid #f0f0f0;
+}
+.summary-row.total {
+    font-size: 18px;
+    font-weight: bold;
+    border-bottom: none;
+    color: #2d5a2d;
+}
+.empty-cart {
+    text-align: center;
+    padding: 60px 20px;
+    background: #fff;
+    border-radius: 8px;
+}
+.empty-cart-icon { font-size: 60px; margin-bottom: 20px; }
+.remove-btn {
+    background: none;
+    border: none;
+    color: #d9534f;
+    cursor: pointer;
+    font-size: 20px;
+}
+@media (max-width: 768px) {
+    .cart-item {
+        grid-template-columns: 60px 1fr;
+        gap: 10px;
+    }
+    .cart-item-image { width: 60px; height: 60px; }
+    .quantity-control { grid-column: 1 / -1; }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="cart-container">
+    <h1 style="margin-bottom: 30px;">🛒 سبد خرید شما</h1>
+    
+    {% if messages %}
+        {% for message in messages %}
+            <div style="background: #f0f7f0; color: #2d5a2d; padding: 12px 20px; border-radius: 8px; margin-bottom: 20px;">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+    
+    {% if items %}
+        <div class="cart-items">
+            {% for item in items %}
+            <div class="cart-item">
+                <div class="cart-item-image">🌿</div>
+                <div>
+                    <div class="cart-item-name">{{ item.product.name }}</div>
+                    <div class="cart-item-price">{{ item.product.final_price|floatformat:0 }} تومان</div>
+                </div>
+                <div>
+                    <form method="post" action="{% url 'order_pages:update_cart_page' %}" class="quantity-control">
+                        {% csrf_token %}
+                        <input type="hidden" name="item_id" value="{{ item.id }}">
+                        <button type="button" class="quantity-btn" onclick="updateQty(this, -1)">-</button>
+                        <input type="number" name="quantity" value="{{ item.quantity }}" min="1" class="quantity-input" onchange="this.form.submit()">
+                        <button type="button" class="quantity-btn" onclick="updateQty(this, 1)">+</button>
+                    </form>
+                </div>
+                <div style="font-weight: 600; color: #2d5a2d;">
+                    {{ item.subtotal|floatformat:0 }} تومان
+                </div>
+                <form method="post" action="{% url 'order_pages:remove_cart_page' %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="item_id" value="{{ item.id }}">
+                    <button type="submit" class="remove-btn" title="حذف">🗑️</button>
+                </form>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <div class="cart-summary">
+            <div class="summary-row">
+                <span>تعداد کل اقلام:</span>
+                <span>{{ item_count }} قلم</span>
+            </div>
+            <div class="summary-row">
+                <span>جمع کالاها:</span>
+                <span>{{ subtotal|floatformat:0 }} تومان</span>
+            </div>
+            <div class="summary-row">
+                <span>هزینه ارسال:</span>
+                <span style="color: #2d5a2d; font-weight: 600;">رایگان ✓</span>
+            </div>
+            <div class="summary-row total">
+                <span>مبلغ نهایی:</span>
+                <span>{{ total|floatformat:0 }} تومان</span>
+            </div>
+            
+            <div style="margin-top: 25px; text-align: center;">
+                <a href="/" style="display: inline-block; padding: 12px 30px; background: #f0f7f0; color: #2d5a2d; text-decoration: none; border-radius: 8px; margin-left: 10px;">
+                    ادامه خرید
+                </a>
+                <button style="padding: 12px 30px; background: #2d5a2d; color: #fff; border: none; border-radius: 8px; font-size: 16px; cursor: pointer;">
+                    ادامه به تسویه‌حساب
+                </button>
+            </div>
+        </div>
+        
+        <script>
+        function updateQty(btn, delta) {
+            const form = btn.closest('form');
+            const input = form.querySelector('input[name=quantity]');
+            let val = parseInt(input.value) + delta;
+            if (val < 1) val = 1;
+            input.value = val;
+            form.submit();
+        }
+        </script>
+    {% else %}
+        <div class="empty-cart">
+            <div class="empty-cart-icon">🛒</div>
+            <h2>سبد خرید شما خالی است</h2>
+            <p style="color: #666; margin: 15px 0;">محصولی به سبد خرید اضافه نکرده‌اید.</p>
+            <a href="/" style="display: inline-block; padding: 12px 30px; background: #2d5a2d; color: #fff; text-decoration: none; border-radius: 8px; margin-top: 20px;">
+                مشاهده محصولات
+            </a>
+        </div>
+    {% endif %}
+</div>
+
+<- src/modules/supplier_panel/: New app for Trust Badges (US-058) -->
+{% include "catalog/partials/trust_badges.html" %}
+{% endblock %}

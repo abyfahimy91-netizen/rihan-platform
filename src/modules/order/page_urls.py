@@ -1,34 +1,14 @@
 """
-Order Page URLs - مسیرهای HTML برای مشتری
-جدا از API URLs برای تمایز بین endpoints برنامه‌ای و صفحات کاربری
-
-Namespace: order_pages (برای جلوگیری از تداخل با API router)
+URLs صفحات HTML ماژول Order (UI سبد خرید)
 """
 from django.urls import path
-from . import page_views
+from . import cart_views
 
-app_name = 'order_pages'  # Namespace جداگانه
+app_name = 'order_pages'
 
 urlpatterns = [
-    path(
-        'payment/<str:order_number>/',
-        page_views.payment_submit_page,
-        name='payment_submit'
-    ),
-    path(
-        'tracking/<str:order_number>/',
-        page_views.order_tracking_page,
-        name='order_tracking'
-    ),
-    path(
-        'success/<str:order_number>/',
-        page_views.payment_success_page,
-        name='payment_success'
-    ),
-    path(
-        'lookup/',
-        page_views.tracking_lookup_page,
-        name='tracking_lookup'
-    ),
-
+    path('cart/', cart_views.cart_page_view, name='cart_page'),
+    path('cart/add/', cart_views.add_to_cart_view, name='add_to_cart_page'),
+    path('cart/update/', cart_views.update_cart_item_view, name='update_cart_page'),
+    path('cart/remove/', cart_views.remove_from_cart_view, name='remove_cart_page'),
 ]
