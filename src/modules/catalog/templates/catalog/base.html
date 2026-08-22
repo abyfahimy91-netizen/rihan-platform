@@ -3,27 +3,84 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}ریهان - فروشگاه آنلاین اعتمادمحور{% endblock %}</title>
+    <title>{% block title %}ریهان - انتخاب مطمئن{% endblock %}</title>
     <meta name="description" content="{% block meta_description %}ریهان - انتخاب مطمئن، هر محصولی که باشد{% endblock %}">
     
-    <- src/modules/supplier_panel/: New app for Open Graph (D-079 - Social Sharing) -->
-    <meta property="og:title" content="{% block og_title %}ریهان{% endblock %}">
-    <meta property="og:description" content="{% block og_description %}انتخاب مطمئن، هر محصولی که باشد{% endblock %}">
-    <meta property="og:type" content="website">
+    <!-- SEO (D-079) -->
+    <meta name="keywords" content="{% block meta_keywords %}ریهان, انتخاب مطمئن, خشکبار هوراند, سماق هوراند{% endblock %}">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="{{ request.build_absolute_uri }}">
     
-    <- src/modules/supplier_panel/: New app for Vazirmatn Font -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet" type="text/css" />
+    <!-- Open Graph (D-079) -->
+    <meta property="og:title" content="{% block og_title %}ریهان - انتخاب مطمئن{% endblock %}">
+    <meta property="og:description" content="{% block og_description %}انتخاب مطمئن، هر محصولی که باشد{% endblock %}">
+    <meta property="og:type" content="{% block og_type %}website{% endblock %}">
+    <meta property="og:url" content="{{ request.build_absolute_uri }}">
+    <meta property="og:site_name" content="ریهان">
+    <meta property="og:locale" content="fa_IR">
+    
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="{% block twitter_title %}ریهان - انتخاب مطمئن{% endblock %}">
+    <meta name="twitter:description" content="{% block twitter_description %}انتخاب مطمئن، هر محصولی که باشد{% endblock %}">
+    
+    <!-- Fonts (Local - No CDN) -->
+    <style>
+        @font-face {
+            font-family: 'Vazirmatn';
+            src: url('/static/fonts/Vazirmatn-Regular.woff2') format('woff2');
+            font-weight: 400;
+            font-style: normal;
+            font-display: swap;
+        }
+        @font-face {
+            font-family: 'Vazirmatn';
+            src: url('/static/fonts/Vazirmatn-Medium.woff2') format('woff2');
+            font-weight: 500;
+            font-style: normal;
+            font-display: swap;
+        }
+        @font-face {
+            font-family: 'Vazirmatn';
+            src: url('/static/fonts/Vazirmatn-Bold.woff2') format('woff2');
+            font-weight: 700;
+            font-style: normal;
+            font-display: swap;
+        }
+        @font-face {
+            font-family: 'Vazirmatn';
+            src: url('/static/fonts/Vazirmatn-Black.woff2') format('woff2');
+            font-weight: 900;
+            font-style: normal;
+            font-display: swap;
+        }
+    </style>
     
     <style>
         :root {
-            --primary: #2d5a2d;
-            --primary-dark: #1a3d1a;
-            --text-dark: #1a1a1a;
-            --text-muted: #666;
-            --border: #e8e8e8;
-            --bg-light: #fafafa;
+            /* برند */
+            --color-primary: #0D3B2E;
+            --color-primary-dark: #092A21;
+            --color-secondary: #C9A961;
+            --color-secondary-dark: #7A6428;
+            
+            /* پس‌زمینه و متن */
+            --color-bg: #FAF7F0;
+            --color-text: #1A1A1A;
+            --color-text-muted: #5C5C5C;
+            --color-border: #E8E4DC;
+            
+            /* معنایی */
+            --color-success: #2D6A4F;
+            --color-error: #9B2C2C;
+            --color-price: #7A6428;
+            
+            /* CTA */
+            --color-cta-bg: #0D3B2E;
+            --color-cta-text: #FFFFFF;
+            
+            /* فونت */
+            --font-family: 'Vazirmatn', sans-serif;
         }
         
         * {
@@ -33,11 +90,19 @@
         }
         
         body {
-            font-family: 'Vazirmatn', 'Segoe UI', Tahoma, sans-serif;
+            font-family: var(--font-family);
+            font-weight: 400;
             line-height: 1.8;
-            color: var(--text-dark);
-            background-color: var(--bg-light);
+            color: var(--color-text);
+            background-color: var(--color-bg);
             direction: rtl;
+            text-rendering: optimizeLegibility;
+            -webkit-font-smoothing: antialiased;
+        }
+        
+        /* ارقام فارسی */
+        body {
+            font-feature-settings: "ss01";
         }
         
         .container {
@@ -49,7 +114,7 @@
         /* Header */
         header {
             background: #fff;
-            border-bottom: 1px solid var(--border);
+            border-bottom: 1px solid var(--color-border);
             padding: 20px 0;
             position: sticky;
             top: 0;
@@ -61,15 +126,19 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            flex-wrap: wrap;
             gap: 20px;
         }
         
         .logo {
             font-size: 28px;
-            font-weight: 700;
-            color: var(--primary);
+            font-weight: 900;
+            color: var(--color-primary);
             text-decoration: none;
+            letter-spacing: -0.5px;
+        }
+        
+        .logo:hover {
+            color: var(--color-primary-dark);
         }
         
         .nav-links {
@@ -79,14 +148,43 @@
         }
         
         .nav-links a {
-            color: var(--text-dark);
+            color: var(--color-text);
             text-decoration: none;
             font-size: 15px;
+            font-weight: 500;
             transition: color 0.2s;
         }
         
         .nav-links a:hover {
-            color: var(--primary);
+            color: var(--color-primary);
+        }
+        
+        .cart-icon {
+            position: relative;
+            text-decoration: none;
+            color: var(--color-text);
+            font-size: 24px;
+            padding: 8px;
+        }
+        
+        .cart-icon:hover {
+            color: var(--color-primary);
+        }
+        
+        .cart-badge {
+            position: absolute;
+            top: 2px;
+            right: 2px;
+            background: var(--color-primary);
+            color: #fff;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            font-size: 12px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
         
         /* Main */
@@ -97,9 +195,9 @@
         
         /* Footer */
         footer {
-            background: #1a1a1a;
+            background: var(--color-primary);
             color: #fff;
-            padding: 50px 0 20px;
+            padding: 60px 0 30px;
             margin-top: 80px;
         }
         
@@ -107,19 +205,19 @@
             display: grid;
             grid-template-columns: 2fr 1fr 1fr 1fr;
             gap: 40px;
-            margin-bottom: 30px;
+            margin-bottom: 40px;
         }
         
         .footer-col h4 {
             color: #fff;
             font-size: 16px;
-            margin-bottom: 15px;
-            font-weight: 600;
+            font-weight: 700;
+            margin-bottom: 16px;
         }
         
         .footer-col p,
         .footer-col a {
-            color: #aaa;
+            color: rgba(255,255,255,0.8);
             font-size: 14px;
             line-height: 2;
             text-decoration: none;
@@ -127,27 +225,27 @@
         }
         
         .footer-col a:hover {
-            color: #fff;
+            color: var(--color-secondary);
         }
         
         .footer-brand {
-            font-size: 24px;
-            font-weight: 700;
+            font-size: 28px;
+            font-weight: 900;
             color: #fff;
-            margin-bottom: 10px;
+            margin-bottom: 12px;
         }
         
         .footer-tagline {
-            color: #888;
+            color: var(--color-secondary);
             font-size: 14px;
             font-style: italic;
         }
         
         .footer-bottom {
-            border-top: 1px solid #333;
-            padding-top: 20px;
+            border-top: 1px solid rgba(255,255,255,0.2);
+            padding-top: 30px;
             text-align: center;
-            color: #777;
+            color: rgba(255,255,255,0.6);
             font-size: 13px;
         }
         
@@ -155,18 +253,30 @@
         .btn {
             display: inline-block;
             padding: 12px 32px;
-            background: var(--primary);
-            color: #fff;
+            background: var(--color-cta-bg);
+            color: var(--color-cta-text);
             text-decoration: none;
             border-radius: 8px;
             border: none;
             cursor: pointer;
             font-size: 16px;
-            transition: background 0.3s;
+            font-weight: 500;
+            transition: all 0.3s;
         }
         
         .btn:hover {
-            background: var(--primary-dark);
+            background: var(--color-primary-dark);
+        }
+        
+        .btn-secondary {
+            background: transparent;
+            border: 2px solid var(--color-primary);
+            color: var(--color-primary);
+        }
+        
+        .btn-secondary:hover {
+            background: var(--color-primary);
+            color: #fff;
         }
         
         /* Trust Badges */
@@ -183,17 +293,24 @@
             align-items: center;
             gap: 8px;
             padding: 10px 16px;
-            background: #f0f7f0;
+            background: rgba(45,106,79,0.1);
             border-radius: 8px;
             font-size: 14px;
-            color: var(--primary);
+            color: var(--color-success);
+            font-weight: 500;
+        }
+        
+        /* Price */
+        .price {
+            color: var(--color-price);
+            font-weight: 700;
+            font-size: 20px;
         }
         
         /* Responsive */
         @media (max-width: 768px) {
             .container { padding: 0 15px; }
-            .header-content { flex-direction: column; }
-            .nav-links { flex-wrap: wrap; justify-content: center; gap: 15px; }
+            .nav-links { display: none; }
             .footer-grid {
                 grid-template-columns: 1fr 1fr;
                 gap: 30px;
@@ -211,13 +328,21 @@
     <header>
         <div class="container">
             <div class="header-content">
-                <a href="/" class="logo">🌿 ریهان</a>
+                <a href="/" class="logo">ریهان</a>
                 <nav class="nav-links">
                     <a href="/">محصولات</a>
-                    <a href="{% url 'pages:about' %}">درباره ما</a>
-                    <a href="{% url 'pages:contact' %}">تماس</a>
-                    <a href="/order/tracking/">پیگیری سفارش</a>
+                    <a href="/about/">درباره ما</a>
+                    <a href="/contact/">تماس</a>
+                    <a href="/tracking/">پیگیری سفارش</a>
                 </nav>
+                <a href="/cart/" class="cart-icon" title="سبد خرید">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="9" cy="21" r="1"></circle>
+                        <circle cx="20" cy="21" r="1"></circle>
+                        <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+                    </svg>
+                    <span class="cart-badge" id="cart-count">0</span>
+                </a>
             </div>
         </div>
     </header>
@@ -232,7 +357,7 @@
         <div class="container">
             <div class="footer-grid">
                 <div class="footer-col">
-                    <div class="footer-brand">🌿 ریهان</div>
+                    <div class="footer-brand">ریهان</div>
                     <p class="footer-tagline">انتخاب مطمئن، هر محصولی که باشد</p>
                     <p style="margin-top: 15px;">فروشگاه آنلاین اعتمادمحور با محصولات اصیل و با کیفیت</p>
                 </div>
@@ -240,15 +365,15 @@
                 <div class="footer-col">
                     <h4>دسترسی سریع</h4>
                     <a href="/">محصولات</a>
-                    <a href="{% url 'pages:about' %}">درباره ما</a>
-                    <a href="{% url 'pages:contact' %}">تماس با ما</a>
+                    <a href="/about/">درباره ما</a>
+                    <a href="/contact/">تماس با ما</a>
                 </div>
                 
                 <div class="footer-col">
                     <h4>راهنما</h4>
-                    <a href="/order/tracking/">پیگیری سفارش</a>
-                    <a href="{% url 'pages:return_policy' %}">سیاست مرجوعی</a>
-                    <a href="{% url 'pages:contact' %}">سؤالات متداول</a>
+                    <a href="/tracking/">پیگیری سفارش</a>
+                    <a href="/return-policy/">سیاست مرجوعی</a>
+                    <a href="/faq/">سؤالات متداول</a>
                 </div>
                 
                 <div class="footer-col">
