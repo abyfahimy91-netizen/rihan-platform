@@ -637,3 +637,73 @@ class SensitiveOperation(models.Model):
         if self.requested_by and user == self.requested_by:
             return False
         return True
+
+
+class ProductContent(models.Model):
+    """
+    محتوای بلوک‌محور محصولات (US-055)
+    
+    Proxy model برای مدیریت بلوک‌های محتوا در پنل خانواده.
+    هر محصول یک ProductContent دارد که بلوک‌های محتوایی آن را نگه می‌دارد.
+    """
+    product = models.OneToOneField(
+        'catalog.Product',
+        on_delete=models.CASCADE,
+        related_name='content_blocks'
+    )
+    
+    # بلوک‌ها به صورت JSON ذخیره می‌شوند
+    blocks = models.JSONField(
+        default=list,
+        help_text='لیست بلوک‌های محتوا به صورت JSON'
+    )
+    
+    # وضعیت انتشار
+    is_published = models.BooleanField(
+        default=False,
+        help_text='آیا محتوا منتشر شده است؟'
+    )
+    
+    # تاریخچه
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    published_at = models.DateTimeField(
+        null=True,
+        blank=True,
+        help_text='زمان آخرین انتشار'
+    )
+    
+    # متادیتا
+    draft_title = models.CharField(
+        max_length=200,
+        blank=True,
+        help_text='عنوان پیش‌نویس'
+    )
+    
+    class Meta:
+        verbose_name = 'محتوای محصول'
+        verbose_name_plural = 'محتواهای محصولات'
+    
+    def __str__(self):
+        return f'محتوای {self.product.name}'
+    
+    def get_blocks(self):
+        """دریافت لیست بلوک‌ها"""
+        return self.blocks if self.blocks else []
+    
+    def set_blocks(self, blocks):
+        """تنظیم لیست بلوک‌ها"""
+        self.blocks = blocks
+        self.save(update_fields=['blocks', 'updated_at'])
+    
+    def publish(self):
+        """انتشار محتوا"""
+        from django.utils import timezone
+        self.is_published = True
+        self.published_at = timezone.now()
+        self.save(update_fields=['is_published', 'published_at', 'updated_at'])
+    
+    def unpublish(self):
+        """لغو انتشار"""
+        self.is_published = False
+        self.save(update_fields=['is_published', 'updated_at'])

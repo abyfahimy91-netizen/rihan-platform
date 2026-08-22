@@ -2,175 +2,31 @@
 
 {% block title %}پیگیری سفارش | ریهان{% endblock %}
 
-{% block extra_css %}
-<style>
-    .lookup-container {
-        max-width: 500px;
-        margin: 60px auto;
-        padding: 40px;
-        background: #fff;
-        border-radius: 16px;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-    }
-    
-    .lookup-title {
-        font-size: 24px;
-        font-weight: 700;
-        color: #1a1a1a;
-        text-align: center;
-        margin-bottom: 12px;
-    }
-    
-    .lookup-subtitle {
-        color: #666;
-        text-align: center;
-        font-size: 14px;
-        margin-bottom: 30px;
-        line-height: 1.6;
-    }
-    
-    .lookup-form {
-        display: flex;
-        flex-direction: column;
-        gap: 20px;
-    }
-    
-    .form-group {
-        display: flex;
-        flex-direction: column;
-        gap: 8px;
-    }
-    
-    .form-label {
-        font-size: 14px;
-        font-weight: 600;
-        color: #1a1a1a;
-    }
-    
-    .form-hint {
-        font-size: 12px;
-        color: #888;
-        font-weight: 400;
-    }
-    
-    .form-input {
-        padding: 14px 16px;
-        border: 1px solid #e0e0e0;
-        border-radius: 8px;
-        font-size: 16px;
-        direction: ltr;
-        text-align: left;
-        transition: border-color 0.2s;
-    }
-    
-    .form-input:focus {
-        outline: none;
-        border-color: #2d5a2d;
-        box-shadow: 0 0 0 3px rgba(45, 90, 45, 0.1);
-    }
-    
-    .form-input.rtl {
-        direction: rtl;
-        text-align: right;
-    }
-    
-    .submit-btn {
-        padding: 14px;
-        background: #2d5a2d;
-        color: #fff;
-        border: none;
-        border-radius: 8px;
-        font-size: 16px;
-        font-weight: 600;
-        cursor: pointer;
-        transition: background 0.2s;
-        margin-top: 10px;
-    }
-    
-    .submit-btn:hover {
-        background: #1a3a1a;
-    }
-    
-    .error-message {
-        background: #fff3cd;
-        color: #856404;
-        padding: 12px 16px;
-        border-radius: 8px;
-        font-size: 14px;
-        margin-bottom: 20px;
-        border-right: 3px solid #ffc107;
-    }
-    
-    .info-box {
-        background: #f8f9fa;
-        border-radius: 8px;
-        padding: 16px;
-        margin-top: 30px;
-        font-size: 13px;
-        color: #666;
-        line-height: 1.6;
-    }
-    
-    .info-box strong {
-        color: #2d5a2d;
-    }
-</style>
-{% endblock %}
-
 {% block content %}
-<div class="lookup-container">
-    <h1 class="lookup-title">پیگیری سفارش</h1>
-    <p class="lookup-subtitle">
-        برای مشاهده وضعیت سفارش، شماره موبایل و شماره سفارش خود را وارد کنید
-    </p>
+<div class="container" style="max-width: 600px; margin: 40px auto; padding: 0 20px;">
+    <h1 style="text-align: center; margin-bottom: 30px;">پیگیری سفارش</h1>
     
-    {% if error %}
-    <div class="error-message">{{ error }}</div>
+    {% if messages %}
+        {% for message in messages %}
+            <div style="background: #fff3cd; border: 1px solid #ffc107; padding: 12px; border-radius: 8px; margin-bottom: 20px;">
+                {{ message }}
+            </div>
+        {% endfor %}
     {% endif %}
     
-    <form method="post" class="lookup-form">
+    <form method="post" style="background: #fff; padding: 30px; border-radius: 8px; border: 1px solid #e8e8e8;">
         {% csrf_token %}
-        
-        <div class="form-group">
-            <label class="form-label">
-                شماره موبایل
-                <span class="form-hint">(همان شماره‌ای که در سفارش وارد کردید)</span>
-            </label>
-            <input 
-                type="tel" 
-                name="phone" 
-                class="form-input" 
-                placeholder="09123456789"
-                maxlength="11"
-                pattern="09[0-9]{9}"
-                required
-                autocomplete="tel"
-            >
+        <div style="margin-bottom: 20px;">
+            <label style="display: block; margin-bottom: 8px; font-weight: 600;">شماره سفارش</label>
+            <input type="text" name="order_number" required style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px;" placeholder="مثلاً: RH-1405-00001">
         </div>
-        
-        <div class="form-group">
-            <label class="form-label">
-                شماره سفارش
-                <span class="form-hint">(مثال: RH-1405-00001)</span>
-            </label>
-            <input 
-                type="text" 
-                name="order_number" 
-                class="form-input rtl" 
-                placeholder="RH-1405-00001"
-                maxlength="20"
-                required
-                autocomplete="off"
-            >
+        <div style="margin-bottom: 20px;">
+            <label style="display: block; margin-bottom: 8px; font-weight: 600;">شماره تلفن</label>
+            <input type="text" name="phone" required style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px;" placeholder="مثلاً: 09121234567">
         </div>
-        
-        <button type="submit" class="submit-btn">مشاهده وضعیت سفارش</button>
+        <button type="submit" style="width: 100%; background: #2d5a2d; color: #fff; padding: 14px; border: none; border-radius: 8px; font-size: 16px; cursor: pointer;">
+            پیگیری سفارش
+        </button>
     </form>
-    
-    <div class="info-box">
-        <strong>راهنما:</strong>
-        <br>شماره سفارش در پیامک تأیید سفارش برای شما ارسال شده است.
-        <br>اگر شماره سفارش را ندارید، با شماره پشتیبانی تماس بگیرید.
-    </div>
 </div>
 {% endblock %}

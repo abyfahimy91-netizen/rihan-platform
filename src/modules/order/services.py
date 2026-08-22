@@ -161,7 +161,7 @@ def confirm_payment(order, payment_data=None, admin_user=None):
     """
     from .checkout_service import CheckoutService
     
-    return CheckoutService.confirm_payment(order, payment_data, admin_user)
+    return CheckoutService.confirm_payment(order=order, payment_data=payment_data, admin_user=admin_user)
 
 
 def cancel_order(order, reason='Customer request', user=None):
