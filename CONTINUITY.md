@@ -8,9 +8,9 @@
 
 | Module | Status |
 |--------|--------|
-| M1 Catalog | Complete |
-| M2 Order | Complete |
-| M3 Family Panel | Complete (D-081) |
+| M1 Catalog | Complete (Category, Supplier, Product, Inventory) |
+| M2 Order | Complete (Cart, Order, Payment, Address) |
+| M3 Family Panel | Complete + Real Interfaces (D-081) |
 | M4 Supplier Panel | Complete (D-085) |
 | M5 RBAC | Complete |
 | M6 Finance | Complete (D-086) |
@@ -18,9 +18,9 @@
 | M8 Reviews | Complete (D-083) |
 | M9 Leads | Complete (D-084) |
 | M10 Authentication | Complete |
-| M11 Payment | Complete (D-067) |
+| M11 Payment | Complete (Card-to-Card, D-067) |
 | M12 About | Complete (D-088) |
-| M13 Design | Complete (D-090 + D-091) |
+| M13 Design | Complete (D-090 + D-091 Luxury) |
 | M14 Plugin Architecture | Complete |
 
 **Progress:** 14/14 modules = 100%
@@ -28,23 +28,98 @@
 ## Achievements This Session (2026-08-22)
 
 ### D-091: Luxury Design Implementation
-- Hero Section with brand story
-- Luxury product cards with hover effects
-- Colors per VISUAL-IDENTITY.md (D-042)
-- Vazirmatn font local (4 weights)
-- Persian numerals enabled
-- SEO meta tags complete
-- Cart icon SVG in header
+- Hero Section with brand story and green gradient
+- Luxury product cards with hover effects (translateY, scale)
+- Colors per VISUAL-IDENTITY.md (D-042): #0D3B2E, #C9A961, #FAF7F0
+- Vazirmatn font local (4 weights: Regular, Medium, Bold, Black)
+- Persian numerals enabled (font-feature-settings: "ss01")
+- SEO meta tags complete (Open Graph, Twitter Card)
+- Cart icon SVG in header (replaced emoji)
+- Removed emoji from logo and footer
+- Nginx config cleaned (removed rihan.ir)
+
+### D-090: UI سبد خرید (M2)
+- cart.html complete
+- cart_views.py with modern features
+- page_urls.py for routing
+
+### D-089: Excel Export (US-031)
+- openpyxl installed
+- Finance reports export capability
+
+### D-087: Trust Badges ایرانی (US-058)
+- 4 Iranian trust badges
+- Minimal and classy design
+
+## Server Configuration
+
+| Item | Value |
+|------|-------|
+| OS | Ubuntu 22.04 LTS |
+| IP | 146.19.212.212 |
+| Domain | rihan360.ir |
+| Web Server | Nginx (reverse proxy to 127.0.0.1:8000) |
+| Backend | Django 5.2 + Python 3.10 |
+| Virtual Env | /root/rihan-platform/venv |
+| Static Files | /root/rihan-platform/staticfiles |
+| PYTHONPATH | /root/rihan-platform |
+
+## Recent Decisions
+
+| Date | Decision |
+|------|----------|
+| 2026-08-22 | D-091: Luxury Design Implementation |
+| 2026-08-21 | D-090: UI سبد خرید |
+| 2026-08-21 | D-089: Excel Export (US-031) |
+| 2026-08-21 | D-088: Integration Testing |
+| 2026-08-21 | D-087: Trust Badges ایرانی (US-058) |
+| 2026-08-21 | D-086: Finance Module Implementation (M6) |
+| 2026-08-21 | D-085: Supplier Panel with User-Supplier Link |
+| 2026-08-20 | D-084: Leads Module Implementation |
+| 2026-08-20 | D-083: Reviews Module Implementation |
+| 2026-08-20 | D-082: Order Tracking Implementation |
+| 2026-08-18 | D-079: Return to Original Vision |
 
 ## Next Major Actions
 
-1. Complete purchase flow test
-2. US-059 (sales funnel)
-3. Performance optimization
-4. Security testing (OWASP)
-5. Admin documentation
+**Priority 1:** Test complete purchase flow (customer → order → payment → delivery)
+**Priority 2:** US-059 — Complete sales funnel
+**Priority 3:** Luxury design for product_detail.html (M1)
+**Priority 4:** Luxury design for cart.html (M2)
+**Priority 5:** Performance optimization (cache, image optimization)
+**Priority 6:** Security testing (OWASP checklist)
+**Priority 7:** Admin documentation
 
-## Server Commands
+## Known Technical Debt
 
+| Item | Severity | Notes |
+|------|----------|-------|
+| RuntimeWarning naive datetime | Low | jdatetime integration needed |
+| No refund signal | Medium | TODO: connect Order cancellation to finance |
+| product_detail.html | Low | Not yet luxury-designed |
+| cart.html | Low | Not yet luxury-designed |
+| PROJECT-INDEX.md | Medium | Uses src/apps/ instead of src/modules/ |
+
+## Commands
+
+Activate environment:
 cd ~/rihan-platform && source venv/bin/activate
-PYTHONPATH=/root/rihan-platform python src/manage.py runserver 0.0.0.0:8000
+
+Start server:
+PYTHONPATH=/root/rihan-platform nohup python src/manage.py runserver 0.0.0.0:8000 > /tmp/django.log 2>&1 &
+
+Check status:
+curl -s -o /dev/null -w "HTTP: %{http_code}" http://rihan360.ir/
+
+Collect static:
+PYTHONPATH=/root/rihan-platform python src/manage.py collectstatic --noinput
+
+Restart nginx:
+nginx -t && systemctl restart nginx
+
+## Git Info
+
+- **Latest commit:** 860ffab
+- **Commit message:** feat(D-091): Luxury Design - Hero Section + Product Cards + Vazirmatn Local
+- **Branch:** main
+- **Remote:** https://github.com/abyfahimy91-netizen/rihan-platform.git
