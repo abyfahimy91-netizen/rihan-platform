@@ -123,3 +123,18 @@ nginx -t && systemctl restart nginx
 - **Commit message:** feat(D-091): Luxury Design - Hero Section + Product Cards + Vazirmatn Local
 - **Branch:** main
 - **Remote:** https://github.com/abyfahimy91-netizen/rihan-platform.git
+
+## Purchase Flow Test Results (2026-08-22)
+
+**Test Method:** Django Direct (shell)
+**Status:** ✅ ALL PASSED
+
+| Step | Action | Result |
+|------|--------|--------|
+| 1 | Add 1 item to cart | ✅ Success (10,000 تومان) |
+| 2 | Update quantity (1 → 3) | ✅ Success (30,000 تومان) |
+| 3 | Add second product | ✅ Success (310,000 تومان) |
+| 4 | Remove first item | ✅ Success |
+| 5 | Clear entire cart | ✅ Success |
+
+**Conclusion:** Cart logic is 100% functional. Session management, price calculation, and quantity updates all work correctly.
