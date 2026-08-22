@@ -1,191 +1,664 @@
 {% extends "catalog/base.html" %}
 
 {% block title %}سبد خرید | ریهان{% endblock %}
-{% block meta_description %}سبد خرید شما در فروشگاه ریهان{% endblock %}
+{% block meta_description %}سبد خرید شما در فروشگاه ریهان - ارسال رایگان، کیفیت اصیل{% endblock %}
 
 {% block extra_css %}
 <style>
-.cart-container { max-width: 1000px; margin: 0 auto; }
-.cart-item {
-    display: grid;
-    grid-template-columns: 80px 2fr 1fr 1fr auto;
-    gap: 20px;
-    align-items: center;
-    padding: 20px;
-    background: #fff;
-    border-radius: 8px;
-    margin-bottom: 15px;
-    border: 1px solid #e8e8e8;
-}
-.cart-item-image {
-    width: 80px;
-    height: 80px;
-    background: #f0f7f0;
-    border-radius: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 30px;
-}
-.cart-item-name { font-weight: 600; font-size: 16px; }
-.cart-item-price { color: #666; font-size: 14px; }
-.quantity-control {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-.quantity-btn {
-    width: 32px;
-    height: 32px;
-    border: 1px solid #ddd;
-    background: #fff;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 18px;
-}
-.quantity-input {
-    width: 50px;
-    text-align: center;
-    padding: 6px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-}
-.cart-summary {
-    background: #fff;
-    padding: 25px;
-    border-radius: 8px;
-    border: 1px solid #e8e8e8;
-    margin-top: 30px;
-}
-.summary-row {
-    display: flex;
-    justify-content: space-between;
-    padding: 10px 0;
-    border-bottom: 1px solid #f0f0f0;
-}
-.summary-row.total {
-    font-size: 18px;
-    font-weight: bold;
-    border-bottom: none;
-    color: #2d5a2d;
-}
-.empty-cart {
-    text-align: center;
-    padding: 60px 20px;
-    background: #fff;
-    border-radius: 8px;
-}
-.empty-cart-icon { font-size: 60px; margin-bottom: 20px; }
-.remove-btn {
-    background: none;
-    border: none;
-    color: #d9534f;
-    cursor: pointer;
-    font-size: 20px;
-}
-@media (max-width: 768px) {
-    .cart-item {
-        grid-template-columns: 60px 1fr;
-        gap: 10px;
+    .cart-page-title {
+        font-size: 40px;
+        font-weight: 900;
+        color: var(--color-text);
+        margin-bottom: 12px;
+        letter-spacing: -0.5px;
     }
-    .cart-item-image { width: 60px; height: 60px; }
-    .quantity-control { grid-column: 1 / -1; }
-}
+    
+    .cart-page-subtitle {
+        font-size: 16px;
+        color: var(--color-text-muted);
+        margin-bottom: 48px;
+    }
+    
+    .cart-layout {
+        display: grid;
+        grid-template-columns: 1fr 380px;
+        gap: 48px;
+        align-items: start;
+    }
+    
+    /* === CART ITEMS === */
+    .cart-items {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+    }
+    
+    .cart-item {
+        display: grid;
+        grid-template-columns: 120px 1fr auto auto;
+        gap: 24px;
+        align-items: center;
+        padding: 24px;
+        background: #fff;
+        border-radius: 16px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+        border: 1px solid var(--color-border);
+        transition: all 0.3s;
+    }
+    
+    .cart-item:hover {
+        box-shadow: 0 8px 32px rgba(13,59,46,0.12);
+        transform: translateY(-2px);
+    }
+    
+    .cart-item-image {
+        width: 120px;
+        height: 120px;
+        background: linear-gradient(135deg, var(--color-bg) 0%, var(--color-border) 100%);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--color-primary);
+        opacity: 0.6;
+    }
+    
+    .cart-item-image svg {
+        width: 48px;
+        height: 48px;
+    }
+    
+    .cart-item-info {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+    
+    .cart-item-category {
+        display: inline-block;
+        font-size: 12px;
+        color: var(--color-primary);
+        font-weight: 600;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+    }
+    
+    .cart-item-name {
+        font-size: 18px;
+        font-weight: 700;
+        color: var(--color-text);
+        line-height: 1.4;
+    }
+    
+    .cart-item-name a {
+        color: inherit;
+        text-decoration: none;
+        transition: color 0.3s;
+    }
+    
+    .cart-item-name a:hover {
+        color: var(--color-primary);
+    }
+    
+    .cart-item-unit-price {
+        font-size: 14px;
+        color: var(--color-text-muted);
+    }
+    
+    /* === QUANTITY CONTROL === */
+    .quantity-control {
+        display: flex;
+        align-items: center;
+        background: var(--color-bg);
+        border-radius: 10px;
+        padding: 4px;
+        border: 1px solid var(--color-border);
+    }
+    
+    .quantity-btn {
+        width: 36px;
+        height: 36px;
+        border: none;
+        background: #fff;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 18px;
+        font-weight: 700;
+        color: var(--color-primary);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s;
+    }
+    
+    .quantity-btn:hover {
+        background: var(--color-primary);
+        color: #fff;
+    }
+    
+    .quantity-input {
+        width: 50px;
+        text-align: center;
+        padding: 8px;
+        border: none;
+        background: transparent;
+        font-size: 16px;
+        font-weight: 700;
+        color: var(--color-text);
+        font-family: inherit;
+        font-feature-settings: "ss01";
+    }
+    
+    .quantity-input:focus {
+        outline: none;
+    }
+    
+    /* === SUBTOTAL === */
+    .cart-item-subtotal {
+        text-align: center;
+        min-width: 120px;
+    }
+    
+    .subtotal-label {
+        font-size: 12px;
+        color: var(--color-text-muted);
+        margin-bottom: 4px;
+    }
+    
+    .subtotal-amount {
+        font-size: 22px;
+        font-weight: 900;
+        color: var(--color-secondary-dark);
+        font-feature-settings: "ss01";
+        line-height: 1.2;
+    }
+    
+    .subtotal-amount small {
+        font-size: 12px;
+        color: var(--color-text-muted);
+        font-weight: 400;
+        display: block;
+        margin-top: 2px;
+    }
+    
+    /* === REMOVE BUTTON === */
+    .remove-btn {
+        background: none;
+        border: none;
+        color: var(--color-text-muted);
+        cursor: pointer;
+        width: 40px;
+        height: 40px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s;
+    }
+    
+    .remove-btn:hover {
+        background: #fff5f5;
+        color: var(--color-error);
+    }
+    
+    .remove-btn svg {
+        width: 20px;
+        height: 20px;
+    }
+    
+    /* === CART SUMMARY === */
+    .cart-summary {
+        background: #fff;
+        border-radius: 16px;
+        padding: 32px;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.08);
+        border: 1px solid var(--color-border);
+        position: sticky;
+        top: 100px;
+    }
+    
+    .summary-title {
+        font-size: 22px;
+        font-weight: 900;
+        color: var(--color-text);
+        margin-bottom: 24px;
+        padding-bottom: 20px;
+        border-bottom: 2px solid var(--color-border);
+    }
+    
+    .summary-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 14px 0;
+        font-size: 15px;
+        color: var(--color-text);
+    }
+    
+    .summary-row-label {
+        color: var(--color-text-muted);
+    }
+    
+    .summary-row-value {
+        font-weight: 600;
+        font-feature-settings: "ss01";
+    }
+    
+    .summary-row.shipping {
+        color: var(--color-success);
+    }
+    
+    .summary-row.shipping .summary-row-value {
+        color: var(--color-success);
+        font-weight: 700;
+    }
+    
+    .summary-divider {
+        height: 1px;
+        background: var(--color-border);
+        margin: 12px 0;
+    }
+    
+    .summary-row.total {
+        margin-top: 8px;
+        padding-top: 20px;
+        border-top: 2px solid var(--color-border);
+        font-size: 20px;
+    }
+    
+    .summary-row.total .summary-row-label {
+        color: var(--color-text);
+        font-weight: 700;
+    }
+    
+    .summary-row.total .summary-row-value {
+        font-size: 28px;
+        font-weight: 900;
+        color: var(--color-secondary-dark);
+        font-feature-settings: "ss01";
+    }
+    
+    .summary-actions {
+        margin-top: 28px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+    
+    .btn-checkout {
+        padding: 18px 32px;
+        background: var(--color-primary);
+        color: #fff;
+        border: none;
+        border-radius: 12px;
+        font-size: 16px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.3s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        font-family: inherit;
+    }
+    
+    .btn-checkout:hover {
+        background: var(--color-primary-dark);
+        transform: translateY(-2px);
+        box-shadow: 0 8px 24px rgba(13,59,46,0.25);
+    }
+    
+    .btn-checkout svg {
+        width: 20px;
+        height: 20px;
+    }
+    
+    .btn-continue {
+        padding: 14px 24px;
+        background: transparent;
+        color: var(--color-primary);
+        border: 2px solid var(--color-primary);
+        border-radius: 12px;
+        font-size: 15px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s;
+        text-decoration: none;
+        text-align: center;
+    }
+    
+    .btn-continue:hover {
+        background: var(--color-primary);
+        color: #fff;
+    }
+    
+    .summary-trust {
+        margin-top: 24px;
+        padding-top: 24px;
+        border-top: 1px solid var(--color-border);
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+    
+    .summary-trust-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 13px;
+        color: var(--color-text-muted);
+    }
+    
+    .summary-trust-item svg {
+        width: 18px;
+        height: 18px;
+        color: var(--color-success);
+        flex-shrink: 0;
+    }
+    
+    /* === MESSAGES === */
+    .alert {
+        padding: 16px 24px;
+        border-radius: 12px;
+        margin-bottom: 24px;
+        font-size: 15px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+    
+    .alert-success {
+        background: rgba(45,106,79,0.1);
+        color: var(--color-success);
+        border: 1px solid rgba(45,106,79,0.2);
+    }
+    
+    .alert-error {
+        background: rgba(155,44,44,0.1);
+        color: var(--color-error);
+        border: 1px solid rgba(155,44,44,0.2);
+    }
+    
+    .alert svg {
+        width: 20px;
+        height: 20px;
+        flex-shrink: 0;
+    }
+    
+    /* === EMPTY CART === */
+    .empty-cart {
+        text-align: center;
+        padding: 80px 32px;
+        background: #fff;
+        border-radius: 16px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+        grid-column: 1 / -1;
+    }
+    
+    .empty-cart-icon {
+        width: 120px;
+        height: 120px;
+        margin: 0 auto 24px;
+        background: var(--color-bg);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--color-primary);
+        opacity: 0.4;
+    }
+    
+    .empty-cart-icon svg {
+        width: 64px;
+        height: 64px;
+    }
+    
+    .empty-cart h2 {
+        font-size: 32px;
+        font-weight: 900;
+        margin-bottom: 12px;
+        color: var(--color-text);
+    }
+    
+    .empty-cart p {
+        font-size: 16px;
+        color: var(--color-text-muted);
+        margin-bottom: 32px;
+    }
+    
+    .btn-start-shopping {
+        display: inline-block;
+        padding: 16px 40px;
+        background: var(--color-primary);
+        color: #fff;
+        text-decoration: none;
+        border-radius: 12px;
+        font-size: 16px;
+        font-weight: 700;
+        transition: all 0.3s;
+    }
+    
+    .btn-start-shopping:hover {
+        background: var(--color-primary-dark);
+        transform: translateY(-2px);
+        box-shadow: 0 8px 24px rgba(13,59,46,0.25);
+    }
+    
+    /* === RESPONSIVE === */
+    @media (max-width: 992px) {
+        .cart-layout {
+            grid-template-columns: 1fr;
+            gap: 32px;
+        }
+        
+        .cart-summary {
+            position: static;
+        }
+    }
+    
+    @media (max-width: 768px) {
+        .cart-page-title {
+            font-size: 28px;
+        }
+        
+        .cart-item {
+            grid-template-columns: 80px 1fr;
+            gap: 16px;
+            padding: 16px;
+        }
+        
+        .cart-item-image {
+            width: 80px;
+            height: 80px;
+        }
+        
+        .quantity-control {
+            grid-column: 1 / -1;
+            justify-content: center;
+        }
+        
+        .cart-item-subtotal {
+            grid-column: 1 / -1;
+            text-align: right;
+            padding-top: 12px;
+            border-top: 1px solid var(--color-border);
+        }
+        
+        .remove-btn {
+            position: absolute;
+            top: 16px;
+            left: 16px;
+        }
+        
+        .cart-item {
+            position: relative;
+        }
+        
+        .summary-row.total .summary-row-value {
+            font-size: 22px;
+        }
+    }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="cart-container">
-    <h1 style="margin-bottom: 30px;">🛒 سبد خرید شما</h1>
-    
-    {% if messages %}
-        {% for message in messages %}
-            <div style="background: #f0f7f0; color: #2d5a2d; padding: 12px 20px; border-radius: 8px; margin-bottom: 20px;">
-                {{ message }}
-            </div>
-        {% endfor %}
-    {% endif %}
-    
-    {% if items %}
-        <div class="cart-items">
-            {% for item in items %}
-            <div class="cart-item">
-                <div class="cart-item-image">🌿</div>
-                <div>
-                    <div class="cart-item-name">{{ item.product.name }}</div>
-                    <div class="cart-item-price">{{ item.product.final_price|floatformat:0 }} تومان</div>
-                </div>
-                <div>
-                    <form method="post" action="{% url 'order_pages:update_cart_page' %}" class="quantity-control">
-                        {% csrf_token %}
-                        <input type="hidden" name="item_id" value="{{ item.id }}">
-                        <button type="button" class="quantity-btn" onclick="updateQty(this, -1)">-</button>
-                        <input type="number" name="quantity" value="{{ item.quantity }}" min="1" class="quantity-input" onchange="this.form.submit()">
-                        <button type="button" class="quantity-btn" onclick="updateQty(this, 1)">+</button>
-                    </form>
-                </div>
-                <div style="font-weight: 600; color: #2d5a2d;">
-                    {{ item.subtotal|floatformat:0 }} تومان
-                </div>
-                <form method="post" action="{% url 'order_pages:remove_cart_page' %}">
-                    {% csrf_token %}
-                    <input type="hidden" name="item_id" value="{{ item.id }}">
-                    <button type="submit" class="remove-btn" title="حذف">🗑️</button>
-                </form>
-            </div>
-            {% endfor %}
+<h1 class="cart-page-title">سبد خرید شما</h1>
+<p class="cart-page-subtitle">محصولات انتخاب‌شده را بررسی کنید و به مرحله بعد بروید</p>
+
+{% if messages %}
+    {% for message in messages %}
+        <div class="alert {% if message.tags == 'error' %}alert-error{% else %}alert-success{% endif %}">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                {% if message.tags == 'error' %}
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="8" x2="12" y2="12"></line>
+                <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                {% else %}
+                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                {% endif %}
+            </svg>
+            {{ message }}
         </div>
-        
-        <div class="cart-summary">
-            <div class="summary-row">
-                <span>تعداد کل اقلام:</span>
-                <span>{{ item_count }} قلم</span>
-            </div>
-            <div class="summary-row">
-                <span>جمع کالاها:</span>
-                <span>{{ subtotal|floatformat:0 }} تومان</span>
-            </div>
-            <div class="summary-row">
-                <span>هزینه ارسال:</span>
-                <span style="color: #2d5a2d; font-weight: 600;">رایگان ✓</span>
-            </div>
-            <div class="summary-row total">
-                <span>مبلغ نهایی:</span>
-                <span>{{ total|floatformat:0 }} تومان</span>
+    {% endfor %}
+{% endif %}
+
+{% if items %}
+<div class="cart-layout">
+    <div class="cart-items">
+        {% for item in items %}
+        <div class="cart-item">
+            <div class="cart-item-image">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                    <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                    <polyline points="21 15 16 10 5 21"></polyline>
+                </svg>
             </div>
             
-            <div style="margin-top: 25px; text-align: center;">
-                <a href="/" style="display: inline-block; padding: 12px 30px; background: #f0f7f0; color: #2d5a2d; text-decoration: none; border-radius: 8px; margin-left: 10px;">
-                    ادامه خرید
-                </a>
-                <button style="padding: 12px 30px; background: #2d5a2d; color: #fff; border: none; border-radius: 8px; font-size: 16px; cursor: pointer;">
-                    ادامه به تسویه‌حساب
-                </button>
+            <div class="cart-item-info">
+                {% if item.product.category %}
+                <span class="cart-item-category">{{ item.product.category.name }}</span>
+                {% endif %}
+                <h3 class="cart-item-name">
+                    <a href="{% url 'catalog:product_detail' item.product.slug %}">{{ item.product.name }}</a>
+                </h3>
+                <div class="cart-item-unit-price">{{ item.product.final_price|floatformat:0 }} تومان هر عدد</div>
             </div>
+            
+            <form method="post" action="{% url 'order_pages:update_cart_page' %}" class="quantity-control">
+                {% csrf_token %}
+                <input type="hidden" name="item_id" value="{{ item.id }}">
+                <button type="button" class="quantity-btn" onclick="updateQty(this, -1)" aria-label="کاهش تعداد">-</button>
+                <input type="number" name="quantity" value="{{ item.quantity }}" min="1" class="quantity-input" onchange="this.form.submit()" aria-label="تعداد">
+                <button type="button" class="quantity-btn" onclick="updateQty(this, 1)" aria-label="افزایش تعداد">+</button>
+            </form>
+            
+            <div class="cart-item-subtotal">
+                <div class="subtotal-label">جمع</div>
+                <div class="subtotal-amount">
+                    {{ item.subtotal|floatformat:0 }}
+                    <small>تومان</small>
+                </div>
+            </div>
+            
+            <form method="post" action="{% url 'order_pages:remove_cart_page' %}">
+                {% csrf_token %}
+                <input type="hidden" name="item_id" value="{{ item.id }}">
+                <button type="submit" class="remove-btn" title="حذف محصول">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="3 6 5 6 21 6"></polyline>
+                        <path d="M19 6l-2 14a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2L5 6"></path>
+                        <path d="M10 11v6"></path>
+                        <path d="M14 11v6"></path>
+                    </svg>
+                </button>
+            </form>
+        </div>
+        {% endfor %}
+    </div>
+    
+    <aside class="cart-summary">
+        <h2 class="summary-title">خلاصه سفارش</h2>
+        
+        <div class="summary-row">
+            <span class="summary-row-label">تعداد اقلام</span>
+            <span class="summary-row-value">{{ item_count }} قلم</span>
         </div>
         
-        <script>
-        function updateQty(btn, delta) {
-            const form = btn.closest('form');
-            const input = form.querySelector('input[name=quantity]');
-            let val = parseInt(input.value) + delta;
-            if (val < 1) val = 1;
-            input.value = val;
-            form.submit();
-        }
-        </script>
-    {% else %}
-        <div class="empty-cart">
-            <div class="empty-cart-icon">🛒</div>
-            <h2>سبد خرید شما خالی است</h2>
-            <p style="color: #666; margin: 15px 0;">محصولی به سبد خرید اضافه نکرده‌اید.</p>
-            <a href="/" style="display: inline-block; padding: 12px 30px; background: #2d5a2d; color: #fff; text-decoration: none; border-radius: 8px; margin-top: 20px;">
-                مشاهده محصولات
-            </a>
+        <div class="summary-row">
+            <span class="summary-row-label">جمع کالاها</span>
+            <span class="summary-row-value">{{ subtotal|floatformat:0 }} تومان</span>
         </div>
-    {% endif %}
+        
+        <div class="summary-row shipping">
+            <span class="summary-row-label">هزینه ارسال</span>
+            <span class="summary-row-value">رایگان</span>
+        </div>
+        
+        <div class="summary-row total">
+            <span class="summary-row-label">مبلغ نهایی</span>
+            <span class="summary-row-value">{{ total|floatformat:0 }} تومان</span>
+        </div>
+        
+        <div class="summary-actions">
+            <button type="button" class="btn-checkout" onclick="alert('تسویه‌حساب به زودی فعال می‌شود')">
+                ادامه به تسویه‌حساب
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                    <polyline points="12 5 19 12 12 19"></polyline>
+                </svg>
+            </button>
+            <a href="/" class="btn-continue">ادامه خرید</a>
+        </div>
+        
+        <div class="summary-trust">
+            <div class="summary-trust-item">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                    <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                </svg>
+                ارسال رایگان به سراسر کشور
+            </div>
+            <div class="summary-trust-item">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                    <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                </svg>
+                ضمانت بازگشت وجه
+            </div>
+            <div class="summary-trust-item">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                    <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                </svg>
+                پشتیبانی ۷ روز هفته
+            </div>
+        </div>
+    </aside>
 </div>
 
-<- src/modules/supplier_panel/: New app for Trust Badges (US-058) -->
-{% include "catalog/partials/trust_badges.html" %}
+<script>
+function updateQty(btn, delta) {
+    const form = btn.closest('form');
+    const input = form.querySelector('input[name=quantity]');
+    let val = parseInt(input.value) + delta;
+    if (val < 1) val = 1;
+    input.value = val;
+    form.submit();
+}
+</script>
+{% else %}
+<div class="empty-cart">
+    <div class="empty-cart-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <circle cx="9" cy="21" r="1"></circle>
+            <circle cx="20" cy="21" r="1"></circle>
+            <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+        </svg>
+    </div>
+    <h2>سبد خرید شما خالی است</h2>
+    <p>هنوز محصولی به سبد خرید خود اضافه نکرده‌اید. برای مشاهده محصولات ویژه ریهان کلیک کنید.</p>
+    <a href="/" class="btn-start-shopping">مشاهده محصولات</a>
+</div>
+{% endif %}
 {% endblock %}
