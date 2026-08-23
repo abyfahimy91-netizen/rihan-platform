@@ -16,7 +16,7 @@ urlpatterns = [
     
     # Lead form for specific product
     path(
-        'register/<slug:product_slug>/',
+        'register/<str:product_slug>/',
         views.lead_form_page,
         name='lead_form_product'
     ),

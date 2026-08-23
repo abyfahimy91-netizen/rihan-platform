@@ -9,7 +9,7 @@ app_name = 'reviews'
 urlpatterns = [
     # Submit review (registered user, from product page)
     path(
-        'submit/<slug:product_slug>/',
+        'submit/<str:product_slug>/',
         views.submit_review,
         name='submit_review'
     ),
@@ -23,7 +23,7 @@ urlpatterns = [
     
     # API: Get reviews for a product
     path(
-        'api/product/<slug:product_slug>/',
+        'api/product/<str:product_slug>/',
         views.product_reviews_api,
         name='product_reviews_api'
     ),

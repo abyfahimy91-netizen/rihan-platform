@@ -8,5 +8,5 @@ urlpatterns = [
     path('', ProductListView.as_view(), name='product_list'),
     
     # Product Detail (SEO-friendly slug URL)
-    path('products/<slug:slug>/', ProductDetailView.as_view(), name='product_detail'),
+    path('products/<str:slug>/', ProductDetailView.as_view(), name='product_detail'),
 ]
