@@ -195,7 +195,7 @@
             <h2>🛒 سفارش شما</h2>
             {% for item in items %}
                 <div class="summary-item">
-                    <span>{{ item.product.name }} <span class="qty">× {{ item.quantity }}</span></span>
+                    <span>{{ item.product.name }}{% if item.variant %} <small>({{ item.variant.title }})</small>{% endif %} <span class="qty">× {{ item.quantity }}</span></span>
                     <span>{{ item.subtotal|floatformat:0 }} تومان</span>
                 </div>
             {% endfor %}

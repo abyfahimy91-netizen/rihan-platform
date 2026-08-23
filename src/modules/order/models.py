@@ -66,6 +66,12 @@ class CartItem(models.Model):
         return self.unit_price_at_add * self.quantity
 
 
+
+    variant = models.ForeignKey(
+        'catalog.ProductVariant', on_delete=models.CASCADE,
+        null=True, blank=True, related_name='cart_items',
+        verbose_name="واریانت انتخابی")
+
 class Order(models.Model):
     '''سفارش نهایی - منطبق بر ADR-002 با Snapshot مهمان'''
     class OrderStatus(models.TextChoices):
@@ -162,6 +168,14 @@ class OrderItem(models.Model):
     def subtotal(self):
         return self.quantity * self.unit_price_at_purchase
 
+
+
+    variant = models.ForeignKey(
+        'catalog.ProductVariant', on_delete=models.PROTECT,
+        null=True, blank=True, related_name='order_items',
+        verbose_name="واریانت خریداری‌شده")
+    variant_title = models.CharField(max_length=120, blank=True, default='',
+                                     verbose_name="عنوان واریانت در لحظه خرید")
 
 class Payment(models.Model):
     '''

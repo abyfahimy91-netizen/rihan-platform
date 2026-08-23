@@ -420,3 +420,43 @@ def sync_images_on_delete(sender, instance, **kwargs):
             _sync_product_images_json(product)
         except Product.DoesNotExist:
             pass
+
+
+class ProductVariant(models.Model):
+    """واریانت محصول — D-094: بسته وزنی/سایز/رنگ با قیمت و موجودی مستقل (الگوی Shopify)"""
+    product = models.ForeignKey(Product, on_delete=models.CASCADE,
+                                related_name='variants', verbose_name="محصول")
+    title = models.CharField(max_length=120,
+                             verbose_name="عنوان گزینه (مثلاً بسته ۵۰۰ گرمی یا L / آبی)")
+    color_name = models.CharField(max_length=50, blank=True, default='',
+                                  verbose_name="نام رنگ (اختیاری)")
+    color_hex = models.CharField(max_length=9, blank=True, default='',
+                                 verbose_name="کد رنگ (اختیاری، مثل #AA2233)")
+    price = models.DecimalField(max_digits=12, decimal_places=0,
+                                verbose_name="قیمت این گزینه (تومان)")
+    unit = models.CharField(max_length=30, default='بسته', verbose_name="واحد نمایش")
+    stock_quantity = models.PositiveIntegerField(default=0, verbose_name="موجودی")
+    reserved_quantity = models.PositiveIntegerField(default=0, editable=False,
+                                                    verbose_name="رزرو شده")
+    low_stock_threshold = models.PositiveIntegerField(default=5,
+                                                      verbose_name="آستانه هشدار کمبود")
+    is_active = models.BooleanField(default=True, verbose_name="فعال")
+    sort_order = models.PositiveIntegerField(default=0, verbose_name="ترتیب نمایش")
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "واریانت محصول"
+        verbose_name_plural = "واریانت‌های محصولات"
+        ordering = ['sort_order', 'id']
+
+    def __str__(self):
+        return f"{self.product.name} — {self.title}"
+
+    @property
+    def available_quantity(self):
+        return max(0, int(self.stock_quantity) - int(self.reserved_quantity))
+
+    @property
+    def is_in_stock(self):
+        return self.available_quantity > 0

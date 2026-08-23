@@ -621,18 +621,21 @@
         
         <div class="product-price-box">
             <div class="product-price-label">قیمت</div>
-            <div class="product-price">
+            <div class="product-price" id="product-price-display">
                 {{ product.final_price|floatformat:0 }}
                 <small>تومان</small>
             </div>
         </div>
         
-        {% if product.inventory and product.inventory.available_quantity > 0 %}
+        {% if product.variants.all %}
+        {% include "catalog/partials/variant_picker.html" %}
+        {% elif product.inventory and product.inventory.available_quantity > 0 %}
         <div class="product-actions">
             <form method="post" action="{% url 'order_pages:add_to_cart_page' %}" style="flex: 1;">
                 {% csrf_token %}
                 <input type="hidden" name="product_slug" value="{{ product.slug }}">
                 <input type="hidden" name="quantity" value="1">
+                <input type="hidden" name="variant_id" id="variant-input-cta" value="">
                 <button type="submit" class="btn-add-cart">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <circle cx="9" cy="21" r="1"></circle>
@@ -753,6 +756,7 @@
                 {% csrf_token %}
                 <input type="hidden" name="product_slug" value="{{ product.slug }}">
                 <input type="hidden" name="quantity" value="1">
+                <input type="hidden" name="variant_id" id="variant-input-cta" value="">
                 <button type="submit" class="btn">
                     {{ block.content.text|default:"افزودن به سبد خرید" }}
                 </button>

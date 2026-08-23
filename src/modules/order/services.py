@@ -9,8 +9,9 @@ Key changes from original:
 """
 from django.core.exceptions import ValidationError
 from django.db import transaction
-from src.modules.catalog.models import Product
+from src.modules.catalog.models import ProductVariant, Product
 from src.modules.catalog.services.inventory_service import InventoryService
+from src.modules.catalog.services.variant_stock_service import VariantStockService
 from src.modules.catalog.services.exceptions import (
     InsufficientStockError,
     ProductNotFoundError,
@@ -49,43 +50,42 @@ def get_or_create_cart(request):
     return cart
 
 
-def add_to_cart(cart, product_id, quantity=1):
-    """
-    Add item to cart with availability check.
-    Per D-045: NO reservation at cart add - only check availability.
-    """
+def add_to_cart(cart, product_id, quantity=1, variant_id=None):
     try:
         product = Product.objects.get(id=product_id)
     except Product.DoesNotExist:
         raise ValidationError("Product not found")
-    
     if quantity < 1:
         raise ValidationError("Quantity must be at least 1")
-    
-    # Check availability via InventoryService (NOT reservation)
-    available = InventoryService.get_available_stock(product)
-    
-    existing_item = CartItem.objects.filter(cart=cart, product=product).first()
+    variant = None
+    if variant_id:
+        try:
+            variant = ProductVariant.objects.get(id=variant_id, product=product, is_active=True)
+        except ProductVariant.DoesNotExist:
+            raise ValidationError("Variant not found")
+        unit_price = variant.price
+        available = VariantStockService.get_available_stock(variant)
+    elif product.variants.filter(is_active=True).exists():
+        in_stock = [v for v in product.variants.filter(is_active=True) if v.is_in_stock]
+        variant = min(in_stock or list(product.variants.filter(is_active=True)), key=lambda v: v.price)
+        unit_price = variant.price
+        available = VariantStockService.get_available_stock(variant)
+    else:
+        unit_price = product.final_price
+        available = InventoryService.get_available_stock(product)
+    existing_item = CartItem.objects.filter(cart=cart, product=product, variant=variant).first()
     new_quantity = (existing_item.quantity + quantity) if existing_item else quantity
-    
     if available < new_quantity:
-        raise ValidationError(
-            f"Insufficient stock. Maximum available: {available}"
-        )
-    
+        raise ValidationError("Insufficient stock. Maximum available: " + str(available))
     if existing_item:
         existing_item.quantity = new_quantity
-        existing_item.unit_price_at_add = product.final_price
+        existing_item.unit_price_at_add = unit_price
         existing_item.save()
         return existing_item
-    else:
-        return CartItem.objects.create(
-            cart=cart,
-            product=product,
-            quantity=quantity,
-            unit_price_at_add=product.final_price
-        )
-
+    return CartItem.objects.create(
+        cart=cart, product=product, variant=variant,
+        quantity=quantity, unit_price_at_add=unit_price,
+    )
 
 def update_cart_item(cart, item_id, quantity):
     """Update item quantity with availability check."""
@@ -98,7 +98,9 @@ def update_cart_item(cart, item_id, quantity):
         item.delete()
         return None
     
-    available = InventoryService.get_available_stock(item.product)
+    available = (VariantStockService.get_available_stock(item.variant)
+                 if item.variant_id
+                 else InventoryService.get_available_stock(item.product))
     if available < quantity:
         raise ValidationError(
             f"Insufficient stock. Maximum available: {available}"

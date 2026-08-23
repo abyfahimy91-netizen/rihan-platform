@@ -331,7 +331,7 @@
             {% for item in order.items.all %}
             <div class="order-item">
                 <div>
-                    <div class="order-item-name">{{ item.product_name_snapshot }}</div>
+                    <div class="order-item-name">{{ item.product_name_snapshot }}{% if item.variant_title %} <small>({{ item.variant_title }})</small>{% endif %}</div>
                     <div class="order-item-qty">تعداد: {{ item.quantity }}</div>
                 </div>
                 <div class="order-item-price">{{ item.subtotal|floatformat:0 }} تومان</div>

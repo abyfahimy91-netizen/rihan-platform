@@ -1,0 +1,97 @@
+{% comment %} انتخاب واریانت محصول (بسته وزنی/سایز/رنگ) — D-094 {% endcomment %}
+<div class="variant-picker" id="variant-picker">
+    <div class="variant-picker-label">انتخاب کنید:</div>
+    <div class="variant-options" role="radiogroup" aria-label="انتخاب بسته یا سایز">
+        {% for v in product.variants.all %}
+            {% if v.is_active %}
+            <button type="button"
+                    class="variant-chip{% if not v.is_in_stock %} out-of-stock{% endif %}"
+                    data-variant-id="{{ v.id }}"
+                    data-price="{{ v.price|floatformat:0 }}"
+                    data-stock="{{ v.available_quantity }}"
+                    data-threshold="{{ v.low_stock_threshold }}"
+                    {% if not v.is_in_stock %}disabled aria-disabled="true"{% endif %}
+                    aria-checked="false" role="radio">
+                {% if v.color_hex %}<span class="variant-dot" style="background: {{ v.color_hex }};" aria-hidden="true"></span>{% endif %}
+                <span class="variant-chip-title">{{ v.title }}</span>
+                <span class="variant-chip-price">{{ v.price|floatformat:0 }} تومان</span>
+            </button>
+            {% endif %}
+        {% endfor %}
+    </div>
+
+    <div class="variant-buybox">
+        <form method="post" action="{% url 'order_pages:add_to_cart_page' %}">
+            {% csrf_token %}
+            <input type="hidden" name="product_slug" value="{{ product.slug }}">
+            <input type="hidden" name="quantity" value="1">
+            <input type="hidden" name="variant_id" id="variant-input" value="">
+            <button type="submit" class="btn-add-cart" id="variant-add-btn" disabled>
+                🛒 افزودن به سبد خرید
+            </button>
+        </form>
+        <a href="{% url 'order_pages:cart_page' %}" class="btn-view-cart">مشاهده سبد</a>
+    </div>
+    <div class="variant-stock-note" id="variant-stock-note"></div>
+    <div class="product-meta" style="margin-top: 14px;">
+        <div class="meta-item">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="3" width="15" height="13"></rect><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon><circle cx="5.5" cy="18.5" r="2.5"></circle><circle cx="18.5" cy="18.5" r="2.5"></circle></svg>
+            ارسال رایگان
+        </div>
+    </div>
+</div>
+
+<script>
+(function () {
+    var chips = document.querySelectorAll('#variant-picker .variant-chip');
+    var priceEl = document.getElementById('product-price-display');
+    var input = document.getElementById('variant-input');
+    var btn = document.getElementById('variant-add-btn');
+    var note = document.getElementById('variant-stock-note');
+    var fmt = function (n) { return Number(n).toLocaleString('fa-IR'); };
+    function select(chip) {
+        chips.forEach(function (c) { c.classList.remove('selected'); c.setAttribute('aria-checked', 'false'); });
+        chip.classList.add('selected');
+        chip.setAttribute('aria-checked', 'true');
+        input.value = chip.dataset.variantId;
+        btn.disabled = false;
+        if (priceEl) { priceEl.innerHTML = fmt(chip.dataset.price) + ' <small>تومان</small>'; }
+        var s = parseInt(chip.dataset.stock, 10);
+        var th = parseInt(chip.dataset.threshold || '5', 10);
+        if (note) {
+            if (s <= 0) { note.textContent = 'این گزینه فعلاً ناموجود است'; }
+            else if (s <= th) { note.textContent = '⚠️ فقط ' + fmt(s) + ' عدد باقی مانده — عجله کنید!'; }
+            else { note.textContent = '✓ موجود در انبار (' + fmt(s) + ' عدد آماده ارسال)'; }
+        }
+    }
+    chips.forEach(function (chip) {
+        if (!chip.disabled) { chip.addEventListener('click', function () { select(chip); }); }
+    });
+    var firstAvailable = Array.prototype.find.call(chips, function (c) { return !c.disabled; });
+    if (firstAvailable) { select(firstAvailable); }
+})();
+</script>
+
+<style>
+.variant-picker { margin: 18px 0; }
+.variant-picker-label { font-size: 13px; font-weight: 600; color: #57524a; margin-bottom: 10px; }
+.variant-options { display: flex; flex-wrap: wrap; gap: 10px; }
+.variant-chip {
+  display: inline-flex; align-items: center; gap: 8px;
+  border: 2px solid #e2dccd; background: #fff; border-radius: 999px;
+  padding: 9px 16px; cursor: pointer; font-family: inherit; font-size: 14px; color: #1a1a1a;
+  transition: border-color .15s, box-shadow .15s, opacity .15s;
+}
+.variant-chip:hover:not(:disabled) { border-color: #C9A961; }
+.variant-chip.selected {
+  border-color: #0D3B2E; background: #f3efe4; font-weight: 700;
+  box-shadow: 0 0 0 3px rgba(201,169,97,.25);
+}
+.variant-chip.out-of-stock { opacity: .5; cursor: not-allowed; background: #faf7f0; }
+.variant-dot { width: 14px; height: 14px; border-radius: 50%; border: 1px solid rgba(0,0,0,.15); flex: none; }
+.variant-chip-price { font-size: 12px; color: #8a8477; }
+.variant-chip.selected .variant-chip-price { color: #0D3B2E; font-weight: 700; }
+.variant-buybox { display: flex; gap: 10px; margin-top: 16px; flex-wrap: wrap; align-items: center; }
+.variant-buybox form { flex: 1; min-width: 220px; }
+.variant-stock-note { margin-top: 10px; font-size: 13px; color: #57524a; min-height: 20px; }
+</style>

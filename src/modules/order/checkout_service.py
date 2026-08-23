@@ -19,7 +19,7 @@ from typing import List, Optional, Dict
 from django.db import transaction
 from django.utils import timezone
 
-from src.modules.catalog.services.inventory_service import InventoryService
+from src.modules.order.variant_dispatch import InventoryService
 from src.modules.catalog.services.exceptions import (
     InsufficientStockError,
     ProductNotFoundError,
@@ -79,6 +79,7 @@ class CheckoutService:
                 'quantity': Decimal(str(cart_item.quantity)),
                 'unit_price': cart_item.unit_price_at_add,
                 'snapshot_name': cart_item.product.name,
+                'variant': cart_item.variant,
             })
         
         # Step 2: Create Order with DRAFT status first
@@ -100,6 +101,8 @@ class CheckoutService:
                 order=order,
                 product=item_data['product'],
                 product_name_snapshot=item_data['snapshot_name'],
+                variant=item_data['variant'],
+                variant_title=(item_data['variant'].title if item_data['variant'] else ''),
                 quantity=item_data['quantity'],
                 unit_price_at_purchase=item_data['unit_price'],
             )
@@ -110,7 +113,8 @@ class CheckoutService:
         # Step 5: Reserve stock via InventoryService
         try:
             reservation_items = [
-                {'product': d['product'], 'quantity': d['quantity']}
+                {'product': d['product'], 'quantity': d['quantity'],
+                 'variant': d.get('variant')}
                 for d in order_items_data
             ]
             InventoryService.reserve_for_order(
@@ -201,6 +205,7 @@ class CheckoutService:
         sale_items = [
             {
                 'product': item.product,
+                'variant': item.variant,
                 'quantity': Decimal(str(item.quantity)),
             }
             for item in order.items.all()
@@ -259,6 +264,7 @@ class CheckoutService:
             release_items = [
                 {
                     'product': item.product,
+                    'variant': item.variant,
                     'quantity': Decimal(str(item.quantity)),
                 }
                 for item in order.items.all()

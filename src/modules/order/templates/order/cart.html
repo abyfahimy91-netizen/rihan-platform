@@ -542,7 +542,8 @@
                 <h3 class="cart-item-name">
                     <a href="{% url 'catalog:product_detail' item.product.slug %}">{{ item.product.name }}</a>
                 </h3>
-                <div class="cart-item-unit-price">{{ item.product.final_price|floatformat:0 }} تومان هر عدد</div>
+                {% if item.variant %}<span class='cart-item-variant'>{{ item.variant.title }}</span><br>{% endif %}
+                <div class='cart-item-unit-price'>{{ item.unit_price_at_add|floatformat:0 }} تومان هر عدد</div>
             </div>
             
             <form method="post" action="{% url 'order_pages:update_cart_page' %}" class="quantity-control">

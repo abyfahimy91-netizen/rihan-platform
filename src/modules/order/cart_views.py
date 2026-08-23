@@ -37,12 +37,13 @@ def cart_page_view(request):
 def add_to_cart_view(request):
     """افزودن محصول به سبد"""
     product_slug = request.POST.get('product_slug')
+    variant_id = request.POST.get("variant_id") or None
     quantity = int(request.POST.get('quantity', 1))
     
     try:
         product = Product.objects.get(slug=product_slug)
         cart = get_or_create_cart(request)
-        add_to_cart(cart, str(product.id), quantity)
+        add_to_cart(cart, str(product.id), quantity, variant_id)
         messages.success(request, f'{product.name} به سبد خرید اضافه شد.')
     except Product.DoesNotExist:
         messages.error(request, 'محصول مورد نظر یافت نشد.')

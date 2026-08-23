@@ -10,7 +10,7 @@ from django.utils.html import format_html
 
 from .models import (
     Category, Supplier, Product, ProductImage,
-    Inventory, InventoryTransaction, ContentBlock,
+    Inventory, InventoryTransaction, ContentBlock, ProductVariant,
 )
 
 
@@ -192,6 +192,16 @@ class ContentBlockInline(admin.TabularInline):
 # محصولات (US-018) — قلب پنل
 # ═══════════════════════════════════════════════════════════════
 
+class ProductVariantInline(admin.TabularInline):
+    """واریانت‌های محصول — D-094"""
+    model = ProductVariant
+    extra = 2
+    fields = ["title", "color_name", "color_hex", "price", "unit",
+              "stock_quantity", "low_stock_threshold", "is_active", "sort_order"]
+    verbose_name = "بسته / سایز (گزینه قابل خرید)"
+    verbose_name_plural = "📦 بسته‌ها / سایزها / رنگ‌ها (هر ردیف یک گزینه خرید)"
+
+
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
     form = ProductForm
@@ -208,7 +218,7 @@ class ProductAdmin(admin.ModelAdmin):
     actions = ('activate_products', 'deactivate_products',
                'feature_products', 'unfeature_products', 'soft_delete_products')
 
-    inlines = [ProductImageInline, InventoryInline, ContentBlockInline]
+    inlines = [ProductVariantInline, ProductImageInline, InventoryInline, ContentBlockInline]
 
     fieldsets = (
         ('📝 اطلاعات اصلی', {

@@ -176,3 +176,11 @@ nginx -t && systemctl restart nginx
 - Edit page for Persian-named product «سماق قرمز هوراند»: HTTP 200 ✅
 - Product creation incl. fully-Persian names/slugs: works ✅ (after D-093)
 - Variant support: **not available yet** — see D-094
+
+
+## 1405/06/01 - سیستم تنوع محصول (واریانت) راه‌اندازی شد — D-094 تایید و اجرا شد
+- هر محصول می‌تواند چند «بسته/سایز/رنگ» با قیمت و موجودی مستقل داشته باشد (مدل ProductVariant)
+- موجودی در سطح واریانت نگهداری می‌شود؛ برای محصولات واریانت‌دار، Inventory والد صرفاً نمایشی است — خرید فقط از واریانت‌ها
+- فایل کلیدی جدید: modules/catalog/services/variant_stock_service.py + modules/order/variant_dispatch.py (پوشش dispatch — قبل از تغییر مسیر رزرو این فایل را ببینید!)
+- قالب variant_picker.html در صفحه محصول؛ اگر محصول واریانت دارد، فرم خرید از آن سرو می‌شود
+- قانون: هنگام افزودن مدل جدید مرتبط با محصول، dispatch را در variant_dispatch هم پوشش دهید
