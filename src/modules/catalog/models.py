@@ -460,3 +460,21 @@ class ProductVariant(models.Model):
     @property
     def is_in_stock(self):
         return self.available_quantity > 0
+
+@receiver(post_save, sender=ProductVariant)
+@receiver(post_delete, sender=ProductVariant)
+def sync_parent_inventory(sender, instance, **kwargs):
+    """D-094: برای محصولات واریانت‌دار، موجودی انبار والد همیشه = مجموع بسته‌هاست"""
+    sync_parent_inventory_for(instance.product_id)
+
+
+def sync_parent_inventory_for(product_id):
+    from src.modules.catalog.models import Inventory as _Inv
+    totals = ProductVariant.objects.filter(product_id=product_id).aggregate(
+        s=models.Sum("stock_quantity"), r=models.Sum("reserved_quantity"))
+    if totals["s"] is None:
+        return  # محصول بدون واریانت: انبار والد مستقل می‌ماند
+    inv, created = _Inv.objects.get_or_create(product_id=product_id, defaults={"quantity": 0})
+    inv.quantity = totals["s"]
+    inv.reserved_quantity = totals["r"] or 0
+    inv.save(update_fields=["quantity", "reserved_quantity"])

@@ -168,7 +168,7 @@ class InventoryInline(admin.StackedInline):
     fields = ('quantity', 'unit', 'low_stock_threshold', 'reserved_quantity')
     readonly_fields = ('reserved_quantity',)
     verbose_name = 'موجودی انبار'
-    verbose_name_plural = '📦 موجودی انبار'
+    verbose_name_plural = '📦 موجودی انبار (محصول واریانت‌دار = خودکار مجموع بسته‌ها)'
 
     def formfield_for_dbfield(self, db_field, request, **kwargs):
         if db_field.name == 'reserved_quantity':
