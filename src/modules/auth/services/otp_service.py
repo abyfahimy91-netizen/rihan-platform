@@ -161,8 +161,20 @@ class OtpService:
             success=True
         )
         
+        # ارسال پیامکی کد (کاوه‌نگار در صورت تنظیم بودن کلید)
+        from ..sms_providers import KavenegarProvider
+        _provider = KavenegarProvider()
+        _sent_via_sms = False
+        if _provider.is_available():
+            _sent_via_sms = _provider.send_otp(phone, otp_code)
+            if not _sent_via_sms:
+                logger.warning("SMS delivery failed -> falling back to on-screen code")
+
         logger.info(f"OTP requested for {phone[:4]}***{phone[-4:]}")
-        
+        if _sent_via_sms:
+            return True, "کد تأیید پیامک شد.", None
+        if _provider.is_available():
+            return True, "ارسال پیامک ناموفق بود؛ کد به‌صورت آزمایشی نمایش داده می‌شود.", otp_code
         return True, "کد ارسال شد.", otp_code
     
     @classmethod
