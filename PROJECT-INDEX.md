@@ -1,7 +1,7 @@
 # PROJECT-INDEX — نقشه جامع و مانیفست مخزن ریهان
 
 **نسخه پروژه:** 0.5.6-dev
-**آخرین بهروزرسانی:** 2026-08-14
+**آخرین بهروزرسانی:** 2026-08-23
 **وضعیت:** منبع یگانه حقیقت (Single Source of Truth)
 
 ---
@@ -20,6 +20,7 @@
 | `docker-compose.yml` | زیرساخت | ارکستراسیون سرویس‌های Django, PostgreSQL 16, Redis 7 |
 | `requirements.txt` | پکیج‌ها | لیست وابستگی‌های بک‌اند (Django, DRF, Celery/Redis, Gunicorn) |
 | `.env.example` | امنیت | الگوی متغیرهای محیطی امن پروژه |
+| `AUDIT-INFRA-1405-06-01.md` | ممیزی زیرساخت | گزارش ممیزی و رفع باگ‌های بحرانی (شبکه Docker، .env، requirements، امنیت settings، سبد خرید) — 1405/06/01 |
 
 ---
 

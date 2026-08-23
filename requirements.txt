@@ -1,2 +1,17 @@
-Django>=5.2,<5.3
-openpyxl>=3.1.0  # US-031 Excel export
+# RIHAN PLATFORM - full known-good set (restored 1405/06/01)
+Django==5.2.17
+djangorestframework==3.18.0
+psycopg2-binary==2.9.12
+gunicorn==26.0.0
+django-cors-headers==4.9.0
+django-environ==0.14.0
+django-redis==6.0.0
+redis==8.1.0
+whitenoise==6.12.0
+pillow==12.3.0
+requests==2.34.2
+openpyxl==3.1.5
+et_xmlfile==2.0.0
+jdatetime==6.1.0
+jalali_core==1.0.0
+python-decouple==3.8

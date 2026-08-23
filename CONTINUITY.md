@@ -1,8 +1,17 @@
 # پروژه ریهان — وضعیت جاری (CONTINUITY)
 
-**Last Update:** 2026-08-22
+**Last Update:** 2026-08-23 (۱ شهریور ۱۴۰۵)
 **Project Version:** 0.14.0-mvp (D-091 Luxury Design)
 **Active Phase:** Phase 5 (MVP Development)
+
+## 🚨 وضعیت زیرساخت — 1405/06/01 (گزارش کامل: AUDIT-INFRA-1405-06-01.md)
+
+- ✅ سرویس پس از یک دوره قطعی طولانی **کاملاً بازیابی و پایدار** شد (rihan360.ir)
+- ✅ ریشه خرابی: قطع شبکه کانتینر وب + حذف .env + requirements ناقص + مسیر WSGI غلط
+- 🔒 سخت‌سازی امنیتی انجام شد: DEBUG=False، SECRET_KEY واقعی، ALLOWED_HOSTS محدود، CSRF origins، whitenoise، سرو مستقیم media در nginx
+- 🗃️ مهاجرت‌های معوق core/rihan_auth اعمال شد؛ `manage.py check` بدون خطا
+- 💾 پشتیبان دستی دیتابیس: `/root/backups/rihan_db_20260823_0517.sql.gz`
+- ⏭️ بعدی: نصب TLS، بکاپ خودکار cron، جایگزینی داده تست با داده واقعی
 
 ## Module Status (14 modules per D-079)
 

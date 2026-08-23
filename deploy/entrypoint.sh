@@ -71,7 +71,7 @@ echo "  RIHAN PLATFORM - Ready!"
 echo "  Listening on 0.0.0.0:8000"
 echo "=========================================="
 
-exec gunicorn rihan.wsgi:application \
+exec gunicorn src.config.wsgi:application \
     --bind 0.0.0.0:8000 \
     --workers 3 \
     --worker-class sync \

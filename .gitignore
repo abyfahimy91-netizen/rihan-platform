@@ -39,3 +39,7 @@ venv/
 *.swp
 *.swo
 Thumbs.db
+
+# backup files with secrets (1405/06/01)
+*.bak_*
+*.bak

@@ -44,5 +44,10 @@ urlpatterns = [
     path('api/v1/auth/', include('src.modules.auth.urls')),
 ]
 
-if settings.DEBUG:
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+# --- media served always (nginx proxies /media/ directly; this is the fallback) ---
+from django.urls import re_path
+from django.views.static import serve as _media_serve
+
+urlpatterns += [
+    re_path(r'^media/(?P<path>.*)$', _media_serve, {'document_root': settings.MEDIA_ROOT}),
+]
