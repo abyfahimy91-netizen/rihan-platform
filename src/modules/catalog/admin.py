@@ -207,7 +207,7 @@ class ProductAdmin(admin.ModelAdmin):
     form = ProductForm
     list_display = (
         'thumb', 'name', 'category', 'supplier',
-        'price_display', 'stock_display', 'status_badge',
+        'price_display', 'stock_display', 'status_badge', 'edit_button',
         'featured_star', 'created_jalali',
     )
     list_filter = ('status', 'category', 'is_featured', 'created_at')
@@ -217,6 +217,15 @@ class ProductAdmin(admin.ModelAdmin):
     list_per_page = 25
     actions = ('activate_products', 'deactivate_products',
                'feature_products', 'unfeature_products', 'soft_delete_products')
+
+    @admin.display(description="عملیات")
+    def edit_button(self, obj):
+        from django.urls import reverse as _rev
+        from django.utils.html import format_html
+        u = _rev("admin:catalog_product_change", args=[obj.pk])
+        q = chr(39)
+        h = "<a class=" + q + "rihan-edit-btn" + q + " href=" + q + str(u) + q + ">ویرایش</a>"
+        return format_html(h)
 
     inlines = [ProductVariantInline, ProductImageInline, InventoryInline, ContentBlockInline]
 

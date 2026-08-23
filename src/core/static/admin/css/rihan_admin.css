@@ -166,3 +166,7 @@ body.login #footer{padding:14px;text-align:center;color:#8b8574}
   font-weight:600;
 }
 .errorlist li{color:#9B2C2C;font-weight:600}
+
+/* دکمه ویرایش سریع در لیست محصولات */
+.rihan-edit-btn{display:inline-block;background:#0D3B2E;color:#fff !important;padding:5px 14px;border-radius:999px;font-size:12px;text-decoration:none;transition:background .15s}
+.rihan-edit-btn:hover{background:#C9A961;color:#0D3B2E !important}
