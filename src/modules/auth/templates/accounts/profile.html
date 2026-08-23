@@ -1,0 +1,128 @@
+{% extends "catalog/base.html" %}
+
+{% block title %}حساب من | ریهان{% endblock %}
+{% block meta_description %}پروفایل کاربری و تاریخچه سفارش‌ها در فروشگاه ریهان{% endblock %}
+
+{% block extra_css %}
+<style>
+    .profile-wrap { max-width: 960px; margin: 48px auto 96px; }
+    .profile-title { font-size: 34px; font-weight: 900; color: var(--color-text); margin-bottom: 32px; }
+    .profile-grid { display: grid; grid-template-columns: 380px 1fr; gap: 32px; align-items: start; }
+    .p-card {
+        background: #fff; border-radius: 16px; padding: 28px;
+        border: 1px solid var(--color-border);
+        box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+    }
+    .p-card + .p-card { margin-top: 24px; }
+    .p-card h2 { font-size: 19px; font-weight: 800; color: var(--color-text); margin-bottom: 20px; display:flex; align-items:center; gap:8px; }
+    .p-field { margin-bottom: 16px; }
+    .p-field label { display:block; font-size: 13px; font-weight: 700; color: var(--color-text-muted); margin-bottom: 6px; }
+    .p-input {
+        width: 100%; padding: 12px 14px; border: 1.5px solid var(--color-border);
+        border-radius: 12px; font-size: 15px; font-family: inherit; color: var(--color-text); background: #fafafa;
+    }
+    .p-input:focus { outline:none; border-color:#0d3b2e; background:#fff; }
+    .p-input[readonly] { background:#f3f4f3; color: var(--color-text-muted); }
+    .p-save {
+        width: 100%; margin-top: 8px; padding: 14px; background: linear-gradient(135deg,#0d3b2e,#14532d);
+        color:#fff; border:none; border-radius: 12px; font-size:15px; font-weight:800; font-family:inherit; cursor:pointer;
+    }
+    .p-save:hover { transform: translateY(-1px); box-shadow: 0 8px 20px rgba(13,59,46,.3); }
+    .p-logout {
+        display:block; width:100%; margin-top: 12px; padding: 13px; background:#fff;
+        color:#b71c1c; border:1.5px solid #f2c4c0; border-radius:12px; font-size:15px; font-weight:700;
+        font-family:inherit; cursor:pointer; text-align:center; text-decoration:none;
+    }
+    .p-logout:hover { background:#fdecea; }
+    .orders-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    .orders-table th {
+        text-align: right; padding: 10px 8px; color: var(--color-text-muted);
+        font-weight: 700; border-bottom: 2px solid var(--color-border); font-size: 12.5px;
+    }
+    .orders-table td { padding: 14px 8px; border-bottom: 1px dashed var(--color-border); color: var(--color-text); }
+    .badge {
+        display: inline-block; padding: 4px 12px; border-radius: 999px; font-size: 12px; font-weight: 800;
+    }
+    .badge.PENDING { background:#fff8e1; color:#8d6e00; }
+    .badge.PAID { background:#e8f5e9; color:#1b5e20; }
+    .badge.PROCESSING { background:#e3f2fd; color:#0d47a1; }
+    .badge.SHIPPED { background:#ede7f6; color:#4527a0; }
+    .badge.DELIVERED { background:#e0f2f1; color:#00695c; }
+    .badge.CANCELLED, .badge.RETURNED { background:#fdecea; color:#b71c1c; }
+    .orders-empty { text-align:center; padding: 48px 16px; color: var(--color-text-muted); }
+    .orders-empty a { color:#0d3b2e; font-weight:800; text-decoration:none; }
+    .track-link { color:#0d3b2e; font-weight:700; text-decoration:none; }
+    @media (max-width: 860px) { .profile-grid { grid-template-columns: 1fr; } }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="profile-wrap">
+        <h1 class="profile-title">حساب من</h1>
+        <div class="profile-grid">
+            <div>
+                <div class="p-card">
+                    <h2>👤 اطلاعات حساب</h2>
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div style="padding:12px 14px;border-radius:10px;margin-bottom:14px;font-size:13.5px;background:{% if message.tags == 'error' %}#fdecea;color:#b71c1c;{% else %}#e8f5e9;color:#1b5e20;{% endif %}">{{ message }}</div>
+                        {% endfor %}
+                    {% endif %}
+                    <form method="post" action="{% url 'auth_pages:profile' %}">
+                        {% csrf_token %}
+                        <div class="p-field">
+                            <label>شماره موبایل (نام کاربری)</label>
+                            <input class="p-input" dir="ltr" value="{{ user.username }}" readonly>
+                        </div>
+                        <div class="p-field">
+                            <label>نام</label>
+                            <input class="p-input" name="first_name" value="{{ user.first_name }}" placeholder="مثلاً: مریم">
+                        </div>
+                        <div class="p-field">
+                            <label>نام خانوادگی</label>
+                            <input class="p-input" name="last_name" value="{{ user.last_name }}" placeholder="مثلاً: احمدی">
+                        </div>
+                        <div class="p-field">
+                            <label>ایمیل (اختیاری)</label>
+                            <input class="p-input" dir="ltr" name="email" value="{{ user.email }}" placeholder="you@example.com">
+                        </div>
+                        <button type="submit" class="p-save">ذخیره تغییرات</button>
+                    </form>
+                </div>
+                <div class="p-card">
+                    <a href="{% url 'auth_pages:logout' %}" class="p-logout">🚪 خروج از حساب</a>
+                </div>
+            </div>
+
+            <div class="p-card">
+                <h2>📦 سفارش‌های من</h2>
+                {% if orders %}
+                    <table class="orders-table">
+                        <thead>
+                            <tr><th>شماره سفارش</th><th>تاریخ</th><th>اقلام</th><th>مبلغ</th><th>وضعیت</th><th></th></tr>
+                        </thead>
+                        <tbody>
+                            {% for o in orders %}
+                            <tr>
+                                <td dir="ltr" style="font-weight:700;">{{ o.order_number }}</td>
+                                <td>{{ o.created_at|date:"Y/m/d" }}</td>
+                                <td>{{ o.items_count }}</td>
+                                <td>{{ o.total_price|floatformat:0 }} تومان</td>
+                                <td><span class="badge {{ o.status }}">{{ o.status_fa }}</span></td>
+                                <td><a class="track-link" href="{% url 'order_pages:tracking_page' o.order_number %}">پیگیری ↗</a></td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                {% else %}
+                    <div class="orders-empty">
+                        هنوز سفارشی ثبت نکرده‌اید 🌱<br><br>
+                        <a href="/">مشاهده محصولات اصیل هوراند ←</a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

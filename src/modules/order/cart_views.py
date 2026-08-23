@@ -150,6 +150,11 @@ def checkout_page_view(request):
     context = {
         'items': items, 'subtotal': subtotal,
         'shipping': shipping, 'total': total,
-        'form_data': {},
+        'form_data': (
+            {'name': ((request.user.first_name or '') + ' ' + (request.user.last_name or '')).strip(),
+             'phone': request.user.username,
+             'address': '', 'postal_code': ''}
+            if request.user.is_authenticated else {}
+        ),
     }
     return render(request, 'order/checkout.html', context)

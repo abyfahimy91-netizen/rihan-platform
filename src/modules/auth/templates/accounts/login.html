@@ -1,0 +1,133 @@
+{% extends "catalog/base.html" %}
+
+{% block title %}ورود / ثبت‌نام | ریهان{% endblock %}
+{% block meta_description %}ورود و ثبت‌نام در فروشگاه ریهان با کد یکبارمصرف پیامکی - ساده و امن{% endblock %}
+
+{% block extra_css %}
+<style>
+    .auth-wrap { max-width: 480px; margin: 48px auto 96px; }
+    .auth-card {
+        background: #fff;
+        border-radius: 20px;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.08);
+        border: 1px solid var(--color-border);
+        padding: 44px 36px;
+        text-align: center;
+    }
+    .auth-logo-badge {
+        width: 72px; height: 72px;
+        margin: 0 auto 20px;
+        background: linear-gradient(135deg, #0d3b2e, #14532d);
+        border-radius: 50%;
+        display: flex; align-items: center; justify-content: center;
+        color: #fff; font-size: 30px; font-weight: 900;
+    }
+    .auth-card h1 { font-size: 26px; font-weight: 900; color: var(--color-text); margin-bottom: 8px; }
+    .auth-sub { font-size: 14px; color: var(--color-text-muted); margin-bottom: 32px; line-height: 1.9; }
+    .auth-input {
+        width: 100%;
+        padding: 16px 18px;
+        border: 1.5px solid var(--color-border);
+        border-radius: 14px;
+        font-size: 18px;
+        font-family: inherit;
+        text-align: center;
+        letter-spacing: 1px;
+        background: #fafafa;
+        color: var(--color-text);
+        transition: all .2s;
+    }
+    .auth-input:focus {
+        outline: none; border-color: #0d3b2e; background: #fff;
+        box-shadow: 0 0 0 3px rgba(13,59,46,.08);
+    }
+    .auth-btn {
+        width: 100%;
+        margin-top: 16px;
+        padding: 17px;
+        background: linear-gradient(135deg, #0d3b2e, #14532d);
+        color: #fff; border: none; border-radius: 14px;
+        font-size: 17px; font-weight: 800; font-family: inherit;
+        cursor: pointer; transition: all .25s;
+    }
+    .auth-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 28px rgba(13,59,46,.35); }
+    .auth-switch {
+        margin-top: 20px; font-size: 13px; color: var(--color-text-muted);
+    }
+    .auth-switch a { color: #0d3b2e; font-weight: 700; text-decoration: none; }
+    .auth-msg {
+        padding: 13px 16px; border-radius: 12px; margin-bottom: 18px;
+        font-size: 14px; text-align: right;
+    }
+    .auth-msg.error { background: #fdecea; color: #b71c1c; }
+    .auth-msg.success { background: #e8f5e9; color: #1b5e20; }
+    .auth-msg.info { background: #e3f2fd; color: #0d47a1; }
+    .demo-code {
+        background: #fff8e1; border: 1px dashed #f0c040; color: #8d6e00;
+        padding: 12px; border-radius: 12px; margin-bottom: 16px;
+        font-size: 15px; font-weight: 800; letter-spacing: 3px;
+    }
+    .phone-chip {
+        display: inline-block; background: #f1f5f2; color: #0d3b2e;
+        border-radius: 999px; padding: 6px 18px; font-weight: 800;
+        letter-spacing: 1px; margin-bottom: 18px; direction: ltr;
+    }
+    .trust-note { margin-top: 28px; font-size: 12px; color: var(--color-text-muted); line-height: 2; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="auth-wrap">
+        <div class="auth-card">
+            <div class="auth-logo-badge">ر</div>
+
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="auth-msg {% if message.tags == 'error' %}error{% elif message.tags == 'success' %}success{% else %}info{% endif %}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+
+            {% if step == 'code' %}
+                <h1>کد تأیید را وارد کنید</h1>
+                <p class="auth-sub">کد ۶ رقمی به شماره زیر پیامک شد</p>
+                <div class="phone-chip">{{ phone_display }}</div>
+
+                <form method="post" action="{% url 'auth_pages:login' %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="verify_otp">
+                    <input type="hidden" name="next" value="{{ next_url }}">
+                    <input type="text" name="code" class="auth-input" inputmode="numeric"
+                           pattern="[0-9]{6}" maxlength="6" placeholder="- - - - - -" required autofocus>
+                    <button type="submit" class="auth-btn">تایید و ورود</button>
+                </form>
+
+                <div class="auth-switch">
+                    شماره اشتباه است؟ <a href="{% url 'auth_pages:login' %}">ویرایش شماره</a>
+                </div>
+            {% else %}
+                <h1>ورود / ثبت‌نام</h1>
+                <p class="auth-sub">شماره موبایل خود را وارد کنید؛<br>کد تأیید برایتان پیامک می‌شود.</p>
+
+                <form method="post" action="{% url 'auth_pages:login' %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="request_otp">
+                    <input type="hidden" name="next" value="{{ next_url }}">
+                    <input type="tel" name="phone" class="auth-input" dir="ltr"
+                           pattern="09[0-9]{9}" maxlength="11" placeholder="09123456789" required autofocus>
+                    <button type="submit" class="auth-btn">دریافت کد ورود</button>
+                </form>
+
+                <div class="auth-switch">
+                    حساب ندارید؟ نیازی به ثبت‌نام جداگانه نیست — با همین فرم حساب شما خودکار ساخته می‌شود ✨
+                </div>
+            {% endif %}
+
+            <div class="trust-note">
+                🔒 ورود بدون رمز عبور — امن و ساده<br>
+                با ورود، سبد خرید فعلی شما حفظ می‌شود
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

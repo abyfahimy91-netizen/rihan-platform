@@ -42,6 +42,8 @@ urlpatterns = [
     path('api/v1/catalog/', include('src.modules.catalog.urls_api')),
     path('api/v1/order/', include('src.modules.order.urls')),
     path('api/v1/auth/', include('src.modules.auth.urls')),
+    # HTML pages for login/register/profile
+    path('accounts/', include('src.modules.auth.page_urls')),
 ]
 
 # --- media served always (nginx proxies /media/ directly; this is the fallback) ---
