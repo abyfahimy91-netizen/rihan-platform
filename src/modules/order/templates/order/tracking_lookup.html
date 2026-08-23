@@ -8,23 +8,23 @@
     
     {% if messages %}
         {% for message in messages %}
-            <div style="background: #fff3cd; border: 1px solid #ffc107; padding: 12px; border-radius: 8px; margin-bottom: 20px;">
+            <div style="background: var(--color-warning-bg); border: 1px solid var(--color-secondary); padding: 12px; border-radius: 8px; margin-bottom: 20px;">
                 {{ message }}
             </div>
         {% endfor %}
     {% endif %}
     
-    <form method="post" style="background: #fff; padding: 30px; border-radius: 8px; border: 1px solid #e8e8e8;">
+    <form method="post" style="background: #fff; padding: 30px; border-radius: 8px; border: 1px solid var(--color-border);">
         {% csrf_token %}
         <div style="margin-bottom: 20px;">
             <label style="display: block; margin-bottom: 8px; font-weight: 600;">شماره سفارش</label>
-            <input type="text" name="order_number" required style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px;" placeholder="مثلاً: RH-1405-00001">
+            <input type="text" name="order_number" required style="width: 100%; padding: 12px; border: 1px solid var(--color-border); border-radius: 8px;" placeholder="مثلاً: RH-1405-00001">
         </div>
         <div style="margin-bottom: 20px;">
             <label style="display: block; margin-bottom: 8px; font-weight: 600;">شماره تلفن</label>
-            <input type="text" name="phone" required style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px;" placeholder="مثلاً: 09121234567">
+            <input type="text" name="phone" required style="width: 100%; padding: 12px; border: 1px solid var(--color-border); border-radius: 8px;" placeholder="مثلاً: 09121234567">
         </div>
-        <button type="submit" style="width: 100%; background: #2d5a2d; color: #fff; padding: 14px; border: none; border-radius: 8px; font-size: 16px; cursor: pointer;">
+        <button type="submit" style="width: 100%; background: var(--color-primary); color: #fff; padding: 14px; border: none; border-radius: 8px; font-size: 16px; cursor: pointer;">
             پیگیری سفارش
         </button>
     </form>

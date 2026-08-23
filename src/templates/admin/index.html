@@ -1,0 +1,102 @@
+{% extends "admin/index.html" %}
+{% load admin_dashboard %}
+
+{% block content %}
+<style>
+  .rihan-dash { background:#fff; border:1px solid #e0e0d8; border-radius:10px; padding:18px 22px; margin-bottom:22px; }
+  .rihan-dash h2 { margin:0 0 14px; font-size:15px; color:#2d5a2d; }
+  .dash-grid { display:flex; flex-wrap:wrap; gap:12px; }
+  .dash-card { flex:1 1 150px; min-width:150px; border-radius:10px; padding:14px 16px; color:#fff; text-decoration:none; display:block; }
+  .dash-card:hover { opacity:.92; text-decoration:none !important; }
+  .dash-card .num { font-size:26px; font-weight:bold; display:block; margin-bottom:4px; }
+  .dash-card .lbl { font-size:12px; opacity:.95; }
+  .c-green { background:#2d5a2d; } .c-blue { background:#1f6f9c; }
+  .c-orange { background:#d9822b; } .c-red { background:#c0392b; }
+  .c-purple { background:#6b4fa0; } .c-teal { background:#17877b; }
+  .dash-warn { margin-top:12px; font-size:13px; line-height:2; }
+  .dash-quick a { display:inline-block; background:#f4f7f2; border:1px solid #d8e4d4; color:#2d5a2d;
+                  border-radius:20px; padding:6px 16px; margin:4px 4px 0 0; font-size:13px; text-decoration:none; }
+  .dash-quick a:hover { background:#2d5a2d; color:#fff; }
+  .recent-table { width:100%; border-collapse:collapse; font-size:13px; margin-top:8px; }
+  .recent-table td { padding:7px 10px; border-bottom:1px solid #eee; }
+</style>
+
+<div class="rihan-dash">
+  <h2>📊 وضعیت فروشگاه — امروز {% jalali_today %}</h2>
+  {% rihan_dashboard_stats as st %}
+  <div class="dash-grid">
+    <a class="dash-card c-green" href="{% url 'admin:order_order_changelist' %}">
+      <span class="num">{{ st.orders_today|default:0 }}</span>
+      <span class="lbl">🧾 سفارش‌های امروز</span>
+    </a>
+    <a class="dash-card c-teal" href="{% url 'admin:order_order_changelist' %}">
+      <span class="num">{{ st.orders_total|default:0 }}</span>
+      <span class="lbl">📦 کل سفارش‌ها</span>
+    </a>
+    <a class="dash-card c-orange" href="{% url 'admin:order_payment_changelist' %}?status__exact=PENDING_REVIEW">
+      <span class="num">{{ st.pending_payments|default:0 }}</span>
+      <span class="lbl">💳 پرداخت منتظر تایید</span>
+    </a>
+    <a class="dash-card c-blue" href="{% url 'admin:reviews_review_changelist' %}?is_approved__exact=0">
+      <span class="num">{{ st.pending_reviews|default:0 }}</span>
+      <span class="lbl">⭐ نظر در انتظار تایید</span>
+    </a>
+    <a class="dash-card c-purple" href="{% url 'admin:leads_lead_changelist' %}">
+      <span class="num">{{ st.new_leads|default:0 }}</span>
+      <span class="lbl">📞 سرنخ جدید (۷ روز)</span>
+    </a>
+    <a class="dash-card c-red" href="{% url 'admin:catalog_inventory_changelist' %}">
+      <span class="num">{{ st.low_stock|length|add:st.out_stock|length }}</span>
+      <span class="lbl">⚠️ هشدار موجودی</span>
+    </a>
+  </div>
+
+  {% if st.paid_today %}
+  <div class="dash-warn" style="color:#28a745;">💚 فروش تاییدشده امروز: {{ st.paid_today }} تومان</div>
+  {% endif %}
+
+  {% if st.out_stock %}
+  <div class="dash-warn" style="color:#c0392b;">
+    ❌ ناموجود:
+    {% for n in st.out_stock %}«{{ n }}»{% if not forloop.last %}، {% endif %}{% endfor %}
+    {% if st.out_stock_more %} و {{ st.out_stock_more }} مورد دیگر{% endif %}
+    — <a href="{% url 'admin:catalog_inventory_changelist' %}?stock_state=out">مدیریت موجودی</a>
+  </div>
+  {% endif %}
+  {% if st.low_stock %}
+  <div class="dash-warn" style="color:#b8860b;">
+    ⚠️ کم‌موجود:
+    {% for n in st.low_stock %}«{{ n }}»{% if not forloop.last %}، {% endif %}{% endfor %}
+    {% if st.low_stock_more %} و {{ st.low_stock_more }} مورد دیگر{% endif %}
+    — <a href="{% url 'admin:catalog_inventory_changelist' %}?stock_state=low">مدیریت موجودی</a>
+  </div>
+  {% endif %}
+
+  <div class="dash-warn dash-quick">
+    ⚡ دسترسی سریع:
+    <a href="{% url 'admin:catalog_product_add' %}">➕ محصول جدید</a>
+    <a href="{% url 'admin:catalog_category_add' %}">➕ دسته‌بندی جدید</a>
+    <a href="{% url 'admin:catalog_supplier_add' %}">➕ تامین‌کننده جدید</a>
+    <a href="{% url 'admin:catalog_product_changelist' %}">📋 همه محصولات</a>
+    <a href="/products/" target="_blank">👁 مشاهده سایت</a>
+  </div>
+
+  {% if st.recent_orders %}
+  <div class="dash-warn">
+    <strong>🧾 آخرین سفارش‌ها:</strong>
+    <table class="recent-table">
+      {% for o in st.recent_orders %}
+      <tr>
+        <td><a href="/admin/order/order/?q={{ o.number }}"><strong>{{ o.number }}</strong></a></td>
+        <td><span style="background:{{ o.color }};color:#fff;padding:2px 10px;border-radius:10px;font-size:11px;">{{ o.status_fa }}</span></td>
+        <td>{{ o.total }} تومان</td>
+        <td style="color:#888;">{{ o.date }}</td>
+      </tr>
+      {% endfor %}
+    </table>
+  </div>
+  {% endif %}
+</div>
+
+{{ block.super }}
+{% endblock %}

@@ -6,15 +6,15 @@
 <div class="container" style="max-width: 600px; margin: 40px auto; padding: 0 20px;">
     <h1 style="text-align: center; margin-bottom: 30px;">پرداخت سفارش</h1>
     
-    <div style="background: #fff; padding: 30px; border-radius: 8px; border: 1px solid #e8e8e8; margin-bottom: 20px;">
+    <div style="background: #fff; padding: 30px; border-radius: 8px; border: 1px solid var(--color-border); margin-bottom: 20px;">
         <h2 style="margin-bottom: 20px;">اطلاعات پرداخت</h2>
-        <div style="background: #f0f7f0; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+        <div style="background: var(--color-success-bg); padding: 20px; border-radius: 8px; margin-bottom: 20px;">
             <p style="font-size: 18px; margin-bottom: 10px;"><strong>مبلغ قابل پرداخت:</strong></p>
-            <p style="font-size: 24px; color: #2d5a2d; font-weight: bold;">{{ order.total_price|floatformat:0 }} تومان</p>
+            <p style="font-size: 24px; color: var(--color-primary); font-weight: bold;">{{ order.total_price|floatformat:0 }} تومان</p>
         </div>
         
         <h2 style="margin-bottom: 15px;">اطلاعات حساب مقصد</h2>
-        <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+        <div style="background: var(--color-bg); padding: 20px; border-radius: 8px; margin-bottom: 20px;">
             <p style="margin-bottom: 10px;"><strong>شماره کارت:</strong></p>
             <p style="font-size: 20px; font-family: monospace; color: #1a1a1a;">{{ card_config.card_number }}</p>
             <p style="margin-top: 15px;"><strong>به نام:</strong> {{ card_config.card_holder }}</p>
@@ -23,7 +23,7 @@
         </div>
         
         <h2 style="margin-bottom: 15px;">راهنمای پرداخت</h2>
-        <ol style="background: #f8f9fa; padding: 20px; border-radius: 8px; padding-right: 40px;">
+        <ol style="background: var(--color-bg); padding: 20px; border-radius: 8px; padding-right: 40px;">
             <li style="margin-bottom: 10px;">مبلغ را به شماره کارت بالا واریز کنید</li>
             <li style="margin-bottom: 10px;">۴ رقم آخر کارت خود را به یاد داشته باشید</li>
             <li style="margin-bottom: 10px;">تاریخ و ساعت دقیق واریز را ثبت کنید</li>
@@ -32,7 +32,7 @@
     </div>
     
     <div style="text-align: center;">
-        <a href="{% url 'order_pages:tracking_lookup' %}" style="display: inline-block; background: #2d5a2d; color: #fff; padding: 14px 30px; border-radius: 8px; text-decoration: none;">
+        <a href="{% url 'order_pages:tracking_lookup' %}" style="display: inline-block; background: var(--color-primary); color: #fff; padding: 14px 30px; border-radius: 8px; text-decoration: none;">
             ثبت اطلاعات پرداخت
         </a>
     </div>

@@ -141,9 +141,28 @@
     /* === PRODUCTS GRID === */
     .products-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+        grid-template-columns: repeat(auto-fit, minmax(300px, 380px));
+        justify-content: center;
         gap: 40px;
         margin-bottom: 80px;
+    }
+
+    /* حالت شروع: وقتی محصولات کم است، کارت‌ها باوقار و متعادل دیده شوند */
+    .growth-note {
+        text-align: center;
+        color: var(--color-text-muted);
+        font-size: 14.5px;
+        margin: -32px 0 48px;
+        letter-spacing: .2px;
+    }
+    .growth-note::before {
+        content: '';
+        display: block;
+        width: 56px; height: 2px;
+        margin: 0 auto 16px;
+        background: var(--color-secondary);
+        border-radius: 2px;
+        opacity: .7;
     }
     
     .product-card {
@@ -356,6 +375,9 @@
     </div>
     
     {% if products %}
+    {% if products|length <= 2 %}
+    <p class="growth-note">چیدمان ریهان تازه آغاز شده؛ محصولات منتخب، به‌تدریج و با وسواس اضافه می‌شوند.</p>
+    {% endif %}
     <div class="products-grid">
         {% for product in products %}
         <article class="product-card">

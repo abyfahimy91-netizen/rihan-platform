@@ -62,7 +62,7 @@
     }
     .form-control:focus {
         outline: none;
-        border-color: var(--color-primary, #0d3b2e);
+        border-color: var(--color-primary, var(--color-primary));
         background: #fff;
         box-shadow: 0 0 0 3px rgba(13,59,46,0.08);
     }
@@ -106,7 +106,7 @@
         width: 100%;
         margin-top: 20px;
         padding: 18px 32px;
-        background: linear-gradient(135deg, #0d3b2e, #14532d);
+        background: linear-gradient(135deg, var(--color-primary), var(--color-primary-dark));
         color: #fff;
         border: none;
         border-radius: 14px;
@@ -151,7 +151,7 @@
     {% if messages %}
         <div style="margin-bottom: 24px;">
             {% for message in messages %}
-                <div style="padding:14px 18px;border-radius:12px;margin-bottom:10px;font-size:14px;background:{% if message.tags == 'error' %}#fdecea;color:#b71c1c;{% else %}#e8f5e9;color:#1b5e20;{% endif %}border:1px solid rgba(0,0,0,0.06);">{{ message }}</div>
+                <div style="padding:14px 18px;border-radius:12px;margin-bottom:10px;font-size:14px;background:{% if message.tags == 'error' %}var(--color-error-bg);color:var(--color-error);{% else %}var(--color-success-bg);color:var(--color-success);{% endif %}border:1px solid rgba(0,0,0,0.06);">{{ message }}</div>
             {% endfor %}
         </div>
     {% endif %}
@@ -223,7 +223,7 @@
     <div class="empty-cart-box">
         <h2 style="font-size:26px;font-weight:800;margin-bottom:12px;">سبد خرید شما خالی است 🛒</h2>
         <p style="color:var(--color-text-muted);margin-bottom:24px;">برای تسویه‌حساب ابتدا محصولی به سبد اضافه کنید.</p>
-        <a href="/" style="display:inline-block;padding:14px 32px;background:#0d3b2e;color:#fff;border-radius:12px;text-decoration:none;font-weight:700;">مشاهده محصولات</a>
+        <a href="/" style="display:inline-block;padding:14px 32px;background:var(--color-primary);color:#fff;border-radius:12px;text-decoration:none;font-weight:700;">مشاهده محصولات</a>
     </div>
     {% endif %}
 </div>

@@ -4,28 +4,29 @@ from django.conf import settings
 from django.db import models
 from django.utils import timezone
 from django.core.validators import MinValueValidator
-from django.db.models.signals import post_save
+from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
 
 
 class Category(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    name = models.CharField(max_length=150)
-    slug = models.SlugField(max_length=180, unique=True, allow_unicode=True)
+    name = models.CharField("نام دسته", max_length=150)
+    slug = models.SlugField("نامک (آدرس)", max_length=180, unique=True, allow_unicode=True)
     parent = models.ForeignKey(
         'self',
         on_delete=models.CASCADE,
         null=True,
         blank=True,
-        related_name='children'
+        related_name='children',
+        verbose_name='دسته والد'
     )
-    is_active = models.BooleanField(default=True)
+    is_active = models.BooleanField("فعال", default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        verbose_name = "Category"
-        verbose_name_plural = "Categories"
+        verbose_name = "دسته‌بندی"
+        verbose_name_plural = "دسته‌بندی‌ها"
         ordering = ['name']
 
     def __str__(self):
@@ -34,10 +35,10 @@ class Category(models.Model):
 
 class Supplier(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    title = models.CharField(max_length=150)
-    city = models.CharField(max_length=100)
-    phone = models.CharField(max_length=11, blank=True)
-    is_active = models.BooleanField(default=True)
+    title = models.CharField("عنوان / نام تامین‌کننده", max_length=150)
+    city = models.CharField("شهر", max_length=100)
+    phone = models.CharField("تلفن همراه", max_length=11, blank=True)
+    is_active = models.BooleanField("فعال", default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     user = models.OneToOneField(
@@ -50,8 +51,8 @@ class Supplier(models.Model):
     )
 
     class Meta:
-        verbose_name = "Supplier"
-        verbose_name_plural = "Suppliers"
+        verbose_name = "تامین‌کننده"
+        verbose_name_plural = "تامین‌کنندگان"
 
     def __str__(self):
         return self.title
@@ -59,73 +60,80 @@ class Supplier(models.Model):
 
 class Product(models.Model):
     STATUS_CHOICES = [
-        ('draft', 'Draft'),
-        ('active', 'Active'),
-        ('inactive', 'Inactive'),
-        ('out_of_stock', 'Out of Stock'),
+        ('draft', 'پیش‌نویس'),
+        ('active', 'فعال (منتشر شده)'),
+        ('inactive', 'غیرفعال (مخفی)'),
+        ('out_of_stock', 'ناموجود'),
     ]
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    slug = models.SlugField(max_length=100, unique=True, allow_unicode=True)
-    name = models.CharField(max_length=150)
+    slug = models.SlugField("نامک (آدرس صفحه)", max_length=100, unique=True, allow_unicode=True)
+    name = models.CharField("نام محصول", max_length=150)
     category = models.ForeignKey(
         Category,
         on_delete=models.PROTECT,
-        related_name='products'
+        related_name='products',
+        verbose_name='دسته‌بندی'
     )
     supplier = models.ForeignKey(
         Supplier,
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
-        related_name='products'
+        related_name='products',
+        verbose_name='تامین‌کننده'
     )
-    unit = models.CharField(max_length=20, blank=True)
+    unit = models.CharField("واحد فروش (مثلا کیلوگرم)", max_length=20, blank=True)
     base_price = models.DecimalField(
+        verbose_name="قیمت پایه (تومان)",
         max_digits=10,
         decimal_places=2,
         default=0,
         validators=[MinValueValidator(0)]
     )
     shipping_cost = models.DecimalField(
+        verbose_name="هزینه ارسال (تومان)",
         max_digits=10,
         decimal_places=2,
         default=0,
         validators=[MinValueValidator(0)]
     )
     margin_percent = models.DecimalField(
+        verbose_name="حاشیه سود (درصد)",
         max_digits=5,
         decimal_places=2,
         default=0,
         validators=[MinValueValidator(0)]
     )
     final_price = models.DecimalField(
+        verbose_name="قیمت نهایی (خودکار محاسبه می‌شود)",
         max_digits=10,
         decimal_places=2,
         default=0,
         validators=[MinValueValidator(0)]
     )
-    short_description = models.TextField()
-    origin_story = models.TextField(verbose_name="Origin Story")
-    long_description = models.TextField(blank=True)
-    seo_title = models.CharField(max_length=60, blank=True, null=True)
-    seo_description = models.CharField(max_length=160, blank=True, null=True)
-    seo_keywords = models.JSONField(blank=True, null=True)
-    images = models.JSONField(default=list, blank=True)
-    metadata = models.JSONField(default=dict, blank=True)
+    short_description = models.TextField("توضیح کوتاه (نمایش در لیست)")
+    origin_story = models.TextField(verbose_name="داستان محصول")
+    long_description = models.TextField("توضیحات کامل", blank=True)
+    seo_title = models.CharField("عنوان سئو", max_length=60, blank=True, null=True)
+    seo_description = models.CharField("توضیح سئو", max_length=160, blank=True, null=True)
+    seo_keywords = models.JSONField("کلمات کلیدی سئو", blank=True, null=True)
+    images = models.JSONField("تصاویر (مدیریت از بخش گالری)", default=list, blank=True)
+    metadata = models.JSONField("متادیتا (فنی)", default=dict, blank=True)
     status = models.CharField(
+        "وضعیت انتشار",
         max_length=20,
         choices=STATUS_CHOICES,
         default='draft'
     )
-    is_featured = models.BooleanField(default=False)
+    is_featured = models.BooleanField("نمایش در صفحه اصلی", default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     deleted_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:
-        verbose_name = "Product"
-        verbose_name_plural = "Products"
+        verbose_name = "محصول"
+        verbose_name_plural = "محصولات"
         ordering = ['-is_featured', '-created_at']
 
     def __str__(self):
@@ -163,7 +171,7 @@ class Inventory(models.Model):
         validators=[MinValueValidator(0)],
         verbose_name="Physical Stock"
     )
-    unit = models.CharField(max_length=20, blank=True)
+    unit = models.CharField("واحد", max_length=20, blank=True)
     low_stock_threshold = models.DecimalField(
         max_digits=10,
         decimal_places=2,
@@ -182,8 +190,8 @@ class Inventory(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        verbose_name = "Inventory"
-        verbose_name_plural = "Inventories"
+        verbose_name = "موجودی انبار"
+        verbose_name_plural = "موجودی انبار"
 
     def __str__(self):
         return f"Inventory for {self.product.name}"
@@ -262,8 +270,8 @@ class InventoryTransaction(models.Model):
     )
 
     class Meta:
-        verbose_name = "Inventory Transaction"
-        verbose_name_plural = "Inventory Transactions"
+        verbose_name = "تراکنش موجودی"
+        verbose_name_plural = "تاریخچه موجودی انبار"
         ordering = ['-created_at']
 
     def __str__(self):
@@ -313,15 +321,17 @@ class ContentBlock(models.Model):
         blank=True,
         related_name='direct_blocks'
     )
-    block_type = models.CharField(max_length=50, choices=BLOCK_TYPES)
-    content = models.JSONField(default=dict, blank=True)
-    sort_order = models.PositiveIntegerField(default=0)
-    is_active = models.BooleanField(default=True)
+    block_type = models.CharField("نوع بلوک", max_length=50, choices=BLOCK_TYPES)
+    content = models.JSONField("محتوای بلوک", default=dict, blank=True)
+    sort_order = models.PositiveIntegerField("ترتیب نمایش", default=0)
+    is_active = models.BooleanField("فعال", default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         ordering = ['sort_order']
+        verbose_name = "بلوک محتوای صفحه"
+        verbose_name_plural = "بلوک‌های محتوای صفحات"
 
     def __str__(self):
         return f"{self.block_type} block"
@@ -363,3 +373,50 @@ def create_inventory_for_product(sender, instance, created, **kwargs):
                 'low_stock_threshold': 2,
             }
         )
+
+
+class ProductImage(models.Model):
+    """عکس‌های محصول — از پنل ادمین آپلود می‌شود و خودکار در سایت نمایش داده می‌شود"""
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    product = models.ForeignKey(
+        Product,
+        on_delete=models.CASCADE,
+        related_name='gallery'
+    )
+    image = models.ImageField(
+        upload_to='products/%Y/%m/',
+        verbose_name='فایل تصویر',
+    )
+    caption = models.CharField(max_length=255, blank=True, verbose_name='متن جایگزین (Alt)')
+    sort_order = models.PositiveIntegerField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['sort_order', 'created_at']
+        verbose_name = "عکس محصول"
+        verbose_name_plural = "گالری تصاویر محصولات"
+
+    def __str__(self):
+        return f"تصویر {self.sort_order} — {self.product.name}"
+
+
+def _sync_product_images_json(product):
+    """به‌روزرسانی JSON images محصول از روی گالری تا قالب سایت بدون تغییر کار کند"""
+    urls = [pi.image.url for pi in product.gallery.all()]
+    if list(product.images or []) != urls:
+        Product.objects.filter(pk=product.pk).update(images=urls)
+
+
+@receiver(post_save, sender=ProductImage)
+def sync_images_on_save(sender, instance, **kwargs):
+    _sync_product_images_json(instance.product)
+
+
+@receiver(post_delete, sender=ProductImage)
+def sync_images_on_delete(sender, instance, **kwargs):
+    if instance.product_id:
+        try:
+            product = Product.objects.get(pk=instance.product_id)
+            _sync_product_images_json(product)
+        except Product.DoesNotExist:
+            pass

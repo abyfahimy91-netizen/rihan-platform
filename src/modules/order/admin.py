@@ -119,10 +119,8 @@ class OrderAdmin(admin.ModelAdmin):
     status_badge.admin_order_field = 'status'
     
     def total_amount(self, obj):
-        return format_html(
-            '<strong style="color:#2d5a2d;">{:,.0f} تومان</strong>',
-            obj.total_price
-        )
+        num = f'{float(obj.total_price):,.0f}'
+        return format_html('<strong style="color:#2d5a2d;">{} تومان</strong>', num)
     total_amount.short_description = 'مبلغ نهایی'
     total_amount.admin_order_field = 'total_price'
     
@@ -205,8 +203,8 @@ class PaymentAdmin(admin.ModelAdmin):
     
     def amount_display(self, obj):
         return format_html(
-            '<strong style="color:#2d5a2d; font-size:14px;">{:,.0f}</strong> <span style="color:#888;">تومان</span>',
-            obj.amount
+            '<strong style="color:#2d5a2d; font-size:14px;">{}</strong> <span style="color:#888;">تومان</span>',
+            f'{float(obj.amount):,.0f}'
         )
     amount_display.short_description = 'مبلغ'
     amount_display.admin_order_field = 'amount'

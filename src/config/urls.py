@@ -12,6 +12,12 @@ sitemaps = {
     'static': StaticViewSitemap,
 }
 
+
+# 🌿 برندینگ پنل مدیریت ریحان
+admin.site.site_header = "🌿 پنل مدیریت ریحان"
+admin.site.site_title = "مدیریت ریحان"
+admin.site.index_title = "کنترل کامل فروشگاه — همه‌چیز از اینجا قابل مدیریت است"
+
 urlpatterns = [
     path('supplier/', include('src.modules.supplier_panel.urls')),
     # SEO endpoints (D-079)

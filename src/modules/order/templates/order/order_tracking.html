@@ -34,12 +34,12 @@
     }
     
     .status-DRAFT { background: #6c757d; }
-    .status-PENDING { background: #ffc107; color: #000; }
-    .status-PAID { background: #28a745; }
+    .status-PENDING { background: var(--color-secondary); color: #000; }
+    .status-PAID { background: var(--color-success); }
     .status-PROCESSING { background: #17a2b8; }
     .status-SHIPPED { background: #007bff; }
-    .status-DELIVERED { background: #28a745; }
-    .status-CANCELLED { background: #dc3545; }
+    .status-DELIVERED { background: var(--color-success); }
+    .status-CANCELLED { background: var(--color-error); }
     
     /* Timeline - Real History Based */
     .timeline {
@@ -62,7 +62,7 @@
         position: relative;
         padding-right: 50px;
         padding-bottom: 25px;
-        border-right: 2px solid #e0e0e0;
+        border-right: 2px solid var(--color-border);
         margin-right: 10px;
     }
     
@@ -72,7 +72,7 @@
     }
     
     .timeline-item.completed {
-        border-right-color: #2d5a2d;
+        border-right-color: var(--color-primary);
     }
     
     .timeline-marker {
@@ -82,41 +82,41 @@
         width: 20px;
         height: 20px;
         border-radius: 50%;
-        background: #e0e0e0;
+        background: var(--color-border);
         border: 3px solid #fff;
-        box-shadow: 0 0 0 2px #e0e0e0;
+        box-shadow: 0 0 0 2px var(--color-border);
     }
     
     .timeline-item.completed .timeline-marker {
-        background: #2d5a2d;
-        box-shadow: 0 0 0 2px #2d5a2d;
+        background: var(--color-primary);
+        box-shadow: 0 0 0 2px var(--color-primary);
     }
     
     .timeline-item.active .timeline-marker {
-        background: #ffc107;
-        box-shadow: 0 0 0 2px #ffc107;
+        background: var(--color-secondary);
+        box-shadow: 0 0 0 2px var(--color-secondary);
         animation: pulse 2s infinite;
     }
     
     @keyframes pulse {
-        0%, 100% { box-shadow: 0 0 0 2px #ffc107; }
+        0%, 100% { box-shadow: 0 0 0 2px var(--color-secondary); }
         50% { box-shadow: 0 0 0 6px rgba(255, 193, 7, 0.3); }
     }
     
     .timeline-content {
-        background: #f8f9fa;
+        background: var(--color-bg);
         border-radius: 12px;
         padding: 16px 20px;
     }
     
     .timeline-item.completed .timeline-content {
-        background: #f0f7f0;
-        border-right: 3px solid #2d5a2d;
+        background: var(--color-success-bg);
+        border-right: 3px solid var(--color-primary);
     }
     
     .timeline-item.active .timeline-content {
         background: #fff9e6;
-        border-right: 3px solid #ffc107;
+        border-right: 3px solid var(--color-secondary);
     }
     
     .timeline-status {
@@ -128,19 +128,19 @@
     
     .timeline-description {
         font-size: 13px;
-        color: #666;
+        color: var(--color-text-muted);
         line-height: 1.5;
     }
     
     .timeline-date {
         font-size: 12px;
-        color: #888;
+        color: var(--color-text-muted);
         margin-top: 8px;
     }
     
     .timeline-tracking {
         display: inline-block;
-        background: #e3f2fd;
+        background: var(--color-warning-bg);
         color: #1565c0;
         padding: 4px 12px;
         border-radius: 12px;
@@ -151,7 +151,7 @@
     
     /* Tracking Code Box */
     .tracking-code-box {
-        background: #e3f2fd;
+        background: var(--color-warning-bg);
         border-radius: 12px;
         padding: 20px;
         margin-top: 20px;
@@ -160,7 +160,7 @@
     
     .tracking-code-label {
         font-size: 13px;
-        color: #666;
+        color: var(--color-text-muted);
         margin-bottom: 8px;
     }
     
@@ -188,14 +188,14 @@
     }
     
     .order-items {
-        border-top: 1px solid #eee;
+        border-top: 1px solid var(--color-border);
     }
     
     .order-item {
         display: flex;
         justify-content: space-between;
         padding: 16px 0;
-        border-bottom: 1px solid #eee;
+        border-bottom: 1px solid var(--color-border);
     }
     
     .order-item:last-child {
@@ -209,12 +209,12 @@
     
     .order-item-qty {
         font-size: 14px;
-        color: #888;
+        color: var(--color-text-muted);
     }
     
     .order-item-price {
         font-weight: 700;
-        color: #2d5a2d;
+        color: var(--color-primary);
     }
     
     .order-total {
@@ -228,13 +228,13 @@
     }
     
     .order-total-value {
-        color: #2d5a2d;
+        color: var(--color-primary);
     }
     
     .shipping-badge {
         display: inline-block;
-        background: #d4edda;
-        color: #155724;
+        background: var(--color-success-bg);
+        color: var(--color-success);
         padding: 4px 12px;
         border-radius: 12px;
         font-size: 12px;
@@ -261,7 +261,7 @@
     .support-phone {
         font-size: 20px;
         font-weight: 700;
-        color: #2d5a2d;
+        color: var(--color-primary);
         direction: ltr;
         display: inline-block;
         margin-top: 5px;
@@ -269,7 +269,7 @@
     
     .support-note {
         font-size: 13px;
-        color: #888;
+        color: var(--color-text-muted);
         margin-top: 10px;
     }
 </style>
@@ -281,7 +281,7 @@
     <div class="order-header">
         <h1 class="order-number">سفارش {{ order.order_number }}</h1>
         <span class="order-status status-{{ order.status }}">{{ order.get_status_display }}</span>
-        <p style="color:#888; margin-top:15px; font-size:14px;">
+        <p style="color:var(--color-text-muted); margin-top:15px; font-size:14px;">
             تاریخ ثبت: {{ order.created_at|date:"Y/m/d H:i" }}
         </p>
         
@@ -337,7 +337,7 @@
                 <div class="order-item-price">{{ item.subtotal|floatformat:0 }} تومان</div>
             </div>
             {% empty %}
-            <p style="color:#888; padding:20px 0;">هیچ کالایی در این سفارش نیست</p>
+            <p style="color:var(--color-text-muted); padding:20px 0;">هیچ کالایی در این سفارش نیست</p>
             {% endfor %}
         </div>
         

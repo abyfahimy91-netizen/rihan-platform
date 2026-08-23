@@ -21,19 +21,19 @@
         width: 100%; padding: 12px 14px; border: 1.5px solid var(--color-border);
         border-radius: 12px; font-size: 15px; font-family: inherit; color: var(--color-text); background: #fafafa;
     }
-    .p-input:focus { outline:none; border-color:#0d3b2e; background:#fff; }
+    .p-input:focus { outline:none; border-color:var(--color-primary); background:#fff; }
     .p-input[readonly] { background:#f3f4f3; color: var(--color-text-muted); }
     .p-save {
-        width: 100%; margin-top: 8px; padding: 14px; background: linear-gradient(135deg,#0d3b2e,#14532d);
+        width: 100%; margin-top: 8px; padding: 14px; background: linear-gradient(135deg,var(--color-primary),var(--color-primary-dark));
         color:#fff; border:none; border-radius: 12px; font-size:15px; font-weight:800; font-family:inherit; cursor:pointer;
     }
     .p-save:hover { transform: translateY(-1px); box-shadow: 0 8px 20px rgba(13,59,46,.3); }
     .p-logout {
         display:block; width:100%; margin-top: 12px; padding: 13px; background:#fff;
-        color:#b71c1c; border:1.5px solid #f2c4c0; border-radius:12px; font-size:15px; font-weight:700;
+        color:var(--color-error); border:1.5px solid #f2c4c0; border-radius:12px; font-size:15px; font-weight:700;
         font-family:inherit; cursor:pointer; text-align:center; text-decoration:none;
     }
-    .p-logout:hover { background:#fdecea; }
+    .p-logout:hover { background:var(--color-error-bg); }
     .orders-table { width: 100%; border-collapse: collapse; font-size: 14px; }
     .orders-table th {
         text-align: right; padding: 10px 8px; color: var(--color-text-muted);
@@ -43,15 +43,15 @@
     .badge {
         display: inline-block; padding: 4px 12px; border-radius: 999px; font-size: 12px; font-weight: 800;
     }
-    .badge.PENDING { background:#fff8e1; color:#8d6e00; }
-    .badge.PAID { background:#e8f5e9; color:#1b5e20; }
-    .badge.PROCESSING { background:#e3f2fd; color:#0d47a1; }
+    .badge.PENDING { background:var(--color-warning-bg); color:var(--color-warning-text); }
+    .badge.PAID { background:var(--color-success-bg); color:var(--color-success); }
+    .badge.PROCESSING { background:var(--color-warning-bg); color:var(--color-secondary-dark); }
     .badge.SHIPPED { background:#ede7f6; color:#4527a0; }
     .badge.DELIVERED { background:#e0f2f1; color:#00695c; }
-    .badge.CANCELLED, .badge.RETURNED { background:#fdecea; color:#b71c1c; }
+    .badge.CANCELLED, .badge.RETURNED { background:var(--color-error-bg); color:var(--color-error); }
     .orders-empty { text-align:center; padding: 48px 16px; color: var(--color-text-muted); }
-    .orders-empty a { color:#0d3b2e; font-weight:800; text-decoration:none; }
-    .track-link { color:#0d3b2e; font-weight:700; text-decoration:none; }
+    .orders-empty a { color:var(--color-primary); font-weight:800; text-decoration:none; }
+    .track-link { color:var(--color-primary); font-weight:700; text-decoration:none; }
     @media (max-width: 860px) { .profile-grid { grid-template-columns: 1fr; } }
 </style>
 {% endblock %}
@@ -66,7 +66,7 @@
                     <h2>👤 اطلاعات حساب</h2>
                     {% if messages %}
                         {% for message in messages %}
-                            <div style="padding:12px 14px;border-radius:10px;margin-bottom:14px;font-size:13.5px;background:{% if message.tags == 'error' %}#fdecea;color:#b71c1c;{% else %}#e8f5e9;color:#1b5e20;{% endif %}">{{ message }}</div>
+                            <div style="padding:12px 14px;border-radius:10px;margin-bottom:14px;font-size:13.5px;background:{% if message.tags == 'error' %}var(--color-error-bg);color:var(--color-error);{% else %}var(--color-success-bg);color:var(--color-success);{% endif %}">{{ message }}</div>
                         {% endfor %}
                     {% endif %}
                     <form method="post" action="{% url 'auth_pages:profile' %}">

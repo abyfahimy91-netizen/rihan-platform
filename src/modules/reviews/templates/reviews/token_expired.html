@@ -9,11 +9,11 @@
         {% if reason == 'used' %}لینک استفاده شده{% else %}لینک منقضی شده{% endif %}
     </h1>
     {% if reason == 'used' %}
-        <p style="color: #666; line-height: 1.8;">این لینک قبلاً استفاده شده است. هر لینک فقط یک بار قابل استفاده است.</p>
+        <p style="color: var(--color-text-muted); line-height: 1.8;">این لینک قبلاً استفاده شده است. هر لینک فقط یک بار قابل استفاده است.</p>
     {% else %}
-        <p style="color: #666; line-height: 1.8;">متأسفانه این لینک منقضی شده است. لینک‌های ثبت نظر ۷ روز اعتبار دارند.</p>
+        <p style="color: var(--color-text-muted); line-height: 1.8;">متأسفانه این لینک منقضی شده است. لینک‌های ثبت نظر ۷ روز اعتبار دارند.</p>
     {% endif %}
-    <p style="color: #888; font-size: 14px; margin-top: 20px;">برای دریافت لینک جدید با پشتیبانی تماس بگیرید.</p>
-    <a href="/" style="display: inline-block; margin-top: 20px; padding: 12px 32px; background: #2d5a2d; color: #fff; text-decoration: none; border-radius: 8px;">بازگشت به صفحه اصلی</a>
+    <p style="color: var(--color-text-muted); font-size: 14px; margin-top: 20px;">برای دریافت لینک جدید با پشتیبانی تماس بگیرید.</p>
+    <a href="/" style="display: inline-block; margin-top: 20px; padding: 12px 32px; background: var(--color-primary); color: #fff; text-decoration: none; border-radius: 8px;">بازگشت به صفحه اصلی</a>
 </div>
 {% endblock %}

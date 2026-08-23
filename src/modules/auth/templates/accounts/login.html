@@ -17,7 +17,7 @@
     .auth-logo-badge {
         width: 72px; height: 72px;
         margin: 0 auto 20px;
-        background: linear-gradient(135deg, #0d3b2e, #14532d);
+        background: linear-gradient(135deg, var(--color-primary), var(--color-primary-dark));
         border-radius: 50%;
         display: flex; align-items: center; justify-content: center;
         color: #fff; font-size: 30px; font-weight: 900;
@@ -38,14 +38,14 @@
         transition: all .2s;
     }
     .auth-input:focus {
-        outline: none; border-color: #0d3b2e; background: #fff;
+        outline: none; border-color: var(--color-primary); background: #fff;
         box-shadow: 0 0 0 3px rgba(13,59,46,.08);
     }
     .auth-btn {
         width: 100%;
         margin-top: 16px;
         padding: 17px;
-        background: linear-gradient(135deg, #0d3b2e, #14532d);
+        background: linear-gradient(135deg, var(--color-primary), var(--color-primary-dark));
         color: #fff; border: none; border-radius: 14px;
         font-size: 17px; font-weight: 800; font-family: inherit;
         cursor: pointer; transition: all .25s;
@@ -54,21 +54,21 @@
     .auth-switch {
         margin-top: 20px; font-size: 13px; color: var(--color-text-muted);
     }
-    .auth-switch a { color: #0d3b2e; font-weight: 700; text-decoration: none; }
+    .auth-switch a { color: var(--color-primary); font-weight: 700; text-decoration: none; }
     .auth-msg {
         padding: 13px 16px; border-radius: 12px; margin-bottom: 18px;
         font-size: 14px; text-align: right;
     }
-    .auth-msg.error { background: #fdecea; color: #b71c1c; }
-    .auth-msg.success { background: #e8f5e9; color: #1b5e20; }
-    .auth-msg.info { background: #e3f2fd; color: #0d47a1; }
+    .auth-msg.error { background: var(--color-error-bg); color: var(--color-error); }
+    .auth-msg.success { background: var(--color-success-bg); color: var(--color-success); }
+    .auth-msg.info { background: var(--color-warning-bg); color: var(--color-secondary-dark); }
     .demo-code {
-        background: #fff8e1; border: 1px dashed #f0c040; color: #8d6e00;
+        background: var(--color-warning-bg); border: 1px dashed #f0c040; color: var(--color-warning-text);
         padding: 12px; border-radius: 12px; margin-bottom: 16px;
         font-size: 15px; font-weight: 800; letter-spacing: 3px;
     }
     .phone-chip {
-        display: inline-block; background: #f1f5f2; color: #0d3b2e;
+        display: inline-block; background: #f1f5f2; color: var(--color-primary);
         border-radius: 999px; padding: 6px 18px; font-weight: 800;
         letter-spacing: 1px; margin-bottom: 18px; direction: ltr;
     }
