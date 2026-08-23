@@ -1,0 +1,43 @@
+{% extends "admin/base_site.html" %}
+{% load static admin_sidebar %}
+
+{% block extrastyle %}
+  {{ block.super }}
+  <link rel="stylesheet" href="{% static 'admin/css/rihan_admin.css' %}">
+{% endblock %}
+
+{% block extrahead %}
+  {{ block.super }}
+  <script src="{% static 'admin/js/rihan_admin.js' %}" defer></script>
+{% endblock %}
+
+{% block branding %}
+<span class="rihan-logo-mark">{{ site_settings.site_name|default:"ریهان" }}</span>
+<span class="rihan-logo-title">پنل مدیریت</span>
+{% endblock %}
+
+{% block nav-global %}
+{% if user.is_authenticated %}
+<nav class="rihan-sidebar" id="rihan-sidebar" aria-label="منوی مدیریت">
+  <div class="rsb-head">
+    <span class="rsb-avatar">{{ user.get_username|default:"ادمین" }}</span>
+    <span class="rsb-welcome">خوش آمدید 👋</span>
+  </div>
+  <div class="rsb-scroll">
+    <a class="rsb-item rsb-home" href="{% url 'admin:index' %}"><i>🏠</i> داشبورد</a>
+    {% rihan_sidebar as sb %}
+    {% for g in sb.groups %}
+      <div class="rsb-group">{{ g.title }}</div>
+      {% for it in g.items %}
+        <a class="rsb-item" href="{{ it.url }}">{{ it.title }}</a>
+      {% endfor %}
+    {% endfor %}
+  </div>
+  <div class="rsb-foot">
+    <a href="/" target="_blank">👁 مشاهده سایت</a>
+  </div>
+</nav>
+<button class="rsb-burger" id="rsb-burger" type="button" aria-label="باز و بسته کردن منو">☰ منو</button>
+<div class="rsb-overlay" id="rsb-overlay"></div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,168 @@
+/* ═══════════════════════════════════════════════════════════
+   پوسته اختصاصی پنل مدیریت ریحان — هم‌راستا با هویت برند سایت
+   سبز تیره #0D3B2E + طلایی #C9A961 + کرم #FAF7F0 — فونت وزیرمتن
+   ═══════════════════════════════════════════════════════════ */
+
+@font-face{font-family:'Vazirmatn';src:url('/static/fonts/Vazirmatn-Regular.woff2') format('woff2');font-weight:400;font-display:swap}
+@font-face{font-family:'Vazirmatn';src:url('/static/fonts/Vazirmatn-Medium.woff2') format('woff2');font-weight:500;font-display:swap}
+@font-face{font-family:'Vazirmatn';src:url('/static/fonts/Vazirmatn-Bold.woff2') format('woff2');font-weight:700;font-display:swap}
+
+/* ── متغیرهای رسمی ادمین جنگو (بازنویسی با رنگ برند) ── */
+:root{
+  --brand:#0D3B2E; --brand-dark:#092A21; --gold:#C9A961; --cream:#FAF7F0;
+
+  --primary:#0D3B2E;
+  --secondary:#efeadf;
+  --accent:#C9A961;
+  --primary-fg:#ffffff;
+  --body-fg:#1A1A1A;
+  --body-bg:#FAF7F0;
+  --body-quiet-color:#5C5C5C;
+  --body-loud-color:#111111;
+  --header-branding-color:#f7f1e1;
+  --header-bg:#0D3B2E;
+  --header-link-color:#f2ead6;
+  --breadcrumbs-fg:#e8e2d3;
+  --breadcrumbs-bg:#123F32;
+  --link-fg:#0D5C43;
+  --link-hover-color:#083F2D;
+  --link-selected-fg:#7A6428;
+  --hairline-color:#e6e0d2;
+  --border-color:#ddd6c6;
+  --darkened-bg:#f3efe4;
+  --selected-row:#eef4ee;
+  --button-bg:#0D3B2E;
+  --button-hover-bg:#092A21;
+  --button-fg:#fff;
+  --default-button-bg:#0D3B2E;
+  --default-button-hover-bg:#092A21;
+  --close-button-bg:#8a8578;
+  --close-button-hover-bg:#6f6a5e;
+  --delete-button-bg:#9B2C2C;
+  --delete-button-hover-bg:#7c2222;
+  --object-tools-bg:#3f5d52;
+  --object-tools-hover-bg:#0D3B2E;
+  --message-success-bg:#eaf3ee;
+  --message-warning-bg:#fbf4e3;
+  --message-error-bg:#f9ecea;
+  --font-family-primary:'Vazirmatn','Segoe UI',Tahoma,sans-serif;
+}
+
+body, button, input, select, textarea, .paginator a, .paginator span{
+  font-family:'Vazirmatn','Segoe UI',Tahoma,sans-serif !important;
+}
+body{background:#FAF7F0; font-size:13.5px}
+
+/* ── هدر ── */
+#header{
+  background:linear-gradient(135deg,#0D3B2E 0%,#0A2F25 100%);
+  border-bottom:3px solid #C9A961;
+}
+#site-name a{color:#f7f1e1;font-weight:700;font-size:15px}
+.rihan-logo-mark{
+  display:inline-block;background:#C9A961;color:#0D3B2E;font-weight:800;
+  padding:3px 14px;border-radius:9px;margin-inline-end:10px;font-size:14px;
+}
+.rihan-logo-title{color:#e9e2cf;font-weight:500;font-size:13.5px}
+#user-tools{color:#cfc8b2}
+#user-tools a{color:#f2ead6;border-bottom-color:rgba(242,234,214,.45)}
+#user-tools a:hover{color:#C9A961;border-bottom-color:#C9A961}
+
+/* ── سایدبار اختصاصی ── */
+.rihan-sidebar{
+  position:fixed;top:0;bottom:0;inset-inline-start:0;width:258px;
+  background:linear-gradient(180deg,#0D3B2E 0%,#0A2E24 100%);
+  color:#dcd6c4;display:none;flex-direction:column;z-index:1200;
+  box-shadow:0 0 26px rgba(0,0,0,.18);
+}
+.rsb-head{padding:16px 18px 12px;border-bottom:1px solid rgba(255,255,255,.09)}
+.rsb-avatar{
+  display:inline-block;background:#C9A961;color:#0D3B2E;font-weight:800;
+  border-radius:8px;padding:2px 11px;font-size:12.5px;margin-inline-end:8px;
+  vertical-align:middle;max-width:110px;overflow:hidden;text-overflow:ellipsis;
+}
+.rsb-welcome{color:#cfc8b2;font-size:12.5px;vertical-align:middle}
+.rsb-scroll{flex:1;overflow-y:auto;padding:10px 10px 16px;scrollbar-width:thin;scrollbar-color:#2c5546 transparent}
+.rsb-item{
+  display:block;color:#e4decb;font-size:13.5px;padding:7px 12px;border-radius:9px;
+  margin-bottom:2px;line-height:1.8;transition:background .15s,color .15s;
+}
+.rsb-item i{font-style:normal;margin-inline-end:4px}
+.rsb-item:hover{background:rgba(255,255,255,.09);color:#fff;text-decoration:none}
+.rsb-item.active{background:#C9A961;color:#0D3B2E;font-weight:700}
+.rsb-group{
+  color:#93ac9d;font-size:11.5px;font-weight:700;letter-spacing:.3px;
+  margin:14px 8px 6px;padding-inline-start:6px;
+}
+.rsb-home{margin-top:4px;font-weight:600}
+.rsb-foot{border-top:1px solid rgba(255,255,255,.09);padding:11px 16px}
+.rsb-foot a{color:#C9A961;font-size:13px;text-decoration:none}
+.rsb-foot a:hover{color:#e8d29a;text-decoration:none}
+
+@media (min-width:1024px){
+  .rihan-sidebar{display:flex}
+  .rsb-burger{display:none !important}
+  body:not(.login) #main{margin-inline-start:258px !important;margin-inline-end:0 !important}
+  body:not(.login) #header{margin-inline-start:258px !important}
+}
+@media (max-width:1023px){
+  body.rsb-open .rihan-sidebar{display:flex}
+  body.rsb-open .rsb-overlay{display:block}
+}
+.rsb-overlay{display:none;position:fixed;inset:0;background:rgba(20,25,22,.45);z-index:1100}
+.rsb-burger{
+  position:fixed;inset-inline-end:14px;bottom:14px;z-index:1050;
+  background:#0D3B2E;color:#fff;border:none;border-radius:999px;
+  padding:10px 20px;font-size:13.5px;box-shadow:0 4px 14px rgba(0,0,0,.28);cursor:pointer;
+}
+
+/* سایدبار پیش‌فرض جنگو را خاموش می‌کنیم (جایگزین شد) */
+#nav-sidebar, .sticky-toggle, .sticky-toggle-label{display:none !important}
+.main.shifted{margin-inline-start:0 !important}
+
+/* ── اجزای عمومی ادمین ── */
+.module{border-radius:12px;box-shadow:0 1px 4px rgba(13,59,46,.05);border-color:#e6e0d2}
+.module h2, .module caption, .inline-group h2{background:#123F32 !important;color:#f2ead6;border-radius:8px 8px 0 0}
+#changelist table thead th{background:#f3efe4;color:#33403a}
+#result_list tbody tr:hover{background:#f4f0e4}
+.breadcrumbs{background:#123F32}
+.breadcrumbs a{color:#C9A961}
+.submit-row input[type="submit"], .submit-row input.default{border-radius:8px}
+button, input[type="submit"], input[type="button"], .object-tools a{border-radius:8px}
+.object-tools a{background:#3f5d52;color:#fff}
+input:focus, select:focus, textarea:focus{border-color:#C9A961}
+.paginator a, .paginator span{border-radius:6px}
+.paginator .this-page{background:#0D3B2E;color:#fff;font-weight:700}
+
+/* پیام‌های سیستم */
+ul.messagelist li{border-radius:10px;margin:8px 12px;font-weight:500}
+
+/* فرم‌ها */
+label{color:#33403a}
+.form-row .help, .form-help{color:#6b665a}
+.aligned label{line-height:1.9}
+
+/* صفحه ورود */
+body.login #container{max-width:520px}
+body.login #content{padding:24px}
+#login-form{
+  border-radius:16px;border:1px solid #e6e0d2;background:#fff;
+  box-shadow:0 14px 44px rgba(13,59,46,.12);padding:26px 26px 18px;
+}
+#login-form label{font-weight:600;color:#33403a}
+#login-form .submit-row input{
+  background:#0D3B2E;border:none;color:#fff;border-radius:9px;
+  padding:10px 22px;font-weight:700;width:100%;
+}
+#login-form .submit-row input:hover{background:#092A21}
+body.login #footer{padding:14px;text-align:center;color:#8b8574}
+
+/* فوتر ادمین */
+#footer{color:#8b8574}
+
+/* حالت خطا با کنتراست کافی */
+.errornote{
+  background:#f9ecea;color:#7c2222;border:1px solid #e3b8b3;border-radius:10px;
+  font-weight:600;
+}
+.errorlist li{color:#9B2C2C;font-weight:600}

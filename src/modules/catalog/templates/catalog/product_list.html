@@ -340,17 +340,13 @@
 <section class="hero">
     <div class="container">
         <div class="hero-content">
-            <span class="hero-badge">فروشگاه آنلاین اعتمادمحور</span>
-            <h1>انتخاب مطمئن،<br>هر محصولی که باشد</h1>
-            <p class="hero-subtitle">
-                ریهان یک فروشگاه عمومی با تعداد زیاد کالا نیست.<br>
-                ارزش ریهان در انتخاب‌های دقیق و معنادار است.
-            </p>
+            <span class="hero-badge">{{ site_settings.hero_badge }}</span>
+            <h1>{{ site_settings.hero_title|linebreaksbr }}</h1>
+            <p class="hero-subtitle">{{ site_settings.hero_subtitle|linebreaksbr }}</p>
             <div class="hero-divider"></div>
-            <p class="hero-quote">
-                «ما به جای پرسیدن چه چیزی بیشتر فروخته می‌شود،<br>
-                می‌پرسیم چه چیزی واقعاً ارزش انتخاب شدن دارد.»
-            </p>
+            {% if site_settings.hero_quote %}
+            <p class="hero-quote">{{ site_settings.hero_quote|linebreaksbr }}</p>
+            {% endif %}
         </div>
     </div>
 </section>
@@ -358,7 +354,7 @@
 <!-- PRODUCTS SECTION -->
 <section class="container">
     <div class="section-title">
-        <h2>محصولات برگزیده</h2>
+        <h2>{{ site_settings.featured_title }}</h2>
         <div class="section-title-line"></div>
         <p>هر محصول با دقت انتخاب و ارزیابی شده است</p>
     </div>

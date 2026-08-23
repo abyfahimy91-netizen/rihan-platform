@@ -329,10 +329,13 @@
     {% block extra_css %}{% endblock %}
 </head>
 <body>
+    {% if site_settings.announcement_active and site_settings.announcement_text %}
+    <div style="background:#C9A961;color:#141414;text-align:center;padding:8px 16px;font-size:13.5px;font-weight:600;">{{ site_settings.announcement_text }}</div>
+    {% endif %}
     <header>
         <div class="container">
             <div class="header-content">
-                <a href="/" class="logo">ریهان</a>
+                <a href="/" class="logo">{{ site_settings.site_name }}</a>
                 <nav class="nav-links">
                     <a href="/">محصولات</a>
                     <a href="/about/">درباره ما</a>
@@ -362,9 +365,9 @@
         <div class="container">
             <div class="footer-grid">
                 <div class="footer-col">
-                    <div class="footer-brand">ریهان</div>
-                    <p class="footer-tagline">انتخاب مطمئن، هر محصولی که باشد</p>
-                    <p style="margin-top: 15px;">فروشگاه آنلاین اعتمادمحور با محصولات اصیل و با کیفیت</p>
+                    <div class="footer-brand">{{ site_settings.site_name }}</div>
+                    <p class="footer-tagline">{{ site_settings.footer_tagline }}</p>
+                    <p style="margin-top: 15px;">{{ site_settings.footer_description }}</p>
                 </div>
                 
                 <div class="footer-col">
@@ -383,14 +386,22 @@
                 
                 <div class="footer-col">
                     <h4>تماس</h4>
-                    <a href="tel:09123456789">۰۹۱۲-۳۴۵-۶۷۸۹</a>
-                    <p>هر روز ۱۱ تا ۱۹</p>
-                    <p>فروشگاه آنلاین — ارسال به سراسر ایران</p>
+                    {% if site_settings.contact_phone %}<a href="tel:{{ site_settings.contact_phone }}">{{ site_settings.contact_phone }}</a>{% endif %}
+                    {% if site_settings.contact_email %}<p><a href="mailto:{{ site_settings.contact_email }}">{{ site_settings.contact_email }}</a></p>{% endif %}
+                    {% if site_settings.contact_hours %}<p>{{ site_settings.contact_hours }}</p>{% endif %}
+                    <p>{{ site_settings.contact_address }}</p>
+                    {% if site_settings.instagram_url or site_settings.telegram_url or site_settings.whatsapp_number %}
+                    <p style="margin-top:10px;">
+                        {% if site_settings.instagram_url %}<a href="{{ site_settings.instagram_url }}" target="_blank" rel="noopener">اینستاگرام</a> · {% endif %}
+                        {% if site_settings.telegram_url %}<a href="{{ site_settings.telegram_url }}" target="_blank" rel="noopener">تلگرام</a> · {% endif %}
+                        {% if site_settings.whatsapp_number %}<a href="https://wa.me/{{ site_settings.whatsapp_number }}" target="_blank" rel="noopener">واتساپ</a>{% endif %}
+                    </p>
+                    {% endif %}
                 </div>
             </div>
             
             <div class="footer-bottom">
-                <p>© ۱۴۰۵ ریهان. تمام حقوق محفوظ است.</p>
+                <p>{{ site_settings.footer_copyright }}</p>
             </div>
         </div>
     </footer>
