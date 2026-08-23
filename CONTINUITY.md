@@ -147,3 +147,32 @@ nginx -t && systemctl restart nginx
 | 5 | Clear entire cart | ✅ Success |
 
 **Conclusion:** Cart logic is 100% functional. Session management, price calculation, and quantity updates all work correctly.
+
+---
+
+## Admin UI Overhaul + Production Hotfixes (2026-08-23, ۱۴۰۵/۰۶/۰۱)
+
+**Scope:** Admin redesign (D-092), unicode slug hotfix (D-093), trust-badges template fix, variants proposal (D-094)
+
+| Item | Status | Commit |
+|------|--------|--------|
+| Brand admin theme (`rihan_admin.css/js`) + grouped sidebar + contrast dashboard | ✅ Live | `c72fd8b` |
+| `SiteSettings` singleton (pages app) + context processor → hero/announcement/footer editable in `/admin/pages/sitesettings/1/change/` | ✅ Live | `c72fd8b` |
+| `<slug:>` → `<str:>` in catalog/leads/reviews urls (Persian slugs broke homepage with 500) | ✅ Fixed | `ab1aa11` |
+| Multiline `{# #}` comment leaking into HTML (trust_badges partial) — replaced with single-line | ✅ Fixed | `8e5ef15` |
+| Product image pipeline verified end-to-end (upload → /app/media/products/... → nginx 200) | ✅ Tested | — |
+| Product Variants system | 🟡 Proposed (D-094) — NOT implemented yet | — |
+
+**Gotchas for next developer:**
+- Template changes require `docker restart rihan_web`; static changes require `collectstatic`
+- Any URL pattern taking a product slug MUST use `<str:...>` (slugs can be Unicode)
+- Never write multiline `{# #}` comments in Django templates
+- `SiteSettings.load()` is called on every request via context processor — keep it cheap; if the model is renamed/removed, update `modules/pages/context_processors.py` or the whole site 500s
+
+---
+
+## Product Edit & Registration Verification (2026-08-23)
+
+- Edit page for Persian-named product «سماق قرمز هوراند»: HTTP 200 ✅
+- Product creation incl. fully-Persian names/slugs: works ✅ (after D-093)
+- Variant support: **not available yet** — see D-094
