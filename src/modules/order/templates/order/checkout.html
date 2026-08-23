@@ -1,0 +1,230 @@
+{% extends "catalog/base.html" %}
+
+{% block title %}تسویه‌حساب | ریهان{% endblock %}
+{% block meta_description %}تکمیل سفارش در فروشگاه ریهان - ارسال رایگان، پرداخت کارت به کارت، کیفیت اصیل{% endblock %}
+
+{% block extra_css %}
+<style>
+    .checkout-page-title {
+        font-size: 40px;
+        font-weight: 900;
+        color: var(--color-text);
+        margin-bottom: 12px;
+        letter-spacing: -0.5px;
+    }
+    .checkout-page-subtitle {
+        font-size: 16px;
+        color: var(--color-text-muted);
+        margin-bottom: 48px;
+    }
+    .checkout-layout {
+        display: grid;
+        grid-template-columns: 1fr 380px;
+        gap: 48px;
+        align-items: start;
+    }
+    .checkout-card {
+        background: #fff;
+        border-radius: 16px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+        border: 1px solid var(--color-border);
+        padding: 32px;
+    }
+    .checkout-card + .checkout-card { margin-top: 24px; }
+    .checkout-card h2 {
+        font-size: 22px;
+        font-weight: 800;
+        color: var(--color-text);
+        margin-bottom: 24px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    .form-group { margin-bottom: 20px; }
+    .form-group label {
+        display: block;
+        font-size: 14px;
+        font-weight: 700;
+        color: var(--color-text);
+        margin-bottom: 8px;
+    }
+    .form-group label .req { color: #c0392b; }
+    .form-control {
+        width: 100%;
+        padding: 14px 16px;
+        border: 1.5px solid var(--color-border);
+        border-radius: 12px;
+        font-size: 15px;
+        font-family: inherit;
+        color: var(--color-text);
+        background: #fafafa;
+        transition: all 0.2s;
+    }
+    .form-control:focus {
+        outline: none;
+        border-color: var(--color-primary, #0d3b2e);
+        background: #fff;
+        box-shadow: 0 0 0 3px rgba(13,59,46,0.08);
+    }
+    textarea.form-control { min-height: 96px; resize: vertical; }
+    .form-hint { font-size: 12px; color: var(--color-text-muted); margin-top: 6px; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .checkout-summary {
+        position: sticky;
+        top: 24px;
+        background: #fff;
+        border-radius: 16px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+        border: 1px solid var(--color-border);
+        padding: 28px;
+    }
+    .checkout-summary h2 {
+        font-size: 20px;
+        font-weight: 800;
+        color: var(--color-text);
+        margin-bottom: 20px;
+    }
+    .summary-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px 0;
+        border-bottom: 1px dashed var(--color-border);
+        font-size: 14px;
+        color: var(--color-text);
+    }
+    .summary-item .qty { color: var(--color-text-muted); font-size: 13px; }
+    .summary-total-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 18px 0 6px;
+        font-size: 17px;
+        font-weight: 800;
+        color: var(--color-text);
+    }
+    .btn-submit-order {
+        width: 100%;
+        margin-top: 20px;
+        padding: 18px 32px;
+        background: linear-gradient(135deg, #0d3b2e, #14532d);
+        color: #fff;
+        border: none;
+        border-radius: 14px;
+        font-size: 17px;
+        font-weight: 800;
+        font-family: inherit;
+        cursor: pointer;
+        transition: all 0.25s;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 10px;
+    }
+    .btn-submit-order:hover { transform: translateY(-2px); box-shadow: 0 10px 28px rgba(13,59,46,0.35); }
+    .trust-badges {
+        margin-top: 18px;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        font-size: 13px;
+        color: var(--color-text-muted);
+    }
+    .trust-badges span { display: flex; align-items: center; gap: 8px; }
+    .empty-cart-box {
+        text-align: center;
+        padding: 80px 24px;
+        background: #fff;
+        border-radius: 16px;
+        border: 1px solid var(--color-border);
+    }
+    @media (max-width: 900px) {
+        .checkout-layout { grid-template-columns: 1fr; }
+        .checkout-summary { position: static; order: -1; }
+        .checkout-page-title { font-size: 30px; }
+        .form-row { grid-template-columns: 1fr; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    {% if messages %}
+        <div style="margin-bottom: 24px;">
+            {% for message in messages %}
+                <div style="padding:14px 18px;border-radius:12px;margin-bottom:10px;font-size:14px;background:{% if message.tags == 'error' %}#fdecea;color:#b71c1c;{% else %}#e8f5e9;color:#1b5e20;{% endif %}border:1px solid rgba(0,0,0,0.06);">{{ message }}</div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    {% if items %}
+    <h1 class="checkout-page-title">تسویه‌حساب</h1>
+    <p class="checkout-page-subtitle">فقط سه قدم تا دریافت محصولات اصیل هوراند 🌿</p>
+
+    <form method="post" action="{% url 'order_pages:checkout_page' %}" class="checkout-layout">
+        {% csrf_token %}
+        <div>
+            <div class="checkout-card">
+                <h2>📍 اطلاعات گیرنده و آدرس</h2>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="id_name">نام و نام خانوادگی <span class="req">*</span></label>
+                        <input type="text" id="id_name" name="name" class="form-control"
+                               value="{{ form_data.name|default:'' }}" placeholder="مثلاً: مریم احمدی" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="id_phone">شماره موبایل <span class="req">*</span></label>
+                        <input type="tel" id="id_phone" name="phone" class="form-control" dir="ltr"
+                               value="{{ form_data.phone|default:'' }}" placeholder="09123456789" required>
+                        <div class="form-hint">برای هماهنگی ارسال با شما تماس می‌گیریم.</div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="id_address">آدرس کامل <span class="req">*</span></label>
+                    <textarea id="id_address" name="address" class="form-control"
+                              placeholder="استان، شهر، خیابان، پلاک و واحد..." required>{{ form_data.address|default:'' }}</textarea>
+                </div>
+                <div class="form-group">
+                    <label for="id_postal_code">کد پستی (اختیاری)</label>
+                    <input type="text" id="id_postal_code" name="postal_code" class="form-control" dir="ltr"
+                           value="{{ form_data.postal_code|default:'' }}" placeholder="10 رقم">
+                </div>
+            </div>
+        </div>
+
+        <div class="checkout-summary">
+            <h2>🛒 سفارش شما</h2>
+            {% for item in items %}
+                <div class="summary-item">
+                    <span>{{ item.product.name }} <span class="qty">× {{ item.quantity }}</span></span>
+                    <span>{{ item.subtotal|floatformat:0 }} تومان</span>
+                </div>
+            {% endfor %}
+            <div class="summary-total-row">
+                <span>مبلغ قابل پرداخت</span>
+                <span>{{ total|floatformat:0 }} تومان</span>
+            </div>
+
+            <button type="submit" class="btn-submit-order">
+                ثبت سفارش و ادامه به پرداخت
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="19" y1="12" x2="5" y2="12"></line>
+                    <polyline points="12 19 5 12 12 5"></polyline>
+                </svg>
+            </button>
+
+            <div class="trust-badges">
+                <span>✅ ارسال رایگان (D-080)</span>
+                <span>💳 امکان پرداخت کارت به کارت با آپلود رسید</span>
+                <span>📞 پیگیری تلفنی سفارش با شماره سفارش</span>
+            </div>
+        </div>
+    </form>
+    {% else %}
+    <div class="empty-cart-box">
+        <h2 style="font-size:26px;font-weight:800;margin-bottom:12px;">سبد خرید شما خالی است 🛒</h2>
+        <p style="color:var(--color-text-muted);margin-bottom:24px;">برای تسویه‌حساب ابتدا محصولی به سبد اضافه کنید.</p>
+        <a href="/" style="display:inline-block;padding:14px 32px;background:#0d3b2e;color:#fff;border-radius:12px;text-decoration:none;font-weight:700;">مشاهده محصولات</a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

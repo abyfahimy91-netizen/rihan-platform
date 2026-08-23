@@ -12,6 +12,7 @@ urlpatterns = [
     path('cart/update/', cart_views.update_cart_item_view, name='update_cart_page'),
     path('cart/remove/', cart_views.remove_from_cart_view, name='remove_cart_page'),
     # Tracking & Payment (M7 + M2)
+    path('checkout/', cart_views.checkout_page_view, name='checkout_page'),
     path('lookup/', tracking_views.tracking_lookup_view, name='tracking_lookup'),
     path('tracking/<str:order_number>/', tracking_views.tracking_page_view, name='tracking_page'),
     path('payment/<str:order_number>/', tracking_views.payment_page_view, name='payment_page'),

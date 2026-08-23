@@ -601,13 +601,13 @@
         </div>
         
         <div class="summary-actions">
-            <button type="button" class="btn-checkout" onclick="alert('تسویه‌حساب به زودی فعال می‌شود')">
+            <a href="{% url 'order_pages:checkout_page' %}" class="btn-checkout" style="text-decoration:none;">
                 ادامه به تسویه‌حساب
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <line x1="5" y1="12" x2="19" y2="12"></line>
                     <polyline points="12 5 19 12 12 19"></polyline>
                 </svg>
-            </button>
+            </a>
             <a href="/" class="btn-continue">ادامه خرید</a>
         </div>
         
