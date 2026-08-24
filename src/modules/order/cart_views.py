@@ -137,8 +137,13 @@ def remove_from_cart_view(request):
 
 
 def checkout_page_view(request):
-    """صفحه تسویه‌حساب — فرم اطلاعات گیرنده (GET) و ثبت سفارش (POST)"""
+    """صفحه تسویه‌حساب — فرم اطلاعات گیرنده (GET) و ثبت سفارش (POST)
+
+    D-102: کاربر لاگین‌کرده آدرس‌های ذخیره‌شده‌اش را می‌بیند و با یک کلیک
+    انتخاب می‌کند؛ آدرس دستی جدید هم (با رضایت کاربر) در پروفایل ذخیره می‌شود.
+    """
     from .checkout_service import CheckoutService
+    from . import address_service  # D-102: آدرس‌های ذخیره‌شده کاربر
 
     cart = get_or_create_cart(request)
     items = cart.items.select_related('product').all()
@@ -147,47 +152,101 @@ def checkout_page_view(request):
     shipping = 0  # D-080: ارسال رایگان
     total = subtotal + shipping
 
+    is_auth = request.user.is_authenticated
+    saved_addresses = list(request.user.addresses.all()) if is_auth else []
+
     if request.method == 'POST':
-        form_data = {
-            'name': (request.POST.get('name') or '').strip(),
-            'phone': (request.POST.get('phone') or '').strip(),
-            'address': (request.POST.get('address') or '').strip(),
-            'postal_code': (request.POST.get('postal_code') or '').strip(),
-        }
-        errors = []
-        if len(form_data['name']) < 3:
-            errors.append('لطفاً نام و نام خانوادگی را کامل وارد کنید.')
-        if not _re.fullmatch(r'09\d{9}', form_data['phone']):
-            errors.append('شماره موبایل معتبر وارد کنید (مثل 09123456789).')
-        if len(form_data['address']) < 10:
-            errors.append('آدرس را کامل‌تر بنویسید تا بتوانیم ارسال کنیم.')
-        if form_data['postal_code'] and not _re.fullmatch(r'\d{10}', form_data['postal_code']):
-            errors.append('کد پستی باید ۱۰ رقم باشد.')
+        choice = (request.POST.get('address_choice') or 'new').strip()
+        save_address = is_auth and request.POST.get('save_address') == 'on'
+
+        selected_address = None
+        if is_auth and choice.startswith('id:'):
+            selected_address = address_service.get_for_user(request.user, choice[3:])
+            if selected_address is None:
+                messages.error(request, 'آدرس انتخابی پیدا نشد؛ لطفاً دوباره انتخاب کنید.')
+                return render(request, 'order/checkout.html', {
+                    'items': items, 'subtotal': subtotal,
+                    'shipping': shipping, 'total': total,
+                    'saved_addresses': saved_addresses, 'address_choice': 'new',
+                    'form_data': _default_form_data(request),
+                })
+
+        if selected_address is not None:
+            # آدرس ذخیره‌شده — بدون تکرار اعتبارسنجی دستی
+            guest_info = {
+                'name': selected_address.full_name,
+                'phone': selected_address.phone,
+                'address': selected_address.detailed_address,
+                'postal_code': selected_address.postal_code,
+                'shipping_cost': shipping,
+            }
+            form_data = None
+        else:
+            form_data = {
+                'name': (request.POST.get('name') or '').strip(),
+                'phone': (request.POST.get('phone') or '').strip(),
+                'address': (request.POST.get('address') or '').strip(),
+                'postal_code': (request.POST.get('postal_code') or '').strip(),
+                'title': (request.POST.get('title') or '').strip(),
+            }
+            errors = []
+            if len(form_data['name']) < 3:
+                errors.append('لطفاً نام و نام خانوادگی را کامل وارد کنید.')
+            if not _re.fullmatch(r'09\d{9}', form_data['phone']):
+                errors.append('شماره موبایل معتبر وارد کنید (مثل 09123456789).')
+            if len(form_data['address']) < 10:
+                errors.append('آدرس را کامل‌تر بنویسید تا بتوانیم ارسال کنیم.')
+            if form_data['postal_code'] and not _re.fullmatch(r'\d{10}', form_data['postal_code']):
+                errors.append('کد پستی باید ۱۰ رقم باشد.')
+
+            if not items.exists():
+                errors.append('سبد خرید شما خالی است.')
+
+            if errors:
+                for e in errors:
+                    messages.error(request, e)
+                return render(request, 'order/checkout.html', {
+                    'items': items, 'subtotal': subtotal,
+                    'shipping': shipping, 'total': total,
+                    'form_data': form_data,
+                    'saved_addresses': saved_addresses,
+                    'address_choice': 'new',
+                })
+
+            guest_info = {
+                'name': form_data['name'],
+                'phone': form_data['phone'],
+                'address': form_data['address'],
+                'postal_code': form_data['postal_code'],
+                'shipping_cost': shipping,
+            }
 
         if not items.exists():
-            errors.append('سبد خرید شما خالی است.')
-
-        if errors:
-            for e in errors:
-                messages.error(request, e)
-            return render(request, 'order/checkout.html', {
-                'items': items, 'subtotal': subtotal,
-                'shipping': shipping, 'total': total,
-                'form_data': form_data,
-            })
+            messages.error(request, 'سبد خرید شما خالی است.')
+            return redirect('order_pages:cart_page')
 
         try:
             order = CheckoutService.create_order(
                 cart,
-                guest_info={
-                    'name': form_data['name'],
-                    'phone': form_data['phone'],
-                    'address': form_data['address'],
-                    'postal_code': form_data['postal_code'],
-                    'shipping_cost': shipping,
-                },
-                user=request.user if request.user.is_authenticated else None,
+                guest_info=guest_info,
+                user=request.user if is_auth else None,
             )
+            # D-102: ذخیره خودکار آدرس دستی جدید در پروفایل (با رضایت کاربر)
+            if form_data is not None and save_address:
+                try:
+                    address_service.create_for_user(
+                        request.user,
+                        {
+                            'title': form_data.get('title', ''),
+                            'full_name': form_data['name'],
+                            'phone': form_data['phone'],
+                            'address': form_data['address'],
+                            'postal_code': form_data['postal_code'],
+                        },
+                    )
+                    messages.success(request, 'آدرس شما در پروفایل ذخیره شد؛ دفعه بعد فقط یک کلیک ✅')
+                except ValueError:
+                    pass  # ذخیره آدرس نباید ثبت سفارش را متوقف کند
             messages.success(request, f"سفارش شما با شماره {order.order_number} ثبت شد. لطفاً پرداخت را تکمیل کنید.")
             request.session['tracking_order_id'] = str(order.id)
             return redirect('order_pages:payment_page', order_number=order.order_number)
@@ -203,11 +262,24 @@ def checkout_page_view(request):
     context = {
         'items': items, 'subtotal': subtotal,
         'shipping': shipping, 'total': total,
+        'saved_addresses': saved_addresses,
+        'selected_address_pk': saved_addresses[0].pk if saved_addresses else None,
         'form_data': (
             {'name': ((request.user.first_name or '') + ' ' + (request.user.last_name or '')).strip(),
              'phone': request.user.username,
-             'address': '', 'postal_code': ''}
-            if request.user.is_authenticated else {}
+             'address': '', 'postal_code': '', 'title': ''}
+            if is_auth else {}
         ),
     }
     return render(request, 'order/checkout.html', context)
+
+
+def _default_form_data(request):
+    """پیش‌پرکردن نام/موبایل از پروفایل کاربر"""
+    if request.user.is_authenticated:
+        return {
+            'name': ((request.user.first_name or '') + ' ' + (request.user.last_name or '')).strip(),
+            'phone': request.user.username,
+            'address': '', 'postal_code': '', 'title': '',
+        }
+    return {}

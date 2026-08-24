@@ -251,6 +251,10 @@ def profile_view(request):
     if request.method == 'POST':
         action = request.POST.get('action', 'save_info')
 
+        # D-102: اکشن‌های مدیریت آدرس‌ها (ذخیره/پیش‌فرض/حذف)
+        if _handle_address_actions(request, u):
+            return redirect('auth_pages:profile')
+
         if action == 'save_info':
             u.first_name = (request.POST.get('first_name') or '').strip()
             u.last_name = (request.POST.get('last_name') or '').strip()
@@ -345,7 +349,82 @@ def profile_view(request):
         'stats': profile_stats,
         'devices': devices,
         'has_password': PasswordService.has_password(u),
+        # D-102: مدیریت آدرس‌ها در پروفایل
+        'addresses': u.addresses.all(),
+        'edit_address': _get_edit_address(u, request),
     })
+
+
+# ══════════════════════════ آدرس‌ها (D-102) ══════════════════════════
+
+def _get_edit_address(user, request):
+    """آدرس در حال ویرایش (از ?edit=<id>) — فقط اگر متعلق به کاربر باشد"""
+    from src.modules.order import address_service
+    edit_id = request.GET.get('edit') or ''
+    if edit_id:
+        return address_service.get_for_user(user, edit_id)
+    return None
+
+
+def _handle_address_actions(request, u):
+    """اکشن‌های POST مربوط به آدرس‌ها در پروفایل — خروجی: True اگر هندل شد"""
+    from src.modules.order import address_service
+
+    action = request.POST.get('action', '')
+
+    if action == 'address_save':
+        addr_id = request.POST.get('address_id') or ''
+        data = {
+            'title': request.POST.get('title'),
+            'full_name': request.POST.get('full_name'),
+            'phone': request.POST.get('phone'),
+            'address': request.POST.get('address'),
+            'postal_code': request.POST.get('postal_code'),
+        }
+        if addr_id:
+            addr = address_service.get_for_user(u, addr_id)
+            if not addr:
+                messages.error(request, 'آدرس موردنظر پیدا نشد.')
+                return True
+            clean, errors = address_service.validate_address_data(data)
+            if errors:
+                for e in errors:
+                    messages.error(request, e)
+                return True
+            make_default = request.POST.get('is_default') == 'on'
+            addr.title = clean['title']
+            addr.full_name = clean['full_name']
+            addr.phone = clean['phone']
+            addr.detailed_address = clean['detailed_address']
+            addr.postal_code = clean['postal_code']
+            if make_default:
+                addr.is_default = True
+            addr.save()
+            messages.success(request, 'آدرس به‌روزرسانی شد ✅')
+        else:
+            try:
+                address_service.create_for_user(u, data)
+                messages.success(request, 'آدرس جدید ذخیره شد ✅ حالا در تسویه‌حساب با یک کلیک در دسترس است.')
+            except ValueError as e:
+                for m in str(e).split(' | '):
+                    messages.error(request, m)
+        return True
+
+    if action == 'address_default':
+        if address_service.set_default(u, request.POST.get('address_id') or ''):
+            messages.success(request, 'آدرس پیش‌فرض شما تغییر کرد ✅')
+        else:
+            messages.error(request, 'آدرس موردنظر پیدا نشد.')
+        return True
+
+    if action == 'address_delete':
+        if address_service.delete_address(u, request.POST.get('address_id') or ''):
+            messages.success(request, 'آدرس حذف شد.')
+        else:
+            messages.error(request, 'آدرس موردنظر پیدا نشد.')
+        return True
+
+    return False
 
 
 # ══════════════════════════ خروج ══════════════════════════

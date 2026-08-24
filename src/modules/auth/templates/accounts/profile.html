@@ -169,6 +169,8 @@
     var saved = null;
     try { saved = localStorage.getItem(TAB_KEY); } catch(e){}
     if (saved && document.getElementById('tab-' + saved)) activate(saved, false);
+    // D-102: هنگام ویرایش آدرس، مستقیم تب آدرس‌ها باز شود
+    {% if edit_address %}activate('addresses', true);{% endif %}
 
     // ── شمارش معکوس مهلت رزرو سفارش‌ها (D-099) ──
     var anyTtl = false;
@@ -276,6 +278,7 @@
         <!-- ═══ تب‌ها ═══ -->
         <nav class="pf-tabs" aria-label="بخش‌های حساب">
             <button type="button" class="pf-tab is-active" data-tab="orders">📦 سفارش‌ها</button>
+            <button type="button" class="pf-tab" data-tab="addresses">📍 آدرس‌ها</button>
             <button type="button" class="pf-tab" data-tab="account">👤 اطلاعات حساب</button>
             <button type="button" class="pf-tab" data-tab="security">🔐 امنیت</button>
             <button type="button" class="pf-tab" data-tab="devices">📱 دستگاه‌ها</button>
@@ -443,6 +446,106 @@
                     </form>
                 {% else %}
                     <div class="pf-hint" style="margin-bottom:0;">دستگاه فعلی به‌عنوان دستگاه معتبر ذخیره نشده است.</div>
+                {% endif %}
+            </div>
+        </section>
+
+        <!-- ═══ پنل آدرس‌ها (D-102) ═══ -->
+        <section class="pf-panel" id="tab-addresses">
+            <style>
+                .adr-card{border:1.5px solid var(--color-border);border-radius:14px;padding:16px 18px;margin-bottom:12px;background:#fff;}
+                .adr-card.is-def{border-color:var(--color-primary);background:#F4F8F2;}
+                .adr-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:8px;flex-wrap:wrap;}
+                .adr-name{font-weight:800;font-size:15px;color:var(--color-text);}
+                .adr-name small{font-weight:600;color:var(--color-text-muted);direction:ltr;}
+                .adr-badge{font-size:11.5px;font-weight:700;border-radius:999px;padding:3px 12px;background:var(--color-primary);color:#fff;}
+                .adr-badge.soft{background:#E8F0E5;color:var(--color-primary);}
+                .adr-body{font-size:13.5px;color:var(--color-text-muted);line-height:1.9;margin-bottom:12px;}
+                .adr-actions{display:flex;gap:8px;flex-wrap:wrap;}
+                .adr-btn{font-family:inherit;font-size:12.5px;font-weight:700;border-radius:9px;padding:7px 14px;cursor:pointer;border:1.5px solid var(--color-border);background:#fff;color:var(--color-text);text-decoration:none;display:inline-block;}
+                .adr-btn:hover{border-color:var(--color-primary);color:var(--color-primary);}
+                .adr-btn.danger{color:#b3402f;}
+                .adr-btn.danger:hover{border-color:#b3402f;color:#b3402f;}
+                .adr-btn.primary{background:var(--color-primary);color:#fff;border-color:var(--color-primary);}
+                .adr-form-box{border:1.5px dashed var(--color-border);border-radius:14px;padding:14px 18px;margin-bottom:18px;background:#FBFAF6;}
+                .adr-form-box summary{cursor:pointer;font-weight:800;font-size:14px;color:var(--color-primary);list-style:none;display:flex;align-items:center;gap:8px;}
+                .adr-form-box summary::-webkit-details-marker{display:none;}
+                .adr-def-row{display:flex;align-items:center;gap:9px;margin:14px 0;cursor:pointer;}
+                .adr-def-row input{width:17px;height:17px;accent-color:var(--color-primary);}
+                .adr-def-row span{font-size:13.5px;font-weight:600;color:var(--color-text);}
+            </style>
+            <div class="pf-card">
+                <h2>📍 آدرس‌های من</h2>
+                <p class="pf-hint">آدرس‌های ذخیره‌شده در تسویه‌حساب با یک کلیک انتخاب می‌شوند؛ آدرس پیش‌فرض خودکار انتخاب می‌شود.</p>
+
+                <details class="adr-form-box" {% if edit_address %}open{% endif %}>
+                    <summary>{% if edit_address %}✏️ ویرایش آدرس{% else %}➕ افزودن آدرس جدید{% endif %}</summary>
+                    <form method="post" action="{% url 'auth_pages:profile' %}" style="margin-top:16px;">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="address_save">
+                        {% if edit_address %}<input type="hidden" name="address_id" value="{{ edit_address.pk }}">{% endif %}
+                        <div class="pf-field">
+                            <label>عنوان آدرس (اختیاری)</label>
+                            <input class="pf-input" name="title" maxlength="60" value="{{ edit_address.title|default:'' }}" placeholder="مثلاً: خانه، محل کار">
+                        </div>
+                        <div class="pf-grid2">
+                            <div class="pf-field">
+                                <label>نام و نام خانوادگی گیرنده</label>
+                                <input class="pf-input" name="full_name" value="{{ edit_address.full_name|default:user.first_name|default:'' }}" placeholder="مثلاً: مریم احمدی" required>
+                            </div>
+                            <div class="pf-field">
+                                <label>شماره موبایل گیرنده</label>
+                                <input class="pf-input" dir="ltr" name="phone" value="{{ edit_address.phone|default:user.username|default:'' }}" placeholder="09123456789" required>
+                            </div>
+                        </div>
+                        <div class="pf-field">
+                            <label>آدرس کامل</label>
+                            <textarea class="pf-input" name="address" rows="3" placeholder="استان، شهر، خیابان، پلاک و واحد..." required>{{ edit_address.detailed_address|default:'' }}</textarea>
+                        </div>
+                        <div class="pf-field">
+                            <label>کد پستی (اختیاری)</label>
+                            <input class="pf-input" dir="ltr" name="postal_code" maxlength="10" value="{{ edit_address.postal_code|default:'' }}" placeholder="10 رقم">
+                        </div>
+                        <label class="adr-def-row">
+                            <input type="checkbox" name="is_default" {% if edit_address.is_default or not edit_address and not addresses %}checked{% endif %}>
+                            <span>⭐ این آدرس پیش‌فرض من باشد</span>
+                        </label>
+                        <div style="display:flex;gap:10px;flex-wrap:wrap;">
+                            <button type="submit" class="pf-save">{% if edit_address %}ذخیره تغییرات{% else %}ذخیره آدرس{% endif %}</button>
+                            {% if edit_address %}<a href="{% url 'auth_pages:profile' %}" class="adr-btn">لغو</a>{% endif %}
+                        </div>
+                    </form>
+                </details>
+
+                {% if addresses %}
+                    {% for addr in addresses %}
+                    <div class="adr-card {% if addr.is_default %}is-def{% endif %}">
+                        <div class="adr-head">
+                            <span class="adr-name">{{ addr.full_name }} <small>{{ addr.phone }}</small></span>
+                            {% if addr.is_default %}<span class="adr-badge">⭐ پیش‌فرض</span>{% elif addr.title %}<span class="adr-badge soft">{{ addr.title }}</span>{% endif %}
+                        </div>
+                        <div class="adr-body">{{ addr.detailed_address }}{% if addr.postal_code %} — کدپستی {{ addr.postal_code|fa }}{% endif %}</div>
+                        <div class="adr-actions">
+                            {% if not addr.is_default %}
+                            <form method="post" action="{% url 'auth_pages:profile' %}">
+                                {% csrf_token %}
+                                <input type="hidden" name="action" value="address_default">
+                                <input type="hidden" name="address_id" value="{{ addr.pk }}">
+                                <button type="submit" class="adr-btn">⭐ پیش‌فرض کن</button>
+                            </form>
+                            {% endif %}
+                            <a class="adr-btn" href="?edit={{ addr.pk }}">✏️ ویرایش</a>
+                            <form method="post" action="{% url 'auth_pages:profile' %}" onsubmit="return confirm('این آدرس حذف شود؟');">
+                                {% csrf_token %}
+                                <input type="hidden" name="action" value="address_delete">
+                                <input type="hidden" name="address_id" value="{{ addr.pk }}">
+                                <button type="submit" class="adr-btn danger">🗑 حذف</button>
+                            </form>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="pf-hint" style="margin-bottom:0;">هنوز آدرسی ذخیره نکرده‌اید. اولین آدرس را از فرم بالای همین بخش اضافه کنید.</div>
                 {% endif %}
             </div>
         </section>

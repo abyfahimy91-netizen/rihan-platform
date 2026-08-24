@@ -356,6 +356,9 @@ class Address(models.Model):
     def save(self, *args, **kwargs):
         if self.is_default:
             Address.objects.filter(user=self.user, is_default=True).exclude(id=self.id).update(is_default=False)
+        elif not Address.objects.filter(user=self.user).exclude(id=self.id).exists():
+            # D-102: اولین آدرس هر کاربر خودکار پیش‌فرض می‌شود
+            self.is_default = True
         super().save(*args, **kwargs)
 
 

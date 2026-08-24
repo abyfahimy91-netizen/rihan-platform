@@ -140,10 +140,37 @@
     }
     @media (max-width: 900px) {
         .checkout-layout { grid-template-columns: 1fr; }
-        .checkout-summary { position: static; order: -1; }
+        .checkout-summary { position: static; }
         .checkout-page-title { font-size: 30px; }
         .form-row { grid-template-columns: 1fr; }
     }
+
+    /* ── کارت‌های آدرس ذخیره‌شده (D-102) ── */
+    .addr-list { display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px; }
+    .addr-card { position: relative; display: block; cursor: pointer; }
+    .addr-card input { position: absolute; opacity: 0; pointer-events: none; }
+    .addr-card .addr-box {
+        border: 2px solid var(--color-border); border-radius: 14px; padding: 16px 18px;
+        background: #fafafa; transition: all .18s;
+    }
+    .addr-card:hover .addr-box { border-color: var(--color-primary); background: #fff; }
+    .addr-card input:checked + .addr-box {
+        border-color: var(--color-primary); background: #F4F8F2;
+        box-shadow: 0 0 0 3px rgba(13,59,46,0.10);
+    }
+    .addr-top { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-bottom: 6px; }
+    .addr-name { font-weight: 800; font-size: 15px; color: var(--color-text); }
+    .addr-tag { font-size: 11.5px; font-weight: 700; background: var(--color-primary); color: #fff; border-radius: 999px; padding: 3px 11px; }
+    .addr-tag.soft { background: #E8F0E5; color: var(--color-primary); }
+    .addr-text { font-size: 13.5px; color: var(--color-text-muted); line-height: 1.9; }
+    .addr-new { display: flex; align-items: center; gap: 10px; font-weight: 700; color: var(--color-primary); }
+    .addr-new .plus { width: 26px; height: 26px; border-radius: 50%; background: #E8F0E5; display: flex; align-items: center; justify-content: center; font-size: 17px; }
+    .save-addr-row {
+        display: flex; align-items: center; gap: 9px; background: #F4F8F2; border: 1px solid #DCE8D8;
+        border-radius: 12px; padding: 12px 14px; margin-bottom: 18px; cursor: pointer;
+    }
+    .save-addr-row input { width: 17px; height: 17px; accent-color: var(--color-primary); }
+    .save-addr-row span { font-size: 13.5px; color: var(--color-text); font-weight: 600; }
 </style>
 {% endblock %}
 
@@ -167,30 +194,69 @@
     <form method="post" action="{% url 'order_pages:checkout_page' %}" class="checkout-layout">
         {% csrf_token %}
         <div>
-            <div class="checkout-card">
-                <h2>📍 اطلاعات گیرنده و آدرس</h2>
-                <div class="form-row">
+                {% if saved_addresses %}
+                <div class="addr-list" id="addrList">
+                    {% for addr in saved_addresses %}
+                    <label class="addr-card">
+                        <input type="radio" name="address_choice" value="id:{{ addr.pk }}"
+                               {% if addr.pk == selected_address_pk %}checked{% endif %}
+                               data-addr-radio>
+                        <div class="addr-box">
+                            <div class="addr-top">
+                                <span class="addr-name">{{ addr.full_name }} <span dir="ltr" style="font-weight:600;color:var(--color-text-muted);">{{ addr.phone }}</span></span>
+                                {% if addr.is_default %}<span class="addr-tag">پیش‌فرض</span>{% elif addr.title %}<span class="addr-tag soft">{{ addr.title }}</span>{% endif %}
+                            </div>
+                            <div class="addr-text">{{ addr.detailed_address|truncatechars:110 }}{% if addr.postal_code %} — کدپستی {{ addr.postal_code|fa }}{% endif %}</div>
+                        </div>
+                    </label>
+                    {% endfor %}
+                    <label class="addr-card">
+                        <input type="radio" name="address_choice" value="new" data-addr-radio {% if not selected_address_pk %}checked{% endif %}>
+                        <div class="addr-box addr-new">
+                            <span class="plus">＋</span>
+                            <span>افزودن آدرس جدید</span>
+                        </div>
+                    </label>
+                </div>
+                {% else %}
+                <input type="hidden" name="address_choice" value="new">
+                {% endif %}
+
+                <div id="newAddressFields" {% if selected_address_pk %}style="display:none;"{% endif %}>
+                    {% if request.user.is_authenticated %}
+                    <label class="save-addr-row">
+                        <input type="checkbox" name="save_address" checked>
+                        <span>💾 این آدرس در پروفایلم ذخیره شود (خرید بعدی فقط یک کلیک)</span>
+                    </label>
+                    {% endif %}
                     <div class="form-group">
-                        <label for="id_name">نام و نام خانوادگی <span class="req">*</span></label>
-                        <input type="text" id="id_name" name="name" class="form-control"
-                               value="{{ form_data.name|default:'' }}" placeholder="مثلاً: مریم احمدی" required>
+                        <label for="id_title">عنوان آدرس (اختیاری)</label>
+                        <input type="text" id="id_title" name="title" class="form-control"
+                               value="{{ form_data.title|default:'' }}" placeholder="مثلاً: خانه، محل کار">
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="id_name">نام و نام خانوادگی <span class="req">*</span></label>
+                            <input type="text" id="id_name" name="name" class="form-control"
+                                   value="{{ form_data.name|default:'' }}" placeholder="مثلاً: مریم احمدی">
+                        </div>
+                        <div class="form-group">
+                            <label for="id_phone">شماره موبایل <span class="req">*</span></label>
+                            <input type="tel" id="id_phone" name="phone" class="form-control" dir="ltr"
+                                   value="{{ form_data.phone|default:'' }}" placeholder="09123456789">
+                            <div class="form-hint">برای هماهنگی ارسال با شما تماس می‌گیریم.</div>
+                        </div>
                     </div>
                     <div class="form-group">
-                        <label for="id_phone">شماره موبایل <span class="req">*</span></label>
-                        <input type="tel" id="id_phone" name="phone" class="form-control" dir="ltr"
-                               value="{{ form_data.phone|default:'' }}" placeholder="09123456789" required>
-                        <div class="form-hint">برای هماهنگی ارسال با شما تماس می‌گیریم.</div>
+                        <label for="id_address">آدرس کامل <span class="req">*</span></label>
+                        <textarea id="id_address" name="address" class="form-control"
+                                  placeholder="استان، شهر، خیابان، پلاک و واحد...">{{ form_data.address|default:'' }}</textarea>
                     </div>
-                </div>
-                <div class="form-group">
-                    <label for="id_address">آدرس کامل <span class="req">*</span></label>
-                    <textarea id="id_address" name="address" class="form-control"
-                              placeholder="استان، شهر، خیابان، پلاک و واحد..." required>{{ form_data.address|default:'' }}</textarea>
-                </div>
-                <div class="form-group">
-                    <label for="id_postal_code">کد پستی (اختیاری)</label>
-                    <input type="text" id="id_postal_code" name="postal_code" class="form-control" dir="ltr"
-                           value="{{ form_data.postal_code|default:'' }}" placeholder="10 رقم">
+                    <div class="form-group">
+                        <label for="id_postal_code">کد پستی (اختیاری)</label>
+                        <input type="text" id="id_postal_code" name="postal_code" class="form-control" dir="ltr"
+                               value="{{ form_data.postal_code|default:'' }}" placeholder="10 رقم">
+                    </div>
                 </div>
             </div>
         </div>
@@ -232,4 +298,35 @@
     </div>
     {% endif %}
 </div>
+
+<script>
+    // ─── مدیریت انتخاب آدرس: کارت ذخیره‌شده یا فرم جدید (D-102) ───
+    (function(){
+        var radios = document.querySelectorAll('[data-addr-radio]');
+        var fields = document.getElementById('newAddressFields');
+        if(!fields) return;
+
+        var managed = ['name', 'phone', 'address', 'postal_code', 'title'];
+
+        function sync(){
+            var chosen = 'new';
+            radios.forEach(function(r){ if(r.checked) chosen = r.value; });
+            var isNew = (chosen === 'new');
+            fields.style.display = isNew ? '' : 'none';
+            managed.forEach(function(n){
+                var el = fields.querySelector('[name="' + n + '"]');
+                if(el){
+                    el.disabled = !isNew;
+                    if(n !== 'title' && n !== 'postal_code') el.required = isNew;
+                }
+            });
+        }
+
+        radios.forEach(function(r){ r.addEventListener('change', sync); });
+        sync();
+
+        // اگر خطا بود و فرم پر شده، خودکار روی «آدرس جدید» بیا
+        {% if form_data.address %}radios.forEach(function(r){ r.checked = (r.value === 'new'); }); sync();{% endif %}
+    })();
+</script>
 {% endblock %}
