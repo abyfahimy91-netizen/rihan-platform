@@ -17,6 +17,8 @@ from django.utils.dateparse import parse_datetime
 
 from .models import Order, Payment
 from .payment_gateway import get_payment_gateway
+from .checkout_service import CheckoutService
+from .expiry import release_expired_orders
 from src.core.fa import money
 
 # تبدیل ارقام فارسی/عربی به لاتین (ورودی فرم‌ها همیشه لاتین ذخیره شود)
@@ -33,6 +35,34 @@ def _check_order_access(request, order):
         return order.user == request.user or request.user.is_staff
     tracking_order_id = request.session.get('tracking_order_id')
     return bool(tracking_order_id and str(tracking_order_id) == str(order.id))
+
+
+def _sweep_expired():
+    """پاکسازی lazy: آزادسازی سفارش‌های منقضی (ارزان و امن برای صدا زدن در هر صفحه)"""
+    try:
+        release_expired_orders()
+    except Exception:
+        pass
+
+
+def _order_flags(order, payment=None):
+    """پرچم‌های مشترک قالب‌ها: مهلت رزرو، امکان لغو و پرداخت"""
+    payment = payment or order.payments.order_by('-created_at').first()
+    evidence_submitted = bool(
+        payment and payment.status == Payment.PaymentStatus.PENDING_REVIEW
+    )
+    remaining = order.remaining_seconds
+    return {
+        'remaining_seconds': remaining,
+        'is_expired': order.is_reservation_expired,
+        'can_pay': order.status == Order.OrderStatus.PENDING and remaining > 0,
+        'can_cancel': (
+            order.status == Order.OrderStatus.PENDING
+            and remaining > 0
+            and not evidence_submitted
+        ),
+        'evidence_submitted': evidence_submitted,
+    }
 
 
 def _get_support_phone():
@@ -60,6 +90,10 @@ def payment_page_view(request, order_number):
     )
     if not _check_order_access(request, order):
         return HttpResponseForbidden('دسترسی غیرمجاز')
+
+    # آزادسازی سفارش‌های منقضی قبل از هر چیز (D-099)
+    _sweep_expired()
+    order.refresh_from_db()
 
     gateway = get_payment_gateway()
     accounts = gateway.get_destination_accounts()
@@ -121,6 +155,7 @@ def payment_page_view(request, order_number):
             except ValueError as e:
                 errors.append(str(e))
 
+    flags = _order_flags(order, payment)
     context = {
         'order': order,
         'payment': payment,
@@ -131,6 +166,8 @@ def payment_page_view(request, order_number):
         'errors': errors,
         'last4_input': last4_input,
         'support_phone': _get_support_phone(),
+        'order_cancelled': order.status == Order.OrderStatus.CANCELLED,
+        **flags,
     }
     return render(request, 'order/payment_page.html', context)
 
@@ -156,6 +193,65 @@ def payment_success_view(request, order_number):
 
 
 # ═══════════════════════════════════════════════════════════════
+# لغو سفارش پرداخت‌نشده توسط مشتری (D-099)
+# ═══════════════════════════════════════════════════════════════
+
+def _post_cancel_redirect(request, next_url, order_number):
+    """بعد از لغو: به مسیر درخواستی (اگر امن بود) وگرنه به صفحه پیگیری برگرد"""
+    if next_url and next_url.startswith('/') and not next_url.startswith('//'):
+        return redirect(next_url)
+    return redirect('order_pages:tracking_page', order_number=order_number)
+
+
+def cancel_order_view(request, order_number):
+    """
+    POST : لغو سفارشِ در انتظار پرداخت + آزادسازی رزرو موجودی
+
+    قوانین:
+    - فقط مالک سفارش (کاربر لاگین‌شده یا مهمان همان سشن)
+    - فقط وقتی سفارش PENDING است و رسیدی ثبت نشده (PENDING_REVIEW نیست)
+    - سفارش منقضی‌شده را پاکسازی خودکار لغو می‌کند؛ اینجا فقط انصراف فعال
+    """
+    if request.method != 'POST':
+        return HttpResponseForbidden('درخواست نامعتبر است')
+
+    order = get_object_or_404(Order, order_number=order_number)
+    if not _check_order_access(request, order):
+        return HttpResponseForbidden('دسترسی غیرمجاز')
+
+    next_url = request.POST.get('next') or ''
+
+    if order.status != Order.OrderStatus.PENDING:
+        messages.info(request, 'این سفارش دیگر در وضعیت پرداخت نیست و قابل لغو نیست.')
+        return _post_cancel_redirect(request, next_url, order.order_number)
+
+    payment = order.payments.order_by('-created_at').first()
+    if payment and payment.status == Payment.PaymentStatus.PENDING_REVIEW:
+        messages.warning(
+            request,
+            'رسید پرداخت شما در حال بررسی است؛ برای لغو سفارش لطفاً با پشتیبانی تماس بگیرید.'
+        )
+        return redirect('order_pages:tracking_page', order_number=order.order_number)
+
+    if order.is_reservation_expired:
+        _sweep_expired()
+        order.refresh_from_db()
+        messages.info(request, 'مهلت پرداخت این سفارش تمام شده بود و موجودی آن آزاد شد.')
+        return _post_cancel_redirect(request, next_url, order.order_number)
+
+    CheckoutService.cancel_order(
+        order,
+        reason='انصراف مشتری از سفارش',
+        user=request.user if request.user.is_authenticated else None,
+    )
+    messages.success(
+        request,
+        'سفارش شما لغو شد و موجودی رزرو‌شده آزاد گردید. هر وقت خواستید دوباره ثبت کنید. 🌿'
+    )
+    return _post_cancel_redirect(request, next_url, order.order_number)
+
+
+# ═══════════════════════════════════════════════════════════════
 # پیگیری سفارش
 # ═══════════════════════════════════════════════════════════════
 
@@ -167,6 +263,11 @@ def tracking_page_view(request, order_number):
     )
     if not _check_order_access(request, order):
         return HttpResponseForbidden('دسترسی غیرمجاز')
+
+    # آزادسازی سفارش‌های منقضی (D-099) — وضعیت ممکن است همین حالا عوض شود
+    if order.status == Order.OrderStatus.PENDING:
+        _sweep_expired()
+        order.refresh_from_db()
 
     history = order.status_history.all().order_by('created_at')
 
@@ -203,6 +304,7 @@ def tracking_page_view(request, order_number):
         'items_count': sum(i.quantity for i in order.items.all()),
         'amount_display': money(order.total_price),
         'support_phone': _get_support_phone(),
+        **_order_flags(order),
     }
     return render(request, 'order/tracking_page.html', context)
 

@@ -17,4 +17,5 @@ urlpatterns = [
     path('tracking/<str:order_number>/', tracking_views.tracking_page_view, name='tracking_page'),
     path('payment/<str:order_number>/', tracking_views.payment_page_view, name='payment_page'),
     path('payment/<str:order_number>/success/', tracking_views.payment_success_view, name='payment_success'),
+    path('payment/<str:order_number>/cancel/', tracking_views.cancel_order_view, name='cancel_order'),
 ]

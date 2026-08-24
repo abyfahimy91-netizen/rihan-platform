@@ -1,78 +1,145 @@
 {% extends "catalog/base.html" %}{% load fa_tags %}
 
-
 {% block title %}حساب من | ریهان{% endblock %}
 {% block meta_description %}پروفایل کاربری و تاریخچه سفارش‌ها در فروشگاه ریهان{% endblock %}
 
 {% block extra_css %}
 <style>
-    .profile-wrap { max-width: 960px; margin: 48px auto 96px; }
-    .profile-title { font-size: 34px; font-weight: 900; color: var(--color-text); margin-bottom: 32px; }
-    .profile-grid { display: grid; grid-template-columns: 380px 1fr; gap: 32px; align-items: start; }
-    .p-card {
-        background: #fff; border-radius: 16px; padding: 28px;
-        border: 1px solid var(--color-border);
-        box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+    /* ── اسکلت ── */
+    .pf-wrap{max-width:880px;margin:0 auto 40px;}
+    .pf-hero{position:relative;background:linear-gradient(135deg,#0D3B2E 0%,#155742 60%,#092A21 100%);
+        border-radius:22px;padding:30px 32px;color:#fff;overflow:hidden;margin-bottom:22px;
+        box-shadow:0 14px 34px rgba(13,59,46,.25);display:flex;justify-content:space-between;align-items:center;gap:22px;flex-wrap:wrap;}
+    .pf-hero::before{content:'';position:absolute;inset:0;
+        background:radial-gradient(circle at 90% -20%,rgba(201,169,97,.35),transparent 55%);pointer-events:none;}
+    .pf-id{display:flex;align-items:center;gap:16px;position:relative;min-width:0;}
+    .pf-avatar{width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,#E8CE8C,#C9A961);
+        color:#12362a;font-size:28px;font-weight:900;display:flex;align-items:center;justify-content:center;flex-shrink:0;
+        border:3px solid rgba(255,255,255,.35);}
+    .pf-id h1{font-size:23px;font-weight:900;margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:320px;}
+    .pf-phone{font-size:13.5px;color:#DFEAE4;direction:ltr;text-align:right;font-family:monospace;letter-spacing:1px;}
+    .pf-stats{display:flex;gap:12px;position:relative;flex-wrap:wrap;}
+    .pf-stat{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.18);border-radius:14px;
+        padding:12px 20px;text-align:center;min-width:92px;}
+    .pf-stat b{display:block;font-size:19px;font-weight:900;color:#F5EBD3;}
+    .pf-stat span{font-size:11.5px;color:rgba(255,255,255,.75);}
+
+    /* ── تب‌ها ── */
+    .pf-tabs{display:flex;gap:8px;background:#fff;border:1px solid var(--color-border);border-radius:16px;
+        padding:8px;margin-bottom:22px;overflow-x:auto;scrollbar-width:none;}
+    .pf-tabs::-webkit-scrollbar{display:none;}
+    .pf-tab{flex:1;min-width:110px;border:none;background:none;font-family:inherit;font-size:13.5px;font-weight:700;
+        color:var(--color-text-muted);padding:11px 10px;border-radius:11px;cursor:pointer;white-space:nowrap;transition:.2s;}
+    .pf-tab:hover{background:#F6F3EC;color:var(--color-text);}
+    .pf-tab.is-active{background:var(--color-primary);color:#fff;box-shadow:0 4px 12px rgba(13,59,46,.25);}
+    .pf-exit{flex:0 0 auto;align-self:center;color:var(--color-error);font-size:13px;font-weight:700;
+        text-decoration:none;padding:10px 14px;border-radius:11px;white-space:nowrap;}
+    .pf-exit:hover{background:var(--color-error-bg);}
+
+    .pf-panel{display:none;}
+    .pf-panel.is-active{display:block;}
+
+    /* ── کارت عمومی ── */
+    .pf-card{background:#fff;border-radius:18px;border:1px solid var(--color-border);
+        box-shadow:0 4px 18px rgba(0,0,0,.05);padding:26px 28px;}
+    .pf-card + .pf-card{margin-top:18px;}
+    .pf-card h2{font-size:17px;font-weight:800;color:var(--color-text);margin-bottom:18px;display:flex;align-items:center;gap:9px;}
+    .pf-hint{font-size:12.5px;color:var(--color-text-muted);line-height:2;margin-bottom:16px;}
+
+    /* ── پیام‌ها ── */
+    .pf-msg{border-radius:13px;padding:13px 17px;margin-bottom:14px;font-size:13.5px;line-height:1.9;
+        background:var(--color-success-bg,#EAF3EE);color:var(--color-success,#2D6A4F);border:1px solid rgba(45,106,79,.2);}
+    .pf-msg.error{background:var(--color-error-bg,#F9ECEA);color:var(--color-error,#9B2C2C);border-color:rgba(155,44,44,.18);}
+
+    /* ── فرم‌ها ── */
+    .pf-grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+    .pf-field{margin-bottom:15px;}
+    .pf-field label{display:block;font-size:12.5px;font-weight:700;color:var(--color-text-muted);margin-bottom:7px;}
+    .pf-input{width:100%;padding:12px 14px;border:1.5px solid var(--color-border);border-radius:12px;
+        font-size:14.5px;font-family:inherit;color:var(--color-text);background:#FAFAF7;transition:.2s;}
+    .pf-input:focus{outline:none;border-color:var(--color-primary);background:#fff;box-shadow:0 0 0 4px rgba(13,59,46,.07);}
+    .pf-input[readonly]{background:#F2F1EC;color:var(--color-text-muted);}
+    .pf-save{width:100%;margin-top:6px;padding:13px;background:linear-gradient(135deg,var(--color-primary),#17604a);
+        color:#fff;border:none;border-radius:12px;font-size:14.5px;font-weight:800;font-family:inherit;cursor:pointer;transition:.25s;}
+    .pf-save:hover{transform:translateY(-1px);box-shadow:0 8px 20px rgba(13,59,46,.3);}
+
+    /* ── رمز عبور ── */
+    .pwd-wrap{position:relative;}
+    .eye-btn{position:absolute;left:8px;top:24px;background:none;border:none;cursor:pointer;font-size:18px;
+        padding:6px 8px;line-height:1;color:var(--color-text-muted);border-radius:10px;}
+    .eye-btn:hover{background:#F1F4F1;}
+    .strength{display:flex;gap:5px;margin-top:8px;}
+    .strength i{height:5px;flex:1;border-radius:99px;background:#E6EAE6;transition:background .3s;}
+    .strength.s1 i:nth-child(1){background:#d9534f;}
+    .strength.s2 i:nth-child(-n+2){background:#e8a33d;}
+    .strength.s3 i{background:#2e9e63;}
+    .strength-lbl{font-size:11.5px;text-align:right;padding:4px 2px 0;color:var(--color-text-muted);min-height:16px;}
+    .match-hint{display:none;color:#d9534f;font-size:12px;padding:0 4px 8px;}
+
+    /* ── دستگاه‌ها ── */
+    .dev-row{display:flex;align-items:center;justify-content:space-between;gap:12px;border:1px solid var(--color-border);
+        border-radius:13px;padding:13px 16px;margin-bottom:10px;flex-wrap:wrap;}
+    .dev-row .dev-t{font-weight:800;font-size:13.5px;}
+    .dev-row .dev-s{font-size:11.5px;color:var(--color-text-muted);margin-top:2px;}
+    .revoke-btn,.revoke-all-btn{background:#fff;border:1.5px solid #F2C4C0;color:var(--color-error);
+        border-radius:10px;padding:8px 14px;font-family:inherit;font-size:12px;font-weight:700;cursor:pointer;transition:.2s;}
+    .revoke-btn:hover,.revoke-all-btn:hover{background:var(--color-error-bg);}
+    .revoke-all-btn{width:100%;margin-top:6px;padding:12px;}
+
+    /* ── کارت سفارش ── */
+    .ord-card{background:#fff;border-radius:16px;border:1px solid var(--color-border);
+        box-shadow:0 3px 14px rgba(0,0,0,.04);padding:20px 22px;margin-bottom:14px;transition:.2s;}
+    .ord-card:hover{box-shadow:0 8px 22px rgba(0,0,0,.07);transform:translateY(-1px);}
+    .ord-top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:12px;}
+    .ord-num{font-family:monospace;font-size:15px;font-weight:800;color:var(--color-primary);direction:ltr;letter-spacing:.5px;}
+    .ord-date{font-size:12px;color:var(--color-text-muted);margin-top:2px;}
+    .badge{display:inline-block;padding:5px 14px;border-radius:999px;font-size:11.5px;font-weight:800;white-space:nowrap;}
+    .badge.PENDING{background:var(--color-warning-bg);color:var(--color-warning-text);}
+    .badge.PAID{background:var(--color-success-bg);color:var(--color-success);}
+    .badge.PROCESSING{background:var(--color-warning-bg);color:var(--color-secondary-dark);}
+    .badge.SHIPPED{background:#E8EEF7;color:#2c5282;}
+    .badge.DELIVERED{background:#E0F2F1;color:#00695c;}
+    .badge.CANCELLED,.badge.RETURNED{background:var(--color-error-bg);color:var(--color-error);}
+    .ord-mid{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:12px 0;
+        border-top:1px dashed var(--color-border);border-bottom:1px dashed var(--color-border);
+        font-size:13px;color:var(--color-text-muted);flex-wrap:wrap;}
+    .ord-mid b{font-size:15.5px;color:var(--color-text);}
+    .ord-ttl{display:flex;align-items:center;gap:8px;margin-top:12px;font-size:12.5px;color:var(--color-warning-text);
+        background:var(--color-warning-bg);border:1px dashed rgba(201,169,97,.5);border-radius:10px;padding:8px 13px;width:fit-content;}
+    .ord-ttl b{font-family:monospace;font-size:14.5px;direction:ltr;color:var(--color-primary);}
+    .ord-ttl.urgent{color:#c0392b;background:#FDEEEC;border-color:#E0A196;}
+    .ord-ttl.urgent b{color:#c0392b;}
+    .ord-actions{display:flex;gap:9px;margin-top:14px;flex-wrap:wrap;align-items:center;}
+    .ord-btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:10px 18px;border-radius:11px;
+        font-size:13px;font-weight:800;text-decoration:none;font-family:inherit;border:none;cursor:pointer;transition:.2s;}
+    .ord-btn.solid{background:linear-gradient(135deg,var(--color-secondary),#B3924A);color:#12362a;}
+    .ord-btn.solid:hover{transform:translateY(-1px);box-shadow:0 6px 14px rgba(201,169,97,.4);}
+    .ord-btn.ghost{background:#fff;color:var(--color-text);border:1.5px solid var(--color-border);}
+    .ord-btn.ghost:hover{border-color:var(--color-secondary);}
+    .ord-cancel{background:none;border:none;color:#9c3a2a;font-family:inherit;font-size:12px;font-weight:700;cursor:pointer;
+        text-decoration:underline;text-decoration-color:rgba(156,58,42,.4);text-underline-offset:4px;padding:6px 4px;margin-right:auto;}
+    .ord-cancel:hover{color:#7c2417;}
+
+    /* ── حالت خالی ── */
+    .pf-empty{text-align:center;padding:52px 20px;}
+    .pf-empty .ico{width:84px;height:84px;border-radius:50%;background:#F4F1E9;display:flex;align-items:center;
+        justify-content:center;font-size:36px;margin:0 auto 18px;}
+    .pf-empty h3{font-size:17px;font-weight:800;margin-bottom:8px;}
+    .pf-empty p{font-size:13.5px;color:var(--color-text-muted);line-height:2;margin-bottom:20px;}
+    .pf-cta{display:inline-block;background:linear-gradient(135deg,var(--color-primary),#17604a);color:#fff;
+        text-decoration:none;font-weight:800;font-size:14px;padding:13px 30px;border-radius:12px;transition:.25s;}
+    .pf-cta:hover{transform:translateY(-2px);box-shadow:0 10px 22px rgba(13,59,46,.3);}
+
+    @media (max-width:640px){
+        .pf-hero{flex-direction:column;align-items:stretch;text-align:center;padding:26px 20px;}
+        .pf-id{flex-direction:column;text-align:center;}
+        .pf-id h1{max-width:none;}
+        .pf-stats{justify-content:center;}
+        .pf-stat{flex:1;min-width:80px;padding:10px 8px;}
+        .pf-card{padding:20px 18px;}
+        .pf-grid2{grid-template-columns:1fr;}
+        .ord-cancel{margin-right:0;}
     }
-    .p-card + .p-card { margin-top: 24px; }
-    .p-card h2 { font-size: 19px; font-weight: 800; color: var(--color-text); margin-bottom: 20px; display:flex; align-items:center; gap:8px; }
-    .p-field { margin-bottom: 16px; }
-    .p-field label { display:block; font-size: 13px; font-weight: 700; color: var(--color-text-muted); margin-bottom: 6px; }
-    .p-input {
-        width: 100%; padding: 12px 14px; border: 1.5px solid var(--color-border);
-        border-radius: 12px; font-size: 15px; font-family: inherit; color: var(--color-text); background: #fafafa;
-    }
-    .p-input:focus { outline:none; border-color:var(--color-primary); background:#fff; }
-    .p-input[readonly] { background:#f3f4f3; color: var(--color-text-muted); }
-    .p-save {
-        width: 100%; margin-top: 8px; padding: 14px; background: linear-gradient(135deg,var(--color-primary),var(--color-primary-dark));
-        color:#fff; border:none; border-radius: 12px; font-size:15px; font-weight:800; font-family:inherit; cursor:pointer;
-    }
-    .p-save:hover { transform: translateY(-1px); box-shadow: 0 8px 20px rgba(13,59,46,.3); }
-    .p-logout {
-        display:block; width:100%; margin-top: 12px; padding: 13px; background:#fff;
-        color:var(--color-error); border:1.5px solid #f2c4c0; border-radius:12px; font-size:15px; font-weight:700;
-        font-family:inherit; cursor:pointer; text-align:center; text-decoration:none;
-    }
-    .p-logout:hover { background:var(--color-error-bg); }
-    .orders-table { width: 100%; border-collapse: collapse; font-size: 14px; }
-    .orders-table th {
-        text-align: right; padding: 10px 8px; color: var(--color-text-muted);
-        font-weight: 700; border-bottom: 2px solid var(--color-border); font-size: 12.5px;
-    }
-    .orders-table td { padding: 14px 8px; border-bottom: 1px dashed var(--color-border); color: var(--color-text); }
-    .badge {
-        display: inline-block; padding: 4px 12px; border-radius: 999px; font-size: 12px; font-weight: 800;
-    }
-    .badge.PENDING { background:var(--color-warning-bg); color:var(--color-warning-text); }
-    .badge.PAID { background:var(--color-success-bg); color:var(--color-success); }
-    .badge.PROCESSING { background:var(--color-warning-bg); color:var(--color-secondary-dark); }
-    .badge.SHIPPED { background:#ede7f6; color:#4527a0; }
-    .badge.DELIVERED { background:#e0f2f1; color:#00695c; }
-    .badge.CANCELLED, .badge.RETURNED { background:var(--color-error-bg); color:var(--color-error); }
-    .orders-empty { text-align:center; padding: 48px 16px; color: var(--color-text-muted); }
-    .orders-empty a { color:var(--color-primary); font-weight:800; text-decoration:none; }
-    .track-link { color:var(--color-primary); font-weight:700; text-decoration:none; }
-    /* ── امنیت: رمز و دستگاه‌ها ── */
-    .pwd-wrap { position:relative; }
-    .eye-btn {
-        position:absolute; left:8px; top:26px; background:none; border:none; cursor:pointer;
-        font-size:19px; padding:6px 8px; line-height:1; color:var(--color-text-muted); border-radius:10px;
-    }
-    .eye-btn:hover { background:#f1f4f1; }
-    .strength { display:flex; gap:5px; margin-top:8px; }
-    .strength i { height:5px; flex:1; border-radius:99px; background:#e6eae6; transition:background .3s; }
-    .strength.s1 i:nth-child(1) { background:#d9534f; }
-    .strength.s2 i:nth-child(-n+2) { background:#e8a33d; }
-    .strength.s3 i { background:#2e9e63; }
-    .strength-lbl { font-size:11.5px; text-align:right; padding:4px 2px 0; color:var(--color-text-muted); min-height:16px; }
-    .revoke-btn, .revoke-all-btn {
-        background:#fff; border:1.5px solid #f2c4c0; color:var(--color-error);
-        border-radius:10px; padding:8px 14px; font-family:inherit; font-size:12px; font-weight:700; cursor:pointer;
-    }
-    .revoke-btn:hover, .revoke-all-btn:hover { background:var(--color-error-bg); }
-    .revoke-all-btn { width:100%; margin-top:6px; padding:12px; }
-    @media (max-width: 860px) { .profile-grid { grid-template-columns: 1fr; } }
 </style>
 {% endblock %}
 
@@ -81,15 +148,53 @@
 (function () {
     'use strict';
     var FA = ['۰','۱','۲','۳','۴','۵','۶','۷','۸','۹'];
-    function toEn(s) {
-        var out = '';
-        for (var i = 0; i < s.length; i++) {
-            var f = FA.indexOf(s[i]);
-            out += (f > -1) ? String(f) : s[i];
-        }
-        return out;
+    function faNum(n){ var s = String(n), out=''; for (var i=0;i<s.length;i++){ out += FA[s.charAt(i)]; } return out; }
+
+    // ── تب‌ها ──
+    var tabs = document.querySelectorAll('.pf-tab');
+    var panels = document.querySelectorAll('.pf-panel');
+    var TAB_KEY = 'rihan_profile_tab';
+    function activate(name, save){
+        tabs.forEach(function(t){
+            var on = t.getAttribute('data-tab') === name;
+            t.classList.toggle('is-active', on);
+            if (on && t.scrollIntoView) { try { t.scrollIntoView({block:'nearest', inline:'center'}); } catch(e){} }
+        });
+        panels.forEach(function(p){ p.classList.toggle('is-active', p.id === 'tab-' + name); });
+        if (save) { try { localStorage.setItem(TAB_KEY, name); } catch(e){} }
     }
-    // چشم نمایش رمز
+    tabs.forEach(function(t){
+        t.addEventListener('click', function(){ activate(t.getAttribute('data-tab'), true); });
+    });
+    var saved = null;
+    try { saved = localStorage.getItem(TAB_KEY); } catch(e){}
+    if (saved && document.getElementById('tab-' + saved)) activate(saved, false);
+
+    // ── شمارش معکوس مهلت رزرو سفارش‌ها (D-099) ──
+    var anyTtl = false;
+    document.querySelectorAll('.ord-ttl').forEach(function(el){
+        anyTtl = true;
+        var remain = parseInt(el.getAttribute('data-remaining') || '0', 10);
+        var b = el.querySelector('b');
+        function render(){
+            var m = Math.floor(remain/60), s = remain%60;
+            b.textContent = faNum(m) + ':' + (s < 10 ? '۰' : '') + faNum(s);
+            el.classList.toggle('urgent', remain <= 300);
+        }
+        render();
+        var iv = setInterval(function(){
+            remain--;
+            if (remain <= 0){
+                clearInterval(iv);
+                b.textContent = '۰:۰۰';
+                setTimeout(function(){ location.reload(); }, 2500);
+                return;
+            }
+            render();
+        }, 1000);
+    });
+
+    // ── چشم نمایش رمز ──
     document.querySelectorAll('.eye-btn').forEach(function (btn) {
         btn.addEventListener('click', function () {
             var input = btn.parentElement.querySelector('input');
@@ -99,22 +204,31 @@
             input.focus();
         });
     });
-    // سنجه قدرت رمز
+
+    // ── سنجه قدرت رمز ──
     document.querySelectorAll('.js-pwd1').forEach(function (pwd) {
-        var bar = pwd.closest('.pwd-wrap').querySelector('.strength');
-        var lbl = pwd.closest('.pwd-wrap').querySelector('.strength-lbl');
+        var wrap = pwd.closest('.pwd-wrap');
+        var bar = wrap ? wrap.querySelector('.strength') : null;
+        var lbl = wrap ? wrap.querySelector('.strength-lbl') : null;
         if (!bar) return;
         pwd.addEventListener('input', function () {
             var v = pwd.value, score = 0;
             if (v.length >= 8) score++;
-            if (/[A-Za-z]/.test(v) && /[0-9]/.test(v)) score++;
-            if (v.length >= 12 || /[^A-Za-z0-9]/.test(v)) score++;
+            var hasLetter = false, hasDigit = false;
+            for (var i=0;i<v.length;i++){
+                var c = v.charAt(i);
+                if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z')) hasLetter = true;
+                if (c >= '0' && c <= '9') hasDigit = true;
+            }
+            if (hasLetter && hasDigit) score++;
+            if (v.length >= 12) score++;
             bar.className = 'strength' + (v ? ' s' + score : '');
             lbl.textContent = !v ? '' : (score <= 1 ? 'ضعیف — حداقل ۸ کاراکتر با حرف و رقم' : score === 2 ? 'متوسط — خوب است! 🌿' : 'عالی — رمز قوی 🔐');
         });
     });
-    // یکسان بودن رمزها
-    document.querySelectorAll('form[id], form:not([id])').forEach(function (form) {
+
+    // ── یکسان بودن رمزها ──
+    document.querySelectorAll('form').forEach(function (form) {
         var p1 = form.querySelector('[name="password1"]');
         var p2 = form.querySelector('[name="password2"]');
         if (!p1 || !p2) return;
@@ -134,162 +248,205 @@
 
 {% block content %}
 <div class="container">
-    <div class="profile-wrap">
-        <h1 class="profile-title">حساب من</h1>
-        <div class="profile-grid">
-            <div>
-                <div class="p-card">
-                    <h2>👤 اطلاعات حساب</h2>
-                    {% if messages %}
-                        {% for message in messages %}
-                            <div style="padding:12px 14px;border-radius:10px;margin-bottom:14px;font-size:13.5px;background:{% if message.tags == 'error' %}var(--color-error-bg);color:var(--color-error);{% else %}var(--color-success-bg);color:var(--color-success);{% endif %}">{{ message }}</div>
-                        {% endfor %}
+    <div class="pf-wrap">
+
+        <!-- ═══ هدر خوش‌آمد ═══ -->
+        <section class="pf-hero">
+            <div class="pf-id">
+                <div class="pf-avatar">{% if user.first_name %}{{ user.first_name|slice:':1' }}{% else %}🌿{% endif %}</div>
+                <div>
+                    <h1>{{ user.get_full_name|default:"کاربر ریهان" }}</h1>
+                    <div class="pf-phone">{{ user.username }}</div>
+                </div>
+            </div>
+            <div class="pf-stats">
+                <div class="pf-stat"><b>{{ stats.total_orders|fa }}</b><span>سفارش ثبت‌شده</span></div>
+                <div class="pf-stat"><b>{{ stats.active_orders|fa }}</b><span>سفارش فعال</span></div>
+                <div class="pf-stat"><b>{{ stats.total_spent|money }}</b><span>مجموع خرید (تومان)</span></div>
+            </div>
+        </section>
+
+        <!-- ═══ پیام‌های سیستم ═══ -->
+        {% if messages %}
+            {% for message in messages %}
+                <div class="pf-msg {% if message.tags == 'error' %}error{% endif %}">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+
+        <!-- ═══ تب‌ها ═══ -->
+        <nav class="pf-tabs" aria-label="بخش‌های حساب">
+            <button type="button" class="pf-tab is-active" data-tab="orders">📦 سفارش‌ها</button>
+            <button type="button" class="pf-tab" data-tab="account">👤 اطلاعات حساب</button>
+            <button type="button" class="pf-tab" data-tab="security">🔐 امنیت</button>
+            <button type="button" class="pf-tab" data-tab="devices">📱 دستگاه‌ها</button>
+            <a class="pf-exit" href="{% url 'auth_pages:logout' %}">🚪 خروج</a>
+        </nav>
+
+        <!-- ═══ پنل سفارش‌ها ═══ -->
+        <section class="pf-panel is-active" id="tab-orders">
+            {% if orders %}
+                {% for o in orders %}
+                <article class="ord-card">
+                    <div class="ord-top">
+                        <div>
+                            <div class="ord-num">{{ o.order_number }}</div>
+                            <div class="ord-date">{{ o.created_at|jdate_human }}</div>
+                        </div>
+                        <span class="badge {{ o.status }}">{{ o.status_fa }}</span>
+                    </div>
+                    <div class="ord-mid">
+                        <span>{{ o.items_count|fa }} کالا</span>
+                        <b>{{ o.total_price|money }} تومان</b>
+                    </div>
+                    {% if o.status == 'PENDING' and o.remaining_seconds > 0 %}
+                    <div class="ord-ttl" data-remaining="{{ o.remaining_seconds }}">
+                        ⏳ مهلت رزرو موجودی: <b>{% widthratio o.remaining_seconds 60 1 %} دقیقه</b>
+                    </div>
                     {% endif %}
+                    <div class="ord-actions">
+                        {% if o.can_pay %}
+                        <a class="ord-btn solid" href="{% url 'order_pages:payment_page' o.order_number %}">💳 تکمیل پرداخت</a>
+                        {% endif %}
+                        <a class="ord-btn ghost" href="{% url 'order_pages:tracking_page' o.order_number %}">مشاهده وضعیت</a>
+                        {% if o.can_cancel %}
+                        <form method="post" action="{% url 'order_pages:cancel_order' o.order_number %}" style="display:inline;"
+                              onsubmit="return confirm('سفارش لغو شود؟ موجودی رزرو‌شده بلافاصله آزاد می‌شود.');">
+                            {% csrf_token %}
+                            <input type="hidden" name="next" value="{% url 'auth_pages:profile' %}">
+                            <button type="submit" class="ord-cancel">لغو سفارش</button>
+                        </form>
+                        {% endif %}
+                    </div>
+                </article>
+                {% endfor %}
+            {% else %}
+                <div class="pf-card">
+                    <div class="pf-empty">
+                        <div class="ico">🌱</div>
+                        <h3>هنوز سفارشی ثبت نکرده‌اید</h3>
+                        <p>اولین خریدتان را تجربه کنید؛ محصولات منتخب ریهان منتظر شما هستند.</p>
+                        <a href="/" class="pf-cta">مشاهده محصولات</a>
+                    </div>
+                </div>
+            {% endif %}
+        </section>
+
+        <!-- ═══ پنل اطلاعات حساب ═══ -->
+        <section class="pf-panel" id="tab-account">
+            <div class="pf-card">
+                <h2>👤 اطلاعات حساب</h2>
+                <form method="post" action="{% url 'auth_pages:profile' %}">
+                    {% csrf_token %}
+                    <div class="pf-grid2">
+                        <div class="pf-field">
+                            <label>نام</label>
+                            <input class="pf-input" name="first_name" value="{{ user.first_name }}" placeholder="مثلاً: مریم">
+                        </div>
+                        <div class="pf-field">
+                            <label>نام خانوادگی</label>
+                            <input class="pf-input" name="last_name" value="{{ user.last_name }}" placeholder="مثلاً: احمدی">
+                        </div>
+                    </div>
+                    <div class="pf-field">
+                        <label>شماره موبایل (نام کاربری — غیرقابل تغییر)</label>
+                        <input class="pf-input" dir="ltr" value="{{ user.username }}" readonly>
+                    </div>
+                    <div class="pf-field">
+                        <label>ایمیل (اختیاری)</label>
+                        <input class="pf-input" dir="ltr" name="email" value="{{ user.email }}" placeholder="you@example.com">
+                    </div>
+                    <button type="submit" class="pf-save">ذخیره تغییرات</button>
+                </form>
+            </div>
+        </section>
+
+        <!-- ═══ پنل امنیت ═══ -->
+        <section class="pf-panel" id="tab-security">
+            <div class="pf-card">
+                <h2>🔐 رمز عبور</h2>
+                {% if has_password %}
+                    <p class="pf-hint">رمز عبور برای شما فعال است — حتی هنگام قطعی پیامک هم می‌توانید وارد شوید. (نام کاربری شما همان شماره موبایل است)</p>
                     <form method="post" action="{% url 'auth_pages:profile' %}">
                         {% csrf_token %}
-                        <div class="p-field">
-                            <label>شماره موبایل (نام کاربری)</label>
-                            <input class="p-input" dir="ltr" value="{{ user.username }}" readonly>
+                        <input type="hidden" name="action" value="change_password">
+                        <div class="pf-field">
+                            <label>رمز عبور فعلی</label>
+                            <input class="pf-input js-pwd" dir="ltr" type="password" name="current_password" required autocomplete="current-password">
                         </div>
-                        <div class="p-field">
-                            <label>نام</label>
-                            <input class="p-input" name="first_name" value="{{ user.first_name }}" placeholder="مثلاً: مریم">
-                        </div>
-                        <div class="p-field">
-                            <label>نام خانوادگی</label>
-                            <input class="p-input" name="last_name" value="{{ user.last_name }}" placeholder="مثلاً: احمدی">
-                        </div>
-                        <div class="p-field">
-                            <label>ایمیل (اختیاری)</label>
-                            <input class="p-input" dir="ltr" name="email" value="{{ user.email }}" placeholder="you@example.com">
-                        </div>
-                        <button type="submit" class="p-save">ذخیره تغییرات</button>
-                    </form>
-                </div>
-
-                <!-- 🔐 امنیت حساب: رمز عبور -->
-                <div class="p-card">
-                    <h2>🔐 رمز عبور</h2>
-                    {% if has_password %}
-                        <p style="font-size:12.5px;color:var(--color-text-muted);line-height:2;margin-bottom:16px;">
-                            رمز عبور برای شما فعال است — می‌توانید حتی هنگام قطعی پیامک هم وارد شوید.
-                            (نام کاربری شما همان شماره موبایل است)
-                        </p>
-                        <form method="post" action="{% url 'auth_pages:profile' %}">
-                            {% csrf_token %}
-                            <input type="hidden" name="action" value="change_password">
-                            <div class="p-field">
-                                <label>رمز عبور فعلی</label>
-                                <input class="p-input js-pwd" dir="ltr" type="password" name="current_password" required autocomplete="current-password">
-                            </div>
-                            <div class="p-field pwd-wrap">
+                        <div class="pf-grid2">
+                            <div class="pf-field pwd-wrap">
                                 <label>رمز جدید (حداقل ۸ کاراکتر، حرف + رقم)</label>
-                                <input class="p-input js-pwd js-pwd1" dir="ltr" type="password" name="password1" required minlength="8" autocomplete="new-password">
+                                <input class="pf-input js-pwd js-pwd1" dir="ltr" type="password" name="password1" required minlength="8" autocomplete="new-password">
                                 <button type="button" class="eye-btn" aria-label="نمایش رمز">👁</button>
                                 <div class="strength"><i></i><i></i><i></i></div>
                                 <div class="strength-lbl"></div>
                             </div>
-                            <div class="p-field pwd-wrap">
+                            <div class="pf-field pwd-wrap">
                                 <label>تکرار رمز جدید</label>
-                                <input class="p-input js-pwd" dir="ltr" type="password" name="password2" required minlength="8" autocomplete="new-password">
+                                <input class="pf-input js-pwd" dir="ltr" type="password" name="password2" required minlength="8" autocomplete="new-password">
                                 <button type="button" class="eye-btn" aria-label="نمایش رمز">👁</button>
                             </div>
-                            <div class="match-hint" style="display:none;color:#d9534f;font-size:12px;padding:0 4px 8px;">رمزها یکسان نیستند ⚠️</div>
-                            <button type="submit" class="p-save">تغییر رمز عبور</button>
-                        </form>
-                    {% else %}
-                        <p style="font-size:12.5px;color:var(--color-text-muted);line-height:2;margin-bottom:16px;">
-                            هنوز رمز عبوری ندارید. با ساخت رمز، در مواقعی که پیامک نمی‌رسد هم می‌توانید وارد شوید.
-                        </p>
-                        <form method="post" action="{% url 'auth_pages:profile' %}" id="setpwd-form">
-                            {% csrf_token %}
-                            <input type="hidden" name="action" value="set_password">
-                            <div class="p-field pwd-wrap">
+                        </div>
+                        <div class="match-hint">رمزها یکسان نیستند ⚠️</div>
+                        <button type="submit" class="pf-save">تغییر رمز عبور</button>
+                    </form>
+                {% else %}
+                    <p class="pf-hint">هنوز رمز عبوری ندارید. با ساخت رمز، در مواقعی که پیامک نمی‌رسد هم می‌توانید وارد شوید.</p>
+                    <form method="post" action="{% url 'auth_pages:profile' %}" id="setpwd-form">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="set_password">
+                        <div class="pf-grid2">
+                            <div class="pf-field pwd-wrap">
                                 <label>رمز عبور جدید (حداقل ۸ کاراکتر، حرف + رقم)</label>
-                                <input class="p-input js-pwd js-pwd1" dir="ltr" type="password" name="password1" required minlength="8" autocomplete="new-password">
+                                <input class="pf-input js-pwd js-pwd1" dir="ltr" type="password" name="password1" required minlength="8" autocomplete="new-password">
                                 <button type="button" class="eye-btn" aria-label="نمایش رمز">👁</button>
                                 <div class="strength"><i></i><i></i><i></i></div>
                                 <div class="strength-lbl"></div>
                             </div>
-                            <div class="p-field pwd-wrap">
+                            <div class="pf-field pwd-wrap">
                                 <label>تکرار رمز عبور</label>
-                                <input class="p-input js-pwd" dir="ltr" type="password" name="password2" required minlength="8" autocomplete="new-password">
+                                <input class="pf-input js-pwd" dir="ltr" type="password" name="password2" required minlength="8" autocomplete="new-password">
                                 <button type="button" class="eye-btn" aria-label="نمایش رمز">👁</button>
                             </div>
-                            <div class="match-hint" style="display:none;color:#d9534f;font-size:12px;padding:0 4px 8px;">رمزها یکسان نیستند ⚠️</div>
-                            <button type="submit" class="p-save">ساخت رمز عبور 🔑</button>
-                        </form>
-                    {% endif %}
-                </div>
-
-                <!-- 📱 دستگاه‌های من -->
-                <div class="p-card">
-                    <h2>📱 دستگاه‌های من</h2>
-                    <p style="font-size:12.5px;color:var(--color-text-muted);line-height:2;margin-bottom:14px;">
-                        دستگاه‌هایی که «مرا به خاطر بسپار» را زده‌اند و تا ۳۰ روز بدون ورود مجدد باز می‌شوند.
-                    </p>
-                    {% if devices %}
-                        {% for d in devices %}
-                        <div style="display:flex;align-items:center;justify-content:space-between;border:1px solid var(--color-border);border-radius:12px;padding:12px 14px;margin-bottom:10px;">
-                            <div style="text-align:right;">
-                                <div style="font-weight:800;font-size:13.5px;">{{ d.device_type }}</div>
-                                <div style="font-size:11.5px;color:var(--color-text-muted);">
-                                    آخرین استفاده: {{ d.last_used_at|jtime }} · از {{ d.ip_address|default:'—' }}
-                                </div>
-                            </div>
-                            <form method="post" action="{% url 'auth_pages:profile' %}">
-                                {% csrf_token %}
-                                <input type="hidden" name="action" value="revoke_device">
-                                <input type="hidden" name="device_id" value="{{ d.id }}">
-                                <button type="submit" class="revoke-btn">خروج از این دستگاه</button>
-                            </form>
                         </div>
-                        {% endfor %}
-                        <form method="post" action="{% url 'auth_pages:profile' %}" onsubmit="return confirm('همه دستگاه‌ها خارج شوند؟');">
-                            {% csrf_token %}
-                            <input type="hidden" name="action" value="revoke_all_devices">
-                            <button type="submit" class="revoke-all-btn">🚪 خروج از همه دستگاه‌ها</button>
-                        </form>
-                    {% else %}
-                        <div style="font-size:13px;color:var(--color-text-muted);padding:8px 4px;">
-                            دستگاه فعلی به‌عنوان دستگاه معتبر ذخیره نشده است.
-                        </div>
-                    {% endif %}
-                </div>
-
-                <div class="p-card">
-                    <a href="{% url 'auth_pages:logout' %}" class="p-logout">🚪 خروج از حساب</a>
-                </div>
-            </div>
-
-            <div class="p-card">
-                <h2>📦 سفارش‌های من</h2>
-                {% if orders %}
-                    <table class="orders-table">
-                        <thead>
-                            <tr><th>شماره سفارش</th><th>تاریخ</th><th>اقلام</th><th>مبلغ</th><th>وضعیت</th><th></th></tr>
-                        </thead>
-                        <tbody>
-                            {% for o in orders %}
-                            <tr>
-                                <td dir="ltr" style="font-weight:700;">{{ o.order_number }}</td>
-                                <td>{{ o.created_at|jdate }}</td>
-                                <td>{{ o.items_count|fa }}</td>
-                                <td>{{ o.total_price|money }} تومان</td>
-                                <td><span class="badge {{ o.status }}">{{ o.status_fa }}</span></td>
-                                <td><a class="track-link" href="{% url 'order_pages:tracking_page' o.order_number %}">پیگیری ↗</a></td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                {% else %}
-                    <div class="orders-empty">
-                        هنوز سفارشی ثبت نکرده‌اید 🌱<br><br>
-                        <a href="/">مشاهده محصولات منتخب ریهان ←</a>
-                    </div>
+                        <div class="match-hint">رمزها یکسان نیستند ⚠️</div>
+                        <button type="submit" class="pf-save">ساخت رمز عبور 🔑</button>
+                    </form>
                 {% endif %}
             </div>
-        </div>
+        </section>
+
+        <!-- ═══ پنل دستگاه‌ها ═══ -->
+        <section class="pf-panel" id="tab-devices">
+            <div class="pf-card">
+                <h2>📱 دستگاه‌های من</h2>
+                <p class="pf-hint">دستگاه‌هایی که «مرا به خاطر بسپار» را زده‌اند و تا ۳۰ روز بدون ورود مجدد باز می‌شوند.</p>
+                {% if devices %}
+                    {% for d in devices %}
+                    <div class="dev-row">
+                        <div>
+                            <div class="dev-t">{{ d.device_type }}</div>
+                            <div class="dev-s">آخرین استفاده: {{ d.last_used_at|jtime }} · از {{ d.ip_address|default:'—' }}</div>
+                        </div>
+                        <form method="post" action="{% url 'auth_pages:profile' %}">
+                            {% csrf_token %}
+                            <input type="hidden" name="action" value="revoke_device">
+                            <input type="hidden" name="device_id" value="{{ d.id }}">
+                            <button type="submit" class="revoke-btn">خروج از این دستگاه</button>
+                        </form>
+                    </div>
+                    {% endfor %}
+                    <form method="post" action="{% url 'auth_pages:profile' %}" onsubmit="return confirm('همه دستگاه‌ها خارج شوند؟');">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="revoke_all_devices">
+                        <button type="submit" class="revoke-all-btn">🚪 خروج از همه دستگاه‌ها</button>
+                    </form>
+                {% else %}
+                    <div class="pf-hint" style="margin-bottom:0;">دستگاه فعلی به‌عنوان دستگاه معتبر ذخیره نشده است.</div>
+                {% endif %}
+            </div>
+        </section>
+
     </div>
 </div>
 {% endblock %}

@@ -13,9 +13,11 @@ Flow:
 4. 24-hour timeout: Auto-release reservation (future enhancement)
 """
 import logging
+from datetime import timedelta
 from decimal import Decimal
 from typing import List, Optional, Dict
 
+from django.conf import settings
 from django.db import transaction
 from django.utils import timezone
 
@@ -127,9 +129,11 @@ class CheckoutService:
             order.delete()
             raise
         
-        # Step 6: Update status to PENDING
+        # Step 6: Update status to PENDING + مهلت رزرو موجودی (D-099)
         order.status = Order.OrderStatus.PENDING
-        order.save()
+        ttl_minutes = int(getattr(settings, 'ORDER_PAYMENT_TTL_MINUTES', 60))
+        order.expires_at = timezone.now() + timedelta(minutes=ttl_minutes)
+        order.save(update_fields=['status', 'expires_at'])
         
         # Step 7: Deactivate cart (keep for history)
         cart.is_active = False

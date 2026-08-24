@@ -120,12 +120,27 @@
         pointer-events:none;transition:all .3s;box-shadow:0 10px 30px rgba(0,0,0,.3);}
     .rx-toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
 
+    /* ── مهلت رزرو موجودی (D-099) ── */
+    .ttl-box{display:flex;align-items:center;justify-content:center;gap:12px;background:#fff;
+        border:1.5px dashed var(--color-secondary);border-radius:14px;padding:13px 18px;margin:18px 0 0;
+        font-size:14px;color:var(--color-text-muted);flex-wrap:wrap;text-align:center;}
+    .ttl-timer{font-family:monospace;font-size:21px;font-weight:800;color:var(--color-primary);
+        background:#F4F1E9;border-radius:10px;padding:3px 14px;direction:ltr;min-width:96px;text-align:center;}
+    .ttl-box.urgent{border-color:#e0a196;}
+    .ttl-box.urgent .ttl-timer{color:#c0392b;background:#FDEEEC;}
+    .cancel-form{margin-top:16px;text-align:center;}
+    .cancel-btn{background:none;border:none;color:#9c3a2a;font-family:inherit;font-size:13px;font-weight:700;
+        cursor:pointer;text-decoration:underline;text-decoration-color:rgba(156,58,42,.4);
+        text-underline-offset:4px;padding:8px 10px;}
+    .cancel-btn:hover{color:#7c2417;}
+
     @media(max-width:560px){
         .pay-head h1{font-size:25px;}
-        .pay-hero{padding:18px 20px;}
+        .pay-hero{padding:18px 20px;flex-direction:column;text-align:center;}
         .pay-hero .amt{font-size:25px;}
         .evidence-form{padding:20px 16px;}
         .bank-card{padding:18px 16px 16px;}
+        .ttl-box{font-size:12.5px;padding:12px 14px;gap:9px;}
     }
 </style>
 {% endblock %}
@@ -136,13 +151,25 @@
 
     <div class="pay-wrap">
         <div class="pay-head">
+            {% if order_cancelled %}
+            <h1>این سفارش لغو شده است</h1>
+            <p class="pay-sub">موجودی رزرو‌شده آزاد شده و هیچ پرداختی از شما ثبت نشده.</p>
+            {% else %}
             <h1>پرداخت سفارش</h1>
             <p class="pay-sub">تقریباً تموم شد! فقط واریز و ثبت رسید مانده 🌿</p>
+            {% endif %}
             <div class="order-chip">
                 <span>شماره سفارش:</span>
-                <b>{{ order.order_number }}</b>
+                <b dir="ltr">{{ order.order_number }}</b>
                 <button type="button" class="chip-copy js-copy" data-copy="{{ order.order_number }}" data-msg="شماره سفارش کپی شد ✓">کپی</button>
             </div>
+
+            {% if can_pay and order.expires_at %}
+            <div class="ttl-box" id="ttlBox">
+                <span>⏳ موجودی این سفارش تا چند دقیقه دیگر فقط برای شما رزرو شده:</span>
+                <span class="ttl-timer" id="ttlTimer" data-remaining="{{ remaining_seconds }}">{% widthratio remaining_seconds 60 1 %} دقیقه</span>
+            </div>
+            {% endif %}
         </div>
 
         {% if messages %}
@@ -164,7 +191,18 @@
             </div>
         {% endif %}
 
-        {% if accounts %}
+        {% if order_cancelled %}
+        <div class="alert-box alert-err" style="margin-top:26px;">
+            ⌛ این سفارش به دلیل تکمیل‌نشده پرداخت در مهلت مقرر، لغو شده و موجودی آن آزاد شده است.<br>
+            اگر قبلاً واریزی انجام داده‌اید، لطفاً پیش از خرید مجدد با پشتیبانی در تماس باشید.
+            {% if support_phone %}<div dir="ltr" style="text-align:center;font-weight:800;margin-top:6px;">{{ support_phone }}</div>{% endif %}
+        </div>
+        <div style="text-align:center;margin-top:20px;">
+            <a href="{% url 'order_pages:cart_page' %}" style="display:inline-flex;align-items:center;justify-content:center;gap:9px;
+               background:linear-gradient(135deg,var(--color-primary),#17604a);color:#fff;font-weight:800;font-size:15.5px;
+               padding:15px 34px;border-radius:13px;text-decoration:none;">بازگشت به سبد خرید</a>
+        </div>
+        {% elif accounts %}
         <div class="pay-hero">
             <div>
                 <div class="lbl">مبلغ قابل پرداخت</div>
@@ -276,6 +314,15 @@
         </div>
         {% endif %}
 
+        {% if can_cancel %}
+        <form method="post" action="{% url 'order_pages:cancel_order' order.order_number %}" class="cancel-form"
+              onsubmit="return confirm('سفارش لغو شود؟ موجودی رزرو‌شده بلافاصله آزاد می‌شود.');">
+            {% csrf_token %}
+            <input type="hidden" name="next" value="{{ request.get_full_path }}">
+            <button type="submit" class="cancel-btn">انصراف از این سفارش و آزادسازی موجودی</button>
+        </form>
+        {% endif %}
+
         <div class="trust-row">
             <span>🔒 پرداخت امن</span>
             <span>🧾 رسید شما ثبت و پیگیری می‌شود</span>
@@ -372,6 +419,32 @@
             pill.style.display = 'none';
             zone.style.display = 'block';
         });
+    })();
+
+    // ─── شمارش معکوس مهلت رزرو موجودی (D-099) ───
+    (function(){
+        var box = document.getElementById('ttlBox');
+        if(!box) return;
+        var timer = document.getElementById('ttlTimer');
+        var remain = parseInt(timer.getAttribute('data-remaining') || '0', 10);
+        var faD = ['۰','۱','۲','۳','۴','۵','۶','۷','۸','۹'];
+        function faNum(n){ var s = String(n), out=''; for (var i=0;i<s.length;i++){ out += faD[s.charAt(i)]; } return out; }
+        function render(){
+            var m = Math.floor(remain/60), s = remain%60;
+            timer.textContent = faNum(m) + ':' + (s < 10 ? '۰' : '') + faNum(s);
+            box.classList.toggle('urgent', remain <= 300);
+        }
+        render();
+        var iv = setInterval(function(){
+            remain--;
+            if(remain <= 0){
+                clearInterval(iv);
+                timer.textContent = '۰:۰۰';
+                setTimeout(function(){ location.reload(); }, 2500);
+                return;
+            }
+            render();
+        }, 1000);
     })();
 
     // ─── حالت بارگذاری دکمه ثبت ───

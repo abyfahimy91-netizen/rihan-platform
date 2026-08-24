@@ -74,7 +74,7 @@ class OrderItemInline(admin.TabularInline):
 class OrderAdmin(admin.ModelAdmin):
     list_display = [
         'order_number', 'customer_display', 'status_badge',
-        'total_amount', 'payment_status', 'items_count', 'created_at_fa'
+        'total_amount', 'payment_status', 'items_count', 'created_at_fa', 'expires_at_fa'
     ]
     list_filter = ['status', 'created_at', 'updated_at']
     search_fields = ['order_number', 'guest_name', 'guest_phone', 'user__username']
@@ -96,7 +96,7 @@ class OrderAdmin(admin.ModelAdmin):
             'fields': ('subtotal', 'shipping_cost', 'total_price')
         }),
         ('زمان‌ها', {
-            'fields': ('created_at', 'updated_at')
+            'fields': ('created_at', 'updated_at', 'expires_at')
         }),
     )
     
@@ -157,6 +157,19 @@ class OrderAdmin(admin.ModelAdmin):
         return jalali_datetime_str(obj.created_at)
     created_at_fa.short_description = 'تاریخ ثبت'
     created_at_fa.admin_order_field = 'created_at'
+
+    def expires_at_fa(self, obj):
+        """D-099: نمایش مهلت رزرو؛ نزدیک به پایان = نارنجی، گذشته = قرمز"""
+        if not obj.expires_at or obj.status != 'PENDING':
+            return '—'
+        remaining = obj.remaining_seconds
+        label = jalali_datetime_str(obj.expires_at)
+        if remaining <= 0:
+            return format_html('<span style="color:#c0392b;font-weight:700;">{} (منقضی)</span>', label)
+        if remaining < 900:
+            return format_html('<span style="color:#d68910;font-weight:700;">{} (نزدیک پایان)</span>', label)
+        return label
+    expires_at_fa.short_description = 'مهلت پرداخت'
 
 
 # ═══════════════════════════════════════════════════════════════

@@ -11,12 +11,26 @@
         border:1.5px dashed var(--color-secondary);border-radius:999px;padding:7px 18px;}
     .status-badge{display:inline-flex;align-items:center;gap:7px;border-radius:999px;font-size:13px;
         font-weight:800;padding:8px 18px;background:#FBF1DC;color:#8a6a25;}
+    .status-badge.CANCELLED{background:var(--color-error-bg,#F9ECEA);color:var(--color-error,#9B2C2C);}
+    .status-badge.PAID,.status-badge.DELIVERED{background:var(--color-success-bg,#EAF3EE);color:var(--color-success,#2D6A4F);}
+    .status-badge.PROCESSING{background:var(--color-warning-bg,#FBF4E3);color:var(--color-warning-text,#7A6428);}
+    .status-badge.SHIPPED{background:#E8EEF7;color:#2c5282;}
+    /* مهلت رزرو (D-099) */
+    .ttl-chip{display:inline-flex;align-items:center;gap:10px;background:#fff;border:1.5px dashed var(--color-secondary);
+        border-radius:999px;padding:8px 18px;font-size:13.5px;color:var(--color-text-muted);}
+    .ttl-chip b{font-family:monospace;font-size:16px;color:var(--color-primary);direction:ltr;display:inline-block;}
+    .ttl-chip.urgent{border-color:#e0a196;}
+    .ttl-chip.urgent b{color:#c0392b;}
+    .cancel-btn{background:none;border:none;color:#9c3a2a;font-family:inherit;font-size:13px;font-weight:700;
+        cursor:pointer;text-decoration:underline;text-decoration-color:rgba(156,58,42,.4);
+        text-underline-offset:4px;padding:8px 10px;}
+    .cancel-btn:hover{color:#7c2417;}
     /* تایم‌لاین افقی */
     .ftl{background:#fff;border-radius:18px;border:1px solid var(--color-border);box-shadow:0 4px 20px rgba(0,0,0,.05);
         padding:30px 20px 24px;margin-bottom:22px;}
     .ftl-row{display:flex;max-width:640px;margin:0 auto;}
     .ftl-step{flex:1;display:flex;flex-direction:column;align-items:center;gap:9px;position:relative;min-width:0;}
-    .ftl-step::before{content:'';position:absolute;top:23px;right:50%;width:100%;height:3px;
+    .ftl-step::before{content:'';position:absolute;top:23px;left:50%;width:100%;height:3px;
         background:var(--color-border,#e5e0d5);border-radius:3px;z-index:0;}
     .ftl-step:first-child::before{display:none;}
     .ftl-step.is-done::before{background:var(--color-primary);}
@@ -72,8 +86,13 @@
         <div class="trk-head">
             <h1>پیگیری سفارش</h1>
             <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+                {% if can_pay and order.expires_at %}
+                <span class="ttl-chip {% if remaining_seconds <= 300 %}urgent{% endif %}" id="ttlBox" data-remaining="{{ remaining_seconds }}">
+                    ⏳ مهلت رزرو: <b id="ttlTimer">{% widthratio remaining_seconds 60 1 %} دقیقه</b>
+                </span>
+                {% endif %}
                 <span class="onum">{{ order.order_number }}</span>
-                <span class="status-badge">{{ order.get_status_display }}</span>
+                <span class="status-badge {{ order.status }}">{{ order.get_status_display }}</span>
             </div>
         </div>
 
@@ -136,11 +155,23 @@
         {% endif %}
 
         <div class="trk-actions">
+            {% if can_pay %}
+            <a href="{% url 'order_pages:payment_page' order.order_number %}" class="trk-btn solid">💳 تکمیل پرداخت</a>
+            {% endif %}
             <a href="/" class="trk-btn line">ادامه خرید</a>
             {% if request.user.is_authenticated %}
-            <a href="{% url 'auth_pages:profile' %}" class="trk-btn solid">سفارش‌های من</a>
+            <a href="{% url 'auth_pages:profile' %}" class="trk-btn line">سفارش‌های من</a>
             {% endif %}
         </div>
+
+        {% if can_cancel %}
+        <form method="post" action="{% url 'order_pages:cancel_order' order.order_number %}" style="text-align:center;margin-top:14px;"
+              onsubmit="return confirm('سفارش لغو شود؟ موجودی رزرو‌شده بلافاصله آزاد می‌شود.');">
+            {% csrf_token %}
+            <input type="hidden" name="next" value="{{ request.get_full_path }}">
+            <button type="submit" class="cancel-btn">انصراف از این سفارش و آزادسازی موجودی</button>
+        </form>
+        {% endif %}
 
         {% if support_phone %}
         <p style="text-align:center;font-size:13px;color:var(--color-text-muted);margin-top:20px;">
@@ -149,4 +180,32 @@
         {% endif %}
     </div>
 </div>
+
+<script>
+    // ─── شمارش معکوس مهلت رزرو (D-099) ───
+    (function(){
+        var box = document.getElementById('ttlBox');
+        if(!box) return;
+        var timer = document.getElementById('ttlTimer');
+        var remain = parseInt(box.getAttribute('data-remaining') || '0', 10);
+        var faD = ['۰','۱','۲','۳','۴','۵','۶','۷','۸','۹'];
+        function faNum(n){ var s = String(n), out=''; for (var i=0;i<s.length;i++){ out += faD[s.charAt(i)]; } return out; }
+        function render(){
+            var m = Math.floor(remain/60), s = remain%60;
+            timer.textContent = faNum(m) + ':' + (s < 10 ? '۰' : '') + faNum(s);
+            box.classList.toggle('urgent', remain <= 300);
+        }
+        render();
+        var iv = setInterval(function(){
+            remain--;
+            if(remain <= 0){
+                clearInterval(iv);
+                timer.textContent = '۰:۰۰';
+                setTimeout(function(){ location.reload(); }, 2500);
+                return;
+            }
+            render();
+        }, 1000);
+    })();
+</script>
 {% endblock %}

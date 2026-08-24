@@ -185,6 +185,15 @@ class CardToCardGateway(BasePaymentGateway):
         except ValueError as e:
             raise
         
+        # D-099: با ثبت رسید، مهلت رزرو موجودی تمدید می‌شود تا ادمین زمان کافی
+        # برای بررسی داشته باشد؛ سفارش‌های در حال بررسی هرگز خودکار لغو نمی‌شوند
+        order = payment.order
+        if order.status == order.__class__.OrderStatus.PENDING:
+            from django.utils import timezone as tz
+            from datetime import timedelta as td
+            order.expires_at = tz.now() + td(hours=48)
+            order.save(update_fields=['expires_at'])
+        
         return {
             'status': 'PENDING_REVIEW',
             'message': 'اطلاعات پرداخت با موفقیت ثبت شد. پس از تایید ادمین، سفارش شما نهایی می‌شود.',

@@ -285,15 +285,45 @@ def profile_view(request):
 
         return redirect('auth_pages:profile')
 
-    orders = u.orders.prefetch_related('items').order_by('-created_at')[:20]
-    order_list = [{
-        'order_number': o.order_number,
-        'created_at': o.created_at,
-        'status': o.status,
-        'status_fa': ORDER_STATUS_FA.get(o.status, o.status),
-        'total_price': o.total_price,
-        'items_count': sum(i.quantity for i in o.items.all()),
-    } for o in orders]
+    # آزادسازی سفارش‌های منقضی تا وضعیت‌ها همیشه تازه باشد (D-099)
+    try:
+        from src.modules.order.expiry import release_expired_orders
+        release_expired_orders()
+    except Exception:
+        pass
+
+    orders = u.orders.prefetch_related('items', 'payments').order_by('-created_at')[:20]
+
+    order_list = []
+    for o in orders:
+        payment = o.payments.order_by('-created_at').first() if hasattr(o, 'payments') else None
+        evidence_submitted = bool(
+            payment and payment.status == 'PENDING_REVIEW'
+        )
+        remaining = o.remaining_seconds
+        can_cancel = o.status == 'PENDING' and remaining > 0 and not evidence_submitted
+        order_list.append({
+            'order_number': o.order_number,
+            'created_at': o.created_at,
+            'status': o.status,
+            'status_fa': ORDER_STATUS_FA.get(o.status, o.status),
+            'total_price': o.total_price,
+            'items_count': sum(i.quantity for i in o.items.all()),
+            # D-099: مهلت رزرو + امکانات لغو/پرداخت
+            'remaining_seconds': remaining,
+            'is_expired': o.is_reservation_expired,
+            'can_pay': o.status == 'PENDING' and remaining > 0,
+            'can_cancel': can_cancel,
+        })
+
+    # آمار سریع هدر پروفایل
+    active_statuses = {'PENDING', 'PAID', 'PROCESSING', 'SHIPPED'}
+    profile_stats = {
+        'total_orders': len(order_list),
+        'active_orders': sum(1 for o in order_list if o['status'] in active_statuses),
+        'total_spent': sum(o['total_price'] for o in order_list
+                           if o['status'] not in ('CANCELLED', 'DRAFT')),
+    }
 
     devices = []
     for d in DeviceService.get_user_devices(u):
@@ -312,6 +342,7 @@ def profile_view(request):
 
     return render(request, 'accounts/profile.html', {
         'orders': order_list,
+        'stats': profile_stats,
         'devices': devices,
         'has_password': PasswordService.has_password(u),
     })

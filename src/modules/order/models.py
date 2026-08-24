@@ -100,7 +100,14 @@ class Order(models.Model):
     subtotal = models.DecimalField(max_digits=10, decimal_places=2, default=0, verbose_name="جمع کل کالاها")
     shipping_cost = models.DecimalField(max_digits=10, decimal_places=2, default=0, verbose_name="هزینه ارسال (در قیمت نهایی نهفته)")
     total_price = models.DecimalField(max_digits=10, decimal_places=2, default=0, verbose_name="مبلغ نهایی")
-    
+
+    # D-099: مهلت رزرو موجودی برای سفارش پرداخت‌نشده؛ پس از آن رزرو خودکار آزاد می‌شود
+    expires_at = models.DateTimeField(
+        null=True, blank=True,
+        verbose_name="مهلت پرداخت (رزرو موجودی)",
+        help_text="سفارش‌های در انتظار پرداخت بعد از این زمان به‌صورت خودکار لغو و موجودی آزاد می‌شود",
+    )
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -143,6 +150,28 @@ class Order(models.Model):
         self.shipping_cost = 0
         self.total_price = self.subtotal
         self.save()
+
+    # ── D-099: کمکی‌های مهلت رزرو ──
+    @property
+    def is_payable(self):
+        """سفارش هنوز در وضعیت پرداخت‌نشده و داخل مهلت رزرو است"""
+        return self.status == self.OrderStatus.PENDING and not self.is_reservation_expired
+
+    @property
+    def is_reservation_expired(self):
+        """مهلت رزرو تمام شده است (فقط برای سفارش‌های در انتظار پرداخت معنا دارد)"""
+        return bool(
+            self.status == self.OrderStatus.PENDING
+            and self.expires_at
+            and timezone.now() > self.expires_at
+        )
+
+    @property
+    def remaining_seconds(self):
+        """ثانیه‌های باقی‌مانده تا پایان مهلت رزرو (۰ یعنی تمام‌شده یا بدون مهلت)"""
+        if self.status != self.OrderStatus.PENDING or not self.expires_at:
+            return 0
+        return max(0, int((self.expires_at - timezone.now()).total_seconds()))
 
 
 class OrderItem(models.Model):
