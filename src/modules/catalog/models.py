@@ -120,6 +120,39 @@ class Product(models.Model):
     seo_keywords = models.JSONField("کلمات کلیدی سئو", blank=True, null=True)
     images = models.JSONField("تصاویر (مدیریت از بخش گالری)", default=list, blank=True)
     metadata = models.JSONField("متادیتا (فنی)", default=dict, blank=True)
+
+    # ─── دسترسی یکپارچه به تصاویر گالری (منبع واقعی: ProductImage) ───
+
+    @property
+    def main_image_url(self):
+        """نشانی تصویر شاخص محصول (نسخه بهینه وب) — None یعنی بدون عکس"""
+        from src.core.thumbs import optimized_url
+        g = self.gallery.filter(image__isnull=False).exclude(image="").order_by(
+            "sort_order").first()
+        if not g:
+            return None
+        try:
+            return optimized_url(g.image, 900)
+        except Exception:
+            try:
+                return g.image.url
+            except Exception:
+                return None
+
+    @property
+    def gallery_image_urls(self):
+        """نشانی همه تصاویر گالری (نسخه بهینه وب) به ترتیب نمایش"""
+        from src.core.thumbs import optimized_url
+        urls = []
+        for g in self.gallery.filter(image__isnull=False).exclude(image="").order_by("sort_order"):
+            try:
+                urls.append(optimized_url(g.image, 1200))
+            except Exception:
+                try:
+                    urls.append(g.image.url)
+                except Exception:
+                    continue
+        return urls
     status = models.CharField(
         "وضعیت انتشار",
         max_length=20,

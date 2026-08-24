@@ -5,7 +5,10 @@ import re as _re
 from django.shortcuts import render, redirect
 from django.core.exceptions import ValidationError
 from django.contrib import messages
+from django.http import JsonResponse
 from django.views.decorators.http import require_GET, require_POST
+
+from src.core.fa import money, fa_digits
 
 from .services import get_or_create_cart, add_to_cart, update_cart_item, remove_from_cart
 from src.modules.catalog.models import Product
@@ -56,36 +59,80 @@ def add_to_cart_view(request):
     return redirect('order_pages:cart_page')
 
 
+def _cart_totals_payload(cart):
+    """خلاصه سبد برای پاسخ JSON — به‌روزرسانی بی‌وقفه بدون بارگذاری مجدد صفحه"""
+    items = list(cart.items.select_related("product").all())
+    subtotal = sum(i.subtotal for i in items)
+    item_count = sum(i.quantity for i in items)
+    return {
+        "ok": True,
+        "item_count": item_count,
+        "count_fa": fa_digits(item_count),
+        "subtotal": money(subtotal),
+        "total": money(subtotal),
+        "per_item": {str(i.id): money(i.subtotal) for i in items},
+    }
+
+
 @require_POST
 def update_cart_item_view(request):
-    """به‌روزرسانی تعداد آیتم"""
+    """به‌روزرسانی تعداد آیتم — با پاسخ JSON برای تجربه بدون پرش صفحه"""
     item_id = request.POST.get('item_id')
-    quantity = int(request.POST.get('quantity', 1))
-    
+    try:
+        quantity = int(request.POST.get('quantity', 1))
+    except (TypeError, ValueError):
+        quantity = 1
+    wants_json = request.headers.get('X-Requested-With') == 'XMLHttpRequest'
+
     try:
         cart = get_or_create_cart(request)
-        update_cart_item(cart, item_id, quantity)
+        result = update_cart_item(cart, item_id, quantity)
+        if wants_json:
+            payload = _cart_totals_payload(cart)
+            payload["quantity"] = quantity
+            payload["remove_item"] = result is None
+            if result is None:
+                payload["message"] = 'محصول مورد نظر از سبد خرید شما حذف شد.'
+            return JsonResponse(payload)
         messages.success(request, 'سبد خرید شما با موفقیت به‌روزرسانی شد.')
     except ValidationError as e:
-        messages.error(request, e.messages[0] if getattr(e, 'messages', None) else str(e))
+        msg = e.messages[0] if getattr(e, 'messages', None) else str(e)
+        if wants_json:
+            return JsonResponse({"ok": False, "message": msg})
+        messages.error(request, msg)
     except Exception:
-        messages.error(request, 'متأسفانه در به‌روزرسانی سبد خطایی رخ داد. لطفاً دوباره تلاش بفرمایید.')
-    
+        import logging
+        logging.getLogger(__name__).exception("cart update failed")
+        msg = 'متأسفانه در به‌روزرسانی سبد خطایی رخ داد. لطفاً دوباره تلاش بفرمایید.'
+        if wants_json:
+            return JsonResponse({"ok": False, "message": msg})
+        messages.error(request, msg)
+
     return redirect('order_pages:cart_page')
 
 
 @require_POST
 def remove_from_cart_view(request):
-    """حذف آیتم از سبد"""
+    """حذف آیتم از سبد — با پاسخ JSON برای تجربه بدون پرش صفحه"""
     item_id = request.POST.get('item_id')
-    
+    wants_json = request.headers.get('X-Requested-With') == 'XMLHttpRequest'
+
     try:
         cart = get_or_create_cart(request)
         remove_from_cart(cart, item_id)
+        if wants_json:
+            payload = _cart_totals_payload(cart)
+            payload["removed_id"] = str(item_id)
+            return JsonResponse(payload)
         messages.success(request, 'محصول مورد نظر با موفقیت از سبد خرید شما حذف شد.')
     except Exception:
-        messages.error(request, 'متأسفانه در حذف این آیتم خطایی رخ داد. لطفاً دوباره تلاش بفرمایید.')
-    
+        import logging
+        logging.getLogger(__name__).exception("cart remove failed")
+        msg = 'متأسفانه در حذف این آیتم خطایی رخ داد. لطفاً دوباره تلاش بفرمایید.'
+        if wants_json:
+            return JsonResponse({"ok": False, "message": msg})
+        messages.error(request, msg)
+
     return redirect('order_pages:cart_page')
 
 

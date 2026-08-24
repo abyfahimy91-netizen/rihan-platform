@@ -527,13 +527,18 @@
 <div class="cart-layout">
     <div class="cart-items">
         {% for item in items %}
-        <div class="cart-item">
+        <div class="cart-item" data-item-id="{{ item.id }}">
             <div class="cart-item-image">
+                {% if item.product.main_image_url %}
+                <img src="{{ item.product.main_image_url }}" alt="{{ item.product.name }}"
+                     loading="lazy" decoding="async">
+                {% else %}
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
                     <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
                     <circle cx="8.5" cy="8.5" r="1.5"></circle>
                     <polyline points="21 15 16 10 5 21"></polyline>
                 </svg>
+                {% endif %}
             </div>
             
             <div class="cart-item-info">
@@ -550,9 +555,9 @@
             <form method="post" action="{% url 'order_pages:update_cart_page' %}" class="quantity-control">
                 {% csrf_token %}
                 <input type="hidden" name="item_id" value="{{ item.id }}">
-                <button type="button" class="quantity-btn" onclick="updateQty(this, -1)" aria-label="کاهش تعداد">-</button>
-                <input type="number" name="quantity" value="{{ item.quantity }}" min="1" class="quantity-input" onchange="this.form.submit()" aria-label="تعداد">
-                <button type="button" class="quantity-btn" onclick="updateQty(this, 1)" aria-label="افزایش تعداد">+</button>
+                <button type="button" class="quantity-btn" aria-label="کاهش تعداد">-</button>
+                <input type="number" name="quantity" value="{{ item.quantity }}" min="1" class="quantity-input" onchange="rihanQueueUpdate(this)" aria-label="تعداد">
+                <button type="button" class="quantity-btn" aria-label="افزایش تعداد">+</button>
             </form>
             
             <div class="cart-item-subtotal">
@@ -563,7 +568,7 @@
                 </div>
             </div>
             
-            <form method="post" action="{% url 'order_pages:remove_cart_page' %}">
+            <form method="post" action="{% url 'order_pages:remove_cart_page' %}" class="js-remove-form">
                 {% csrf_token %}
                 <input type="hidden" name="item_id" value="{{ item.id }}">
                 <button type="submit" class="remove-btn" title="حذف محصول">
@@ -584,12 +589,12 @@
         
         <div class="summary-row">
             <span class="summary-row-label">تعداد اقلام</span>
-            <span class="summary-row-value">{{ item_count|fa }} قلم</span>
+            <span class="summary-row-value" id="sumCount">{{ item_count|fa }} قلم</span>
         </div>
         
         <div class="summary-row">
             <span class="summary-row-label">جمع کالاها</span>
-            <span class="summary-row-value">{{ subtotal|money }} تومان</span>
+            <span class="summary-row-value" id="sumSubtotal">{{ subtotal|money }} تومان</span>
         </div>
         
         <div class="summary-row shipping">
@@ -599,7 +604,7 @@
         
         <div class="summary-row total">
             <span class="summary-row-label">مبلغ نهایی</span>
-            <span class="summary-row-value">{{ total|money }} تومان</span>
+            <span class="summary-row-value" id="sumTotal">{{ total|money }} تومان</span>
         </div>
         
         <div class="summary-actions">
@@ -639,15 +644,196 @@
     </aside>
 </div>
 
+<style>
+    /* ── به‌روزرسانی بی‌وقفه سبد — بدون پرش صفحه ── */
+    .cart-item-image { overflow: hidden; }
+    .cart-item-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+    }
+    .cart-item {
+        transition: opacity .25s ease, transform .3s ease, max-height .35s ease;
+        max-height: 400px;
+    }
+    .cart-item.is-updating { opacity: .55; pointer-events: none; }
+    .cart-item.row-remove {
+        opacity: 0;
+        transform: translateX(-24px);
+        max-height: 0 !important;
+        margin-bottom: 0 !important;
+        padding-top: 0 !important;
+        padding-bottom: 0 !important;
+        border-width: 0 !important;
+        overflow: hidden;
+    }
+    .rihan-toast {
+        position: fixed;
+        bottom: 26px;
+        right: 50%;
+        transform: translateX(50%);
+        background: #0D3B2E;
+        color: #fff;
+        padding: 13px 26px;
+        border-radius: 999px;
+        font-size: 14px;
+        font-weight: 600;
+        box-shadow: 0 10px 30px rgba(13,59,46,.35);
+        z-index: 99999;
+        opacity: 0;
+        transition: opacity .25s ease, bottom .25s ease;
+        pointer-events: none;
+        max-width: min(92vw, 520px);
+        text-align: center;
+        line-height: 1.9;
+    }
+    .rihan-toast.show { opacity: 1; bottom: 38px; }
+    .rihan-toast.error { background: #7c2222; }
+    .quantity-btn:disabled, .btn-remove-disabled { opacity: .5; cursor: wait; }
+</style>
+
 <script>
-function updateQty(btn, delta) {
-    const form = btn.closest('form');
-    const input = form.querySelector('input[name=quantity]');
-    let val = parseInt(input.value) + delta;
-    if (val < 1) val = 1;
-    input.value = val;
-    form.submit();
-}
+(function () {
+    "use strict";
+    var CSRF = "{{ csrf_token }}";
+
+    /* ── توست محترمانه فارسی (بدون جابه‌جایی صفحه) ── */
+    var toastEl = null, toastTimer = null;
+    function showToast(msg, isError) {
+        if (!toastEl) {
+            toastEl = document.createElement("div");
+            toastEl.className = "rihan-toast";
+            document.body.appendChild(toastEl);
+        }
+        toastEl.textContent = msg;
+        toastEl.className = "rihan-toast show" + (isError ? " error" : "");
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(function () {
+            toastEl.className = "rihan-toast";
+        }, 4200);
+    }
+
+    /* ── بازیابی محل اسکرول (پشتیبان؛ مسیر اصلی AJAX است) ── */
+    var scrollKey = "rihanCartScroll";
+    window.addEventListener("beforeunload", function () {
+        try { sessionStorage.setItem(scrollKey, String(window.scrollY)); } catch (e) {}
+    });
+    try {
+        if (location.pathname.indexOf("/order/cart/") === 0) {
+            var sy = parseInt(sessionStorage.getItem(scrollKey) || "0", 10);
+            if (sy > 0) { window.scrollTo(0, sy); }
+            sessionStorage.removeItem(scrollKey);
+        }
+    } catch (e) {}
+
+    function moneyFa(n) { return Number(n).toLocaleString("fa-IR"); }
+
+    function applyTotals(data, itemRow) {
+        if (itemRow && data.per_item) {
+            var id = itemRow.getAttribute("data-item-id");
+            var sub = itemRow.querySelector(".subtotal-amount");
+            if (sub && data.per_item[id]) {
+                sub.innerHTML = data.per_item[id] + " <small>تومان</small>";
+            }
+        }
+        var s1 = document.getElementById("sumSubtotal"), s2 = document.getElementById("sumTotal"),
+            s3 = document.getElementById("sumCount"), badge = document.getElementById("cart-count");
+        if (s1) s1.textContent = data.subtotal + " تومان";
+        if (s2) s2.textContent = data.total + " تومان";
+        if (s3) s3.textContent = data.count_fa + " قلم";
+        if (badge) badge.textContent = data.count_fa;
+    }
+
+    function removeRow(row) {
+        row.style.maxHeight = row.scrollHeight + "px";
+        void row.offsetHeight;
+        row.classList.add("row-remove");
+        setTimeout(function () { row.remove(); }, 380);
+    }
+
+    async function postForm(action, fd) {
+        fd.append("csrfmiddlewaretoken", CSRF);
+        var res = await fetch(action, {
+            method: "POST",
+            body: fd,
+            headers: { "X-Requested-With": "XMLHttpRequest" },
+            credentials: "same-origin"
+        });
+        try { return await res.json(); } catch (e) { return { ok: false }; }
+    }
+
+    var pendingTimer = null;
+
+    function sendQuantityUpdate(form) {
+        var row = form.closest(".cart-item");
+        var input = form.querySelector("input[name=quantity]");
+        var btns = row ? row.querySelectorAll(".quantity-btn") : [];
+        btns.forEach(function (b) { b.disabled = true; });
+        if (row) row.classList.add("is-updating");
+
+        var fd = new FormData(form);
+        postForm(form.action, fd).then(function (data) {
+            if (!data.ok) {
+                showToast(data.message || "متأسفانه عملیات انجام نشد. لطفاً دوباره تلاش بفرمایید.", true);
+                if (input && input.dataset.prev) { input.value = input.dataset.prev; }
+            } else if (data.remove_item) {
+                if (row) { removeRow(row); }
+                showToast(data.message || "محصول از سبد حذف شد.");
+                applyTotals(data, null);
+            } else {
+                applyTotals(data, row);
+            }
+        }).catch(function () {
+            showToast("ارتباط برقرار نشد؛ لطفاً اتصال اینترنت را بررسی و دوباره تلاش بفرمایید.", true);
+        }).finally(function () {
+            btns.forEach(function (b) { b.disabled = false; });
+            if (row) row.classList.remove("is-updating");
+        });
+    }
+
+    window.rihanQueueUpdate = function (input) {
+        var form = input.closest ? input.closest("form") : null;
+        if (!form) { return true; }
+        clearTimeout(pendingTimer);
+        pendingTimer = setTimeout(function () { sendQuantityUpdate(form); }, 320);
+        return false;
+    };
+
+    /* دکمه‌های + و − */
+    document.querySelectorAll(".quantity-btn").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+            var form = btn.closest("form");
+            var input = form.querySelector("input[name=quantity]");
+            input.dataset.prev = input.value;
+            var val = (parseInt(input.value, 10) || 1) + (btn.textContent.trim() === "+" ? 1 : -1);
+            if (val < 1) val = 1;
+            input.value = val;
+            clearTimeout(pendingTimer);
+            pendingTimer = setTimeout(function () { sendQuantityUpdate(form); }, 320);
+        });
+    });
+
+    /* فرم حذف */
+    document.querySelectorAll(".js-remove-form").forEach(function (form) {
+        form.addEventListener("submit", function (ev) {
+            ev.preventDefault();
+            var row = form.closest(".cart-item");
+            var fd = new FormData(form);
+            postForm(form.action, fd).then(function (data) {
+                if (data.ok) {
+                    if (row) { removeRow(row); }
+                    applyTotals(data, null);
+                    showToast("محصول مورد نظر با موفقیت از سبد خرید شما حذف شد.");
+                } else {
+                    showToast(data.message || "متأسفانه در حذف این آیتم خطایی رخ داد.", true);
+                }
+            }).catch(function () {
+                showToast("ارتباط برقرار نشد؛ دوباره تلاش بفرمایید.", true);
+            });
+        });
+    });
+})();
 </script>
 {% else %}
 <div class="empty-cart">
