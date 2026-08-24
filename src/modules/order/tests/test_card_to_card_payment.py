@@ -422,7 +422,7 @@ class CardToCardPaymentTest(TestCase):
         
         self.assertEqual(response.status_code, 200)
         content = response.content.decode('utf-8')
-        self.assertIn('اطلاعات حساب مقصد', content)
+        self.assertIn('کارت‌های زیر واریز کنید', content)
         self.assertIn('۴ رقم آخر کارت', content)
     
     # ═══════════════════════════════════════════════════════════════

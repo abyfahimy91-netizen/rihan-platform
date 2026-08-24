@@ -224,7 +224,7 @@ class TrackingLookupViewTest(TestCase):
         })
         
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, 'یافت نشد')
+        self.assertContains(response, 'پیدا نشد')
     
     def test_lookup_with_empty_fields(self):
         """POST with empty fields should show error"""
