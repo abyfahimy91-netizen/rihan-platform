@@ -340,7 +340,7 @@
                     <a href="/">محصولات</a>
                     <a href="/about/">درباره ما</a>
                     <a href="/contact/">تماس</a>
-                    <a href="/tracking/">پیگیری سفارش</a>
+                    <a href="/order/lookup/">پیگیری سفارش</a>
                 </nav>
                 {% if user.is_authenticated %}<a href="{% url 'auth_pages:profile' %}" style="color:var(--color-text);font-weight:700;text-decoration:none;margin-left:18px;font-size:14px;">👤 حساب من</a>{% else %}<a href="{% url 'auth_pages:login' %}" style="color:var(--color-text);font-weight:700;text-decoration:none;margin-left:18px;font-size:14px;">ورود / ثبت‌نام</a>{% endif %}
             <a href="{% url 'order_pages:cart_page' %}" class="cart-icon" title="سبد خرید">
@@ -379,7 +379,7 @@
                 
                 <div class="footer-col">
                     <h4>راهنما</h4>
-                    <a href="/tracking/">پیگیری سفارش</a>
+                    <a href="/order/lookup/">پیگیری سفارش</a>
                     <a href="/return-policy/">سیاست مرجوعی</a>
                     <a href="/faq/">سؤالات متداول</a>
                 </div>
