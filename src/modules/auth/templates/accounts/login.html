@@ -244,10 +244,12 @@
             <h1>ورود با رمز عبور</h1>
             <p class="auth-sub">شماره موبایل و رمز عبور خود را وارد کنید.<br>نام کاربری شما در ریحان همان <b>شماره موبایل</b> است.</p>
 
+            {% if otp_enabled and password_enabled %}
             <div class="auth-tabs">
                 <a href="{% url 'auth_pages:login' %}">کد پیامکی<small>سریع و بدون نیاز به رمز ✨</small></a>
                 <a href="javascript:void(0)" class="on">رمز عبور<small>مناسب قطعی پیامک</small></a>
             </div>
+            {% endif %}
 
             <form method="post" action="{% url 'auth_pages:login' %}" id="pwd-login-form">
                 {% csrf_token %}
@@ -294,15 +296,23 @@
 
             <div class="switch-link"><a href="{% url 'auth_pages:login' %}?method=password">← بازگشت به ورود</a></div>
 
+            {% elif step == 'disabled' %}
+            <!-- ═══════ هر دو روش ورود خاموش است (D-103) ═══════ -->
+            <h1>ورود موقتاً غیرفعال است</h1>
+            <p class="auth-sub">در حال حاضر امکان ورود وجود ندارد؛<br>لطفاً کمی بعد دوباره تلاش کنید یا با پشتیبانی در تماس باشید.</p>
+            <div class="trust-note">🛠 مدیر سایت می‌تواند روش‌های ورود را از پنل مدیریت فعال کند</div>
+
             {% else %}
             <!-- ═══════ مرحله ۱: تب پیش‌فرض (کد پیامکی) ═══════ -->
             <h1>ورود / ثبت‌نام</h1>
             <p class="auth-sub">شماره موبایل خود را وارد کنید؛<br>کد تأیید برایتان پیامک می‌شود.</p>
 
+            {% if otp_enabled and password_enabled %}
             <div class="auth-tabs">
                 <a href="javascript:void(0)" class="on">کد پیامکی<small>سریع و بدون نیاز به رمز ✨</small></a>
                 <a href="{% url 'auth_pages:login' %}?method=password">رمز عبور<small>مناسب قطعی پیامک</small></a>
             </div>
+            {% endif %}
 
             <form method="post" action="{% url 'auth_pages:login' %}" id="request-form">
                 {% csrf_token %}

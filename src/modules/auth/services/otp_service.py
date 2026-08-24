@@ -45,9 +45,18 @@ class OtpService:
     """
     
     OTP_LENGTH = 6
-    OTP_TTL_MINUTES = 5
+    OTP_TTL_MINUTES = 5  # پیش‌فرض؛ مقدار واقعی از AuthSettings ادمین خوانده می‌شود (D-103)
     MAX_ATTEMPTS = 3
     LOCKOUT_MINUTES = 30
+
+    @classmethod
+    def _settings(cls):
+        """تنظیمات ورود از پنل ادمین (D-103) — در صورت خطا None"""
+        try:
+            from ..models import AuthSettings
+            return AuthSettings.load()
+        except Exception:
+            return None
     
     @classmethod
     def generate_otp(cls) -> str:
@@ -142,12 +151,15 @@ class OtpService:
             verified_at__isnull=True
         ).update(expires_at=timezone.now())
         
-        # ایجاد OTP جدید
+        # ایجاد OTP جدید (TTL و تلاش‌ها از تنظیمات ادمین — D-103)
+        _settings = cls._settings()
+        ttl_minutes = _settings.otp_ttl_minutes if _settings else cls.OTP_TTL_MINUTES
+        max_attempts = _settings.otp_max_attempts if _settings else cls.MAX_ATTEMPTS
         otp = PhoneOTP.objects.create(
             phone=phone,
             otp_hash=otp_hash,
-            expires_at=timezone.now() + timedelta(minutes=cls.OTP_TTL_MINUTES),
-            max_attempts=cls.MAX_ATTEMPTS
+            expires_at=timezone.now() + timedelta(minutes=ttl_minutes),
+            max_attempts=max_attempts
         )
         
         # ثبت در Rate Limiter
@@ -161,21 +173,20 @@ class OtpService:
             success=True
         )
         
-        # ارسال پیامکی کد (کاوه‌نگار در صورت تنظیم بودن کلید)
-        from ..sms_providers import KavenegarProvider
-        _provider = KavenegarProvider()
-        _sent_via_sms = False
-        if _provider.is_available():
-            _sent_via_sms = _provider.send_otp(phone, otp_code)
-            if not _sent_via_sms:
-                logger.warning("SMS delivery failed -> falling back to on-screen code")
-
-        logger.info(f"OTP requested for {phone[:4]}***{phone[-4:]}")
-        if _sent_via_sms:
+        # D-103: ارسال از طریق سرویس‌دهنده فعال (با جایگزینی خودکار و Mock اضطراری)
+        from .sms_service import SmsService
+        sent_via_sms, show_code, provider_name = SmsService.send_otp_or_mock(phone, otp_code)
+        otp.sent_via = provider_name or ('screen' if show_code else 'failed')
+        otp.save(update_fields=['sent_via'])
+        
+        logger.info(f"OTP requested for {phone[:4]}***{phone[-4:]} via {provider_name or 'N/A'}")
+        if sent_via_sms:
             return True, "کد تأیید پیامک شد.", None
-        if _provider.is_available():
-            return True, "ارسال پیامک ناموفق بود؛ کد به‌صورت آزمایشی نمایش داده می‌شود.", otp_code
-        return True, "کد ارسال شد.", otp_code
+        if show_code:
+            return True, "ارسال پیامک موقتاً امکان‌پذیر نیست؛ کد به‌صورت آزمایشی نمایش داده می‌شود.", otp_code
+        # هیچ سرویسی در دسترس نیست و ادمین نمایش کد را هم خاموش کرده است
+        otp.delete()  # کد بلااستفاده باقی نماند
+        return False, "ارسال پیامک موقتاً امکان‌پذیر نیست. لطفاً چند دقیقه بعد دوباره تلاش کنید یا با پشتیبانی تماس بگیرید.", None
     
     @classmethod
     def verify_otp(cls, phone: str, otp_code: str, ip: str = None) -> Tuple[bool, str, Optional[User]]:

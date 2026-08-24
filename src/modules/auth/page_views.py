@@ -82,7 +82,8 @@ def _remember_device(response, request, user):
 # ══════════════════════════ ورود / ثبت‌نام ══════════════════════════
 
 def login_page_view(request):
-    """ورود دوکاناله با راهنمای گام‌به‌گام (سفر مشتری: ۱ شماره ← ۲ تأیید ← ۳ ورود)"""
+    """ورود دوکاناله با راهنمای گام‌به‌گام (سفر مشتری: ۱ شماره ← ۲ تأیید ← ۳ ورود)
+    D-103: روش‌های فعال و روش پیش‌فرض از تنظیمات ادمین (AuthSettings) کنترل می‌شود."""
     if request.user.is_authenticated:
         return redirect('auth_pages:profile')
 
@@ -90,14 +91,36 @@ def login_page_view(request):
     ip = _client_ip(request)
     ua = request.META.get('HTTP_USER_AGENT', '')[:255]
 
+    # ── تنظیمات ورود از پنل ادمین (D-103) ──
+    from .models import AuthSettings
+    try:
+        _s = AuthSettings.load()
+    except Exception:
+        _s = None
+    otp_enabled = _s.otp_enabled if _s else True
+    password_enabled = _s.password_enabled if _s else True
+
+    # روش پیش‌فرض — با محافظ: روشی انتخاب شود که واقعاً فعال است
+    default_method = (_s.default_method if _s else 'otp') or 'otp'
+    if default_method == 'password' and not password_enabled:
+        default_method = 'otp'
+    if default_method == 'otp' and not otp_enabled:
+        default_method = 'password'
+    auth_disabled = not otp_enabled and not password_enabled
+
     # مقادیر پیش‌فرض context
     ctx = {
-        'step': 'phone',          # phone | code | password | forgot | reset_code | set_password
-        'method': 'otp',          # otp | password (تب فعال)
+        'step': 'disabled' if auth_disabled else ('password' if default_method == 'password' else 'phone'),
+        'method': default_method if not auth_disabled else 'otp',
         'phone_display': '',
         'next_url': next_url,
         'code_error': False,
         'resend_seconds': 120,
+        # D-103: کنترل روش‌های ورود از ادمین
+        'otp_enabled': otp_enabled,
+        'password_enabled': password_enabled,
+        'default_method': default_method,
+        'auth_disabled': auth_disabled,
     }
 
     if request.method == 'POST':
@@ -105,8 +128,16 @@ def login_page_view(request):
         method = request.POST.get('method', 'otp')
         ctx['method'] = method
 
+        # ── محافظ D-103: روش غیرفعال را رد کن ──
+        if action == 'request_otp' and not otp_enabled:
+            messages.error(request, 'ورود با کد پیامکی موقتاً غیرفعال است. لطفاً از رمز عبور استفاده کنید.')
+            ctx.update(step='password' if password_enabled else 'disabled')
+        elif action in ('password_login', 'forgot_request', 'reset_password', 'set_password') and not password_enabled:
+            messages.error(request, 'ورود با رمز عبور موقتاً غیرفعال است. لطفاً از کد پیامکی استفاده کنید.')
+            ctx.update(step=('phone' if otp_enabled else 'disabled'), method='otp')
+
         # ── مرحله ۱: درخواست کد پیامکی ──
-        if action == 'request_otp':
+        elif action == 'request_otp':
             raw_phone = (request.POST.get('phone') or '').strip()
             success, message, otp_code = OtpService.request_otp(raw_phone, ip)
             if success:
@@ -228,7 +259,7 @@ def login_page_view(request):
             phone = request.session.get(SESSION_RESET_PHONE_KEY)
             if phone:
                 ctx.update(step='reset_code', phone_display=phone, method='password')
-        if request.GET.get('method') == 'password' and ctx['step'] == 'phone':
+        if request.GET.get('method') == 'password' and ctx['step'] == 'phone' and password_enabled:
             ctx['step'] = 'password'
 
     return render(request, 'accounts/login.html', ctx)

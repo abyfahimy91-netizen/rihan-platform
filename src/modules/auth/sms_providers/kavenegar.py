@@ -21,9 +21,11 @@ KAVENEGAR_VERIFY_URL = 'https://api.kavenegar.com/v1/{api_key}/verify/lookup.jso
 class KavenegarProvider(SmsProvider):
     """Provider اصلی SMS با استفاده از Kavenegar Verify Lookup API"""
 
-    def __init__(self):
-        self.api_key = os.environ.get('KAVENEGAR_API_KEY', '').strip()
-        self.template = os.environ.get('KAVENEGAR_OTP_TEMPLATE', 'rihan-otp').strip()
+    def __init__(self, api_key: str = None, template: str = None, sender: str = None):
+        # D-103: اولویت با مقادیر دیتابیس (پنل ادمین)؛ fallback به متغیرهای محیطی
+        self.api_key = (api_key or os.environ.get('KAVENEGAR_API_KEY', '') or '').strip()
+        self.template = (template or os.environ.get('KAVENEGAR_OTP_TEMPLATE', '') or 'rihan-otp').strip()
+        self.sender = (sender or '').strip()
 
     @property
     def name(self) -> str:

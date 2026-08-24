@@ -62,6 +62,13 @@ class PhoneOTP(models.Model):
         verbose_name='قفل موقت تا',
         help_text='پس از ۳ تلاش ناموفق: ۳۰ دقیقه'
     )
+    sent_via = models.CharField(
+        max_length=100,
+        blank=True,
+        default='',
+        verbose_name='ارسال‌شده از طریق',
+        help_text='نام سرویس‌دهنده پیامکی که این کد را ارسال کرده (D-103)',
+    )
     created_at = models.DateTimeField(
         auto_now_add=True,
         verbose_name='زمان ایجاد'
@@ -324,3 +331,128 @@ class LoginAttempt(models.Model):
             queryset = queryset.filter(ip_address=ip)
         
         return queryset.count()
+
+
+class AuthSettings(models.Model):
+    """
+    تنظیمات ورود و پیامک — تک‌رکورد (pk=1) — D-103
+    ادمین به‌طور کامل کنترل می‌کند: کدام روش‌های ورود فعال باشند،
+    پیش‌فرض کدام باشد و رفتار کد یکبارمصرف چگونه باشد.
+    """
+    METHOD_CHOICES = [
+        ('otp', 'کد یکبارمصرف (پیامک)'),
+        ('password', 'رمز عبور'),
+    ]
+
+    # ── روش‌های ورود ──
+    otp_enabled = models.BooleanField(
+        'ورود و ثبت‌نام با کد پیامکی', default=True,
+    )
+    password_enabled = models.BooleanField(
+        'ورود با رمز عبور', default=True,
+    )
+    default_method = models.CharField(
+        'روش پیش‌فرض (تب اول صفحه ورود)', max_length=10,
+        choices=METHOD_CHOICES, default='otp',
+    )
+
+    # ── رفتار کد یکبارمصرف ──
+    otp_ttl_minutes = models.PositiveSmallIntegerField(
+        'مهلت اعتبار کد (دقیقه)', default=5,
+    )
+    otp_max_attempts = models.PositiveSmallIntegerField(
+        'حداکثر تلاش مجاز برای هر کد', default=3,
+    )
+    show_code_on_sms_fail = models.BooleanField(
+        'نمایش کد در صفحه وقتی پیامک ارسال نمی‌شود',
+        default=True,
+        help_text='حالت اضطراری/تست: اگر هیچ سرویس پیامکی در دسترس نباشد، کد روی صفحه نمایش داده می‌شود تا مسیر مشتری قطع نشود. در بهره‌برداری واقعی خاموش کنید.',
+    )
+
+    updated_at = models.DateTimeField('آخرین تغییر', auto_now=True)
+
+    class Meta:
+        app_label = 'rihan_auth'
+        verbose_name = '🔐 تنظیمات ورود و پیامک'
+        verbose_name_plural = '🔐 تنظیمات ورود و پیامک'
+
+    def __str__(self):
+        return 'تنظیمات ورود و پیامک'
+
+    def save(self, *args, **kwargs):
+        self.pk = 1  # همیشه تک‌رکورد
+        super().save(*args, **kwargs)
+
+    def clean(self):
+        from django.core.exceptions import ValidationError
+        if not self.otp_enabled and not self.password_enabled:
+            raise ValidationError('حداقل یکی از روش‌های ورود باید فعال بماند؛ در غیر این صورت هیچ‌کس نمی‌تواند وارد شود.')
+
+    @classmethod
+    def load(cls):
+        obj, _created = cls.objects.get_or_create(pk=1)
+        return obj
+
+
+class SmsProvider(models.Model):
+    """
+    سرویس‌دهنده پیامک — D-103
+    چند سرویس قابل ثبت است؛ فقط یکی «فعال» است و در قطعی آن،
+    بقیه به ترتیب «اولویت» به‌صورت خودکار امتحان می‌شوند.
+    """
+    TYPE_CHOICES = [
+        ('kavenegar', 'کاوه‌نگار'),
+        ('ghasedak', 'قاصدک'),
+        ('sms_ir', 'اس‌ام‌اس آی‌آر'),
+        ('farazsms', 'فراز اس‌ام‌اس'),
+    ]
+
+    name = models.CharField(
+        'عنوان (برای تشخیص)', max_length=100,
+        help_text='مثلاً: «کاوه‌نگار اصلی» یا «کاوه‌نگار پشتیبان»',
+    )
+    provider_type = models.CharField(
+        'نوع سرویس', max_length=20, choices=TYPE_CHOICES, default='kavenegar',
+    )
+    api_key = models.CharField(
+        'کلید API', max_length=255,
+        help_text='از پنل سرویس‌دهنده دریافت می‌شود (کاوه‌نگار: تنظیمات → کلید API)',
+    )
+    otp_template = models.CharField(
+        'نام قالب تأییدیه', max_length=100, default='rihan-otp', blank=True,
+        help_text='نام قالبی که در پنل سرویس‌دهنده ساخته‌اید و متغیر %token دارد',
+    )
+    sender = models.CharField(
+        'شماره فرستنده (اختیاری)', max_length=20, blank=True, default='',
+    )
+
+    is_active = models.BooleanField(
+        'فعال (سرویس در حال استفاده)', default=False,
+        help_text='فقط یک سرویس می‌تواند فعال باشد؛ با فعال‌کردن این، بقیه خودکار غیرفعال می‌شوند.',
+    )
+    priority = models.PositiveIntegerField(
+        'اولویت جایگزین (عدد کوچک‌تر = زودتر)', default=100,
+        help_text='وقتی سرویس فعال قطع شود، بقیه به همین ترتیب امتحان می‌شوند.',
+    )
+
+    last_status = models.CharField(
+        'آخرین وضعیت ارسال', max_length=255, blank=True, default='', editable=False,
+    )
+    last_used_at = models.DateTimeField('آخرین استفاده', null=True, blank=True, editable=False)
+    created_at = models.DateTimeField('ایجاد', auto_now_add=True)
+    updated_at = models.DateTimeField('آخرین تغییر', auto_now=True)
+
+    class Meta:
+        app_label = 'rihan_auth'
+        verbose_name = '📡 سرویس‌دهنده پیامک'
+        verbose_name_plural = '📡 سرویس‌دهنده‌های پیامک'
+        ordering = ('-is_active', 'priority', 'id')
+
+    def __str__(self):
+        flag = ' ✅' if self.is_active else ''
+        return f'{self.name}{flag}'
+
+    def save(self, *args, **kwargs):
+        if self.is_active:
+            SmsProvider.objects.filter(is_active=True).exclude(pk=self.pk).update(is_active=False)
+        super().save(*args, **kwargs)
