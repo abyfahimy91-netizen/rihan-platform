@@ -19,6 +19,40 @@ from src.core.fa import money
 class BasePaymentGateway(ABC):
     """کلاس پایه برای همه درگاه‌های پرداخت (Interface مشترک ADR-005)"""
     
+    def get_destination_accounts(self):
+        """
+        حساب‌های فعال مقصد از دیتابیس (مدیریت از ادمین).
+        اگر هیچ حسابی ثبت نشده باشد، به CARD_TO_CARD_CONFIG برمی‌گردد.
+        نتیجه در سطح instance کش می‌شود تا چند بار فراخوانی ارزان باشد.
+        """
+        if getattr(self, '_accounts_cache', None):
+            return self._accounts_cache
+        from .models import BankAccount
+        accounts = []
+        for a in BankAccount.objects.filter(is_active=True):
+            accounts.append({
+                'bank_name': a.bank_name,
+                'card_number': a.card_digits,
+                'card_grouped': a.card_grouped,
+                'card_holder': a.card_holder,
+                'iban': a.iban or '',
+                'label': a.label or '',
+            })
+        if not accounts:
+            cfg = getattr(settings, 'CARD_TO_CARD_CONFIG', {})
+            raw = ''.join(ch for ch in cfg.get('card_number', '') if ch.isdigit())
+            grouped = '-'.join(raw[i:i+4] for i in range(0, len(raw), 4)) if len(raw) == 16 else cfg.get('card_number', '')
+            accounts.append({
+                'bank_name': cfg.get('bank_name', ''),
+                'card_number': raw,
+                'card_grouped': grouped,
+                'card_holder': cfg.get('card_holder', ''),
+                'iban': cfg.get('iban', ''),
+                'label': '',
+            })
+        self._accounts_cache = accounts
+        return accounts
+
     @abstractmethod
     def create_payment(self, order, description=None, callback_url=None):
         """
@@ -90,6 +124,8 @@ class CardToCardGateway(BasePaymentGateway):
             'amount': float(order.total_price),
             'amount_display': money(order.total_price) + " تومان",
             'order_number': order.order_number,
+            'destinations': self.get_destination_accounts(),
+            'destination': self.get_destination_accounts()[0] if self.get_destination_accounts() else {},
             'instructions': [
                 'مبلغ را به شماره کارت زیر واریز کنید',
                 '۴ رقم آخر کارت خود را در فرم زیر وارد کنید',

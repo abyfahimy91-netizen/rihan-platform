@@ -9,7 +9,7 @@ from django.utils.html import format_html
 from django.utils import timezone
 from django.db.models import Count, Sum, Q
 from django.urls import reverse
-from .models import Cart, CartItem, Order, OrderItem, Payment, Address
+from .models import Cart, CartItem, Order, OrderItem, Payment, Address, BankAccount
 from src.core.fa import money as fa_money, jalali_datetime_str
 
 
@@ -352,3 +352,41 @@ class AddressAdmin(admin.ModelAdmin):
     
     def has_add_permission(self, request):
         return False
+
+
+# ═══════════════════════════════════════════════════════════════
+# Admin حساب‌های بانکی مقصد (پرداخت کارت‌به‌کارت)
+# ═══════════════════════════════════════════════════════════════
+
+@admin.register(BankAccount)
+class BankAccountAdmin(admin.ModelAdmin):
+    list_display = [
+        'bank_name', 'card_grouped_display', 'card_holder',
+        'label', 'sort_order', 'is_active', 'created_at_fa',
+    ]
+    list_editable = ['sort_order', 'is_active']
+    list_filter = ['is_active', 'bank_name']
+    search_fields = ['bank_name', 'card_number', 'card_holder', 'label']
+    readonly_fields = ['created_at']
+
+    fieldsets = (
+        ('اطلاعات حساب مقصد', {
+            'fields': ('bank_name', 'card_number', 'card_holder', 'iban'),
+            'description': 'این اطلاعات در صفحه پرداخت مشتری با دکمه کپی نمایش داده می‌شود.',
+        }),
+        ('نمایش', {
+            'fields': ('label', 'sort_order', 'is_active'),
+            'description': 'با «ترتیب نمایش» مشخص کنید کدام کارت اول دیده شود. غیرفعال = مخفی از سایت.',
+        }),
+    )
+
+    def card_grouped_display(self, obj):
+        return format_html(
+            '<span dir="ltr" style="font-family:monospace;font-weight:600;">{}</span>',
+            obj.card_grouped,
+        )
+    card_grouped_display.short_description = 'شماره کارت'
+
+    def created_at_fa(self, obj):
+        return jalali_datetime_str(obj.created_at)
+    created_at_fa.short_description = 'تاریخ'

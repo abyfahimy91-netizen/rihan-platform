@@ -188,7 +188,7 @@ class Payment(models.Model):
     '''
     class PaymentStatus(models.TextChoices):
         PENDING = 'PENDING', 'در انتظار پرداخت'
-        PENDING_REVIEW = 'PENDING_REVIEW', 'در انتظار تایید ادمین'  # NEW - برای کارت‌به‌کارت
+        PENDING_REVIEW = 'PENDING_REVIEW', 'در انتظار بررسی و تایید'  # NEW - برای کارت‌به‌کارت
         SUCCESS = 'SUCCESS', 'پرداخت موفق'
         FAILED = 'FAILED', 'پرداخت ناموفق'
         CANCELLED = 'CANCELLED', 'لغو شده توسط کاربر'
@@ -379,3 +379,66 @@ class OrderStatusHistory(models.Model):
     
     def __str__(self):
         return f"{self.order.order_number} - {self.get_status_display()}"
+
+
+# ═══════════════════════════════════════════════════════════════
+# حساب‌های بانکی مقصد (پرداخت کارت‌به‌کارت) — قابل مدیریت از ادمین
+# ═══════════════════════════════════════════════════════════════
+
+class BankAccount(models.Model):
+    """حساب بانکی مقصد برای واریز کارت‌به‌کارت.
+    ادمین می‌تواند یک یا چند حساب فعال تعریف کند؛ همه در صفحه پرداخت
+    به صورت کارت‌های زیبا با دکمه کپی نمایش داده می‌شوند."""
+
+    bank_name = models.CharField(max_length=50, verbose_name="نام بانک")
+    card_number = models.CharField(
+        max_length=24, verbose_name="شماره کارت",
+        help_text="۱۶ رقمی — جداکننده لازم نیست، خودکار تمیز می‌شود",
+    )
+    card_holder = models.CharField(max_length=100, verbose_name="نام صاحب حساب")
+    iban = models.CharField(
+        max_length=30, blank=True, default='',
+        verbose_name="شماره شبا", help_text="اختیاری — با یا بدون IR",
+    )
+    label = models.CharField(
+        max_length=60, blank=True, default='',
+        verbose_name="برچسب نمایشی", help_text="مثلاً: کارت اصلی فروشگاه (اختیاری)",
+    )
+    sort_order = models.PositiveIntegerField(default=0, verbose_name="ترتیب نمایش")
+    is_active = models.BooleanField(default=True, verbose_name="فعال")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = "حساب بانکی مقصد"
+        verbose_name_plural = "حساب‌های بانکی مقصد"
+        ordering = ['sort_order', 'created_at']
+
+    def clean(self):
+        from django.core.exceptions import ValidationError as VE
+        trans = str.maketrans('۰۱۲۳۴۵۶۷۸۹٠١٢٣٤٥٦٧٨٩', '01234567890123456789')
+        digits = ''.join(ch for ch in str(self.card_number).translate(trans) if ch.isdigit())
+        if len(digits) != 16:
+            raise VE({'card_number': 'شماره کارت باید دقیقاً ۱۶ رقم باشد.'})
+        self.card_number = digits
+        if self.iban:
+            ib = ''.join(ch for ch in str(self.iban).translate(trans).upper()
+                         if ch.isalnum())
+            if not ib.startswith('IR'):
+                ib = 'IR' + ib
+            self.iban = ib
+
+    @property
+    def card_grouped(self):
+        """نمایش گروه‌بندی‌شده: 6037-9975-XXXX-XXXX"""
+        c = self.card_number
+        if len(c) == 16:
+            return '-'.join(c[i:i + 4] for i in range(0, 16, 4))
+        return c
+
+    @property
+    def card_digits(self):
+        """فقط ارقام — مناسب دکمه کپی"""
+        return self.card_number
+
+    def __str__(self):
+        return '{} - {}'.format(self.bank_name, self.card_grouped)

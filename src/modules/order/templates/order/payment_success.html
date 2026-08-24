@@ -1,187 +1,162 @@
-{% extends "catalog/base.html" %}
+{% extends "catalog/base.html" %}{% load fa_tags %}
 
-{% block title %}اطلاعات پرداخت ثبت شد | ریهان{% endblock %}
+{% block title %}رسید شما ثبت شد | ریهان{% endblock %}
 
 {% block extra_css %}
 <style>
-    .success-container {
-        max-width: 600px;
-        margin: 60px auto;
-        text-align: center;
-    }
-    
-    .success-icon {
-        width: 100px;
-        height: 100px;
-        background: var(--color-success-bg);
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin: 0 auto 30px;
-        font-size: 60px;
-        animation: pop 0.5s ease-out;
-    }
-    
-    @keyframes pop {
-        0% { transform: scale(0); }
-        70% { transform: scale(1.1); }
-        100% { transform: scale(1); }
-    }
-    
-    .success-title {
-        font-size: 28px;
-        font-weight: 700;
-        color: #1a1a1a;
-        margin-bottom: 16px;
-    }
-    
-    .success-subtitle {
-        font-size: 16px;
-        color: var(--color-text-muted);
-        margin-bottom: 30px;
-        line-height: 1.8;
-    }
-    
-    .order-card {
-        background: #fff;
-        border-radius: 16px;
-        padding: 30px;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-        margin-bottom: 30px;
-    }
-    
-    .order-number {
-        font-size: 24px;
-        font-weight: 700;
-        color: var(--color-primary);
-        margin-bottom: 20px;
-        font-family: monospace;
-    }
-    
-    .info-row {
-        display: flex;
-        justify-content: space-between;
-        padding: 12px 0;
-        border-bottom: 1px solid #f0f0f0;
-    }
-    
-    .info-row:last-child {
-        border-bottom: none;
-    }
-    
-    .info-label {
-        color: var(--color-text-muted);
-    }
-    
-    .info-value {
-        font-weight: 600;
-        color: #1a1a1a;
-    }
-    
-    .next-steps {
-        background: #fff9e6;
-        border-right: 4px solid var(--color-secondary);
-        padding: 20px;
-        border-radius: 8px;
-        text-align: right;
-        margin-bottom: 30px;
-    }
-    
-    .next-steps h3 {
-        font-size: 16px;
-        font-weight: 700;
-        margin-bottom: 12px;
-        color: #1a1a1a;
-    }
-    
-    .next-steps ul {
-        padding-right: 20px;
-        margin: 0;
-        color: var(--color-text-muted);
-        line-height: 2;
-    }
-    
-    .action-buttons {
-        display: flex;
-        gap: 15px;
-        justify-content: center;
-        flex-wrap: wrap;
-    }
-    
-    .btn {
-        padding: 14px 28px;
-        border-radius: 8px;
-        font-size: 16px;
-        font-weight: 600;
-        text-decoration: none;
-        display: inline-block;
-        transition: all 0.3s;
-    }
-    
-    .btn-primary {
-        background: var(--color-primary);
-        color: #fff;
-    }
-    
-    .btn-primary:hover {
-        background: #1a4020;
-    }
-    
-    .btn-secondary {
-        background: #fff;
-        color: #1a1a1a;
-        border: 1px solid var(--color-border);
-    }
-    
-    .btn-secondary:hover {
-        background: #f5f5f5;
-    }
+    .suc-wrap{max-width:600px;margin:0 auto;text-align:center;}
+    .suc-icon{width:104px;height:104px;margin:10px auto 26px;border-radius:50%;
+        background:#EFF6EC;border:3px solid #CDE3C8;display:flex;align-items:center;justify-content:center;
+        animation:suc-pop .55s cubic-bezier(.34,1.56,.64,1) both;}
+    @keyframes suc-pop{0%{transform:scale(0);opacity:0;}70%{transform:scale(1.12);}100%{transform:scale(1);opacity:1;}}
+    .suc-icon svg{width:52px;height:52px;}
+    .suc-icon path{stroke:#2c7a3f;stroke-width:3;fill:none;stroke-linecap:round;stroke-linejoin:round;
+        stroke-dasharray:60;stroke-dashoffset:60;animation:suc-draw .5s .35s ease-out forwards;}
+    @keyframes suc-draw{to{stroke-dashoffset:0;}}
+    .suc-title{font-size:28px;font-weight:900;color:var(--color-text);margin-bottom:10px;}
+    .suc-sub{font-size:15px;color:var(--color-text-muted);line-height:2;margin-bottom:30px;}
+    .suc-card{background:#fff;border-radius:18px;border:1px solid var(--color-border);
+        box-shadow:0 4px 20px rgba(0,0,0,.05);padding:24px 26px;text-align:right;margin-bottom:22px;}
+    .suc-row{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:13px 0;
+        border-bottom:1px dashed var(--color-border);font-size:14.5px;}
+    .suc-row:last-child{border-bottom:none;padding-bottom:2px;}
+    .suc-row .k{color:var(--color-text-muted);}
+    .suc-row .v{font-weight:700;color:var(--color-text);display:flex;align-items:center;gap:8px;}
+    .badge-review{display:inline-block;background:#FBF1DC;color:#8a6a25;border-radius:999px;font-size:12.5px;
+        font-weight:800;padding:5px 14px;}
+    .mini-copy{background:none;border:none;cursor:pointer;color:var(--color-secondary);font-family:inherit;
+        font-size:12px;font-weight:700;padding:3px 8px;border-radius:8px;border:1px solid rgba(201,169,97,.45);transition:.2s;}
+    .mini-copy:hover{background:#FBF7EC;}
+    .next-steps{text-align:right;background:#fff;border-radius:18px;border:1px solid var(--color-border);
+        padding:24px 26px;margin-bottom:30px;}
+    .next-steps h3{font-size:16px;font-weight:800;color:var(--color-text);margin-bottom:16px;}
+    .ns-item{display:flex;gap:14px;position:relative;padding-bottom:20px;}
+    .ns-item:last-child{padding-bottom:0;}
+    .ns-item::before{content:'';position:absolute;top:34px;right:15px;bottom:2px;width:2px;
+        background:var(--color-border);}
+    .ns-item:last-child::before{display:none;}
+    .ns-dot{width:32px;height:32px;border-radius:50%;background:#F4F1E9;display:flex;align-items:center;
+        justify-content:center;font-size:15px;flex-shrink:0;z-index:1;}
+    .ns-t{font-weight:700;font-size:14px;color:var(--color-text);}
+    .ns-s{font-size:12.5px;color:var(--color-text-muted);margin-top:3px;line-height:1.9;}
+    .suc-actions{display:flex;gap:12px;flex-wrap:wrap;}
+    .btn-primary-rx{flex:1;min-width:180px;display:flex;align-items:center;justify-content:center;gap:9px;
+        background:linear-gradient(135deg,var(--color-primary),#17604a);color:#fff;font-family:inherit;font-weight:800;
+        font-size:15.5px;padding:15px 24px;border:none;border-radius:13px;cursor:pointer;text-decoration:none;transition:.25s;}
+    .btn-primary-rx:hover{transform:translateY(-2px);box-shadow:0 10px 24px rgba(13,59,46,.3);color:#fff;}
+    .btn-ghost-rx{flex:1;min-width:150px;display:flex;align-items:center;justify-content:center;gap:8px;
+        background:#fff;color:var(--color-text);border:1.5px solid var(--color-border);font-family:inherit;font-weight:700;
+        font-size:14.5px;padding:15px 22px;border-radius:13px;text-decoration:none;transition:.2s;}
+    .btn-ghost-rx:hover{border-color:var(--color-secondary);color:var(--color-text);}
+    .rx-toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(20px);background:#132A21;color:#fff;
+        padding:12px 26px;border-radius:999px;font-size:14px;font-weight:700;z-index:9999;opacity:0;
+        pointer-events:none;transition:all .3s;box-shadow:0 10px 30px rgba(0,0,0,.3);}
+    .rx-toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="success-container">
-    <div class="success-icon">✓</div>
-    <h1 class="success-title">اطلاعات پرداخت ثبت شد!</h1>
-    <p class="success-subtitle">
-        اطلاعات پرداخت شما با موفقیت ثبت شد. <br>
-        تیم ریهان به زودی پرداخت شما را تایید خواهد کرد.
-    </p>
-    
-    <div class="order-card">
-        <div class="order-number">{{ order_number }}</div>
-        <div class="info-row">
-            <span class="info-label">مبلغ پرداخت</span>
-            <span class="info-value">{{ amount_display }}</span>
+<div class="container">
+    {% include "order/partials/checkout_steps.html" with current=4 %}
+
+    <div class="suc-wrap">
+        <div class="suc-icon">
+            <svg viewBox="0 0 52 52"><path d="M14 27l8 8 16-17"/></svg>
         </div>
-        <div class="info-row">
-            <span class="info-label">کارت فرستنده</span>
-            <span class="info-value">****-****-****-{{ card_last4 }}</span>
+
+        <h1 class="suc-title">رسید شما ثبت شد 🎉</h1>
+        <p class="suc-sub">
+            ممنون که همراه ما هستید!<br>
+            واریزی شما به‌زودی بررسی و سفارش‌تان نهایی می‌شود.
+        </p>
+
+        <div class="suc-card">
+            <div class="suc-row">
+                <span class="k">شماره سفارش</span>
+                <span class="v" dir="ltr">
+                    {{ order.order_number }}
+                    <button type="button" class="mini-copy js-copy" data-copy="{{ order.order_number }}" data-msg="شماره سفارش کپی شد ✓">کپی</button>
+                </span>
+            </div>
+            <div class="suc-row">
+                <span class="k">مبلغ</span>
+                <span class="v">{{ amount_display|fa }} تومان</span>
+            </div>
+            {% if card_last4 %}
+            <div class="suc-row">
+                <span class="k">۴ رقم آخر کارت شما</span>
+                <span class="v" dir="ltr">{{ card_last4|fa }}</span>
+            </div>
+            {% endif %}
+            {% if payment %}
+            <div class="suc-row">
+                <span class="k">وضعیت پرداخت</span>
+                <span class="v"><span class="badge-review">{{ payment.get_status_display }}</span></span>
+            </div>
+            {% endif %}
         </div>
-        <div class="info-row">
-            <span class="info-label">وضعیت فعلی</span>
-            <span class="info-value" style="color:var(--color-secondary);">⏳ در انتظار تایید</span>
+
+        <div class="next-steps">
+            <h3>از اینجا چه اتفاقی می‌افتد؟</h3>
+            <div class="ns-item">
+                <div class="ns-dot">🔍</div>
+                <div>
+                    <div class="ns-t">بررسی واریزی</div>
+                    <div class="ns-s">همکاران ما مبلغ را با صورت‌حساب بانکی مطابقت می‌دهند.</div>
+                </div>
+            </div>
+            <div class="ns-item">
+                <div class="ns-dot">✅</div>
+                <div>
+                    <div class="ns-t">تایید و نهایی شدن سفارش</div>
+                    <div class="ns-s">به‌محض تایید، وضعیت سفارش در همین سایت به‌روز می‌شود.</div>
+                </div>
+            </div>
+            <div class="ns-item">
+                <div class="ns-dot">📦</div>
+                <div>
+                    <div class="ns-t">آماده‌سازی و ارسال</div>
+                    <div class="ns-s">سفارش شما بسته‌بندی و ارسال می‌شود؛ می‌توانید همه مراحل را همین‌جا دنبال کنید.</div>
+                </div>
+            </div>
         </div>
-    </div>
-    
-    <div class="next-steps">
-        <h3>📌 مراحل بعدی:</h3>
-        <ul>
-            <li>تیم ریهان پرداخت شما را بررسی و تایید می‌کند</li>
-            <li>پس از تایید، سفارش شما بسته‌بندی و ارسال می‌شود</li>
-            <li>وضعیت سفارش را از طریق لینک زیر پیگیری کنید</li>
-            <li>در صورت هرگونه سوال، با پشتیبانی تماس بگیرید</li>
-        </ul>
-    </div>
-    
-    <div class="action-buttons">
-        <a href="/order/tracking/{{ order_number }}/" class="btn btn-primary">
-            پیگیری سفارش
-        </a>
-        <a href="/" class="btn btn-secondary">
-            ادامه خرید
-        </a>
+
+        <div class="suc-actions">
+            <a href="{% url 'order_pages:tracking_page' order.order_number %}" class="btn-primary-rx">
+                پیگیری سفارش
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.4"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+            </a>
+            <a href="/" class="btn-ghost-rx">ادامه خرید</a>
+        </div>
+
+        {% if support_phone %}
+        <p style="font-size:13px;color:var(--color-text-muted);margin-top:22px;">
+            سوالی دارید؟ ☎️ <b dir="ltr">{{ support_phone }}</b>
+        </p>
+        {% endif %}
     </div>
 </div>
+
+<div class="rx-toast" id="rxToast"></div>
+<script>
+    function rxToast(msg){
+        var t = document.getElementById('rxToast');
+        t.textContent = msg; t.classList.add('show');
+        setTimeout(function(){ t.classList.remove('show'); }, 2200);
+    }
+    document.querySelectorAll('.js-copy').forEach(function(btn){
+        btn.addEventListener('click', function(){
+            var text = btn.getAttribute('data-copy'), msg = btn.getAttribute('data-msg') || 'کپی شد ✓';
+            if(navigator.clipboard && window.isSecureContext){
+                navigator.clipboard.writeText(text).then(function(){ rxToast(msg); });
+            } else {
+                var ta = document.createElement('textarea');
+                ta.value = text; ta.style.cssText='position:fixed;top:-999px;opacity:0;';
+                document.body.appendChild(ta); ta.select();
+                try { document.execCommand('copy'); rxToast(msg); } catch(e){}
+                document.body.removeChild(ta);
+            }
+        });
+    });
+</script>
 {% endblock %}

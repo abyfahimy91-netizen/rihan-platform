@@ -1,46 +1,152 @@
 {% extends "catalog/base.html" %}{% load fa_tags %}
 
-
 {% block title %}پیگیری سفارش {{ order.order_number }} | ریهان{% endblock %}
 
+{% block extra_css %}
+<style>
+    .trk-wrap{max-width:760px;margin:0 auto;}
+    .trk-head{display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:26px;}
+    .trk-head h1{font-size:27px;font-weight:900;color:var(--color-text);}
+    .trk-head .onum{font-family:monospace;font-size:15px;color:var(--color-primary);background:#fff;
+        border:1.5px dashed var(--color-secondary);border-radius:999px;padding:7px 18px;}
+    .status-badge{display:inline-flex;align-items:center;gap:7px;border-radius:999px;font-size:13px;
+        font-weight:800;padding:8px 18px;background:#FBF1DC;color:#8a6a25;}
+    /* تایم‌لاین افقی */
+    .ftl{background:#fff;border-radius:18px;border:1px solid var(--color-border);box-shadow:0 4px 20px rgba(0,0,0,.05);
+        padding:30px 20px 24px;margin-bottom:22px;}
+    .ftl-row{display:flex;max-width:640px;margin:0 auto;}
+    .ftl-step{flex:1;display:flex;flex-direction:column;align-items:center;gap:9px;position:relative;min-width:0;}
+    .ftl-step::before{content:'';position:absolute;top:23px;right:50%;width:100%;height:3px;
+        background:var(--color-border,#e5e0d5);border-radius:3px;z-index:0;}
+    .ftl-step:first-child::before{display:none;}
+    .ftl-step.is-done::before{background:var(--color-primary);}
+    .ftl-dot{width:48px;height:48px;border-radius:50%;background:#fff;border:2.5px solid var(--color-border);
+        display:flex;align-items:center;justify-content:center;font-size:21px;z-index:1;transition:.3s;}
+    .ftl-step.is-done .ftl-dot{background:var(--color-primary);border-color:var(--color-primary);box-shadow:0 6px 16px rgba(13,59,46,.25);}
+    .ftl-step.is-done .ftl-ic{filter:none;opacity:1;}
+    .ftl-ic{filter:grayscale(1);opacity:.38;transition:.3s;}
+    .ftl-t{font-size:12.5px;font-weight:700;color:var(--color-text-muted);white-space:nowrap;}
+    .ftl-step.is-done .ftl-t{color:var(--color-primary);}
+    /* کارت‌های اطلاعات */
+    .info-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:22px;}
+    .info-card{background:#fff;border-radius:16px;border:1px solid var(--color-border);padding:20px 22px;}
+    .info-card h4{font-size:13px;color:var(--color-text-muted);font-weight:700;margin-bottom:9px;}
+    .info-card .big{font-size:21px;font-weight:900;color:var(--color-primary);}
+    .info-card .mid{font-size:15.5px;font-weight:800;color:var(--color-text);}
+    /* آیتم‌ها */
+    .items-box{background:#fff;border-radius:16px;border:1px solid var(--color-border);padding:22px;margin-bottom:22px;}
+    .items-box h3{font-size:16px;font-weight:800;color:var(--color-text);margin-bottom:14px;}
+    .it-row{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:11px 0;
+        border-bottom:1px dashed var(--color-border);font-size:14px;}
+    .it-row:last-of-type{border-bottom:none;}
+    .it-row .q{color:var(--color-text-muted);font-size:12.5px;}
+    /* تاریخچه عمودی */
+    .hist{background:#fff;border-radius:16px;border:1px solid var(--color-border);padding:24px 26px;}
+    .hist h3{font-size:16px;font-weight:800;color:var(--color-text);margin-bottom:18px;}
+    .h-item{position:relative;padding:0 44px 22px 0;}
+    .h-item:last-child{padding-bottom:0;}
+    .h-item::before{content:'';position:absolute;top:26px;right:13px;bottom:0;width:2px;background:var(--color-border);}
+    .h-item:last-child::before{display:none;}
+    .h-dot{position:absolute;right:0;top:2px;width:28px;height:28px;border-radius:50%;background:var(--color-primary);
+        display:flex;align-items:center;justify-content:center;font-size:12px;z-index:1;}
+    .h-t{font-weight:800;font-size:14px;color:var(--color-text);}
+    .h-s{font-size:12.5px;color:var(--color-text-muted);margin-top:3px;}
+    .trk-actions{display:flex;gap:12px;margin-top:26px;flex-wrap:wrap;}
+    .trk-btn{flex:1;min-width:160px;text-align:center;padding:14px 20px;border-radius:13px;font-weight:800;
+        font-size:14.5px;text-decoration:none;transition:.2s;font-family:inherit;border:none;cursor:pointer;}
+    .trk-btn.solid{background:var(--color-primary);color:#fff;}
+    .trk-btn.line{background:#fff;color:var(--color-text);border:1.5px solid var(--color-border);}
+    .trk-btn:hover{transform:translateY(-1px);}
+    @media(max-width:600px){
+        .info-grid{grid-template-columns:1fr;}
+        .ftl-t{font-size:10px;}
+        .ftl-dot{width:40px;height:40px;font-size:17px;}
+        .trk-head h1{font-size:21px;}
+    }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="container" style="max-width: 800px; margin: 40px auto; padding: 0 20px;">
-    <h1 style="margin-bottom: 30px;">پیگیری سفارش {{ order.order_number }}</h1>
-    
-    <div style="background: #fff; padding: 30px; border-radius: 8px; border: 1px solid var(--color-border); margin-bottom: 30px;">
-        <h2 style="margin-bottom: 20px;">وضعیت سفارش</h2>
-        
-        <div style="display: flex; justify-content: space-between; margin-bottom: 40px;">
-            {% for step in timeline %}
-            <div style="text-align: center; flex: 1;">
-                <div style="width: 30px; height: 30px; border-radius: 50%; margin: 0 auto 10px; 
-                     background: {% if step.active %}var(--color-primary){% else %}var(--color-border){% endif %};"></div>
-                <div style="font-size: 14px; {% if step.active %}color: var(--color-primary); font-weight: 600;{% else %}color: var(--color-text-muted);{% endif %}">
-                    {{ step.title }}
+<div class="container">
+    <div class="trk-wrap">
+        <div class="trk-head">
+            <h1>پیگیری سفارش</h1>
+            <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+                <span class="onum">{{ order.order_number }}</span>
+                <span class="status-badge">{{ order.get_status_display }}</span>
+            </div>
+        </div>
+
+        <div class="ftl">
+            <div class="ftl-row">
+                {% for step in timeline %}
+                <div class="ftl-step {% if step.active %}is-done{% endif %}">
+                    <div class="ftl-dot"><span class="ftl-ic">{{ step.icon }}</span></div>
+                    <div class="ftl-t">{{ step.title }}</div>
                 </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="info-grid">
+            <div class="info-card">
+                <h4>مبلغ کل سفارش</h4>
+                <div class="big">{{ amount_display|fa }} <small style="font-size:13px;">تومان</small></div>
+            </div>
+            <div class="info-card">
+                <h4>تاریخ ثبت</h4>
+                <div class="mid">{{ order.created_at|jdate_human }}</div>
+            </div>
+            {% if payment %}
+            <div class="info-card">
+                <h4>وضعیت پرداخت</h4>
+                <div class="mid">{{ payment.get_status_display }}</div>
+            </div>
+            {% endif %}
+            <div class="info-card">
+                <h4>تعداد اقلام</h4>
+                <div class="mid">{{ items_count|fa }} کالا</div>
+            </div>
+        </div>
+
+        {% if order.items.all %}
+        <div class="items-box">
+            <h3>اقلام سفارش</h3>
+            {% for item in order.items.all %}
+            <div class="it-row">
+                <span>{{ item.product_name_snapshot|default:item.product.name }} <span class="q">× {{ item.quantity|fa }}</span></span>
+                <span>{{ item.subtotal|money }} تومان</span>
             </div>
             {% endfor %}
         </div>
-        
-        <h2 style="margin-bottom: 15px;">اطلاعات سفارش</h2>
-        <div style="background: var(--color-bg); padding: 20px; border-radius: 8px;">
-            <p><strong>وضعیت فعلی:</strong> {{ order.get_status_display }}</p>
-            <p><strong>تاریخ ثبت:</strong> {{ order.created_at|jtime }}</p>
-            <p><strong>مبلغ کل:</strong> {{ order.total_price|money }} تومان</p>
+        {% endif %}
+
+        {% if history %}
+        <div class="hist">
+            <h3>تاریخچه سفارش</h3>
+            {% for item in history %}
+            <div class="h-item">
+                <div class="h-dot">✓</div>
+                <div class="h-t">{{ item.get_status_display }}</div>
+                <div class="h-s">{{ item.created_at|jdate_human }}</div>
+                {% if item.description %}<p style="margin-top:5px;font-size:13.5px;color:var(--color-text);">{{ item.description }}</p>{% endif %}
+            </div>
+            {% endfor %}
         </div>
-    </div>
-    
-    {% if history %}
-    <div style="background: #fff; padding: 30px; border-radius: 8px; border: 1px solid var(--color-border);">
-        <h2 style="margin-bottom: 20px;">تاریخچه تغییرات</h2>
-        {% for item in history %}
-        <div style="border-right: 3px solid var(--color-primary); padding-right: 15px; margin-bottom: 15px;">
-            <strong>{{ item.get_status_display }}</strong>
-            <div style="color: var(--color-text-muted); font-size: 14px;">{{ item.created_at|jtime }}</div>
-            {% if item.description %}<p style="margin-top: 5px;">{{ item.description }}</p>{% endif %}
+        {% endif %}
+
+        <div class="trk-actions">
+            <a href="/" class="trk-btn line">ادامه خرید</a>
+            {% if request.user.is_authenticated %}
+            <a href="{% url 'auth_pages:profile' %}" class="trk-btn solid">سفارش‌های من</a>
+            {% endif %}
         </div>
-        {% endfor %}
+
+        {% if support_phone %}
+        <p style="text-align:center;font-size:13px;color:var(--color-text-muted);margin-top:20px;">
+            سوالی درباره این سفارش دارید؟ ☎️ <b dir="ltr">{{ support_phone }}</b>
+        </p>
+        {% endif %}
     </div>
-    {% endif %}
 </div>
 {% endblock %}

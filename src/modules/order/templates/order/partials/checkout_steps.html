@@ -1,0 +1,36 @@
+{% load fa_tags %}
+{# استپر مراحل سفر خرید — با {٪ include "order/partials/checkout_steps.html" with current=N ٪} #}
+<style>
+    .rx-steps{display:flex;align-items:flex-start;justify-content:center;max-width:660px;margin:0 auto 40px;padding:0 4px;}
+    .rx-step{display:flex;flex-direction:column;align-items:center;gap:9px;position:relative;flex:1;min-width:0;}
+    .rx-step::before{content:'';position:absolute;top:20px;height:3px;width:100%;right:50%;background:var(--color-border,#e5e0d5);border-radius:3px;z-index:0;transition:background .3s;}
+    .rx-step:first-child::before{display:none;}
+    .rx-step.is-done::before{background:var(--color-primary);}
+    .rx-step.is-current::before{background:linear-gradient(90deg,var(--color-secondary),var(--color-border));}
+    .rx-dot{width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:16px;background:#fff;border:2.5px solid var(--color-border,#e5e0d5);color:var(--color-text-muted,#999);z-index:1;transition:all .3s;}
+    .rx-step.is-done .rx-dot{background:var(--color-primary);border-color:var(--color-primary);color:#fff;}
+    .rx-step.is-current .rx-dot{border-color:var(--color-secondary);color:var(--color-primary);box-shadow:0 0 0 6px rgba(201,169,97,.16);animation:rx-pulse 2s infinite;}
+    @keyframes rx-pulse{0%,100%{box-shadow:0 0 0 5px rgba(201,169,97,.16);}50%{box-shadow:0 0 0 9px rgba(201,169,97,.07);}}
+    .rx-label{font-size:12.5px;color:var(--color-text-muted,#999);font-weight:600;white-space:nowrap;}
+    .rx-step.is-done .rx-label{color:var(--color-primary);}
+    .rx-step.is-current .rx-label{color:var(--color-text,#1a1a1a);font-weight:800;}
+    @media(max-width:520px){.rx-dot{width:35px;height:35px;font-size:14px;}.rx-label{font-size:10.5px;}.rx-steps{margin-bottom:28px;}}
+</style>
+<div class="rx-steps" aria-label="مراحل خرید">
+    <div class="rx-step {% if current > 1 %}is-done{% elif current == 1 %}is-current{% endif %}">
+        <div class="rx-dot">{% if current > 1 %}✓{% else %}{{ 1|fa }}{% endif %}</div>
+        <div class="rx-label">سبد خرید</div>
+    </div>
+    <div class="rx-step {% if current > 2 %}is-done{% elif current == 2 %}is-current{% endif %}">
+        <div class="rx-dot">{% if current > 2 %}✓{% else %}{{ 2|fa }}{% endif %}</div>
+        <div class="rx-label">اطلاعات ارسال</div>
+    </div>
+    <div class="rx-step {% if current > 3 %}is-done{% elif current == 3 %}is-current{% endif %}">
+        <div class="rx-dot">{% if current > 3 %}✓{% else %}{{ 3|fa }}{% endif %}</div>
+        <div class="rx-label">پرداخت</div>
+    </div>
+    <div class="rx-step {% if current > 4 %}is-done{% elif current == 4 %}is-current{% endif %}">
+        <div class="rx-dot">{{ 4|fa }}</div>
+        <div class="rx-label">تایید سفارش</div>
+    </div>
+</div>

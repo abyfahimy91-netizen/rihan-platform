@@ -158,7 +158,10 @@
     {% endif %}
 
     {% if items %}
-    <h1 class="checkout-page-title">تسویه‌حساب</h1>
+    <div style="height:12px;"></div>
+    {% include "order/partials/checkout_steps.html" with current=2 %}
+
+    <h1 class="checkout-page-title" style="text-align:center;">تسویه‌حساب</h1>
     <p class="checkout-page-subtitle">فقط سه قدم تا دریافت سفارش شما 🌿</p>
 
     <form method="post" action="{% url 'order_pages:checkout_page' %}" class="checkout-layout">
@@ -214,9 +217,10 @@
             </button>
 
             <div class="trust-badges">
-                <span>✅ ارسال رایگان (D-080)</span>
+                <span>✅ ارسال رایگان به سراسر ایران</span>
                 <span>💳 امکان پرداخت کارت به کارت با آپلود رسید</span>
-                <span>📞 پیگیری تلفنی سفارش با شماره سفارش</span>
+                <span>🔍 پیگیری آسان سفارش آنلاین یا تلفنی</span>
+                <span>🧾 ثبت رسید فقط با ۴ رقم آخر کارت</span>
             </div>
         </div>
     </form>

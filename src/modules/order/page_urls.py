@@ -16,4 +16,5 @@ urlpatterns = [
     path('lookup/', tracking_views.tracking_lookup_view, name='tracking_lookup'),
     path('tracking/<str:order_number>/', tracking_views.tracking_page_view, name='tracking_page'),
     path('payment/<str:order_number>/', tracking_views.payment_page_view, name='payment_page'),
+    path('payment/<str:order_number>/success/', tracking_views.payment_success_view, name='payment_success'),
 ]
