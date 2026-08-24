@@ -80,7 +80,7 @@
             </div>
             <div class="suc-row">
                 <span class="k">مبلغ</span>
-                <span class="v">{{ amount_display|fa }} تومان</span>
+                <span class="v">{{ amount_display|fa }} تومان <span style="color:var(--color-text-muted);font-size:12px;">(معادل {{ amount_rial_display|fa }} ریال)</span></span>
             </div>
             {% if card_last4 %}
             <div class="suc-row">

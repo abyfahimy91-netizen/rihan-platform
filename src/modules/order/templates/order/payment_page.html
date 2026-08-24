@@ -21,10 +21,11 @@
 
     /* ── هیرو مبلغ ── */
     .pay-hero{background:#fff;border-radius:18px;border:1px solid var(--color-border);box-shadow:0 4px 20px rgba(0,0,0,.05);
-        padding:22px 26px;margin:26px 0;display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;}
+        padding:22px 26px;margin:0 0 22px;display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;}
     .pay-hero .lbl{font-size:13.5px;color:var(--color-text-muted);margin-bottom:4px;}
     .pay-hero .amt{font-size:30px;font-weight:900;color:var(--color-primary);}
     .pay-hero .amt small{font-size:15px;font-weight:700;color:var(--color-text-muted);}
+    .pay-hero .amt-eq{font-size:12.5px;color:var(--color-text-muted);margin-top:5px;}
 
     /* ── کارت بانکی مقصد ── */
     .sec-title{display:flex;align-items:center;gap:10px;font-size:19px;font-weight:800;color:var(--color-text);margin:30px 0 14px;}
@@ -203,20 +204,7 @@
                padding:15px 34px;border-radius:13px;text-decoration:none;">بازگشت به سبد خرید</a>
         </div>
         {% elif accounts %}
-        <div class="pay-hero">
-            <div>
-                <div class="lbl">مبلغ قابل پرداخت</div>
-                <div class="amt">{{ amount_display|fa }} <small>تومان</small></div>
-            </div>
-            <button type="button" class="copy-btn js-copy"
-                    data-copy="{{ order.total_price }}"
-                    data-msg="مبلغ کپی شد ✓">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
-                کپی مبلغ
-            </button>
-        </div>
-
-        <div class="sec-title"><span class="num">{{ 1|fa }}</span> به یکی از کارت‌های زیر واریز کنید</div>
+        <div class="sec-title"><span class="num">{{ 1|fa }}</span> کارت به کارت — واریز به یکی از کارت‌های زیر</div>
 
         {% for acc in accounts %}
         <div class="bank-card">
@@ -248,16 +236,32 @@
         </div>
         {% endfor %}
 
+        <div class="sec-title"><span class="num">{{ 2|fa }}</span> مبلغ واریز</div>
+
+        <div class="pay-hero">
+            <div>
+                <div class="lbl">این مبلغ را دقیقاً واریز کنید</div>
+                <div class="amt">{{ amount_rial_display|fa }} <small>ریال</small></div>
+                <div class="amt-eq">معادل {{ amount_display|fa }} تومان</div>
+            </div>
+            <button type="button" class="copy-btn js-copy"
+                    data-copy="{{ amount_rial }}"
+                    data-msg="مبلغ به ریال کپی شد ✓ در قسمت مبلغ اپ بانکی بچسبانید">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+                کپی مبلغ (ریال)
+            </button>
+        </div>
+
         <div class="guide-box">
-            <h3>💡 راهنمای سریع پرداخت</h3>
+            <h3>💡 راهنمای سریع پرداخت (به ترتیب اپ بانکی)</h3>
             <div class="guide-steps">
-                <div class="guide-item"><span class="gi">📋</span><span>شماره کارت را با دکمه <b>«کپی»</b> بردارید و در اپ بانکی خود بچسبانید.</span></div>
-                <div class="guide-item"><span class="gi">💳</span><span>مبلغ را دقیقاً به <b>تومان</b> واریز کنید؛ نیازی به یادداشت کردن چیزی نیست.</span></div>
-                <div class="guide-item"><span class="gi">✍️</span><span>برگردید به همین صفحه و فقط <b>۴ رقم آخر کارت خودتان</b> را وارد کنید.</span></div>
+                <div class="guide-item"><span class="gi">💳</span><span><b>۱) کارت به کارت:</b> در اپ بانکی خود کارت به کارت را انتخاب و شماره کارت مقصد را با دکمه <b>«کپی شماره کارت»</b> بچسبانید.</span></div>
+                <div class="guide-item"><span class="gi">💰</span><span><b>۲) مبلغ:</b> مبلغ را با دکمه <b>«کپی مبلغ»</b> بردارید و در قسمت مبلغ اپ بچسبانید؛ عدد کپی‌شده به <b>ریال</b> است — دقیقاً همین را واریز کنید.</span></div>
+                <div class="guide-item"><span class="gi">✍️</span><span><b>۳) ثبت رسید:</b> پس از واریز، به همین صفحه برگردید و فقط <b>۴ رقم آخر کارت خودتان</b> را وارد کنید.</span></div>
             </div>
         </div>
 
-        <div class="sec-title"><span class="num">{{ 2|fa }}</span> رسید پرداخت را ثبت کنید</div>
+        <div class="sec-title"><span class="num">{{ 3|fa }}</span> رسید پرداخت را ثبت کنید</div>
 
         <form method="post" enctype="multipart/form-data" class="evidence-form" id="evidenceForm">
             {% csrf_token %}

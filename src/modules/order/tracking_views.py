@@ -161,6 +161,10 @@ def payment_page_view(request, order_number):
         'payment': payment,
         'accounts': accounts,
         'amount_display': money(order.total_price),
+        # مبلغ واریز باید ریالی باشد — اپ‌های بانکی مبلغ را ریال می‌پذیرند (D-101)
+        # int() تا مقدار کپی‌شده عدد تمیز باشد نه «5000000.00» (DecimalField داری اعشار است)
+        'amount_rial': int(order.total_price * 10),
+        'amount_rial_display': money(order.total_price * 10),
         'items_count': sum(i.quantity for i in order.items.all()),
         'already_submitted': already_submitted,
         'errors': errors,
@@ -186,6 +190,7 @@ def payment_success_view(request, order_number):
         'order': order,
         'payment': payment,
         'amount_display': money(order.total_price),
+        'amount_rial_display': money(order.total_price * 10),
         'card_last4': payment.sender_card_last4 if payment else '',
         'support_phone': _get_support_phone(),
     }

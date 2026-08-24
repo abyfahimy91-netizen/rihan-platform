@@ -422,8 +422,54 @@ class CardToCardPaymentTest(TestCase):
         
         self.assertEqual(response.status_code, 200)
         content = response.content.decode('utf-8')
-        self.assertIn('کارت‌های زیر واریز کنید', content)
+        self.assertIn('کارت به کارت — واریز به یکی از کارت‌های زیر', content)
         self.assertIn('۴ رقم آخر کارت', content)
+
+    # ═══════════════════════════════════════════════════════════════
+    # Test 12b: Amount must be Rial (D-101)
+    # ═══════════════════════════════════════════════════════════════
+    def test_payment_page_amount_in_rial(self):
+        """مبلغ قابل کپی و نمایش باید ریال باشد — اپ‌های بانکی مبلغ را ریال می‌پذیرند (D-101)"""
+        order = self._create_order()
+        self._create_payment(order)
+
+        self.client.force_login(self.customer)
+        response = self.client.get(f'/order/payment/{order.order_number}/')
+        content = response.content.decode('utf-8')
+
+        expected_rial = str(int(order.total_price * 10))
+        # دکمه کپی، مقدار ریال تمیز (بدون اعشار) کپی می‌کند
+        self.assertIn(f'data-copy="{expected_rial}"', content)
+        self.assertNotIn(f'data-copy="{expected_rial}.', content)
+        # واحد نمایش ریال است + معادل تومان هم هست
+        self.assertIn('ریال', content)
+        self.assertIn('معادل', content)
+        # مقدار تومان خام دیگر کپی نمی‌شود
+        self.assertNotIn(f'data-copy="{int(order.total_price)}"', content)
+        # راهنمای قدیمی «به تومان واریز کنید» حذف شده
+        self.assertNotIn('به <b>تومان</b> واریز', content)
+
+    def test_payment_page_section_order_matches_bank_app(self):
+        """ترتیب صفحه باید مطابق اپ بانکی باشد: ۱) کارت به کارت ۲) مبلغ ۳) ۴ رقم (D-101)"""
+        order = self._create_order()
+        self._create_payment(order)
+
+        self.client.force_login(self.customer)
+        response = self.client.get(f'/order/payment/{order.order_number}/')
+        content = response.content.decode('utf-8')
+
+        i_card = content.index('کارت به کارت — واریز به')
+        i_amount = content.index('مبلغ واریز')
+        i_last4 = content.index('رسید پرداخت را ثبت کنید')
+        self.assertLess(i_card, i_amount)
+        self.assertLess(i_amount, i_last4)
+
+        # راهنما هم همین ترتیب را می‌گوید
+        i_g1 = content.index('۱) کارت به کارت')
+        i_g2 = content.index('۲) مبلغ')
+        i_g3 = content.index('۳) ثبت رسید')
+        self.assertLess(i_g1, i_g2)
+        self.assertLess(i_g2, i_g3)
     
     # ═══════════════════════════════════════════════════════════════
     # Test 13: Tracking page renders timeline
