@@ -1,71 +1,36 @@
 {% extends "catalog/base.html" %}
 
-{% block title %}سیاست مرجوعی | ریهان{% endblock %}
-{% block meta_description %}سیاست مرجوعی ریهان - ۷ روز گارانتی مرجوعی بدون سؤال{% endblock %}
+{% block title %}{{ policy_title }} | {{ site_settings.site_name }}{% endblock %}
+{% block meta_description %}{{ policy_title }} {{ site_settings.site_name }} - شرایط و فرآیند مرجوعی{% endblock %}
 
 {% block content %}
+<style>
+    .return-policy-page .pm-heading { font-size: 1.5rem; margin: 34px 0 18px; color: #1a1a1a; }
+    .return-policy-page .pm-p { line-height: 2; font-size: 1.08rem; margin-bottom: 16px; }
+    .return-policy-page .pm-list, .return-policy-page .pm-olist { line-height: 2; font-size: 1.08rem; padding-right: 24px; margin-bottom: 20px; }
+    .return-policy-page .pm-quote {
+        border-right: 4px solid var(--color-primary);
+        background: var(--color-bg);
+        padding: 18px 22px;
+        border-radius: 8px;
+        color: var(--color-text-muted);
+        margin: 24px 0;
+        font-size: 1.05rem;
+    }
+</style>
+
 <div class="return-policy-page" dir="rtl">
     <div class="container" style="max-width: 800px; margin: 0 auto; padding: 40px 20px;">
-        
-        <h1 style="font-size: 2.5rem; margin-bottom: 30px; color: #1a1a1a;">سیاست مرجوعی</h1>
-        
-        <div class="policy-intro" style="margin-bottom: 30px; line-height: 1.8;">
-            <p style="font-size: 1.1rem; margin-bottom: 20px;">
-                ما در ریهان به کیفیت محصولات خود اطمینان داریم.
-                اگر به هر دلیلی از خرید خود راضی نبودید، تا <strong>۷ روز</strong> فرصت مرجوعی دارید.
-            </p>
-        </div>
-        
-        <h2 style="font-size: 1.5rem; margin-bottom: 20px;">شرایط مرجوعی</h2>
-        
-        <div style="background: var(--color-bg); padding: 30px; border-radius: 8px; margin-bottom: 30px;">
-            <ul style="line-height: 2; font-size: 1.1rem; padding-right: 20px;">
-                <li>محصول باید در بسته‌بندی اصلی و استفاده نشده باشد</li>
-                <li>برچسب‌ها و اتیکت‌ها نباید کنده شده باشند</li>
-                <li>محصول نباید آسیب دیده یا لکه‌دار شده باشد</li>
-                <li>فقط تا ۷ روز پس از تحویل قابل مرجوع است</li>
-            </ul>
-        </div>
-        
-        <h2 style="font-size: 1.5rem; margin-bottom: 20px;">فرآیند مرجوعی</h2>
-        
-        <div style="margin-bottom: 30px;">
-            <ol style="line-height: 2; font-size: 1.1rem; padding-right: 20px;">
-                <li>با پشتیبانی تماس بگیرید: <a href="tel:09123456789" style="color: var(--color-primary);">۰۹۱۲-۳۴۵-۶۷۸۹</a></li>
-                <li>شماره سفارش و دلیل مرجوعی را اعلام کنید</li>
-                <li>هماهنگی برای ارسال محصول انجام می‌شود</li>
-                <li>پس از دریافت و تأیید سلامت محصول، مبلغ به حساب شما بازگردانده می‌شود</li>
-                <li>بازگشت وجه طی ۳ تا ۵ روز کاری انجام می‌شود</li>
-            </ol>
-        </div>
-        
-        <h2 style="font-size: 1.5rem; margin-bottom: 20px;">هزینه‌ها</h2>
-        
-        <div style="background: var(--color-warning-bg); padding: 30px; border-radius: 8px; margin-bottom: 30px; border-right: 4px solid var(--color-secondary);">
-            <p style="font-size: 1.1rem; margin-bottom: 10px;">
-                <strong>نکته مهم:</strong> هزینه ارسال مرجوعی بر عهده مشتری است.
-            </p>
-            <p style="font-size: 1rem; color: var(--color-text-muted);">
-                مگر اینکه محصول آسیب‌دیده یا اشتباه ارسال شده باشد.
-            </p>
-        </div>
-        
-        <h2 style="font-size: 1.5rem; margin-bottom: 20px;">استثنائات</h2>
-        
-        <div style="margin-bottom: 30px;">
-            <p style="line-height: 1.8;">موارد زیر قابل مرجوع نیستند:</p>
-            <ul style="line-height: 2; font-size: 1.1rem; padding-right: 20px;">
-                <li>محصولات بهداشتی و شخصی (به دلایل بهداشتی)</li>
-                <li>محصولات سفارشی‌سازی شده</li>
-                <li>محصولاتی که بیش از ۷ روز از تحویل آن‌ها گذشته باشد</li>
-            </ul>
-        </div>
-        
-        <div style="text-align: center; margin-top: 40px;">
+
+        <h1 style="font-size: 2.5rem; margin-bottom: 30px; color: #1a1a1a;">{{ policy_title }}</h1>
+
+        <div class="policy-content">{{ policy_html|safe }}</div>
+
+        <div style="text-align: center; margin-top: 40px; background: var(--color-bg); padding: 30px; border-radius: 8px;">
             <p style="font-size: 1.1rem; margin-bottom: 20px;">سؤالی دارید؟</p>
-            <a href="/contact/" style="display: inline-block; background: var(--color-primary); color: white; padding: 15px 40px; border-radius: 8px; text-decoration: none; font-weight: bold;">تماس با پشتیبانی</a>
+            <a href="{% url 'pages:contact' %}" style="display: inline-block; background: var(--color-primary); color: white; padding: 15px 40px; border-radius: 8px; text-decoration: none; font-weight: bold;">تماس با پشتیبانی</a>
         </div>
-        
+
     </div>
 </div>
 {% endblock %}

@@ -1,9 +1,17 @@
-"""ادمین تنظیمات سایت — فرم تک‌صفحه‌ای مرتب با بخش‌بندی واضح."""
+"""ادمین تنظیمات سایت و سوالات متداول — فرم تک‌صفحه‌ای مرتب با بخش‌بندی واضح."""
 from django.contrib import admin
 
-from .models import SiteSettings
+from .models import FaqItem, SiteSettings
 
 from src.core.fa import jalali_datetime_str
+
+
+MARKUP_HELP = (
+    'قواعد نوشتن: خط خالی = پاراگراف جدید | خطی که با «#» شروع شود = تیتر بخش | '
+    'خطوطی که با «-» شروع شوند = فهرست نقطه‌ای | '
+    'خطوطی که با «۱.» «۲.» شروع شوند = فهرست شماره‌ای | '
+    'خطی که با «>» شروع شود = نقل‌قول برجسته.'
+)
 
 
 @admin.register(SiteSettings)
@@ -25,9 +33,25 @@ class SiteSettingsAdmin(admin.ModelAdmin):
         }),
         ('📞 اطلاعات تماس', {
             'fields': ('contact_phone', 'contact_email', 'contact_address', 'contact_hours'),
+            'description': 'این اطلاعات در صفحه «تماس با ما»، صفحه «درباره ما» و فوتر استفاده می‌شود.',
         }),
         ('🌐 شبکه‌های اجتماعی', {
             'fields': ('instagram_url', 'telegram_url', 'whatsapp_number'),
+            'classes': ('collapse',),
+        }),
+        ('📄 محتوای صفحه درباره ما', {
+            'fields': ('about_title', 'about_body'),
+            'description': MARKUP_HELP,
+            'classes': ('collapse',),
+        }),
+        ('↩️ محتوای صفحه سیاست مرجوعی', {
+            'fields': ('return_policy_title', 'return_policy_body'),
+            'description': MARKUP_HELP,
+            'classes': ('collapse',),
+        }),
+        ('❓ صفحه سوالات متداول', {
+            'fields': ('faq_intro',),
+            'description': 'خود سوال‌ها و جواب‌ها را از بخش جداگانه «سوالات متداول» در همین پنل مدیریت کنید.',
             'classes': ('collapse',),
         }),
         ('🦶 فوتر سایت', {
@@ -53,3 +77,22 @@ class SiteSettingsAdmin(admin.ModelAdmin):
         from django.contrib import messages
         messages.success(request, '✅ تنظیمات ذخیره شد و بلافاصله روی سایت اعمال می‌شود.')
         return super().response_change(request, obj)
+
+
+@admin.register(FaqItem)
+class FaqItemAdmin(admin.ModelAdmin):
+    """مدیریت سوالات متداول — هر سوال یک کارت جمع‌شونده در صفحه /faq/"""
+    list_display = ('question', 'sort_order', 'is_active', 'created_at_fa')
+    list_editable = ('sort_order', 'is_active')
+    list_display_links = ('question',)
+    search_fields = ('question', 'answer')
+    fields = ('question', 'answer', 'sort_order', 'is_active')
+
+    def created_at_fa(self, obj):
+        return jalali_datetime_str(obj.created_at)
+    created_at_fa.short_description = 'تاریخ ایجاد'
+
+    def response_add(self, request, obj):
+        from django.contrib import messages
+        messages.success(request, f'✅ سوال «{obj.question}» ثبت شد و در صفحه سوالات متداول سایت نمایش داده می‌شود.')
+        return super().response_add(request, obj)

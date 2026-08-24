@@ -1,56 +1,79 @@
 {% extends "catalog/base.html" %}
+{% load fa_tags %}
 
-{% block title %}تماس با ما | ریهان{% endblock %}
-{% block meta_description %}تماس با تیم ریهان - فروشگاه آنلاین اعتمادمحور{% endblock %}
+{% block title %}تماس با ما | {{ site_settings.site_name }}{% endblock %}
+{% block meta_description %}تماس با تیم {{ site_settings.site_name }} - فروشگاه آنلاین اعتمادمحور{% endblock %}
 
 {% block content %}
 <div class="contact-page" dir="rtl">
     <div class="container" style="max-width: 800px; margin: 0 auto; padding: 40px 20px;">
-        
+
         <h1 style="font-size: 2.5rem; margin-bottom: 30px; color: #1a1a1a;">تماس با ما</h1>
-        
+
         <div class="contact-info" style="margin-bottom: 40px;">
             <h2 style="font-size: 1.5rem; margin-bottom: 20px;">راه‌های تماس</h2>
-            
+
+            {% if contact_phone %}
             <div style="background: var(--color-bg); padding: 30px; border-radius: 8px; margin-bottom: 20px;">
                 <h3 style="margin-bottom: 15px;">📞 تلفن</h3>
-                <p style="font-size: 1.2rem; margin-bottom: 10px;">
-                    <a href="tel:09123456789" style="color: var(--color-primary); text-decoration: none;">۰۹۱۲-۳۴۵-۶۷۸۹</a>
+                <p style="font-size: 1.3rem; margin-bottom: 10px;">
+                    <a href="tel:{{ contact_phone }}" style="color: var(--color-primary); text-decoration: none;">{{ contact_phone|fa }}</a>
                 </p>
-                <p style="color: var(--color-text-muted);">هر روز از ۱۱ صبح تا ۷ عصر</p>
+                {% if contact_hours %}
+                <p style="color: var(--color-text-muted);">{{ contact_hours }}</p>
+                {% endif %}
             </div>
-            
+            {% endif %}
+
+            {% if contact_email %}
+            <div style="background: var(--color-bg); padding: 30px; border-radius: 8px; margin-bottom: 20px;">
+                <h3 style="margin-bottom: 15px;">✉️ ایمیل</h3>
+                <p style="font-size: 1.1rem;">
+                    <a href="mailto:{{ contact_email }}" style="color: var(--color-primary); text-decoration: none;">{{ contact_email }}</a>
+                </p>
+            </div>
+            {% endif %}
+
+            {% if contact_address %}
             <div style="background: var(--color-bg); padding: 30px; border-radius: 8px; margin-bottom: 20px;">
                 <h3 style="margin-bottom: 15px;">📍 موقعیت</h3>
-                <p style="font-size: 1.1rem;">فروشگاه آنلاین ریهان — ارسال به سراسر ایران</p>
+                <p style="font-size: 1.1rem;">{{ contact_address }}</p>
             </div>
-            
+            {% endif %}
+
+            {% if contact_hours and not contact_phone %}
             <div style="background: var(--color-bg); padding: 30px; border-radius: 8px;">
                 <h3 style="margin-bottom: 15px;">⏰ ساعات پاسخگویی</h3>
-                <p style="font-size: 1.1rem;">هر روز (شنبه تا جمعه)</p>
-                <p style="font-size: 1.1rem;">۱۱:۰۰ صبح تا ۷:۰۰ عصر</p>
+                <p style="font-size: 1.1rem;">{{ contact_hours }}</p>
             </div>
+            {% endif %}
+
+            {% if instagram_url or telegram_url or whatsapp_number %}
+            <div style="background: var(--color-bg); padding: 30px; border-radius: 8px; margin-top: 20px;">
+                <h3 style="margin-bottom: 15px;">💬 شبکه‌های اجتماعی</h3>
+                <p style="font-size: 1.05rem; display: flex; gap: 24px; flex-wrap: wrap;">
+                    {% if instagram_url %}
+                    <a href="{{ instagram_url }}" target="_blank" rel="noopener" style="color: var(--color-primary); text-decoration: none;">اینستاگرام</a>
+                    {% endif %}
+                    {% if telegram_url %}
+                    <a href="{{ telegram_url }}" target="_blank" rel="noopener" style="color: var(--color-primary); text-decoration: none;">تلگرام</a>
+                    {% endif %}
+                    {% if whatsapp_number %}
+                    <a href="https://wa.me/{{ whatsapp_number }}" target="_blank" rel="noopener" style="color: var(--color-primary); text-decoration: none;">واتساپ</a>
+                    {% endif %}
+                </p>
+            </div>
+            {% endif %}
         </div>
-        
-        <div class="faq" style="margin-bottom: 40px;">
-            <h2 style="font-size: 1.5rem; margin-bottom: 20px;">سؤالات متداول</h2>
-            
-            <div style="margin-bottom: 20px;">
-                <h3 style="color: var(--color-primary);">چگونه سفارش دهم؟</h3>
-                <p>محصول مورد نظر را انتخاب کنید، به سبد خرید اضافه کنید و مراحل تسویه‌حساب را طی کنید.</p>
-            </div>
-            
-            <div style="margin-bottom: 20px;">
-                <h3 style="color: var(--color-primary);">چگونه سفارشم را پیگیری کنم؟</h3>
-                <p>از صفحه <a href="/order/tracking/" style="color: var(--color-primary);">پیگیری سفارش</a> با شماره سفارش و شماره تلفن خود استفاده کنید.</p>
-            </div>
-            
-            <div style="margin-bottom: 20px;">
-                <h3 style="color: var(--color-primary);">آیا امکان مرجوعی وجود دارد؟</h3>
-                <p>بله، تا ۷ روز پس از تحویل می‌توانید محصول را مرجوع کنید. <a href="/return-policy/" style="color: var(--color-primary);">جزئیات بیشتر</a></p>
-            </div>
+
+        <div class="faq-teaser" style="background: var(--color-bg); padding: 30px; border-radius: 8px; margin-bottom: 40px; text-align: center;">
+            <h2 style="font-size: 1.4rem; margin-bottom: 12px;">❓ سؤالی دارید؟</h2>
+            <p style="color: var(--color-text-muted); margin-bottom: 18px;">
+                پاسخ بیشتر سؤالات رایج را در صفحه سؤالات متداول ببینید.
+            </p>
+            <a href="{% url 'pages:faq' %}" style="display: inline-block; background: var(--color-primary); color: white; padding: 12px 36px; border-radius: 8px; text-decoration: none; font-weight: bold;">مشاهده سؤالات متداول</a>
         </div>
-        
+
     </div>
 </div>
 {% endblock %}

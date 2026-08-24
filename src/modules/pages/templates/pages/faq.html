@@ -1,0 +1,77 @@
+{% extends "catalog/base.html" %}
+
+{% block title %}سؤالات متداول | {{ site_settings.site_name }}{% endblock %}
+{% block meta_description %}پاسخ سؤالات رایج درباره خرید، پرداخت، پیگیری سفارش و مرجوعی در {{ site_settings.site_name }}{% endblock %}
+
+{% block content %}
+<style>
+    .faq-page .faq-item {
+        background: var(--color-bg);
+        border: 1px solid rgba(0, 0, 0, .06);
+        border-radius: 10px;
+        margin-bottom: 14px;
+        overflow: hidden;
+    }
+    .faq-page summary {
+        cursor: pointer;
+        padding: 18px 22px;
+        font-weight: 700;
+        font-size: 1.05rem;
+        color: #1a1a1a;
+        list-style: none;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+    }
+    .faq-page summary::-webkit-details-marker { display: none; }
+    .faq-page summary::after {
+        content: '+';
+        font-size: 1.5rem;
+        font-weight: 400;
+        color: var(--color-primary);
+        flex-shrink: 0;
+        line-height: 1;
+    }
+    .faq-page details[open] summary::after { content: '−'; }
+    .faq-page details[open] summary { border-bottom: 1px solid rgba(0, 0, 0, .06); }
+    .faq-page .faq-answer {
+        padding: 16px 22px 20px;
+        line-height: 2;
+        color: var(--color-text-muted);
+    }
+</style>
+
+<div class="faq-page" dir="rtl">
+    <div class="container" style="max-width: 800px; margin: 0 auto; padding: 40px 20px;">
+
+        <h1 style="font-size: 2.5rem; margin-bottom: 20px; color: #1a1a1a;">سؤالات متداول</h1>
+
+        {% if faq_intro %}
+        <p style="line-height: 2; color: var(--color-text-muted); margin-bottom: 30px;">{{ faq_intro }}</p>
+        {% endif %}
+
+        {% for item in faq_items %}
+        <details class="faq-item" {% if forloop.first %}open{% endif %}>
+            <summary>{{ item.question }}</summary>
+            <div class="faq-answer">{{ item.answer|linebreaks }}</div>
+        </details>
+        {% empty %}
+        <div style="background: var(--color-bg); padding: 30px; border-radius: 8px; text-align: center;">
+            <p style="margin-bottom: 16px; color: var(--color-text-muted);">
+                هنوز سوالی ثبت نشده است. برای پاسخ به سؤالات خود با ما در تماس باشید.
+            </p>
+        </div>
+        {% endfor %}
+
+        <div style="background: var(--color-bg); padding: 30px; border-radius: 8px; margin-top: 30px; text-align: center;">
+            <h2 style="font-size: 1.3rem; margin-bottom: 12px;">پاسخ سؤالتان را پیدا نکردید؟</h2>
+            <p style="color: var(--color-text-muted); margin-bottom: 18px;">
+                تیم پشتیبانی آماده پاسخگویی به شماست.
+            </p>
+            <a href="{% url 'pages:contact' %}" style="display: inline-block; background: var(--color-primary); color: white; padding: 12px 36px; border-radius: 8px; text-decoration: none; font-weight: bold;">تماس با ما</a>
+        </div>
+
+    </div>
+</div>
+{% endblock %}
