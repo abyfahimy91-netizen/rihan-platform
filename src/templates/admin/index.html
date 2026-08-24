@@ -35,7 +35,38 @@
   .rd-table td{padding:8px 10px;border-bottom:1px solid #eee8da}
   .rd-table tr:last-child td{border-bottom:none}
   .rd-pill{display:inline-block;padding:2px 12px;border-radius:999px;font-size:11.5px;color:#fff;font-weight:600}
+
+  /* ── راهنمای گام‌به‌گام ادمین (D-095) ── */
+  .rd-guide{background:linear-gradient(135deg,#0D3B2E,#14523f);border-radius:14px;
+            padding:20px 22px;margin-bottom:20px;color:#fff;position:relative}
+  .rd-guide h2{color:#C9A961;font-size:15.5px;margin:0 0 12px}
+  .rd-guide ol{list-style:none;padding:0;margin:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:10px}
+  .rd-guide li{display:flex;gap:10px;align-items:flex-start;background:rgba(255,255,255,.08);
+               border-radius:11px;padding:11px 13px;font-size:12.5px;line-height:1.9}
+  .rd-guide li a{color:#fff;text-decoration:none}
+  .rd-guide li a:hover{text-decoration:underline;color:#C9A961}
+  .rd-guide .gnum{flex:none;width:24px;height:24px;border-radius:50%;background:#C9A961;color:#0D3B2E;
+                  font-weight:800;font-size:12px;display:flex;align-items:center;justify-content:center;margin-top:3px}
+  .rd-guide .gclose{position:absolute;top:12px;left:14px;background:none;border:none;color:#cfe0d6;
+                    cursor:pointer;font-size:17px;line-height:1;padding:4px}
+  .rd-guide .gclose:hover{color:#fff}
 </style>
+
+<!-- 🧭 راهنمای گام‌به‌گام — سفر ادمین -->
+<div class="rd-guide" id="rihanGuide">
+  <button type="button" class="gclose" onclick="localStorage.setItem('rihan_guide_hidden','1');document.getElementById('rihanGuide').style.display='none'" title="بستن راهنما">✕</button>
+  <h2>🧭 شروع سریع — کارهای روزانه در ۵ گام</h2>
+  <ol>
+    <li><span class="gnum">۱</span><span><a href="{% url 'admin:catalog_product_changelist' %}">محصولات را ببینید</a> — موجودی و قیمت هر بسته از همین‌جا مدیریت می‌شود.</span></li>
+    <li><span class="gnum">۲</span><span>سفارش جدید رسید؟ از <a href="{% url 'admin:order_order_changelist' %}">لیست سفارش‌ها</a> وضعیت آن را «در حال آماده‌سازی» کنید.</span></li>
+    <li><span class="gnum">۳</span><span>پس از ارسال، وضعیت را «ارسال شد» و بعد از تحویل «تحویل شد» بزنید تا مشتری پیگیری کند.</span></li>
+    <li><span class="gnum">۴</span><span><a href="/admin/leads/lead/">سرنخ‌ها</a> و <a href="/admin/reviews/review/">نظرات مشتریان</a> را بررسی و پاسخ دهید.</span></li>
+    <li><span class="gnum">۵</span><span>ظاهر سایت (اعلان بالای صفحه، متن هیرو، تماس) از <a href="{% url 'admin:pages_sitesettings_change' 1 %}">تنظیمات سایت</a>.</span></li>
+  </ol>
+</div>
+<script>
+(function(){ try { if(localStorage.getItem('rihan_guide_hidden')==='1'){ var g=document.getElementById('rihanGuide'); if(g) g.style.display='none'; } } catch(e){} })();
+</script>
 
 <div class="rd-panel">
   <h2>📊 وضعیت فروشگاه — امروز {% jalali_today %}</h2>

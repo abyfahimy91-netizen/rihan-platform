@@ -52,8 +52,83 @@
     .orders-empty { text-align:center; padding: 48px 16px; color: var(--color-text-muted); }
     .orders-empty a { color:var(--color-primary); font-weight:800; text-decoration:none; }
     .track-link { color:var(--color-primary); font-weight:700; text-decoration:none; }
+    /* ── امنیت: رمز و دستگاه‌ها ── */
+    .pwd-wrap { position:relative; }
+    .eye-btn {
+        position:absolute; left:8px; top:26px; background:none; border:none; cursor:pointer;
+        font-size:19px; padding:6px 8px; line-height:1; color:var(--color-text-muted); border-radius:10px;
+    }
+    .eye-btn:hover { background:#f1f4f1; }
+    .strength { display:flex; gap:5px; margin-top:8px; }
+    .strength i { height:5px; flex:1; border-radius:99px; background:#e6eae6; transition:background .3s; }
+    .strength.s1 i:nth-child(1) { background:#d9534f; }
+    .strength.s2 i:nth-child(-n+2) { background:#e8a33d; }
+    .strength.s3 i { background:#2e9e63; }
+    .strength-lbl { font-size:11.5px; text-align:right; padding:4px 2px 0; color:var(--color-text-muted); min-height:16px; }
+    .revoke-btn, .revoke-all-btn {
+        background:#fff; border:1.5px solid #f2c4c0; color:var(--color-error);
+        border-radius:10px; padding:8px 14px; font-family:inherit; font-size:12px; font-weight:700; cursor:pointer;
+    }
+    .revoke-btn:hover, .revoke-all-btn:hover { background:var(--color-error-bg); }
+    .revoke-all-btn { width:100%; margin-top:6px; padding:12px; }
     @media (max-width: 860px) { .profile-grid { grid-template-columns: 1fr; } }
 </style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function () {
+    'use strict';
+    var FA = ['۰','۱','۲','۳','۴','۵','۶','۷','۸','۹'];
+    function toEn(s) {
+        var out = '';
+        for (var i = 0; i < s.length; i++) {
+            var f = FA.indexOf(s[i]);
+            out += (f > -1) ? String(f) : s[i];
+        }
+        return out;
+    }
+    // چشم نمایش رمز
+    document.querySelectorAll('.eye-btn').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            var input = btn.parentElement.querySelector('input');
+            var show = input.type === 'password';
+            input.type = show ? 'text' : 'password';
+            btn.textContent = show ? '🙈' : '👁';
+            input.focus();
+        });
+    });
+    // سنجه قدرت رمز
+    document.querySelectorAll('.js-pwd1').forEach(function (pwd) {
+        var bar = pwd.closest('.pwd-wrap').querySelector('.strength');
+        var lbl = pwd.closest('.pwd-wrap').querySelector('.strength-lbl');
+        if (!bar) return;
+        pwd.addEventListener('input', function () {
+            var v = pwd.value, score = 0;
+            if (v.length >= 8) score++;
+            if (/[A-Za-z]/.test(v) && /[0-9]/.test(v)) score++;
+            if (v.length >= 12 || /[^A-Za-z0-9]/.test(v)) score++;
+            bar.className = 'strength' + (v ? ' s' + score : '');
+            lbl.textContent = !v ? '' : (score <= 1 ? 'ضعیف — حداقل ۸ کاراکتر با حرف و رقم' : score === 2 ? 'متوسط — خوب است! 🌿' : 'عالی — رمز قوی 🔐');
+        });
+    });
+    // یکسان بودن رمزها
+    document.querySelectorAll('form[id], form:not([id])').forEach(function (form) {
+        var p1 = form.querySelector('[name="password1"]');
+        var p2 = form.querySelector('[name="password2"]');
+        if (!p1 || !p2) return;
+        var hint = form.querySelector('.match-hint');
+        function check() {
+            if (hint) hint.style.display = (p2.value && p1.value !== p2.value) ? 'block' : 'none';
+        }
+        p1.addEventListener('input', check);
+        p2.addEventListener('input', check);
+        form.addEventListener('submit', function (e) {
+            if (p1.value !== p2.value) e.preventDefault();
+        });
+    });
+})();
+</script>
 {% endblock %}
 
 {% block content %}
@@ -90,6 +165,97 @@
                         <button type="submit" class="p-save">ذخیره تغییرات</button>
                     </form>
                 </div>
+
+                <!-- 🔐 امنیت حساب: رمز عبور -->
+                <div class="p-card">
+                    <h2>🔐 رمز عبور</h2>
+                    {% if has_password %}
+                        <p style="font-size:12.5px;color:var(--color-text-muted);line-height:2;margin-bottom:16px;">
+                            رمز عبور برای شما فعال است — می‌توانید حتی هنگام قطعی پیامک هم وارد شوید.
+                            (نام کاربری شما همان شماره موبایل است)
+                        </p>
+                        <form method="post" action="{% url 'auth_pages:profile' %}">
+                            {% csrf_token %}
+                            <input type="hidden" name="action" value="change_password">
+                            <div class="p-field">
+                                <label>رمز عبور فعلی</label>
+                                <input class="p-input js-pwd" dir="ltr" type="password" name="current_password" required autocomplete="current-password">
+                            </div>
+                            <div class="p-field pwd-wrap">
+                                <label>رمز جدید (حداقل ۸ کاراکتر، حرف + رقم)</label>
+                                <input class="p-input js-pwd js-pwd1" dir="ltr" type="password" name="password1" required minlength="8" autocomplete="new-password">
+                                <button type="button" class="eye-btn" aria-label="نمایش رمز">👁</button>
+                                <div class="strength"><i></i><i></i><i></i></div>
+                                <div class="strength-lbl"></div>
+                            </div>
+                            <div class="p-field pwd-wrap">
+                                <label>تکرار رمز جدید</label>
+                                <input class="p-input js-pwd" dir="ltr" type="password" name="password2" required minlength="8" autocomplete="new-password">
+                                <button type="button" class="eye-btn" aria-label="نمایش رمز">👁</button>
+                            </div>
+                            <div class="match-hint" style="display:none;color:#d9534f;font-size:12px;padding:0 4px 8px;">رمزها یکسان نیستند ⚠️</div>
+                            <button type="submit" class="p-save">تغییر رمز عبور</button>
+                        </form>
+                    {% else %}
+                        <p style="font-size:12.5px;color:var(--color-text-muted);line-height:2;margin-bottom:16px;">
+                            هنوز رمز عبوری ندارید. با ساخت رمز، در مواقعی که پیامک نمی‌رسد هم می‌توانید وارد شوید.
+                        </p>
+                        <form method="post" action="{% url 'auth_pages:profile' %}" id="setpwd-form">
+                            {% csrf_token %}
+                            <input type="hidden" name="action" value="set_password">
+                            <div class="p-field pwd-wrap">
+                                <label>رمز عبور جدید (حداقل ۸ کاراکتر، حرف + رقم)</label>
+                                <input class="p-input js-pwd js-pwd1" dir="ltr" type="password" name="password1" required minlength="8" autocomplete="new-password">
+                                <button type="button" class="eye-btn" aria-label="نمایش رمز">👁</button>
+                                <div class="strength"><i></i><i></i><i></i></div>
+                                <div class="strength-lbl"></div>
+                            </div>
+                            <div class="p-field pwd-wrap">
+                                <label>تکرار رمز عبور</label>
+                                <input class="p-input js-pwd" dir="ltr" type="password" name="password2" required minlength="8" autocomplete="new-password">
+                                <button type="button" class="eye-btn" aria-label="نمایش رمز">👁</button>
+                            </div>
+                            <div class="match-hint" style="display:none;color:#d9534f;font-size:12px;padding:0 4px 8px;">رمزها یکسان نیستند ⚠️</div>
+                            <button type="submit" class="p-save">ساخت رمز عبور 🔑</button>
+                        </form>
+                    {% endif %}
+                </div>
+
+                <!-- 📱 دستگاه‌های من -->
+                <div class="p-card">
+                    <h2>📱 دستگاه‌های من</h2>
+                    <p style="font-size:12.5px;color:var(--color-text-muted);line-height:2;margin-bottom:14px;">
+                        دستگاه‌هایی که «مرا به خاطر بسپار» را زده‌اند و تا ۳۰ روز بدون ورود مجدد باز می‌شوند.
+                    </p>
+                    {% if devices %}
+                        {% for d in devices %}
+                        <div style="display:flex;align-items:center;justify-content:space-between;border:1px solid var(--color-border);border-radius:12px;padding:12px 14px;margin-bottom:10px;">
+                            <div style="text-align:right;">
+                                <div style="font-weight:800;font-size:13.5px;">{{ d.device_type }}</div>
+                                <div style="font-size:11.5px;color:var(--color-text-muted);">
+                                    آخرین استفاده: {{ d.last_used_at|date:"Y/m/d H:i" }} · از {{ d.ip_address|default:'—' }}
+                                </div>
+                            </div>
+                            <form method="post" action="{% url 'auth_pages:profile' %}">
+                                {% csrf_token %}
+                                <input type="hidden" name="action" value="revoke_device">
+                                <input type="hidden" name="device_id" value="{{ d.id }}">
+                                <button type="submit" class="revoke-btn">خروج از این دستگاه</button>
+                            </form>
+                        </div>
+                        {% endfor %}
+                        <form method="post" action="{% url 'auth_pages:profile' %}" onsubmit="return confirm('همه دستگاه‌ها خارج شوند؟');">
+                            {% csrf_token %}
+                            <input type="hidden" name="action" value="revoke_all_devices">
+                            <button type="submit" class="revoke-all-btn">🚪 خروج از همه دستگاه‌ها</button>
+                        </form>
+                    {% else %}
+                        <div style="font-size:13px;color:var(--color-text-muted);padding:8px 4px;">
+                            دستگاه فعلی به‌عنوان دستگاه معتبر ذخیره نشده است.
+                        </div>
+                    {% endif %}
+                </div>
+
                 <div class="p-card">
                     <a href="{% url 'auth_pages:logout' %}" class="p-logout">🚪 خروج از حساب</a>
                 </div>

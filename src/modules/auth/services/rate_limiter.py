@@ -33,6 +33,11 @@ class RateLimiter:
     OTP_VERIFY_PER_PHONE = 3       # ۳ بار در ۱۰ دقیقه
     LOCKOUT_DURATION = 30          # ۳۰ دقیقه قفل موقت
     HARD_LOCKOUT_DURATION = 24 * 60  # ۲۴ ساعت قفل سخت
+
+    # رمز عبور (D-095)
+    PASSWORD_ATTEMPT_PER_PHONE = 5   # ۵ تلاش ناموفق
+    PASSWORD_WINDOW_SECONDS = 900    # در پنجره ۱۵ دقیقه‌ای
+    PASSWORD_LOCKOUT_MINUTES = 15    # سپس قفل ۱۵ دقیقه‌ای
     
     CACHE_PREFIX = 'rihan:ratelimit:'
     
@@ -145,12 +150,36 @@ class RateLimiter:
         cache.delete(key)
     
     @classmethod
+    def check_password_attempt(cls, phone: str) -> Tuple[bool, str]:
+        """
+        بررسی امکان تلاش ورود با رمز عبور (D-095).
+        """
+        if cls.check_lockout(phone)[0]:
+            return False, "حساب شما موقتاً قفل شده است. لطفاً کمی بعد دوباره تلاش کنید."
+        key = f"{cls.CACHE_PREFIX}pwd_attempt:{phone}"
+        count = cache.get(key, 0)
+        if count >= cls.PASSWORD_ATTEMPT_PER_PHONE:
+            logger.warning(f"Password attempt rate limit exceeded for phone: {phone}")
+            return False, ("به دلیل تلاش‌های ناموفق متعدد، ورود با رمز عبور موقتاً غیرفعال است. "
+                           "می‌توانید با کد پیامکی وارد شوید.")
+        return True, ""
+
+    @classmethod
+    def record_password_attempt(cls, phone: str) -> int:
+        """ثبت تلاش ناموفق رمز عبور؛ تعداد تلاش باقی‌مانده را برمی‌گرداند."""
+        key = f"{cls.CACHE_PREFIX}pwd_attempt:{phone}"
+        count = cache.get(key, 0) + 1
+        cache.set(key, count, timeout=cls.PASSWORD_WINDOW_SECONDS)
+        return max(0, cls.PASSWORD_ATTEMPT_PER_PHONE - count)
+
+    @classmethod
     def clear_all(cls, phone: str) -> None:
         """پاکسازی تمام محدودیت‌های یک شماره"""
         keys = [
             f"{cls.CACHE_PREFIX}otp_req_phone:{phone}",
             f"{cls.CACHE_PREFIX}otp_verify:{phone}",
             f"{cls.CACHE_PREFIX}lockout:{phone}",
+            f"{cls.CACHE_PREFIX}pwd_attempt:{phone}",
         ]
         for key in keys:
             cache.delete(key)

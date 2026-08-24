@@ -1,78 +1,135 @@
 {% extends "catalog/base.html" %}
 
-{% block title %}ورود / ثبت‌نام | ریهان{% endblock %}
-{% block meta_description %}ورود و ثبت‌نام در فروشگاه ریهان با کد یکبارمصرف پیامکی - ساده و امن{% endblock %}
+{% block title %}ورود / ثبت‌نام | ریحان{% endblock %}
+{% block meta_description %}ورود و ثبت‌نام در فروشگاه ریحان با کد یکبارمصرف پیامکی یا رمز عبور - ساده، سریع و امن{% endblock %}
 
 {% block extra_css %}
 <style>
-    .auth-wrap { max-width: 480px; margin: 48px auto 96px; }
+    .auth-wrap { max-width: 480px; margin: 40px auto 96px; }
     .auth-card {
-        background: #fff;
-        border-radius: 20px;
+        background: #fff; border-radius: 20px;
         box-shadow: 0 8px 32px rgba(0,0,0,0.08);
         border: 1px solid var(--color-border);
-        padding: 44px 36px;
-        text-align: center;
+        padding: 36px 32px 30px; text-align: center;
     }
     .auth-logo-badge {
-        width: 72px; height: 72px;
-        margin: 0 auto 20px;
+        width: 64px; height: 64px; margin: 0 auto 14px;
         background: linear-gradient(135deg, var(--color-primary), var(--color-primary-dark));
-        border-radius: 50%;
+        border-radius: 50%; display: flex; align-items: center; justify-content: center;
+        color: #fff; font-size: 28px; font-weight: 900;
+    }
+    .auth-card h1 { font-size: 24px; font-weight: 900; color: var(--color-text); margin-bottom: 6px; }
+    .auth-sub { font-size: 13.5px; color: var(--color-text-muted); margin-bottom: 22px; line-height: 1.9; }
+
+    /* ── نشانگر مراحل سفر مشتری ── */
+    .steps { display: flex; align-items: center; justify-content: center; gap: 0; margin-bottom: 26px; direction: rtl; }
+    .steps .st { display: flex; flex-direction: column; align-items: center; gap: 5px; width: 96px; }
+    .steps .st .dot {
+        width: 34px; height: 34px; border-radius: 50%; font-size: 14px; font-weight: 800;
         display: flex; align-items: center; justify-content: center;
-        color: #fff; font-size: 30px; font-weight: 900;
+        background: #eef1ee; color: #9aa39c; border: 2px solid #e3e8e4; transition: all .3s;
     }
-    .auth-card h1 { font-size: 26px; font-weight: 900; color: var(--color-text); margin-bottom: 8px; }
-    .auth-sub { font-size: 14px; color: var(--color-text-muted); margin-bottom: 32px; line-height: 1.9; }
+    .steps .st span.lbl { font-size: 11px; color: #9aa39c; font-weight: 700; }
+    .steps .st.active .dot { background: var(--color-primary); color: #fff; border-color: var(--color-primary); box-shadow: 0 0 0 5px rgba(13,59,46,.12); }
+    .steps .st.active span.lbl { color: var(--color-primary); }
+    .steps .st.done .dot { background: var(--color-success-bg, #e6f4ec); color: var(--color-success, #1d7a45); border-color: #bfe3cf; }
+    .steps .st.done span.lbl { color: var(--color-success, #1d7a45); }
+    .steps .ln { height: 2px; flex: 1; max-width: 42px; background: #e3e8e4; margin-bottom: 18px; }
+
+    /* ── تب روش ورود ── */
+    .auth-tabs { display: flex; background: #f1f4f1; border-radius: 13px; padding: 5px; margin-bottom: 24px; }
+    .auth-tabs a {
+        flex: 1; padding: 11px 6px; border-radius: 10px; font-size: 13.5px; font-weight: 800;
+        color: var(--color-text-muted); text-decoration: none; transition: all .25s;
+    }
+    .auth-tabs a.on { background: #fff; color: var(--color-primary); box-shadow: 0 2px 10px rgba(13,59,46,.12); }
+    .auth-tabs a small { display: block; font-size: 10px; font-weight: 500; opacity: .75; margin-top: 2px; }
+
+    /* ── فرم ── */
+    .field-row { position: relative; margin-bottom: 6px; }
     .auth-input {
-        width: 100%;
-        padding: 16px 18px;
-        border: 1.5px solid var(--color-border);
-        border-radius: 14px;
-        font-size: 18px;
-        font-family: inherit;
-        text-align: center;
-        letter-spacing: 1px;
-        background: #fafafa;
-        color: var(--color-text);
-        transition: all .2s;
+        width: 100%; padding: 15px 16px; border: 1.5px solid var(--color-border);
+        border-radius: 14px; font-size: 17px; font-family: inherit; text-align: center;
+        letter-spacing: 1px; background: #fafafa; color: var(--color-text); transition: all .2s;
     }
-    .auth-input:focus {
-        outline: none; border-color: var(--color-primary); background: #fff;
-        box-shadow: 0 0 0 3px rgba(13,59,46,.08);
+    .auth-input:focus { outline: none; border-color: var(--color-primary); background: #fff; box-shadow: 0 0 0 3px rgba(13,59,46,.08); }
+    .auth-input.valid { border-color: #2e9e63; }
+    .auth-input.invalid { border-color: #d9534f; }
+    .input-hint { min-height: 20px; font-size: 12px; text-align: right; padding: 4px 8px 0; }
+    .input-hint.ok { color: #2e9e63; } .input-hint.bad { color: #d9534f; }
+    .pwd-wrap { position: relative; }
+    .pwd-wrap .auth-input { text-align: right; letter-spacing: normal; padding-left: 52px; font-size: 16px; }
+    .eye-btn {
+        position: absolute; left: 8px; top: 50%; transform: translateY(-50%);
+        background: none; border: none; cursor: pointer; font-size: 20px;
+        padding: 8px; line-height: 1; color: var(--color-text-muted); border-radius: 10px;
     }
+    .eye-btn:hover { background: #f1f4f1; }
+    .eye-btn.off::after { content: ''; }
     .auth-btn {
-        width: 100%;
-        margin-top: 16px;
-        padding: 17px;
+        width: 100%; margin-top: 14px; padding: 16px;
         background: linear-gradient(135deg, var(--color-primary), var(--color-primary-dark));
-        color: #fff; border: none; border-radius: 14px;
-        font-size: 17px; font-weight: 800; font-family: inherit;
-        cursor: pointer; transition: all .25s;
+        color: #fff; border: none; border-radius: 14px; font-size: 16.5px; font-weight: 800;
+        font-family: inherit; cursor: pointer; transition: all .25s;
     }
     .auth-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 28px rgba(13,59,46,.35); }
-    .auth-switch {
-        margin-top: 20px; font-size: 13px; color: var(--color-text-muted);
+    .auth-btn[disabled] { opacity: .55; cursor: not-allowed; transform: none; box-shadow: none; }
+    .auth-btn.secondary { background: #fff; color: var(--color-primary); border: 1.5px solid var(--color-border); box-shadow: none; }
+    .auth-btn.secondary:hover { border-color: var(--color-primary); }
+
+    /* ── جعبه‌های کد ۶ رقمی ── */
+    .otp-cells { display: flex; gap: 7px; direction: ltr; justify-content: center; }
+    .otp-cells input {
+        width: 100%; max-width: 48px; min-width: 0; height: 56px; text-align: center; font-size: 22px; font-weight: 800;
+        border: 1.5px solid var(--color-border); border-radius: 12px; background: #fafafa;
+        font-family: inherit; color: var(--color-text); transition: all .15s;
     }
-    .auth-switch a { color: var(--color-primary); font-weight: 700; text-decoration: none; }
-    .auth-msg {
-        padding: 13px 16px; border-radius: 12px; margin-bottom: 18px;
-        font-size: 14px; text-align: right;
+    .otp-cells input:focus { outline: none; border-color: var(--color-primary); background: #fff; box-shadow: 0 0 0 3px rgba(13,59,46,.08); }
+    .otp-cells input.filled { border-color: #2e9e63; background: #f4faf6; }
+    .resend-row { margin-top: 16px; font-size: 13px; color: var(--color-text-muted); }
+    .resend-row button {
+        background: none; border: none; color: var(--color-primary); font-family: inherit;
+        font-weight: 800; cursor: pointer; font-size: 13px; text-decoration: underline;
     }
+    .resend-row button[disabled] { color: #a5ada7; cursor: not-allowed; text-decoration: none; }
+
+    /* ── گزینه یادآوری دستگاه + لینک‌ها ── */
+    .row-between { display: flex; align-items: center; justify-content: space-between; margin-top: 14px; font-size: 12.5px; }
+    .remember-label { display: flex; align-items: center; gap: 7px; color: var(--color-text-muted); cursor: pointer; user-select: none; }
+    .remember-label input { width: 17px; height: 17px; accent-color: var(--color-primary); cursor: pointer; }
+    .link-btn { background: none; border: none; color: var(--color-primary); font-family: inherit; font-size: 12.5px; font-weight: 700; cursor: pointer; padding: 0; }
+    .link-btn:hover { text-decoration: underline; }
+
+    /* ── سنجه قدرت رمز ── */
+    .strength { display: flex; gap: 5px; margin-top: 8px; padding: 0 8px; }
+    .strength i { height: 5px; flex: 1; border-radius: 99px; background: #e6eae6; transition: background .3s; }
+    .strength.s1 i:nth-child(1) { background: #d9534f; }
+    .strength.s2 i:nth-child(-n+2) { background: #e8a33d; }
+    .strength.s3 i { background: #2e9e63; }
+    .strength-lbl { font-size: 11.5px; text-align: right; padding: 4px 8px 0; color: var(--color-text-muted); min-height: 18px; }
+
+    /* ── پیام‌ها / راهنما ── */
+    .auth-msg { padding: 12px 15px; border-radius: 12px; margin-bottom: 16px; font-size: 13.5px; text-align: right; }
     .auth-msg.error { background: var(--color-error-bg); color: var(--color-error); }
     .auth-msg.success { background: var(--color-success-bg); color: var(--color-success); }
     .auth-msg.info { background: var(--color-warning-bg); color: var(--color-secondary-dark); }
     .demo-code {
         background: var(--color-warning-bg); border: 1px dashed #f0c040; color: var(--color-warning-text);
-        padding: 12px; border-radius: 12px; margin-bottom: 16px;
-        font-size: 15px; font-weight: 800; letter-spacing: 3px;
+        padding: 12px; border-radius: 12px; margin-bottom: 16px; font-size: 15px; font-weight: 800; letter-spacing: 3px;
     }
     .phone-chip {
-        display: inline-block; background: #f1f5f2; color: var(--color-primary);
-        border-radius: 999px; padding: 6px 18px; font-weight: 800;
-        letter-spacing: 1px; margin-bottom: 18px; direction: ltr;
+        display: inline-block; background: #f1f5f2; color: var(--color-primary); border-radius: 999px;
+        padding: 7px 20px; font-weight: 800; letter-spacing: 1px; margin-bottom: 18px; direction: ltr; font-size: 16px;
     }
-    .trust-note { margin-top: 28px; font-size: 12px; color: var(--color-text-muted); line-height: 2; }
+    details.helpbox { margin-top: 22px; text-align: right; background: #f8faf8; border: 1px solid var(--color-border); border-radius: 13px; padding: 0 16px; }
+    details.helpbox summary { cursor: pointer; font-size: 13px; font-weight: 800; color: var(--color-primary); padding: 13px 0; list-style: none; }
+    details.helpbox summary::-webkit-details-marker { display: none; }
+    details.helpbox summary::before { content: '❓ '; }
+    details.helpbox .hb-body { font-size: 12.5px; color: var(--color-text-muted); line-height: 2.2; padding-bottom: 14px; }
+    details.helpbox .hb-body b { color: var(--color-text); }
+    .trust-note { margin-top: 20px; font-size: 11.5px; color: var(--color-text-muted); line-height: 2.1; }
+    .switch-link { margin-top: 16px; font-size: 12.5px; color: var(--color-text-muted); }
+    .switch-link a { color: var(--color-primary); font-weight: 700; text-decoration: none; }
 </style>
 {% endblock %}
 
@@ -88,46 +145,375 @@
                 {% endfor %}
             {% endif %}
 
-            {% if step == 'code' %}
-                <h1>کد تأیید را وارد کنید</h1>
-                <p class="auth-sub">کد ۶ رقمی به شماره زیر پیامک شد</p>
-                <div class="phone-chip">{{ phone_display }}</div>
+            {% if demo_code %}<div class="demo-code">کد آزمایشی: {{ demo_code }}</div>{% endif %}
 
-                <form method="post" action="{% url 'auth_pages:login' %}">
-                    {% csrf_token %}
-                    <input type="hidden" name="action" value="verify_otp">
-                    <input type="hidden" name="next" value="{{ next_url }}">
-                    <input type="text" name="code" class="auth-input" inputmode="numeric"
-                           pattern="[0-9]{6}" maxlength="6" placeholder="- - - - - -" required autofocus>
-                    <button type="submit" class="auth-btn">تایید و ورود</button>
-                </form>
+            {% if step == 'code' or step == 'reset_code' %}
+            <!-- ═══════ مرحله ۲: کد تأیید ═══════ -->
+            <div class="steps">
+                <div class="st done"><div class="dot">✓</div><span class="lbl">شماره موبایل</span></div>
+                <div class="ln"></div>
+                <div class="st active"><div class="dot">۲</div><span class="lbl">کد تأیید</span></div>
+                <div class="ln"></div>
+                <div class="st"><div class="dot">۳</div><span class="lbl">{% if step == 'code' %}ورود{% else %}رمز جدید{% endif %}</span></div>
+            </div>
 
-                <div class="auth-switch">
-                    شماره اشتباه است؟ <a href="{% url 'auth_pages:login' %}">ویرایش شماره</a>
+            <h1>کد تأیید را وارد کنید</h1>
+            <p class="auth-sub">
+                {% if step == 'code' %}کد ۶ رقمی به شماره زیر پیامک شد{% else %}کد ۶ رقمی برای بازنشانی رمز به شماره زیر پیامک شد{% endif %}
+            </p>
+            <div class="phone-chip">{{ phone_display }}</div>
+
+            <form method="post" id="otp-form" action="{% url 'auth_pages:login' %}">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="{% if step == 'code' %}verify_otp{% else %}verify_reset_code{% endif %}">
+                <input type="hidden" name="next" value="{{ next_url }}">
+                <input type="hidden" name="remember" value="1">
+                <div class="otp-cells" dir="ltr">
+                    <input type="text" maxlength="1" inputmode="numeric" autocomplete="one-time-code" data-otp="1" autofocus>
+                    <input type="text" maxlength="1" inputmode="numeric" data-otp="2">
+                    <input type="text" maxlength="1" inputmode="numeric" data-otp="3">
+                    <input type="text" maxlength="1" inputmode="numeric" data-otp="4">
+                    <input type="text" maxlength="1" inputmode="numeric" data-otp="5">
+                    <input type="text" maxlength="1" inputmode="numeric" data-otp="6">
                 </div>
-            {% else %}
-                <h1>ورود / ثبت‌نام</h1>
-                <p class="auth-sub">شماره موبایل خود را وارد کنید؛<br>کد تأیید برایتان پیامک می‌شود.</p>
+                <button type="submit" class="auth-btn" id="otp-submit" disabled>
+                    {% if step == 'code' %}تایید و ورود{% else %}تأیید کد{% endif %}
+                </button>
+            </form>
 
-                <form method="post" action="{% url 'auth_pages:login' %}">
-                    {% csrf_token %}
-                    <input type="hidden" name="action" value="request_otp">
-                    <input type="hidden" name="next" value="{{ next_url }}">
-                    <input type="tel" name="phone" class="auth-input" dir="ltr"
-                           pattern="09[0-9]{9}" maxlength="11" placeholder="09123456789" required autofocus>
-                    <button type="submit" class="auth-btn">دریافت کد ورود</button>
-                </form>
+            <div class="resend-row">
+                کد را دریافت نکردید؟
+                <button type="button" id="resend-btn" disabled>ارسال مجدد (<span id="countdown">۱۲۰</span> ثانیه)</button>
+            </div>
 
-                <div class="auth-switch">
-                    حساب ندارید؟ نیازی به ثبت‌نام جداگانه نیست — با همین فرم حساب شما خودکار ساخته می‌شود ✨
+            <form method="post" action="{% url 'auth_pages:login' %}" id="resend-form">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="{% if step == 'code' %}request_otp{% else %}forgot_request{% endif %}">
+                <input type="hidden" name="phone" value="{{ phone_display }}">
+                <input type="hidden" name="next" value="{{ next_url }}">
+            </form>
+
+            <div class="switch-link">
+                شماره اشتباه است؟ <a href="{% url 'auth_pages:login' %}{% if step == 'reset_code' %}?step=forgot{% endif %}">ویرایش شماره</a>
+            </div>
+
+            <details class="helpbox">
+                <summary>کد پیامک نمی‌آید؟ این راهنما را ببینید</summary>
+                <div class="hb-body">
+                    ۱) صندوق پیامک و بخش <b>پیام‌های ناشناس</b> گوشی را بررسی کنید.<br>
+                    ۲) ممکن است <b>حافظه پیامک پر</b> باشد — چند پیامک قدیمی را پاک کنید.<br>
+                    ۳) کد فقط <b>۲ دقیقه</b> اعتبار دارد؛ اگر منقضی شد، دکمه «ارسال مجدد» را بزنید.<br>
+                    ۴) آنتن‌دهی سیم‌کارت را چک کنید یا لحظه‌ای <b>حالت پرواز</b> را روشن و خاموش کنید.<br>
+                    ۵) اگر پیامک نمی‌رسد، از تب <b>«رمز عبور»</b> وارد شوید.
                 </div>
-            {% endif %}
+            </details>
+
+            {% elif step == 'set_password' %}
+            <!-- ═══════ مرحله ۳: رمز جدید ═══════ -->
+            <div class="steps">
+                <div class="st done"><div class="dot">✓</div><span class="lbl">شماره موبایل</span></div>
+                <div class="ln"></div>
+                <div class="st done"><div class="dot">✓</div><span class="lbl">کد تأیید</span></div>
+                <div class="ln"></div>
+                <div class="st active"><div class="dot">۳</div><span class="lbl">رمز جدید</span></div>
+            </div>
+
+            <h1>رمز عبور جدید بسازید</h1>
+            <p class="auth-sub">یک رمز حداقل <b>۸ کاراکتری</b> انتخاب کنید که ترکیبی از حرف و رقم باشد.</p>
+            <div class="phone-chip">{{ phone_display }}</div>
+
+            <form method="post" action="{% url 'auth_pages:login' %}" id="newpwd-form">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="set_new_password">
+                <div class="field-row pwd-wrap">
+                    <input class="auth-input js-pwd" type="password" name="password1" placeholder="رمز عبور جدید" required minlength="8" autocomplete="new-password">
+                    <button type="button" class="eye-btn" aria-label="نمایش رمز">👁</button>
+                    <div class="strength"><i></i><i></i><i></i></div>
+                    <div class="strength-lbl"></div>
+                </div>
+                <div class="field-row pwd-wrap" style="margin-top:12px;">
+                    <input class="auth-input js-pwd" type="password" name="password2" placeholder="تکرار رمز عبور جدید" required minlength="8" autocomplete="new-password">
+                    <button type="button" class="eye-btn" aria-label="نمایش رمز">👁</button>
+                </div>
+                <div class="input-hint bad js-match-hint" style="display:none;">رمزها یکسان نیستند ⚠️</div>
+                <button type="submit" class="auth-btn">ذخیره رمز جدید</button>
+            </form>
+
+            {% elif step == 'password' %}
+            <!-- ═══════ تب رمز عبور ═══════ -->
+            <h1>ورود با رمز عبور</h1>
+            <p class="auth-sub">شماره موبایل و رمز عبور خود را وارد کنید.<br>نام کاربری شما در ریحان همان <b>شماره موبایل</b> است.</p>
+
+            <div class="auth-tabs">
+                <a href="{% url 'auth_pages:login' %}">کد پیامکی<small>سریع و بدون نیاز به رمز ✨</small></a>
+                <a href="javascript:void(0)" class="on">رمز عبور<small>مناسب قطعی پیامک</small></a>
+            </div>
+
+            <form method="post" action="{% url 'auth_pages:login' %}" id="pwd-login-form">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="password_login">
+                <input type="hidden" name="method" value="password">
+                <input type="hidden" name="next" value="{{ next_url }}">
+                <div class="field-row">
+                    <input class="auth-input js-phone" type="tel" name="phone" dir="ltr" maxlength="11"
+                           placeholder="09123456789" value="{{ phone_display }}" required autocomplete="username">
+                    <div class="input-hint js-phone-hint"></div>
+                </div>
+                <div class="field-row pwd-wrap" style="margin-top:12px;">
+                    <input class="auth-input js-pwd" type="password" name="password" placeholder="رمز عبور" required autocomplete="current-password">
+                    <button type="button" class="eye-btn" aria-label="نمایش رمز">👁</button>
+                </div>
+                <div class="row-between">
+                    <label class="remember-label"><input type="checkbox" name="remember" value="1" checked> مرا در این دستگاه به خاطر بسپار</label>
+                    <button type="button" class="link-btn" onclick="location.href='{% url 'auth_pages:login' %}?step=forgot'">رمزم را فراموش کرده‌ام</button>
+                </div>
+                <button type="submit" class="auth-btn">ورود به حساب</button>
+            </form>
 
             <div class="trust-note">
-                🔒 ورود بدون رمز عبور — امن و ساده<br>
-                با ورود، سبد خرید فعلی شما حفظ می‌شود
+                🔒 بعد از ۵ تلاش ناموفق، ورود موقتاً قفل می‌شود تا حساب شما امن بماند<br>
+                حساب ندارید؟ با «کد پیامکی» وارد شوید — حساب خودکار ساخته می‌شود ✨
             </div>
+
+            {% elif step == 'forgot' %}
+            <!-- ═══════ فراموشی رمز: دریافت شماره ═══════ -->
+            <h1>بازیابی رمز عبور</h1>
+            <p class="auth-sub">شماره موبایل حساب خود را وارد کنید؛<br>کد تأیید برای تنظیم رمز جدید پیامک می‌شود.</p>
+
+            <form method="post" action="{% url 'auth_pages:login' %}" id="forgot-form">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="forgot_request">
+                <input type="hidden" name="method" value="password">
+                <div class="field-row">
+                    <input class="auth-input js-phone" type="tel" name="phone" dir="ltr" maxlength="11"
+                           placeholder="09123456789" value="{{ phone_display }}" required>
+                    <div class="input-hint js-phone-hint"></div>
+                </div>
+                <button type="submit" class="auth-btn">ارسال کد بازیابی</button>
+            </form>
+
+            <div class="switch-link"><a href="{% url 'auth_pages:login' %}?method=password">← بازگشت به ورود</a></div>
+
+            {% else %}
+            <!-- ═══════ مرحله ۱: تب پیش‌فرض (کد پیامکی) ═══════ -->
+            <h1>ورود / ثبت‌نام</h1>
+            <p class="auth-sub">شماره موبایل خود را وارد کنید؛<br>کد تأیید برایتان پیامک می‌شود.</p>
+
+            <div class="auth-tabs">
+                <a href="javascript:void(0)" class="on">کد پیامکی<small>سریع و بدون نیاز به رمز ✨</small></a>
+                <a href="{% url 'auth_pages:login' %}?method=password">رمز عبور<small>مناسب قطعی پیامک</small></a>
+            </div>
+
+            <form method="post" action="{% url 'auth_pages:login' %}" id="request-form">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="request_otp">
+                <input type="hidden" name="method" value="otp">
+                <input type="hidden" name="next" value="{{ next_url }}">
+                <input type="hidden" name="remember" value="1">
+                <div class="field-row">
+                    <input class="auth-input js-phone" type="tel" name="phone" dir="ltr" maxlength="11"
+                           pattern="09[0-9]{9}" placeholder="09123456789" value="{{ phone_display }}" required autofocus autocomplete="tel">
+                    <div class="input-hint js-phone-hint"></div>
+                </div>
+                <button type="submit" class="auth-btn" id="request-btn">دریافت کد ورود 📩</button>
+            </form>
+
+            <div class="row-between" style="justify-content:center;">
+                <label class="remember-label"><input type="checkbox" checked disabled> ورود بعدی در همین دستگاه خودکار انجام می‌شود</label>
+            </div>
+
+            <details class="helpbox">
+                <summary>چطور وارد شوم؟ (راهنمای گام‌به‌گام)</summary>
+                <div class="hb-body">
+                    <b>قدم ۱:</b> شماره موبایل خود را در کادر بالا بنویسید (با ۰۹ شروع می‌شود).<br>
+                    <b>قدم ۲:</b> روی «دریافت کد ورود» بزنید؛ کدی ۶ رقمی برایتان پیامک می‌شود.<br>
+                    <b>قدم ۳:</b> کد را در صفحه بعد وارد کنید — تمام! وارد حساب شده‌اید ✅<br><br>
+                    💡 اگر قبلاً رمز عبور ساخته باشید، از تب <b>«رمز عبور»</b> هم می‌توانید وارد شوید.<br>
+                    💡 حساب ندارید؟ لازم نیست ثبت‌نام کنید — با اولین ورود، حسابتان خودکار ساخته می‌شود.
+                </div>
+            </details>
+
+            <div class="trust-note">
+                🔒 ورود امن دوکاناله — کدها هش می‌شوند و هیچ‌کس (حتی ما) آنها را نمی‌بیند<br>
+                🛡 محدودیت تلاش هوشمند ضد سوءاستفاده فعال است<br>
+                🛒 با ورود، سبد خرید فعلی شما حفظ می‌شود
+            </div>
+            {% endif %}
         </div>
     </div>
 </div>
+
+<script>
+(function () {
+    'use strict';
+
+    // ── تبدیل اعداد فارسی/عربی به انگلیسی ──
+    var FA = ['۰','۱','۲','۳','۴','۵','۶','۷','۸','۹'];
+    var AR = ['٠','١','٢','٣','٤','٥','٦','٧','٨','٩'];
+    function toEn(s) {
+        var out = '';
+        for (var i = 0; i < s.length; i++) {
+            var c = s[i], f = FA.indexOf(c), a = AR.indexOf(c);
+            if (f > -1) c = String(f);
+            if (a > -1) c = String(a);
+            out += c;
+        }
+        return out;
+    }
+    function toFa(s) {
+        var out = '';
+        for (var i = 0; i < s.length; i++) {
+            var n = parseInt(s[i], 10);
+            out += (!isNaN(n) && s[i] !== ' ') ? FA[n] : s[i];
+        }
+        return out;
+    }
+    function isDigitChar(c) { return c >= '0' && c <= '9'; }
+
+    // ── اعتبارسنجی زنده شماره موبایل ──
+    document.querySelectorAll('.js-phone').forEach(function (inp) {
+        var hint = inp.closest('.field-row').querySelector('.js-phone-hint');
+        inp.addEventListener('input', function () {
+            var clean = toEn(inp.value).replace(/[^0-9]/g, '').slice(0, 11);
+            if (clean !== inp.value) inp.value = clean;
+            inp.classList.remove('valid', 'invalid');
+            hint.className = 'input-hint js-phone-hint';
+            hint.textContent = '';
+            if (clean.length === 0) return;
+            if (clean.length === 11 && /^09[0-9]{9}$/.test(clean)) {
+                inp.classList.add('valid');
+                hint.classList.add('ok');
+                hint.textContent = '✓ شماره موبایل معتبر است';
+            } else if (clean.length === 11 || (clean.length > 2 && clean.slice(0, 2) !== '09')) {
+                inp.classList.add('invalid');
+                hint.classList.add('bad');
+                hint.textContent = clean.length === 11 ? 'شماره باید با ۰۹ شروع شود' : 'شماره کامل نیست (۱۱ رقم، شروع با ۰۹)';
+            } else {
+                hint.classList.add('ok');
+                hint.textContent = 'در حال تکمیل... ' + toFa(clean.length) + ' از ۱۱ رقم';
+            }
+        });
+        inp.dispatchEvent(new Event('input'));
+    });
+
+    // ── نمایش/پنهان کردن رمز با علامت چشم ──
+    document.querySelectorAll('.eye-btn').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            var input = btn.parentElement.querySelector('input');
+            var show = input.type === 'password';
+            input.type = show ? 'text' : 'password';
+            btn.textContent = show ? '🙈' : '👁';
+            btn.setAttribute('aria-label', show ? 'پنهان کردن رمز' : 'نمایش رمز');
+            input.focus();
+        });
+    });
+
+    // ── سنجه قدرت رمز عبور ──
+    document.querySelectorAll('.js-pwd[name="password1"]').forEach(function (pwd) {
+        var bar = pwd.closest('.pwd-wrap').querySelector('.strength');
+        var lbl = pwd.closest('.pwd-wrap').querySelector('.strength-lbl');
+        if (!bar) return;
+        pwd.addEventListener('input', function () {
+            var v = pwd.value, score = 0;
+            if (v.length >= 8) score++;
+            if (/[A-Za-z]/.test(v) && /[0-9]/.test(v)) score++;
+            if (v.length >= 12 || /[^A-Za-z0-9]/.test(v)) score++;
+            bar.className = 'strength' + (v ? ' s' + score : '');
+            lbl.textContent = !v ? '' : (score <= 1 ? 'ضعیف — حداقل ۸ کاراکتر با حرف و رقم' : score === 2 ? 'متوسط — خوب است! 🌿' : 'عالی — رمز قوی 🔐');
+        });
+    });
+
+    // ── بررسی یکسان بودن رمز و تکرارش ──
+    var npForm = document.getElementById('newpwd-form');
+    if (npForm) {
+        var p1 = npForm.querySelector('[name="password1"]');
+        var p2 = npForm.querySelector('[name="password2"]');
+        var mh = npForm.querySelector('.js-match-hint');
+        function checkMatch() {
+            var show = p2.value.length > 0 && p1.value !== p2.value;
+            mh.style.display = show ? 'block' : 'none';
+        }
+        p1.addEventListener('input', checkMatch);
+        p2.addEventListener('input', checkMatch);
+        npForm.addEventListener('submit', function (e) {
+            if (p1.value !== p2.value) { e.preventDefault(); mh.style.display = 'block'; }
+        });
+    }
+
+    // ── جعبه‌های کد ۶ رقمی: پرش خودکار، جای‌گذاری (Paste)، دکمه فعال‌شو ──
+    var cells = document.querySelectorAll('[data-otp]');
+    if (cells.length) {
+        var submitBtn = document.getElementById('otp-submit');
+        var form = document.getElementById('otp-form');
+
+        function syncCells() {
+            var full = true;
+            cells.forEach(function (c) {
+                var d = toEn(c.value).replace(/[^0-9]/g, '');
+                c.value = d;
+                c.classList.toggle('filled', d.length > 0);
+                if (!d) full = false;
+            });
+            submitBtn.disabled = !full;
+        }
+
+        cells.forEach(function (cell, idx) {
+            cell.addEventListener('input', function () {
+                cell.value = toEn(cell.value).replace(/[^0-9]/g, '').slice(0, 1);
+                syncCells();
+                if (cell.value && idx < cells.length - 1) cells[idx + 1].focus();
+            });
+            cell.addEventListener('keydown', function (e) {
+                if (e.key === 'Backspace' && !cell.value && idx > 0) cells[idx - 1].focus();
+            });
+            cell.addEventListener('paste', function (e) {
+                e.preventDefault();
+                var pasted = toEn((e.clipboardData || window.clipboardData).getData('text')).replace(/[^0-9]/g, '').slice(0, 6);
+                for (var i = 0; i < pasted.length && i < cells.length; i++) cells[i].value = pasted[i];
+                syncCells();
+                cells[Math.min(pasted.length, cells.length) - 1].focus();
+            });
+        });
+        syncCells();
+
+        form.addEventListener('submit', function () {
+            var code = '';
+            cells.forEach(function (c) { code += toEn(c.value).replace(/[^0-9]/g, ''); });
+            var hidden = document.createElement('input');
+            hidden.type = 'hidden'; hidden.name = 'code'; hidden.value = code;
+            form.appendChild(hidden);
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'در حال بررسی...';
+        });
+
+        // ── تایمر ارسال مجدد کد ──
+        var resendBtn = document.getElementById('resend-btn');
+        var cdEl = document.getElementById('countdown');
+        var left = 120;
+        resendBtn.disabled = true;
+        var t = setInterval(function () {
+            left--;
+            cdEl.textContent = toFa(String(left));
+            if (left <= 0) {
+                clearInterval(t);
+                resendBtn.disabled = false;
+                document.querySelector('.resend-row').innerHTML = '<b>کد نرسید؟</b>&nbsp;&nbsp;<button type="button" onclick="document.getElementById(&quot;resend-form&quot;).submit()">ارسال مجدد کد ↺</button>';
+            }
+        }, 1000);
+        resendBtn.addEventListener('click', function () {
+            if (!resendBtn.disabled) document.getElementById('resend-form').submit();
+        });
+    }
+
+    // ── حالت بارگذاری برای دکمه‌های اصلی ──
+    [['request-form', 'request-btn'], ['pwd-login-form']].forEach(function (pair) {
+        var f = document.getElementById(pair[0]);
+        if (!f) return;
+        f.addEventListener('submit', function () {
+            var b = f.querySelector('.auth-btn');
+            if (b) { setTimeout(function () { b.disabled = true; b.textContent = 'لطفاً صبر کنید...'; }, 0); }
+        });
+    });
+})();
+</script>
 {% endblock %}

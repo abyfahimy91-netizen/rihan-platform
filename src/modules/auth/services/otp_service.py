@@ -45,7 +45,7 @@ class OtpService:
     """
     
     OTP_LENGTH = 6
-    OTP_TTL_MINUTES = 2
+    OTP_TTL_MINUTES = 5
     MAX_ATTEMPTS = 3
     LOCKOUT_MINUTES = 30
     

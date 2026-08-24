@@ -249,6 +249,8 @@ class LoginAttempt(models.Model):
         ('otp_verify_failed', 'تأیید ناموفق OTP'),
         ('device_login', 'ورود با DeviceToken'),
         ('password_login', 'ورود با رمز پشتیبان'),
+        ('password_failed', 'رمز عبور نادرست (D-095)'),
+        ('password_reset', 'تنظیم/بازنشانی رمز عبور'),
         ('logout', 'خروج'),
         ('lockout', 'قفل موقت'),
     ]

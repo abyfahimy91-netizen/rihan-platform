@@ -9,6 +9,14 @@ ALLOWED_HOSTS = [h.strip() for h in os.environ.get('ALLOWED_HOSTS', '127.0.0.1,l
 CSRF_TRUSTED_ORIGINS = [o.strip() for o in os.environ.get('CSRF_TRUSTED_ORIGINS', '').split(',') if o.strip()]
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
+# ── امنیت نشست و کوکی‌ها (D-095) ──
+SESSION_COOKIE_HTTPONLY = True      # جاوااسکریپت به کوکی نشست دسترسی ندارد
+SESSION_COOKIE_SAMESITE = 'Lax'     # محافظت CSRF برای ورودهای عادی
+SESSION_COOKIE_SECURE = True        # کوکی نشست فقط روی HTTPS
+CSRF_COOKIE_SECURE = True           # کوکی CSRF فقط روی HTTPS
+SESSION_COOKIE_AGE = 60 * 60 * 24 * 14  # نشست عادی: ۱۴ روز (دستگاه remembered جداگانه ۳۰ روزه است)
+SECURE_CONTENT_TYPE_NOSNIFF = True
+
 INSTALLED_APPS = [
     # Django apps
     'django.contrib.admin',
@@ -56,6 +64,10 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+
+    # ✅ یادآوری دستگاه — ورود خودکار با کوکی امن ۳۰ روزه (D-095)
+    'src.modules.auth.middleware.auth_middleware.DeviceTokenMiddleware',
+
     
     # ✅ Middlewareهای ریهان (M14)
     'src.core.middleware.FeatureFlagMiddleware',

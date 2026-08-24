@@ -9,6 +9,7 @@ Device Service برای ماژول احراز هویت
 """
 from __future__ import annotations
 
+import hashlib
 import logging
 import uuid
 from typing import List, Optional
@@ -41,6 +42,11 @@ class DeviceService:
     
     MAX_DEVICES_PER_USER = 5
     TOKEN_TTL_DAYS = 30
+
+    @staticmethod
+    def _hash(token: str) -> str:
+        """هش سریع SHA-256 — توکن UUID با انتروپی بالا است؛ جستجوی مستقیم DB ممکن می‌شود."""
+        return hashlib.sha256(token.encode('utf-8')).hexdigest()
     
     @classmethod
     def create_device_token(
@@ -73,7 +79,7 @@ class DeviceService:
         
         # تولید UUID v4
         token = str(uuid.uuid4())
-        token_hash = make_password(token)
+        token_hash = cls._hash(token)
         
         # ایجاد DeviceToken
         device_token = DeviceToken.objects.create(
@@ -105,35 +111,37 @@ class DeviceService:
             user یا None اگر نامعتبر باشد
         """
         try:
-            # پیدا کردن DeviceToken با hash
-            device_tokens = DeviceToken.objects.filter(is_active=True)
-            
-            for dt in device_tokens:
-                if check_password(token, dt.token_hash):
-                    # بررسی انقضا
-                    if dt.is_expired:
-                        dt.revoke()
-                        logger.info(f"Device token expired: {dt.id}")
-                        return None
-                    
-                    # تمدید انقضا
-                    dt.refresh_expiry()
-                    
-                    # ثبت در LoginAttempt
-                    LoginAttempt.objects.create(
-                        phone=dt.user.username,
-                        action='device_login',
-                        ip_address=dt.ip_address,
-                        user_agent=dt.user_agent,
-                        success=True,
-                        user=dt.user
-                    )
-                    
-                    logger.info(f"Device token verified: {dt.id}")
-                    return dt.user
-            
-            return None
-            
+            # جستجوی مستقیم با هش (سریع — بدون پیمایش جدول)
+            dt = DeviceToken.objects.filter(
+                token_hash=cls._hash(token),
+                is_active=True
+            ).select_related('user').first()
+
+            if dt is None:
+                return None
+
+            # بررسی انقضا
+            if dt.is_expired:
+                dt.revoke()
+                logger.info(f"Device token expired: {dt.id}")
+                return None
+
+            # تمدید انقضا (sliding window)
+            dt.refresh_expiry()
+
+            # به‌روزرسانی لاگ ورود با دستگاه
+            LoginAttempt.objects.create(
+                phone=dt.user.username,
+                action='device_login',
+                ip_address=dt.ip_address,
+                user_agent=dt.user_agent,
+                success=True,
+                user=dt.user
+            )
+
+            logger.info(f"Device token verified: {dt.id}")
+            return dt.user
+
         except Exception as e:
             logger.error(f"Device token verification error: {e}")
             return None
@@ -150,20 +158,31 @@ class DeviceService:
             True اگر ابطال موفق بود
         """
         try:
-            device_tokens = DeviceToken.objects.filter(is_active=True)
-            
-            for dt in device_tokens:
-                if check_password(token, dt.token_hash):
-                    dt.revoke()
-                    logger.info(f"Device token revoked: {dt.id}")
-                    return True
-            
+            dt = DeviceToken.objects.filter(
+                token_hash=cls._hash(token),
+                is_active=True
+            ).first()
+            if dt:
+                dt.revoke()
+                logger.info(f"Device token revoked: {dt.id}")
+                return True
             return False
-            
+
         except Exception as e:
             logger.error(f"Device token revocation error: {e}")
             return False
     
+    @classmethod
+    def revoke_device_by_id(cls, user: User, device_id: str) -> bool:
+        """ابطال یک دستگاه خاص کاربر (از پروفایل)."""
+        try:
+            updated = DeviceToken.objects.filter(
+                id=device_id, user=user, is_active=True
+            ).update(is_active=False)
+            return bool(updated)
+        except Exception:
+            return False
+
     @classmethod
     def revoke_all_devices(cls, user: User) -> int:
         """

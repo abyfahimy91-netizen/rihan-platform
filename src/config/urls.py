@@ -7,6 +7,8 @@ from django.contrib.sitemaps.views import sitemap
 from src.modules.catalog.sitemaps import ProductSitemap, StaticViewSitemap
 from src.modules.catalog.seo_views import robots_txt
 
+import src.modules.auth.admin_login  # noqa: E402 - ورود ادمین با یادآوری دستگاه
+
 sitemaps = {
     'products': ProductSitemap,
     'static': StaticViewSitemap,
@@ -39,6 +41,7 @@ urlpatterns = [
     path('', include('src.modules.pages.urls')),
     
     # Admin
+    path('admin/login/', src.modules.auth.admin_login.rihan_admin_login),  # ورود ادمین + «مرا به خاطر بسپار» (D-095)
     path('admin/', admin.site.urls),
     
     # Finance (M6)

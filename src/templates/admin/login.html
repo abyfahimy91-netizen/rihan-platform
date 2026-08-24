@@ -1,0 +1,120 @@
+{% extends "admin/base_site.html" %}
+{% load i18n static %}
+
+{% block extrastyle %}{{ block.super }}
+<style>
+  body.login { background: linear-gradient(160deg, #0D3B2E 0%, #14523f 60%, #1d6b52 100%); }
+  #login-form, .login-box {
+      background: #FAF7F0; border-radius: 18px; padding: 34px 32px;
+      max-width: 400px; margin: 48px auto; box-shadow: 0 14px 44px rgba(0,0,0,.35);
+      font-family: Vazirmatn, inherit;
+  }
+  .login-brand { text-align: center; margin-bottom: 20px; }
+  .login-brand .badge-logo {
+      width: 62px; height: 62px; border-radius: 50%; margin: 0 auto 12px;
+      background: linear-gradient(135deg, #0D3B2E, #C9A961);
+      display: flex; align-items: center; justify-content: center;
+      color: #fff; font-size: 26px; font-weight: 900;
+  }
+  .login-brand h1 { font-size: 20px; color: #C9A961; margin-bottom: 4px; font-family: inherit; }
+  .login-brand p { font-size: 12.5px; color: rgba(255,255,255,.78); line-height: 2; margin: 0; }
+  .login-steps {
+      background: #fff; border: 1px solid #e6e0d2; border-radius: 12px;
+      padding: 12px 16px; margin-bottom: 18px; font-size: 12.5px; line-height: 2.3; color: #57524a;
+  }
+  .login-steps b { color: #0D3B2E; }
+  .login-steps .n {
+      display: inline-flex; width: 19px; height: 19px; border-radius: 50%;
+      background: #0D3B2E; color: #fff; font-size: 11px; font-weight: 800;
+      align-items: center; justify-content: center; margin-left: 6px;
+  }
+  .login-row { position: relative; margin-bottom: 14px; }
+  .login-row label { display: block; font-size: 12.5px; font-weight: 700; color: #57524a; margin-bottom: 6px; }
+  .login-row input[type="text"], .login-row input[type="password"] {
+      width: 100%; box-sizing: border-box; padding: 12px 40px 12px 46px;
+      border: 1.5px solid #ded7c4; border-radius: 12px; font-size: 15px;
+      background: #fff; font-family: inherit; direction: ltr; text-align: left;
+  }
+  .login-row input:focus { outline: none; border-color: #0D3B2E; box-shadow: 0 0 0 3px rgba(13,59,46,.1); }
+  .eye-btn {
+      position: absolute; left: 10px; top: 27px; background: none; border: none;
+      cursor: pointer; font-size: 18px; padding: 4px; color: #6d6a5e;
+  }
+  .remember-row { display: flex; align-items: center; gap: 8px; margin: 4px 0 16px; font-size: 12.5px; color: #57524a; cursor: pointer; user-select: none; }
+  .remember-row input { width: 17px; height: 17px; accent-color: #0D3B2E; }
+  .submit-btn {
+      width: 100%; padding: 15px; border: none; border-radius: 12px; cursor: pointer;
+      background: linear-gradient(135deg, #0D3B2E, #14523f); color: #fff;
+      font-size: 15.5px; font-weight: 800; font-family: inherit; transition: all .25s;
+  }
+  .submit-btn:hover { transform: translateY(-1px); box-shadow: 0 8px 22px rgba(13,59,46,.4); }
+  .errornote {
+      background: #f9ecea; border: 1px solid #eccfca; color: #7c2222;
+      border-radius: 10px; padding: 10px 14px; margin-bottom: 14px; font-size: 13px;
+  }
+</style>
+{% endblock %}
+
+{% block branding %}
+<div class="login-brand">
+    <div class="badge-logo">ر</div>
+    <h1>پنل مدیریت ریحان</h1>
+    <p>ورود امن مدیران — نام کاربری شما همان شماره موبایل یا نام مدیریتی است</p>
+</div>
+{% endblock %}
+
+{% block nav-sidebar %}{% endblock %}
+{% block breadcrumbs %}{% endblock %}
+{% block content_title %}{% endblock %}
+{% block content %}
+
+<div class="login-box">
+{% if form.errors and not form.non_field_errors %}
+    <div class="errornote">نام کاربری یا رمز عبور نادرست است.</div>
+{% endif %}
+{% if form.non_field_errors %}
+    {% for e in form.non_field_errors %}<div class="errornote">{{ e }}</div>{% endfor %}
+{% endif %}
+
+<div class="login-steps">
+    <span class="n">۱</span><b>نام کاربری</b> و <b>رمز عبور</b> خود را وارد کنید<br>
+    <span class="n">۲</span> برای دستگاه شخصی، تیک <b>«مرا به خاطر بسپار»</b> را بزنید<br>
+    <span class="n">۳</span> روی «ورود به پنل» بزنید — تمام!
+</div>
+
+<form id="login-form" method="post" action="{{ app_path }}">
+    {% csrf_token %}
+    <input type="hidden" name="next" value="{{ next }}">
+    <div class="login-row">
+        <label for="id_username">{% translate "Username:" %}</label>
+        <input type="text" name="username" id="id_username" value="{{ form.username.value|default:'' }}" autofocus autocomplete="username" required>
+    </div>
+    <div class="login-row">
+        <label for="id_password">{% translate "Password:" %}</label>
+        <input type="password" name="password" id="id_password" autocomplete="current-password" required>
+        <button type="button" class="eye-btn" onclick="var i=document.getElementById('id_password');i.type=(i.type==='password')?'text':'password';this.textContent=(i.type==='password')?'👁':'🙈'">👁</button>
+    </div>
+    <label class="remember-row">
+        <input type="checkbox" name="remember_me" checked>
+        مرا به خاطر بسپار (۳۰ روز بدون ورود مجدد)
+    </label>
+    <button type="submit" class="submit-btn">ورود به پنل مدیریت 🌿</button>
+</form>
+
+<script>
+(function () {
+    var u = document.getElementById('id_username');
+    if (!u) return;
+    u.addEventListener('input', function () {
+        var FA = ['۰','۱','۲','۳','۴','۵','۶','۷','۸','۹'];
+        var out = '';
+        for (var i = 0; i < u.value.length; i++) {
+            var f = FA.indexOf(u.value[i]);
+            out += (f > -1) ? String(f) : u.value[i];
+        }
+        if (out !== u.value) u.value = out;
+    });
+})();
+</script>
+</div>
+{% endblock %}
