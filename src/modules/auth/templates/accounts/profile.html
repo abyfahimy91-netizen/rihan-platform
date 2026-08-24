@@ -1,4 +1,5 @@
-{% extends "catalog/base.html" %}
+{% extends "catalog/base.html" %}{% load fa_tags %}
+
 
 {% block title %}حساب من | ریهان{% endblock %}
 {% block meta_description %}پروفایل کاربری و تاریخچه سفارش‌ها در فروشگاه ریهان{% endblock %}
@@ -233,7 +234,7 @@
                             <div style="text-align:right;">
                                 <div style="font-weight:800;font-size:13.5px;">{{ d.device_type }}</div>
                                 <div style="font-size:11.5px;color:var(--color-text-muted);">
-                                    آخرین استفاده: {{ d.last_used_at|date:"Y/m/d H:i" }} · از {{ d.ip_address|default:'—' }}
+                                    آخرین استفاده: {{ d.last_used_at|jtime }} · از {{ d.ip_address|default:'—' }}
                                 </div>
                             </div>
                             <form method="post" action="{% url 'auth_pages:profile' %}">
@@ -272,9 +273,9 @@
                             {% for o in orders %}
                             <tr>
                                 <td dir="ltr" style="font-weight:700;">{{ o.order_number }}</td>
-                                <td>{{ o.created_at|date:"Y/m/d" }}</td>
-                                <td>{{ o.items_count }}</td>
-                                <td>{{ o.total_price|floatformat:0 }} تومان</td>
+                                <td>{{ o.created_at|jdate }}</td>
+                                <td>{{ o.items_count|fa }}</td>
+                                <td>{{ o.total_price|money }} تومان</td>
                                 <td><span class="badge {{ o.status }}">{{ o.status_fa }}</span></td>
                                 <td><a class="track-link" href="{% url 'order_pages:tracking_page' o.order_number %}">پیگیری ↗</a></td>
                             </tr>

@@ -1,4 +1,5 @@
-{% extends "catalog/base.html" %}
+{% extends "catalog/base.html" %}{% load fa_tags %}
+
 
 {% block title %}تسویه‌حساب | ریهان{% endblock %}
 {% block meta_description %}تکمیل سفارش در فروشگاه ریهان - ارسال رایگان، پرداخت کارت به کارت، کیفیت اصیل{% endblock %}
@@ -195,13 +196,13 @@
             <h2>🛒 سفارش شما</h2>
             {% for item in items %}
                 <div class="summary-item">
-                    <span>{{ item.product.name }}{% if item.variant %} <small>({{ item.variant.title }})</small>{% endif %} <span class="qty">× {{ item.quantity }}</span></span>
-                    <span>{{ item.subtotal|floatformat:0 }} تومان</span>
+                    <span>{{ item.product.name }}{% if item.variant %} <small>({{ item.variant.title }})</small>{% endif %} <span class="qty">× {{ item.quantity|fa }}</span></span>
+                    <span>{{ item.subtotal|money }} تومان</span>
                 </div>
             {% endfor %}
             <div class="summary-total-row">
                 <span>مبلغ قابل پرداخت</span>
-                <span>{{ total|floatformat:0 }} تومان</span>
+                <span>{{ total|money }} تومان</span>
             </div>
 
             <button type="submit" class="btn-submit-order">

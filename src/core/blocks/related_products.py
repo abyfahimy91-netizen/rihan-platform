@@ -25,7 +25,7 @@ class RelatedProductsBlock(BaseBlock):
     def validate(self) -> bool:
         max_count = self.data.get('max_count', 4)
         if not isinstance(max_count, int) or max_count < 1:
-            raise BlockValidationError("max_count must be a positive integer")
+            raise BlockValidationError("تعداد باید عدد صحیح مثبت باشد")
         return True
 
     def get_schema(self) -> dict:

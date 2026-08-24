@@ -13,6 +13,7 @@ from decimal import Decimal
 from django.conf import settings
 from django.utils import timezone
 from .models import Payment
+from src.core.fa import money
 
 
 class BasePaymentGateway(ABC):
@@ -87,7 +88,7 @@ class CardToCardGateway(BasePaymentGateway):
                 'iban': self.config.get('iban', ''),
             },
             'amount': float(order.total_price),
-            'amount_display': f"{order.total_price:,.0f} تومان",
+            'amount_display': money(order.total_price) + " تومان",
             'order_number': order.order_number,
             'instructions': [
                 'مبلغ را به شماره کارت زیر واریز کنید',

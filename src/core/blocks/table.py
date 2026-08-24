@@ -28,13 +28,13 @@ class TableBlock(BaseBlock):
     def validate(self) -> bool:
         rows = self.data.get('rows', [])
         if not rows or not isinstance(rows, list):
-            raise BlockValidationError("Table block requires 'rows' list")
+            raise BlockValidationError("بلوک جدول به فهرست ردیف‌ها نیاز دارد")
         # بررسی یکسان بودن تعداد ستون‌ها
         if len(rows) > 1:
             first_len = len(rows[0])
             for row in rows[1:]:
                 if len(row) != first_len:
-                    raise BlockValidationError("All rows must have same number of columns")
+                    raise BlockValidationError("همه ردیف‌ها باید تعداد ستون‌های یکسان داشته باشند")
         return True
 
     def get_schema(self) -> dict:

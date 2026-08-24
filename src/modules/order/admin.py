@@ -10,6 +10,7 @@ from django.utils import timezone
 from django.db.models import Count, Sum, Q
 from django.urls import reverse
 from .models import Cart, CartItem, Order, OrderItem, Payment, Address
+from src.core.fa import money as fa_money, jalali_datetime_str
 
 
 # ═══════════════════════════════════════════════════════════════
@@ -27,7 +28,7 @@ class CartItemInline(admin.TabularInline):
 
 @admin.register(Cart)
 class CartAdmin(admin.ModelAdmin):
-    list_display = ['id', 'user_or_session', 'items_count', 'total_amount', 'is_active', 'created_at']
+    list_display = ['id', 'user_or_session', 'items_count', 'total_amount', 'is_active', 'created_at_fa']
     list_filter = ['is_active', 'created_at']
     search_fields = ['id', 'session_key', 'user__username', 'user__email']
     readonly_fields = ['id', 'session_key', 'user', 'is_active', 'created_at', 'updated_at']
@@ -38,9 +39,14 @@ class CartAdmin(admin.ModelAdmin):
     items_count.short_description = 'تعداد اقلام'
     
     def total_amount(self, obj):
-        return f"{obj.subtotal:,.0f} تومان"
+        return fa_money(obj.subtotal) + ' تومان'
     total_amount.short_description = 'مبلغ کل'
     
+    def created_at_fa(self, obj):
+        return jalali_datetime_str(obj.created_at)
+    created_at_fa.short_description = 'تاریخ'
+    created_at_fa.admin_order_field = 'created_at'
+
     def user_or_session(self, obj):
         if obj.user:
             return f"{obj.user.username} (کاربر)"
@@ -68,7 +74,7 @@ class OrderItemInline(admin.TabularInline):
 class OrderAdmin(admin.ModelAdmin):
     list_display = [
         'order_number', 'customer_display', 'status_badge',
-        'total_amount', 'payment_status', 'items_count', 'created_at'
+        'total_amount', 'payment_status', 'items_count', 'created_at_fa'
     ]
     list_filter = ['status', 'created_at', 'updated_at']
     search_fields = ['order_number', 'guest_name', 'guest_phone', 'user__username']
@@ -119,7 +125,7 @@ class OrderAdmin(admin.ModelAdmin):
     status_badge.admin_order_field = 'status'
     
     def total_amount(self, obj):
-        num = f'{float(obj.total_price):,.0f}'
+        num = fa_money(obj.total_price)
         return format_html('<strong style="color:#2d5a2d;">{} تومان</strong>', num)
     total_amount.short_description = 'مبلغ نهایی'
     total_amount.admin_order_field = 'total_price'
@@ -147,6 +153,11 @@ class OrderAdmin(admin.ModelAdmin):
         return obj.items.count()
     items_count.short_description = 'اقلام'
 
+    def created_at_fa(self, obj):
+        return jalali_datetime_str(obj.created_at)
+    created_at_fa.short_description = 'تاریخ ثبت'
+    created_at_fa.admin_order_field = 'created_at'
+
 
 # ═══════════════════════════════════════════════════════════════
 # Admin برای پرداخت‌ها (پنل تایید کارت‌به‌کارت)
@@ -157,7 +168,7 @@ class PaymentAdmin(admin.ModelAdmin):
     list_display = [
         'order_number', 'customer_name', 'amount_display',
         'status_badge', 'gateway_badge', 'evidence_preview',
-        'reviewed_by_name', 'created_at'
+        'reviewed_by_name', 'created_at_fa'
     ]
     list_filter = ['status', 'gateway', 'created_at', 'reviewed_at']
     search_fields = ['order__order_number', 'sender_card_last4', 'order__guest_name']
@@ -195,6 +206,11 @@ class PaymentAdmin(admin.ModelAdmin):
     order_number.short_description = 'شماره سفارش'
     order_number.admin_order_field = 'order__order_number'
     
+    def created_at_fa(self, obj):
+        return jalali_datetime_str(obj.created_at)
+    created_at_fa.short_description = 'تاریخ ثبت'
+    created_at_fa.admin_order_field = 'created_at'
+
     def customer_name(self, obj):
         if obj.order.user:
             return obj.order.user.get_full_name() or obj.order.user.username
@@ -204,7 +220,7 @@ class PaymentAdmin(admin.ModelAdmin):
     def amount_display(self, obj):
         return format_html(
             '<strong style="color:#2d5a2d; font-size:14px;">{}</strong> <span style="color:#888;">تومان</span>',
-            f'{float(obj.amount):,.0f}'
+            fa_money(obj.amount)
         )
     amount_display.short_description = 'مبلغ'
     amount_display.admin_order_field = 'amount'

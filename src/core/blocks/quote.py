@@ -23,7 +23,7 @@ class QuoteBlock(BaseBlock):
 
     def validate(self) -> bool:
         if 'quote' not in self.data or not self.data['quote']:
-            raise BlockValidationError("Quote block requires 'quote' field")
+            raise BlockValidationError("بلوک نقل‌قول به فیلد نقل‌قول نیاز دارد")
         return True
 
     def get_schema(self) -> dict:

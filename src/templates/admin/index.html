@@ -1,5 +1,6 @@
 {% extends "admin/index.html" %}
-{% load admin_dashboard %}
+{% load admin_dashboard %}{% load fa_tags %}
+
 
 {% block content %}
 <style>
@@ -73,40 +74,40 @@
   {% rihan_dashboard_stats as st %}
   <div class="rd-grid">
     <a class="rd-card" style="--ac:#2D6A4F" href="{% url 'admin:order_order_changelist' %}">
-      <span class="rd-num">{{ st.orders_today|default:0 }}</span>
+      <span class="rd-num">{{ st.orders_today|default:0|fa }}</span>
       <span class="rd-lbl">🧾 سفارش‌های امروز</span>
     </a>
     <a class="rd-card" style="--ac:#17877b" href="{% url 'admin:order_order_changelist' %}">
-      <span class="rd-num">{{ st.orders_total|default:0 }}</span>
+      <span class="rd-num">{{ st.orders_total|default:0|fa }}</span>
       <span class="rd-lbl">📦 کل سفارش‌ها</span>
     </a>
     <a class="rd-card" style="--ac:#B45309" href="{% url 'admin:order_payment_changelist' %}?status__exact=PENDING_REVIEW">
-      <span class="rd-num">{{ st.pending_payments|default:0 }}</span>
+      <span class="rd-num">{{ st.pending_payments|default:0|fa }}</span>
       <span class="rd-lbl">💳 پرداخت منتظر تایید</span>
     </a>
     <a class="rd-card" style="--ac:#1F6F9C" href="{% url 'admin:reviews_review_changelist' %}?is_approved__exact=0">
-      <span class="rd-num">{{ st.pending_reviews|default:0 }}</span>
+      <span class="rd-num">{{ st.pending_reviews|default:0|fa }}</span>
       <span class="rd-lbl">⭐ نظر در انتظار تایید</span>
     </a>
     <a class="rd-card" style="--ac:#5B21B6" href="{% url 'admin:leads_lead_changelist' %}">
-      <span class="rd-num">{{ st.new_leads|default:0 }}</span>
+      <span class="rd-num">{{ st.new_leads|default:0|fa }}</span>
       <span class="rd-lbl">📞 سرنخ جدید (۷ روز)</span>
     </a>
     <a class="rd-card" style="--ac:#9B2C2C" href="{% url 'admin:catalog_inventory_changelist' %}">
-      <span class="rd-num">{{ st.low_stock|length|add:st.out_stock|length }}</span>
+      <span class="rd-num">{{ st.low_stock|length|add:st.out_stock|length|fa }}</span>
       <span class="rd-lbl">⚠️ هشدار موجودی</span>
     </a>
   </div>
 
   {% if st.paid_today %}
-  <div class="rd-alert ok">💚 فروش تاییدشده امروز: <strong>{{ st.paid_today }} تومان</strong></div>
+  <div class="rd-alert ok">💚 فروش تاییدشده امروز: <strong>{{ st.paid_today|money }} تومان</strong></div>
   {% endif %}
 
   {% if st.out_stock %}
   <div class="rd-alert err">
     ❌ ناموجود:
     {% for n in st.out_stock %}«{{ n }}»{% if not forloop.last %}، {% endif %}{% endfor %}
-    {% if st.out_stock_more %} و {{ st.out_stock_more }} مورد دیگر{% endif %}
+    {% if st.out_stock_more %} و {{ st.out_stock_more|fa }} مورد دیگر{% endif %}
     — <a href="{% url 'admin:catalog_inventory_changelist' %}?stock_state=out">مدیریت موجودی</a>
   </div>
   {% endif %}
@@ -114,7 +115,7 @@
   <div class="rd-alert warn">
     ⚠️ کم‌موجود:
     {% for n in st.low_stock %}«{{ n }}»{% if not forloop.last %}، {% endif %}{% endfor %}
-    {% if st.low_stock_more %} و {{ st.low_stock_more }} مورد دیگر{% endif %}
+    {% if st.low_stock_more %} و {{ st.low_stock_more|fa }} مورد دیگر{% endif %}
     — <a href="{% url 'admin:catalog_inventory_changelist' %}?stock_state=low">مدیریت موجودی</a>
   </div>
   {% endif %}

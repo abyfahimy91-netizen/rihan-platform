@@ -3,6 +3,8 @@
 """
 import jdatetime
 from django import template
+
+from src.core.fa import money as fa_money, fa_digits
 from django.utils import timezone
 from datetime import timedelta
 
@@ -88,8 +90,8 @@ def rihan_dashboard_stats():
                 'number': o.order_number,
                 'status_fa': STATUS_FA.get(o.status, o.status),
                 'color': COLOR.get(o.status, '#888'),
-                'total': f'{o.total_price:,.0f}',
-                'date': jdatetime.datetime.fromgregorian(datetime=o.created_at).strftime('%m/%d %H:%M'),
+                'total': fa_money(o.total_price),
+                'date': fa_digits(jdatetime.datetime.fromgregorian(datetime=o.created_at).strftime('%m/%d %H:%M')),
             })
         stats['recent_orders'] = recent
     except Exception as e:
@@ -100,4 +102,4 @@ def rihan_dashboard_stats():
 
 @register.simple_tag
 def jalali_today():
-    return jdatetime.datetime.fromgregorian(datetime=timezone.now()).strftime('%Y/%m/%d')
+    return fa_digits(jdatetime.datetime.fromgregorian(datetime=timezone.now()).strftime('%Y/%m/%d'))

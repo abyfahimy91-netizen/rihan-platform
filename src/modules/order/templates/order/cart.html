@@ -1,4 +1,5 @@
-{% extends "catalog/base.html" %}
+{% extends "catalog/base.html" %}{% load fa_tags %}
+
 
 {% block title %}سبد خرید | ریهان{% endblock %}
 {% block meta_description %}سبد خرید شما در فروشگاه ریهان - ارسال رایگان، کیفیت اصیل{% endblock %}
@@ -543,7 +544,7 @@
                     <a href="{% url 'catalog:product_detail' item.product.slug %}">{{ item.product.name }}</a>
                 </h3>
                 {% if item.variant %}<span class='cart-item-variant'>{{ item.variant.title }}</span><br>{% endif %}
-                <div class='cart-item-unit-price'>{{ item.unit_price_at_add|floatformat:0 }} تومان هر عدد</div>
+                <div class='cart-item-unit-price'>{{ item.unit_price_at_add|money }} تومان هر عدد</div>
             </div>
             
             <form method="post" action="{% url 'order_pages:update_cart_page' %}" class="quantity-control">
@@ -557,7 +558,7 @@
             <div class="cart-item-subtotal">
                 <div class="subtotal-label">جمع</div>
                 <div class="subtotal-amount">
-                    {{ item.subtotal|floatformat:0 }}
+                    {{ item.subtotal|money }}
                     <small>تومان</small>
                 </div>
             </div>
@@ -583,12 +584,12 @@
         
         <div class="summary-row">
             <span class="summary-row-label">تعداد اقلام</span>
-            <span class="summary-row-value">{{ item_count }} قلم</span>
+            <span class="summary-row-value">{{ item_count|fa }} قلم</span>
         </div>
         
         <div class="summary-row">
             <span class="summary-row-label">جمع کالاها</span>
-            <span class="summary-row-value">{{ subtotal|floatformat:0 }} تومان</span>
+            <span class="summary-row-value">{{ subtotal|money }} تومان</span>
         </div>
         
         <div class="summary-row shipping">
@@ -598,7 +599,7 @@
         
         <div class="summary-row total">
             <span class="summary-row-label">مبلغ نهایی</span>
-            <span class="summary-row-value">{{ total|floatformat:0 }} تومان</span>
+            <span class="summary-row-value">{{ total|money }} تومان</span>
         </div>
         
         <div class="summary-actions">

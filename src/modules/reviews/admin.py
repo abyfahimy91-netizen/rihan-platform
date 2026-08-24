@@ -7,6 +7,8 @@ from django.utils import timezone
 
 from .models import Review
 
+from src.core.fa import jalali_datetime_str
+
 
 @admin.register(Review)
 class ReviewAdmin(admin.ModelAdmin):
@@ -18,7 +20,7 @@ class ReviewAdmin(admin.ModelAdmin):
         'rating_display',
         'text_preview',
         'is_approved',
-        'created_at',
+        'created_at_fa',
         'approve_action',
     )
     
@@ -91,6 +93,11 @@ class ReviewAdmin(admin.ModelAdmin):
     
     actions = ['approve_reviews', 'unapprove_reviews']
     
+    def created_at_fa(self, obj):
+        return jalali_datetime_str(obj.created_at)
+    created_at_fa.short_description = 'تاریخ ثبت'
+    created_at_fa.admin_order_field = 'created_at'
+
     def reviewer_display(self, obj):
         """Display reviewer name"""
         if obj.user:

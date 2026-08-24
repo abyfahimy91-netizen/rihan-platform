@@ -1,4 +1,5 @@
-{% extends "finance/base.html" %}
+{% extends "finance/base.html" %}{% load fa_tags %}
+
 {% block title %}حساب ماهانه | ریهان{% endblock %}
 
 {% block content %}
@@ -22,7 +23,7 @@
     <div class="col-md-4">
         <div class="card stat-card bg-primary text-white">
             <div class="card-body text-center">
-                <h2>{{ report.sales_total|floatformat:0 }}</h2>
+                <h2>{{ report.sales_total|money }}</h2>
                 <p>فروش این ماه</p>
             </div>
         </div>
@@ -56,13 +57,13 @@
             <tbody>
                 {% for transaction in report.transactions %}
                 <tr>
-                    <td>{{ transaction.created_at|date:"Y/m/d" }}</td>
+                    <td>{{ transaction.created_at|jdate }}</td>
                     <td>
                         <span class="badge bg-{% if transaction.transaction_type == 'SALE' %}success{% elif transaction.transaction_type == 'SETTLEMENT' %}primary{% else %}secondary{% endif %}">
                             {{ transaction.get_transaction_type_display }}
                         </span>
                     </td>
-                    <td>{{ transaction.amount|floatformat:0 }}</td>
+                    <td>{{ transaction.amount|money }}</td>
                     <td>{{ transaction.description }}</td>
                 </tr>
                 {% endfor %}
@@ -92,8 +93,8 @@
             <tbody>
                 {% for settlement in ledger.settlements.all %}
                 <tr>
-                    <td>{{ settlement.created_at|date:"Y/m/d" }}</td>
-                    <td>{{ settlement.amount|floatformat:0 }}</td>
+                    <td>{{ settlement.created_at|jdate }}</td>
+                    <td>{{ settlement.amount|money }}</td>
                     <td>
                         <span class="badge bg-{% if settlement.status == 'COMPLETED' %}success{% elif settlement.status == 'PENDING' %}warning{% else %}danger{% endif %}">
                             {{ settlement.get_status_display }}

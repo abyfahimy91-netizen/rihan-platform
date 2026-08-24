@@ -22,10 +22,10 @@ class HeadingBlock(BaseBlock):
 
     def validate(self) -> bool:
         if 'text' not in self.data or not self.data['text']:
-            raise BlockValidationError("Heading block requires 'text' field")
+            raise BlockValidationError("بلوک تیتر به فیلد متن نیاز دارد")
         level = self.data.get('level', 'h2')
         if level not in self.VALID_LEVELS:
-            raise BlockValidationError(f"Invalid heading level: {level}")
+            raise BlockValidationError(f"سطح تیتر نامعتبر است: {level}")
         return True
 
     def get_schema(self) -> dict:

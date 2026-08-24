@@ -1,4 +1,5 @@
-{% extends "finance/base.html" %}
+{% extends "finance/base.html" %}{% load fa_tags %}
+
 {% block title %}داشبورد مالی ادمین | ریهان{% endblock %}
 
 {% block content %}
@@ -10,7 +11,7 @@
     <div class="col-md-3">
         <div class="card stat-card bg-success text-white">
             <div class="card-body text-center">
-                <h2>{{ stats.total_revenue|floatformat:0 }}</h2>
+                <h2>{{ stats.total_revenue|money }}</h2>
                 <p>درآمد (۳۰ روز گذشته)</p>
             </div>
         </div>
@@ -34,7 +35,7 @@
     <div class="col-md-3">
         <div class="card stat-card bg-warning text-dark">
             <div class="card-body text-center">
-                <h2>{{ stats.total_supplier_debt|floatformat:0 }}</h2>
+                <h2>{{ stats.total_supplier_debt|money }}</h2>
                 <p>بدهی به تأمین‌کنندگان</p>
             </div>
         </div>
@@ -62,10 +63,10 @@
                 {% for ledger in ledgers %}
                 <tr>
                     <td>{{ ledger.supplier.title }}</td>
-                    <td>{{ ledger.total_sales|floatformat:0 }}</td>
-                    <td>{{ ledger.total_settlements|floatformat:0 }}</td>
+                    <td>{{ ledger.total_sales|money }}</td>
+                    <td>{{ ledger.total_settlements|money }}</td>
                     <td class="{% if ledger.balance > 0 %}text-success{% else %}text-danger{% endif %}">
-                        {{ ledger.balance|floatformat:0 }}
+                        {{ ledger.balance|money }}
                     </td>
                     <td>
                         <a href="#" class="btn btn-sm btn-outline-primary">جزئیات</a>

@@ -215,7 +215,7 @@ class Inventory(models.Model):
 
     def reserve(self, qty):
         if not self.can_reserve(qty):
-            raise ValueError("Insufficient stock")
+            raise ValueError("موجودی کافی نیست")
         self.reserved_quantity += qty
         self.save()
 

@@ -24,7 +24,7 @@ class SpacerBlock(BaseBlock):
     def validate(self) -> bool:
         height = self.data.get('height', 'medium')
         if height not in self.VALID_HEIGHTS:
-            raise BlockValidationError(f"Invalid height: {height}")
+            raise BlockValidationError(f"ارتفاع واردشده نامعتبر است: {height}")
         return True
 
     def get_schema(self) -> dict:

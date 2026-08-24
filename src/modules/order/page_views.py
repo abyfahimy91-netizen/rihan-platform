@@ -11,6 +11,7 @@ from django.shortcuts import render, get_object_or_404
 from django.http import HttpResponseForbidden
 from .models import Order, Payment
 from .payment_gateway import get_payment_gateway
+from src.core.fa import money
 
 
 def payment_submit_page(request, order_number):
@@ -61,7 +62,7 @@ def payment_submit_page(request, order_number):
         'payment_id': str(payment.id),
         'destination': payment_info['destination'],
         'amount': float(order.total_price),
-        'amount_display': f"{order.total_price:,.0f} تومان",
+        'amount_display': money(order.total_price) + " تومان",
     }
     
     return render(request, 'order/payment_submit.html', context)
@@ -134,7 +135,7 @@ def payment_success_page(request, order_number):
     
     context = {
         'order_number': order.order_number,
-        'amount_display': f"{order.total_price:,.0f} تومان",
+        'amount_display': money(order.total_price) + " تومان",
         'card_last4': payment.sender_card_last4 if payment else '----',
         'payment_status': payment.get_status_display() if payment else '-',
     }

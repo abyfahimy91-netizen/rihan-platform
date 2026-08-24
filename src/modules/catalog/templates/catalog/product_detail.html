@@ -1,4 +1,5 @@
-{% extends "catalog/base.html" %}
+{% extends "catalog/base.html" %}{% load fa_tags %}
+
 
 {% block title %}{{ seo_title }} | ریهان{% endblock %}
 
@@ -622,7 +623,7 @@
         <div class="product-price-box">
             <div class="product-price-label">قیمت</div>
             <div class="product-price" id="product-price-display">
-                {{ product.final_price|floatformat:0 }}
+                {{ product.final_price|money }}
                 <small>تومان</small>
             </div>
         </div>
@@ -829,7 +830,7 @@
                 {% endif %}
                 <div class="related-card-info">
                     <h4>{{ rp.name }}</h4>
-                    <div class="related-card-price">{{ rp.final_price|floatformat:0 }} تومان</div>
+                    <div class="related-card-price">{{ rp.final_price|money }} تومان</div>
                 </div>
             </a>
         </div>

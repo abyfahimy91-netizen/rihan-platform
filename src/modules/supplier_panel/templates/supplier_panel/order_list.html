@@ -1,4 +1,5 @@
-{% extends "supplier_panel/base.html" %}
+{% extends "supplier_panel/base.html" %}{% load fa_tags %}
+
 {% block title %}سفارشات من | ریهان{% endblock %}
 
 {% block content %}
@@ -22,7 +23,7 @@
                 <tr>
                     <td>{{ order.order_number }}</td>
                     <td>{{ order.guest_name|default:order.user.username }}</td>
-                    <td>{{ order.created_at|date:"Y/m/d" }}</td>
+                    <td>{{ order.created_at|jdate }}</td>
                     <td>
                         {% if order.status == 'PAID' %}
                             <span class="badge bg-info">پرداخت شده</span>

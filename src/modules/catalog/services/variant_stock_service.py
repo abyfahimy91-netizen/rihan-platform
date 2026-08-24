@@ -118,3 +118,22 @@ class VariantStockService:
             )
 
         return released
+
+    @classmethod
+    @transaction.atomic
+    def return_stock(cls, order_items, user=None, order_id=None, reason=""):
+        """بازگشت کالای مرجوع‌شده به موجودی واریانت (پس از تایید ادمین)"""
+        from src.modules.catalog.models import ProductVariant
+
+        restored = []
+        for item in order_items:
+            variant = ProductVariant.objects.select_for_update().get(pk=item["variant"].pk)
+            quantity = int(item["quantity"])
+            variant.stock_quantity = max(0, int(variant.stock_quantity)) + quantity
+            variant.save(update_fields=["stock_quantity"])
+            restored.append(variant)
+            logger.info(
+                f"Variant stock returned: {variant} x{quantity} "
+                f"(order {order_id}, reason: {reason})"
+            )
+        return restored

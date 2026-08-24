@@ -56,3 +56,15 @@ class InventoryService:
             out += _InvSvc.release_reservation(
                 order_items=simple, user=user, order_id=order_id, reason=reason) or []
         return out
+
+    @classmethod
+    def return_stock(cls, order_items, user=None, order_id=None, reason=""):
+        simple, varr = _split(order_items)
+        out = []
+        if varr:
+            out += VariantStockService.return_stock(
+                order_items=varr, user=user, order_id=order_id, reason=reason)
+        if simple:
+            out += _InvSvc.return_stock(
+                order_items=simple, user=user, order_id=order_id, reason=reason) or []
+        return out

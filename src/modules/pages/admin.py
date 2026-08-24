@@ -3,6 +3,8 @@ from django.contrib import admin
 
 from .models import SiteSettings
 
+from src.core.fa import jalali_datetime_str
+
 
 @admin.register(SiteSettings)
 class SiteSettingsAdmin(admin.ModelAdmin):
@@ -34,7 +36,11 @@ class SiteSettingsAdmin(admin.ModelAdmin):
         }),
     )
 
-    list_display = ('site_name', 'updated_at')
+    list_display = ('site_name', 'updated_at_fa')
+
+    def updated_at_fa(self, obj):
+        return jalali_datetime_str(obj.updated_at)
+    updated_at_fa.short_description = 'آخرین بروزرسانی'
 
     def has_add_permission(self, request):
         # فقط وقتی هیچ رکوردی نیست اجازه ساخت بده

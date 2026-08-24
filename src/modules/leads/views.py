@@ -68,7 +68,8 @@ def lead_form_page(request, product_slug=None):
     )
     
     # Success response
-    success_message = 'ثبت شد. اطلاع می‌دهیم.'
+    success_message = ('درخواست شما با موفقیت ثبت شد؛ به‌محض موجود شدن این محصول، '
+                       'به شما اطلاع خواهیم داد. سپاس از صبر و همراهی شما.')
     
     if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
         return JsonResponse({

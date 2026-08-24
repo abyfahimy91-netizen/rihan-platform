@@ -21,12 +21,12 @@ class LinkBlock(BaseBlock):
 
     def validate(self) -> bool:
         if 'url' not in self.data or not self.data['url']:
-            raise BlockValidationError("Link block requires 'url' field")
+            raise BlockValidationError("بلوک پیوند به فیلد نشانی نیاز دارد")
         if 'text' not in self.data or not self.data['text']:
-            raise BlockValidationError("Link block requires 'text' field")
+            raise BlockValidationError("بلوک پیوند به فیلد متن نیاز دارد")
         target = self.data.get('target', '_self')
         if target not in self.VALID_TARGETS:
-            raise BlockValidationError(f"Invalid target: {target}")
+            raise BlockValidationError(f"مقدار هدف پیوند نامعتبر است: {target}")
         return True
 
     def get_schema(self) -> dict:

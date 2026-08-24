@@ -17,7 +17,7 @@ class TextBlock(BaseBlock):
 
     def validate(self) -> bool:
         if 'content' not in self.data or not self.data['content']:
-            raise BlockValidationError("Text block requires 'content' field")
+            raise BlockValidationError("بلوک متن به فیلد محتوا نیاز دارد")
         return True
 
     def get_schema(self) -> dict:

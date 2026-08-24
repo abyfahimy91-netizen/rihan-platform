@@ -19,9 +19,9 @@ class CTABlock(BaseBlock):
 
     def validate(self) -> bool:
         if 'text' not in self.data or not self.data['text']:
-            raise BlockValidationError("CTA block requires 'text' field")
+            raise BlockValidationError("بلوک فراخوان به فیلد متن نیاز دارد")
         if 'action' not in self.data or not self.data['action']:
-            raise BlockValidationError("CTA block requires 'action' field")
+            raise BlockValidationError("بلوک فراخوان به فیلد اقدام نیاز دارد")
         return True
 
     def get_schema(self) -> dict:

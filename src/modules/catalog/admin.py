@@ -13,6 +13,8 @@ from .models import (
     Inventory, InventoryTransaction, ContentBlock, ProductVariant,
 )
 
+from src.core.fa import money as fa_money, fa_digits as fa_dg
+
 
 class ProductForm(forms.ModelForm):
     """فرم محصول — فیلدهای JSON خالی را به مقدار پیش‌فرض صحیح تبدیل می‌کند"""
@@ -41,12 +43,12 @@ def jalali(dt, fmt='%Y/%m/%d'):
     """تبدیل تاریخ به شمسی برای نمایش در لیست‌ها"""
     if not dt:
         return '-'
-    return jdatetime.datetime.fromgregorian(datetime=dt).strftime(fmt)
+    return fa_dg(jdatetime.datetime.fromgregorian(datetime=dt).strftime(fmt))
 
 
 def toman(value):
     try:
-        num = f'{float(value):,.0f}'
+        num = fa_money(value)
     except (TypeError, ValueError):
         num = '۰'
     return format_html('<strong>{}</strong> <span style="color:#888;">تومان</span>', num)
@@ -276,7 +278,7 @@ class ProductAdmin(admin.ModelAdmin):
             return format_html('<span style="color:#dc3545;">بدون موجودی!</span>')
         avail = inv.available_quantity
         unit = inv.unit or obj.unit or ''
-        num = f'{float(avail):,.0f}'
+        num = fa_money(avail)
         if avail <= 0:
             return format_html('<span style="background:#dc3545;color:#fff;padding:3px 10px;'
                                'border-radius:10px;font-size:12px;">ناموجود</span>')
@@ -429,16 +431,16 @@ class InventoryAdmin(admin.ModelAdmin):
     product_link.short_description = 'محصول'
 
     def reserved(self, obj):
-        return f'{obj.reserved_quantity:,.0f}'
+        return fa_money(obj.reserved_quantity)
     reserved.short_description = 'رزرو شده'
 
     def available_display(self, obj):
-        return f'{obj.available_quantity:,.0f}'
+        return fa_money(obj.available_quantity)
     available_display.short_description = 'قابل فروش'
     available_display.admin_order_field = 'quantity'
 
     def threshold(self, obj):
-        return f'{obj.low_stock_threshold:,.0f}'
+        return fa_money(obj.low_stock_threshold)
     threshold.short_description = 'حد هشدار'
 
     def state_badge(self, obj):

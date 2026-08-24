@@ -69,7 +69,7 @@ class CheckoutService:
         from django.core.exceptions import ValidationError
         
         if not cart.items.exists():
-            raise ValidationError("Cart is empty")
+            raise ValidationError("سبد خرید شما خالی است؛ ابتدا محصولی به سبد اضافه بفرمایید.")
         
         # Step 1: Prepare order items data for reservation
         order_items_data = []

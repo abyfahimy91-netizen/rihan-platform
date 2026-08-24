@@ -9,6 +9,7 @@ from django.views.decorators.http import require_GET, require_POST
 
 from .services import get_or_create_cart, add_to_cart, update_cart_item, remove_from_cart
 from src.modules.catalog.models import Product
+from src.modules.catalog.services.exceptions import InsufficientStockError
 
 
 @require_GET
@@ -48,9 +49,9 @@ def add_to_cart_view(request):
     except Product.DoesNotExist:
         messages.error(request, 'محصول مورد نظر یافت نشد.')
     except ValidationError as e:
-        messages.error(request, f'خطا در افزودن: {e}')
-    except Exception as e:
-        messages.error(request, f'خطای غیرمنتظره: {e}')
+        messages.error(request, e.messages[0] if getattr(e, 'messages', None) else str(e))
+    except Exception:
+        messages.error(request, 'متأسفانه در افزودن به سبد خرید خطایی رخ داد. لطفاً دوباره تلاش بفرمایید.')
     
     return redirect('order_pages:cart_page')
 
@@ -64,9 +65,11 @@ def update_cart_item_view(request):
     try:
         cart = get_or_create_cart(request)
         update_cart_item(cart, item_id, quantity)
-        messages.success(request, 'سبد خرید به‌روز شد.')
-    except Exception as e:
-        messages.error(request, f'خطا: {e}')
+        messages.success(request, 'سبد خرید شما با موفقیت به‌روزرسانی شد.')
+    except ValidationError as e:
+        messages.error(request, e.messages[0] if getattr(e, 'messages', None) else str(e))
+    except Exception:
+        messages.error(request, 'متأسفانه در به‌روزرسانی سبد خطایی رخ داد. لطفاً دوباره تلاش بفرمایید.')
     
     return redirect('order_pages:cart_page')
 
@@ -79,9 +82,9 @@ def remove_from_cart_view(request):
     try:
         cart = get_or_create_cart(request)
         remove_from_cart(cart, item_id)
-        messages.success(request, 'آیتم از سبد حذف شد.')
-    except Exception as e:
-        messages.error(request, f'خطا: {e}')
+        messages.success(request, 'محصول مورد نظر با موفقیت از سبد خرید شما حذف شد.')
+    except Exception:
+        messages.error(request, 'متأسفانه در حذف این آیتم خطایی رخ داد. لطفاً دوباره تلاش بفرمایید.')
     
     return redirect('order_pages:cart_page')
 
@@ -142,7 +145,9 @@ def checkout_page_view(request):
             request.session['tracking_order_id'] = str(order.id)
             return redirect('order_pages:payment_page', order_number=order.order_number)
         except ValidationError as e:
-            messages.error(request, f'خطا در ثبت سفارش: {e}')
+            messages.error(request, e.messages[0] if getattr(e, 'messages', None) else str(e))
+        except InsufficientStockError as e:
+            messages.error(request, str(e))
         except Exception:
             import logging
             logging.getLogger(__name__).exception("checkout failed")

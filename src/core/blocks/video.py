@@ -29,7 +29,7 @@ class VideoBlock(BaseBlock):
 
     def validate(self) -> bool:
         if not self.data.get('video_url') and not self.data.get('video_file'):
-            raise BlockValidationError("Video block requires 'video_url' or 'video_file'")
+            raise BlockValidationError("بلوک ویدیو به نشانی یا فایل ویدیو نیاز دارد")
         return True
 
     def get_schema(self) -> dict:

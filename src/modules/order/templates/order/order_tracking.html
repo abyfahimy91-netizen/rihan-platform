@@ -1,4 +1,5 @@
-{% extends "catalog/base.html" %}
+{% extends "catalog/base.html" %}{% load fa_tags %}
+
 
 {% block title %}پیگیری سفارش {{ order.order_number }} | ریهان{% endblock %}
 
@@ -282,7 +283,7 @@
         <h1 class="order-number">سفارش {{ order.order_number }}</h1>
         <span class="order-status status-{{ order.status }}">{{ order.get_status_display }}</span>
         <p style="color:var(--color-text-muted); margin-top:15px; font-size:14px;">
-            تاریخ ثبت: {{ order.created_at|date:"Y/m/d H:i" }}
+            تاریخ ثبت: {{ order.created_at|jtime }}
         </p>
         
         {% if order.tracking_code %}
@@ -311,7 +312,7 @@
                 {% if event.tracking_code %}
                 <span class="timeline-tracking">کد رهگیری: {{ event.tracking_code }}</span>
                 {% endif %}
-                <div class="timeline-date">{{ event.created_at|date:"Y/m/d H:i" }}</div>
+                <div class="timeline-date">{{ event.created_at|jtime }}</div>
             </div>
         </div>
         {% empty %}
@@ -332,9 +333,9 @@
             <div class="order-item">
                 <div>
                     <div class="order-item-name">{{ item.product_name_snapshot }}{% if item.variant_title %} <small>({{ item.variant_title }})</small>{% endif %}</div>
-                    <div class="order-item-qty">تعداد: {{ item.quantity }}</div>
+                    <div class="order-item-qty">تعداد: {{ item.quantity|fa }}</div>
                 </div>
-                <div class="order-item-price">{{ item.subtotal|floatformat:0 }} تومان</div>
+                <div class="order-item-price">{{ item.subtotal|money }} تومان</div>
             </div>
             {% empty %}
             <p style="color:var(--color-text-muted); padding:20px 0;">هیچ کالایی در این سفارش نیست</p>
@@ -343,7 +344,7 @@
         
         <div class="order-total">
             <span>مبلغ نهایی <span class="shipping-badge">🚚 ارسال رایگان</span></span>
-            <span class="order-total-value">{{ order.total_price|floatformat:0 }} تومان</span>
+            <span class="order-total-value">{{ order.total_price|money }} تومان</span>
         </div>
     </div>
     

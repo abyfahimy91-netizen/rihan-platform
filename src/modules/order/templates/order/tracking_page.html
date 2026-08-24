@@ -1,4 +1,5 @@
-{% extends "catalog/base.html" %}
+{% extends "catalog/base.html" %}{% load fa_tags %}
+
 
 {% block title %}پیگیری سفارش {{ order.order_number }} | ریهان{% endblock %}
 
@@ -24,8 +25,8 @@
         <h2 style="margin-bottom: 15px;">اطلاعات سفارش</h2>
         <div style="background: var(--color-bg); padding: 20px; border-radius: 8px;">
             <p><strong>وضعیت فعلی:</strong> {{ order.get_status_display }}</p>
-            <p><strong>تاریخ ثبت:</strong> {{ order.created_at|date:"Y/m/d H:i" }}</p>
-            <p><strong>مبلغ کل:</strong> {{ order.total_price|floatformat:0 }} تومان</p>
+            <p><strong>تاریخ ثبت:</strong> {{ order.created_at|jtime }}</p>
+            <p><strong>مبلغ کل:</strong> {{ order.total_price|money }} تومان</p>
         </div>
     </div>
     
@@ -35,7 +36,7 @@
         {% for item in history %}
         <div style="border-right: 3px solid var(--color-primary); padding-right: 15px; margin-bottom: 15px;">
             <strong>{{ item.get_status_display }}</strong>
-            <div style="color: var(--color-text-muted); font-size: 14px;">{{ item.created_at|date:"Y/m/d H:i" }}</div>
+            <div style="color: var(--color-text-muted); font-size: 14px;">{{ item.created_at|jtime }}</div>
             {% if item.description %}<p style="margin-top: 5px;">{{ item.description }}</p>{% endif %}
         </div>
         {% endfor %}

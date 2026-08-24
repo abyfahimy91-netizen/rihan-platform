@@ -26,7 +26,7 @@ class ImageBlock(BaseBlock):
 
     def validate(self) -> bool:
         if 'image' not in self.data or not self.data['image']:
-            raise BlockValidationError("Image block requires 'image' field")
+            raise BlockValidationError("بلوک تصویر به فیلد عکس نیاز دارد")
         return True
 
     def get_schema(self) -> dict:

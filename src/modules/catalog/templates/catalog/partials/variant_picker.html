@@ -1,3 +1,4 @@
+{% load fa_tags %}
 {% comment %} انتخاب واریانت محصول (بسته وزنی/سایز/رنگ) — D-094 {% endcomment %}
 <div class="variant-picker" id="variant-picker">
     <div class="variant-picker-label">انتخاب کنید:</div>
@@ -14,7 +15,7 @@
                     aria-checked="false" role="radio">
                 {% if v.color_hex %}<span class="variant-dot" style="background: {{ v.color_hex }};" aria-hidden="true"></span>{% endif %}
                 <span class="variant-chip-title">{{ v.title }}</span>
-                <span class="variant-chip-price">{{ v.price|floatformat:0 }} تومان</span>
+                <span class="variant-chip-price">{{ v.price|money }} تومان</span>
             </button>
             {% endif %}
         {% endfor %}

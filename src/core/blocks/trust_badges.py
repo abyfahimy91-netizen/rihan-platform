@@ -36,7 +36,7 @@ class TrustBadgesBlock(BaseBlock):
     def validate(self) -> bool:
         badges = self.data.get('badges', self.DEFAULT_BADGES)
         if not isinstance(badges, list):
-            raise BlockValidationError("Trust badges must be a list")
+            raise BlockValidationError("نشان‌های اعتماد باید به‌صورت فهرست باشند")
         return True
 
     def get_schema(self) -> dict:

@@ -28,10 +28,10 @@ class GalleryBlock(BaseBlock):
     def validate(self) -> bool:
         images = self.data.get('images', [])
         if not images or not isinstance(images, list):
-            raise BlockValidationError("Gallery block requires 'images' list")
+            raise BlockValidationError("بلوک گالری به فهرست تصاویر نیاز دارد")
         columns = self.data.get('columns', 3)
         if columns not in self.VALID_COLUMNS:
-            raise BlockValidationError(f"Invalid columns: {columns}")
+            raise BlockValidationError(f"تعداد ستون‌ها نامعتبر است: {columns}")
         return True
 
     def get_schema(self) -> dict:

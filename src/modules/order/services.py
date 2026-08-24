@@ -17,6 +17,7 @@ from src.modules.catalog.services.exceptions import (
     ProductNotFoundError,
 )
 from .models import Cart, CartItem, Order, OrderItem
+from src.core.fa import fa_digits
 
 
 def get_or_create_cart(request):
@@ -54,15 +55,15 @@ def add_to_cart(cart, product_id, quantity=1, variant_id=None):
     try:
         product = Product.objects.get(id=product_id)
     except Product.DoesNotExist:
-        raise ValidationError("Product not found")
+        raise ValidationError("محصول مورد نظر پیدا نشد؛ لطفاً صفحه را تازه‌سازی بفرمایید.")
     if quantity < 1:
-        raise ValidationError("Quantity must be at least 1")
+        raise ValidationError("تعداد واردشده باید حداقل ۱ باشد.")
     variant = None
     if variant_id:
         try:
             variant = ProductVariant.objects.get(id=variant_id, product=product, is_active=True)
         except ProductVariant.DoesNotExist:
-            raise ValidationError("Variant not found")
+            raise ValidationError("گزینه انتخابی این محصول معتبر نیست؛ لطفاً دوباره انتخاب بفرمایید.")
         unit_price = variant.price
         available = VariantStockService.get_available_stock(variant)
     elif product.variants.filter(is_active=True).exists():
@@ -76,7 +77,10 @@ def add_to_cart(cart, product_id, quantity=1, variant_id=None):
     existing_item = CartItem.objects.filter(cart=cart, product=product, variant=variant).first()
     new_quantity = (existing_item.quantity + quantity) if existing_item else quantity
     if available < new_quantity:
-        raise ValidationError("Insufficient stock. Maximum available: " + str(available))
+        raise ValidationError(
+            "موجودی کافی نیست؛ حداکثر مقدار قابل سفارش برای این محصول {} عدد است. "
+            "لطفاً تعداد را تعدیل بفرمایید.".format(fa_digits(available))
+        )
     if existing_item:
         existing_item.quantity = new_quantity
         existing_item.unit_price_at_add = unit_price
@@ -92,7 +96,7 @@ def update_cart_item(cart, item_id, quantity):
     try:
         item = CartItem.objects.get(id=item_id, cart=cart)
     except CartItem.DoesNotExist:
-        raise ValidationError("Item not found in cart")
+        raise ValidationError("این آیتم در سبد خرید شما پیدا نشد؛ شاید همزمان حذف شده باشد.")
     
     if quantity < 1:
         item.delete()
@@ -103,7 +107,8 @@ def update_cart_item(cart, item_id, quantity):
                  else InventoryService.get_available_stock(item.product))
     if available < quantity:
         raise ValidationError(
-            f"Insufficient stock. Maximum available: {available}"
+            "موجودی کافی نیست؛ حداکثر مقدار قابل سفارش برای این محصول {} عدد است. "
+            "لطفاً تعداد را تعدیل بفرمایید.".format(fa_digits(available))
         )
     
     item.quantity = quantity
