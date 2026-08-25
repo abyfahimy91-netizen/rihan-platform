@@ -227,7 +227,17 @@ def _calculate_average_rating(product):
 
 
 def _get_reviewer_name(review):
-    """Get reviewer display name (privacy-safe)."""
+    """Get reviewer display name (privacy-safe) — D-104: پیش‌فرض ناشناس محرمانه"""
+    if getattr(review, 'display_anonymously', True):
+        # نمایش محرمانه: حرف اول نام‌ها یا برچسب خریدار تأییدشده
+        if review.user and (review.user.first_name or review.user.last_name):
+            parts = []
+            if review.user.first_name:
+                parts.append(review.user.first_name[0] + '.')
+            if review.user.last_name:
+                parts.append(review.user.last_name[0] + '.')
+            return ' '.join(parts)
+        return 'خریدار تأییدشده'
     if review.user:
         if review.user.first_name:
             # Show first name + last initial
@@ -245,3 +255,63 @@ def _get_reviewer_name(review):
             return name[:1] + '*' * (len(name) - 2) + name[-1]
         return name
     return 'مشتری'
+
+
+@require_http_methods(["POST"])
+def inline_submit(request, product_slug):
+    """فرم ثبت نظر ۲ ثانیه‌ای در صفحه محصول (D-104)
+
+    صفر اصطکاک: ستاره + متن + تیک ناشناس (پیش‌فرض روشن).
+    سفارش تحویل‌شده خودکار انتخاب می‌شود؛ نظر در صف تایید ادمین می‌رود.
+    """
+    if not request.user.is_authenticated:
+        # برای fetch باید 403 برگردد نه ریدایرکت لاگین
+        return JsonResponse({
+            'success': False,
+            'errors': ['برای ثبت نظر اول وارد حساب شوید.'],
+        }, status=403)
+
+    product = get_object_or_404(Product, slug=product_slug, status='active')
+
+    available_orders = [
+        o for o in Order.objects.filter(
+            user=request.user,
+            status=Order.OrderStatus.DELIVERED,
+            items__product=product,
+        ).distinct().order_by('created_at')
+        if not Review.objects.filter(order=o).exists()
+    ]
+    if not available_orders:
+        return JsonResponse({
+            'success': False,
+            'errors': ['ثبت نظر فقط برای خریدارانِ با سفارش تحویل‌شده امکان‌پذیر است. 🌿'],
+        }, status=403)
+
+    rating = request.POST.get('rating', '')
+    text = (request.POST.get('text') or '').strip()
+    anonymous = request.POST.get('anonymous') == 'on'
+
+    errors = []
+    if not rating or not rating.isdigit() or int(rating) < 1 or int(rating) > 5:
+        errors.append('لطفاً امتیاز ستاره‌ای را انتخاب کنید.')
+    if not text:
+        errors.append('لطفاً متن نظر را بنویسید.')
+    elif len(text) > 500:
+        errors.append('متن نظر حداکثر ۵۰۰ کاراکتر است.')
+
+    if errors:
+        return JsonResponse({'success': False, 'errors': errors}, status=400)
+
+    Review.objects.create(
+        product=product,
+        order=available_orders[0],
+        user=request.user,
+        rating=int(rating),
+        title='',
+        text=text[:500],
+        display_anonymously=anonymous,
+    )
+    return JsonResponse({
+        'success': True,
+        'message': 'نظر شما ثبت شد و پس از تأیید همکاران ما نمایش داده می‌شود. 🌿',
+    })

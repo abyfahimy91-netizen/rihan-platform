@@ -48,6 +48,9 @@ def add_to_cart_view(request):
         product = Product.objects.get(slug=product_slug)
         cart = get_or_create_cart(request)
         add_to_cart(cart, str(product.id), quantity, variant_id)
+        # D-104: خرید سریع — مستقیم به تسویه‌حساب
+        if request.POST.get('fast_buy'):
+            return redirect('order_pages:checkout_page')
         messages.success(request, f'{product.name} به سبد خرید اضافه شد.')
     except Product.DoesNotExist:
         messages.error(request, 'محصول مورد نظر یافت نشد.')

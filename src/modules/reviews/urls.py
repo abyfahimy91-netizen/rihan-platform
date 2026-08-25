@@ -27,4 +27,11 @@ urlpatterns = [
         views.product_reviews_api,
         name='product_reviews_api'
     ),
+
+    # فرم ۲ ثانیه‌ای ثبت نظر در صفحه محصول (D-104)
+    path(
+        'inline/<str:product_slug>/',
+        views.inline_submit,
+        name='inline_submit'
+    ),
 ]

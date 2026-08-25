@@ -54,6 +54,12 @@ class Review(models.Model):
         max_length=100, blank=True,
         verbose_name="Guest name"
     )
+    # D-104: حریم خصوصی — پیش‌فرض نمایش ناشناس نظر
+    display_anonymously = models.BooleanField(
+        default=True,
+        verbose_name="نمایش ناشناس نام نظردهنده",
+        help_text="اگر روشن باشد، نام کاربر به‌صورت محرمانه (مثلاً «م. ح.» یا «خریدار تأییدشده») نمایش داده می‌شود.",
+    )
     guest_phone = models.CharField(
         max_length=20, blank=True,
         verbose_name="Guest phone (for token verification)"

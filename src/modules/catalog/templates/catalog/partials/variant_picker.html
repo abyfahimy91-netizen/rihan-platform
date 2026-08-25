@@ -22,16 +22,28 @@
     </div>
 
     <div class="variant-buybox">
+        <form method="post" action="{% url 'order_pages:add_to_cart_page' %}" style="flex:1;">
+            {% csrf_token %}
+            <input type="hidden" name="product_slug" value="{{ product.slug }}">
+            <input type="hidden" name="quantity" value="1">
+            <input type="hidden" name="variant_id" id="variant-input" value="">
+            <input type="hidden" name="fast_buy" value="1">
+            <button type="submit" class="btn-add-cart btn-fast-buy" id="variant-add-btn" disabled>
+                🛒 خرید سریع — ثبت سفارش در ۳۰ ثانیه
+            </button>
+        </form>
         <form method="post" action="{% url 'order_pages:add_to_cart_page' %}">
             {% csrf_token %}
             <input type="hidden" name="product_slug" value="{{ product.slug }}">
             <input type="hidden" name="quantity" value="1">
             <input type="hidden" name="variant_id" id="variant-input" value="">
-            <button type="submit" class="btn-add-cart" id="variant-add-btn" disabled>
-                🛒 افزودن به سبد خرید
-            </button>
+            <button type="submit" class="btn-view-cart">افزودن به سبد</button>
         </form>
-        <a href="{% url 'order_pages:cart_page' %}" class="btn-view-cart">مشاهده سبد</a>
+    </div>
+    <div class="buy-commitments">
+        <span>✅ ۷ روز ضمانت بازگشت وجه</span>
+        <span>📦 ارسال ایمن و بیمه‌شده</span>
+        <span>🎁 بسته‌بندی محرمانه و تضمین سلامت</span>
     </div>
     <div class="variant-stock-note" id="variant-stock-note"></div>
     <div class="product-meta" style="margin-top: 14px;">

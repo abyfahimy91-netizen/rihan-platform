@@ -1,4 +1,4 @@
-{% extends "catalog/base.html" %}{% load fa_tags %}
+{% extends "catalog/base.html" %}{% load fa_tags %}{% load sales_tags %}
 
 
 {% block title %}{{ seo_title }} | ریهان{% endblock %}
@@ -9,8 +9,200 @@
 {% block og_description %}{{ seo_description }}{% endblock %}
 {% block og_type %}product{% endblock %}
 
+{% block extra_head %}
+<!-- ─── داده ساختاریافته برای گوگل و هوش‌های مصنوعی (D-104) ─── -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Product",
+  "name": "{{ product.name|escapejs }}",
+  {% if product.main_image_url %}"image": ["{{ request.scheme }}://{{ request.get_host }}{{ product.main_image_url }}"],{% endif %}
+  "description": "{{ product.short_description|escapejs }}",
+  "sku": "{{ product.slug|escapejs }}",
+  "brand": {"@type": "Brand", "name": "{{ site_settings.site_name|default:'ریهان'|escapejs }}"},
+  "offers": {
+    "@type": "Offer",
+    "url": "{{ request.scheme }}://{{ request.get_host }}{{ request.get_full_path }}",
+    "priceCurrency": "IRR",
+    "price": "{% widthratio product.final_price 1 10 %}",
+    "availability": "{% if product.inventory and product.inventory.available_quantity > 0 %}https://schema.org/InStock{% else %}https://schema.org/OutOfStock{% endif %}"
+  }{% if review_count %},
+  "aggregateRating": {
+    "@type": "AggregateRating",
+    "ratingValue": "{{ avg_rating }}",
+    "reviewCount": {{ review_count }}
+  }{% endif %}
+}
+</script>
+{% if faqs %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {% for f in faqs %}
+    {
+      "@type": "Question",
+      "name": "{{ f.question|escapejs }}",
+      "acceptedAnswer": {"@type": "Answer", "text": "{{ f.answer|escapejs }}"}
+    }{% if not forloop.last %},{% endif %}
+    {% endfor %}
+  ]
+}
+</script>
+{% endif %}
+{% endblock %}
+
 {% block extra_css %}
 <style>
+    /* ═══════════ صفحه فروش اقناعی — D-104 ═══════════ */
+    .result-headline {
+        display: inline-flex; align-items: center; gap: 8px;
+        background: linear-gradient(135deg, #F4F8F2, #EAF3EE);
+        border: 1px solid #CFE3CC; color: var(--color-primary);
+        font-size: 15px; font-weight: 800; line-height: 1.8;
+        padding: 9px 16px; border-radius: 12px; margin-bottom: 14px;
+    }
+    .rating-summary-row { display: flex; align-items: center; gap: 8px; margin: 4px 0 14px; font-size: 13.5px; }
+    .rating-summary-row b { color: var(--color-text); }
+    .rating-summary-row .muted { color: var(--color-text-muted); }
+    .stars-wrap { position: relative; display: inline-block; font-size: 17px; line-height: 1; letter-spacing: 2px; }
+    .stars-bg { color: #E3DFD5; }
+    .stars-fill { position: absolute; top: 0; right: 0; overflow: hidden; white-space: nowrap; color: #E8B931; }
+    .discount-badge { background: #B3402F; color: #fff; border-radius: 999px; padding: 2px 10px; font-size: 12px; margin: 0 4px; }
+    .product-price-row { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+    .price-old { color: var(--color-text-muted); text-decoration: line-through; font-size: 16px; opacity: .75; }
+    .buy-commitments {
+        display: flex; gap: 14px; flex-wrap: wrap; margin-top: 16px;
+        font-size: 12.5px; font-weight: 700; color: var(--color-success);
+    }
+    .btn-fast-buy { font-size: 17px; padding: 16px 22px; }
+
+    /* بخش ۲: فیلتر مخاطب */
+    .audience-filter { max-width: 1100px; margin: 34px auto 0; padding: 0 20px; }
+    .audience-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .audience-col { border-radius: 16px; padding: 20px 22px; border: 1.5px solid; }
+    .audience-yes { background: #F2F8EF; border-color: #CFE3CC; }
+    .audience-no { background: #FBF1EF; border-color: #EBCFC9; }
+    .audience-col h3 { font-size: 15.5px; font-weight: 800; margin-bottom: 10px; }
+    .audience-yes h3 { color: #2D6A4F; }
+    .audience-no h3 { color: #9B2C2C; }
+    .audience-body .pm-list, .audience-body .pm-p { font-size: 13.5px; line-height: 2; color: var(--color-text); }
+    .audience-body ul { padding-right: 20px; margin: 0; }
+
+    /* تیترهای بخش‌ها */
+    .sec-title { font-size: 21px; font-weight: 900; color: var(--color-text); margin-bottom: 6px; }
+    .sec-sub { color: var(--color-text-muted); font-size: 13.5px; margin-bottom: 18px; }
+    .curation-section, .share-hub, .reviews-section, .pfaq-section, .deepdive-section {
+        max-width: 900px; margin: 44px auto 0; padding: 0 20px;
+    }
+    .curation-body, .deepdive-body {
+        background: #fff; border: 1px solid var(--color-border); border-radius: 16px;
+        padding: 24px 26px; line-height: 2.1; font-size: 14.5px; color: var(--color-text);
+    }
+    .curation-body .pm-heading, .deepdive-body .pm-heading { font-size: 17px; font-weight: 800; margin: 22px 0 10px; color: var(--color-primary); }
+    .curation-body .pm-list, .deepdive-body .pm-list { padding-right: 22px; margin-bottom: 12px; }
+    .curation-body .pm-quote, .deepdive-body .pm-quote {
+        border-right: 4px solid var(--color-secondary); background: #FBF7EC;
+        padding: 14px 18px; border-radius: 10px; margin: 16px 0; color: var(--color-text-muted);
+    }
+
+    /* بخش ۴: هاب اشتراک */
+    .share-hub {
+        background: linear-gradient(135deg, #F4F8F2, #FBF7EC);
+        border: 1px solid #E3E0D5; border-radius: 18px; padding: 26px 24px;
+    }
+    .share-title { font-size: 19px; font-weight: 900; margin-bottom: 4px; }
+    .share-sub { font-size: 13px; color: var(--color-text-muted); margin-bottom: 14px; }
+    .share-counter {
+        display: inline-block; background: #fff; border: 1px dashed var(--color-secondary);
+        border-radius: 999px; padding: 7px 18px; font-size: 13.5px; margin-bottom: 16px;
+    }
+    .share-counter.bump { animation: shareBump .5s ease; }
+    @keyframes shareBump { 0% { transform: scale(1); } 40% { transform: scale(1.12); } 100% { transform: scale(1); } }
+    .share-counter b { color: var(--color-primary); }
+    .share-buttons { display: flex; gap: 10px; flex-wrap: wrap; }
+    .share-btn {
+        display: inline-flex; align-items: center; gap: 7px; cursor: pointer;
+        border: 1.5px solid var(--color-border); background: #fff; color: var(--color-text);
+        font-family: inherit; font-size: 13px; font-weight: 700;
+        padding: 10px 16px; border-radius: 12px; text-decoration: none; transition: all .18s;
+    }
+    .share-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(0,0,0,.08); border-color: var(--color-primary); }
+    .share-toast {
+        margin-top: 14px; background: var(--color-primary); color: #fff;
+        border-radius: 12px; padding: 12px 18px; font-size: 13.5px; font-weight: 700;
+    }
+
+    /* بخش ۵: نظرات */
+    .reviews-list { display: flex; flex-direction: column; gap: 12px; margin-bottom: 22px; }
+    .review-card { background: #fff; border: 1px solid var(--color-border); border-radius: 14px; padding: 16px 20px; }
+    .review-head { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 8px; }
+    .review-stars { color: #E8B931; font-size: 15px; letter-spacing: 2px; }
+    .review-who { font-size: 13px; font-weight: 800; color: var(--color-primary); background: #F2F8EF; border-radius: 999px; padding: 3px 12px; }
+    .review-date { font-size: 12px; color: var(--color-text-muted); margin-right: auto; }
+    .review-text { font-size: 14px; line-height: 2; color: var(--color-text); margin: 0; }
+    .review-reply { margin-top: 10px; background: #FBF7EC; border-radius: 10px; padding: 10px 14px; font-size: 13px; }
+    .reviews-empty { color: var(--color-text-muted); font-size: 14px; }
+    .review-form-box { background: #fff; border: 1.5px solid var(--color-border); border-radius: 16px; padding: 20px 22px; }
+    .review-form-box h3 { font-size: 15.5px; font-weight: 800; margin-bottom: 12px; }
+    .rf-stars { display: flex; flex-direction: row-reverse; gap: 4px; margin-bottom: 12px; }
+    .rf-star input { display: none; }
+    .rf-star span { font-size: 30px; color: #E3DFD5; cursor: pointer; transition: color .15s; }
+    .rf-star.on span, .rf-star input:checked + span { color: #E8B931; }
+    .rf-star:hover span, .rf-star:hover ~ .rf-star span { color: #E8B931; }
+    #rfText {
+        width: 100%; border: 1.5px solid var(--color-border); border-radius: 12px;
+        padding: 12px 14px; font-family: inherit; font-size: 14px; resize: vertical;
+    }
+    #rfText:focus { outline: none; border-color: var(--color-primary); }
+    .rf-anon { display: flex; align-items: center; gap: 8px; font-size: 12.5px; font-weight: 600; color: var(--color-text-muted); margin: 10px 0 14px; cursor: pointer; }
+    .rf-anon input { accent-color: var(--color-primary); width: 16px; height: 16px; }
+    .rf-submit {
+        background: linear-gradient(135deg, var(--color-primary), var(--color-primary-dark));
+        color: #fff; border: none; border-radius: 12px; padding: 12px 30px;
+        font-family: inherit; font-size: 14.5px; font-weight: 800; cursor: pointer;
+    }
+    .rf-msg { margin-top: 12px; border-radius: 10px; padding: 10px 14px; font-size: 13px; font-weight: 700; }
+    .rf-msg.ok { background: #EAF3EE; color: var(--color-success); }
+    .rf-msg.err { background: #F9ECEA; color: var(--color-error); }
+    .rf-hint { font-size: 11.5px; color: var(--color-text-muted); margin-top: 10px; }
+
+    /* بخش ۶: سوالات متداول محصول */
+    .pfaq-list { display: flex; flex-direction: column; gap: 10px; }
+    .pfaq-item { background: #fff; border: 1px solid var(--color-border); border-radius: 12px; overflow: hidden; }
+    .pfaq-item summary {
+        cursor: pointer; padding: 15px 18px; font-weight: 700; font-size: 14px;
+        list-style: none; display: flex; justify-content: space-between; align-items: center; gap: 10px;
+    }
+    .pfaq-item summary::-webkit-details-marker { display: none; }
+    .pfaq-item summary::after { content: '+'; color: var(--color-primary); font-size: 20px; }
+    .pfaq-item[open] summary::after { content: '−'; }
+    .pfaq-answer { padding: 0 18px 16px; font-size: 13.5px; line-height: 2; color: var(--color-text-muted); }
+
+    /* بخش ۸: نوار چسبان موبایل */
+    .sticky-buy-bar {
+        position: fixed; bottom: 0; left: 0; right: 0; z-index: 90;
+        background: #fff; border-top: 1px solid var(--color-border);
+        box-shadow: 0 -6px 24px rgba(0,0,0,.10);
+        display: none; justify-content: space-between; align-items: center; gap: 10px;
+        padding: 10px 16px calc(10px + env(safe-area-inset-bottom, 0px));
+        transform: translateY(110%); transition: transform .25s ease;
+    }
+    .sticky-buy-bar.show { transform: translateY(0); }
+    .sbb-info { display: flex; flex-direction: column; min-width: 0; }
+    .sbb-name { font-size: 12.5px; font-weight: 800; color: var(--color-text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .sbb-price { font-size: 14px; font-weight: 900; color: var(--color-primary); }
+    .sbb-btn {
+        background: linear-gradient(135deg, var(--color-primary), var(--color-primary-dark));
+        color: #fff; border: none; border-radius: 12px; padding: 12px 26px;
+        font-family: inherit; font-size: 14px; font-weight: 800; cursor: pointer; white-space: nowrap;
+    }
+    @media (max-width: 900px) {
+        .sticky-buy-bar.show { display: flex; }
+        .audience-grid { grid-template-columns: 1fr; }
+    }
+
     /* === BREADCRUMB === */
     .breadcrumb {
         padding: 20px 0;
@@ -719,16 +911,35 @@
     </div>
     
     <div class="product-info-section">
+        {% if product.result_headline %}
+        <div class="result-headline">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+            {{ product.result_headline }}
+        </div>
+        {% endif %}
         <h1 class="product-title">{{ product.name }}</h1>
         {% if product.short_description %}
         <p class="product-subtitle">{{ product.short_description }}</p>
         {% endif %}
-        
+
+        {% if review_count %}
+        <div class="rating-summary-row" aria-label="امتیاز خریداران">
+            <span class="stars-wrap" dir="ltr"><span class="stars-bg">★★★★★</span><span class="stars-fill" style="width:{% widthratio avg_rating 5 100 %}%;">★★★★★</span></span>
+            <b>{{ avg_rating|fa }}</b>
+            <span class="muted">از {{ review_count|fa }} نظر خریداران تأییدشده</span>
+        </div>
+        {% endif %}
+
         <div class="product-price-box">
-            <div class="product-price-label">قیمت</div>
-            <div class="product-price" id="product-price-display">
-                {{ product.final_price|money }}
-                <small>تومان</small>
+            <div class="product-price-label">قیمت{% if product.discount_percent %} با <b class="discount-badge">{{ product.discount_percent|fa }}٪ تخفیف</b>{% endif %}</div>
+            <div class="product-price-row">
+                {% if product.compare_at_price and product.discount_percent %}
+                <span class="price-old">{{ product.compare_at_price|money }}</span>
+                {% endif %}
+                <div class="product-price" id="product-price-display">
+                    {{ product.final_price|money }}
+                    <small>تومان</small>
+                </div>
             </div>
         </div>
         
@@ -741,18 +952,29 @@
                 <input type="hidden" name="product_slug" value="{{ product.slug }}">
                 <input type="hidden" name="quantity" value="1">
                 <input type="hidden" name="variant_id" id="variant-input-cta" value="">
-                <button type="submit" class="btn-add-cart">
+                <input type="hidden" name="fast_buy" value="1">
+                <button type="submit" class="btn-add-cart btn-fast-buy">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <circle cx="9" cy="21" r="1"></circle>
                         <circle cx="20" cy="21" r="1"></circle>
                         <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
                     </svg>
-                    افزودن به سبد خرید
+                    خرید سریع — ثبت سفارش در ۳۰ ثانیه
                 </button>
             </form>
-            <a href="{% url 'order_pages:cart_page' %}" class="btn-view-cart">
-                مشاهده سبد
-            </a>
+            <form method="post" action="{% url 'order_pages:add_to_cart_page' %}">
+                {% csrf_token %}
+                <input type="hidden" name="product_slug" value="{{ product.slug }}">
+                <input type="hidden" name="quantity" value="1">
+                <input type="hidden" name="variant_id" id="variant-input-cta" value="">
+                <button type="submit" class="btn-view-cart">افزودن به سبد</button>
+            </form>
+        </div>
+
+        <div class="buy-commitments">
+            <span>✅ ۷ روز ضمانت بازگشت وجه</span>
+            <span>📦 ارسال ایمن و بیمه‌شده</span>
+            <span>🎁 بسته‌بندی محرمانه و تضمین سلامت</span>
         </div>
         
         <div class="product-meta">
@@ -783,6 +1005,26 @@
         {% endif %}
     </div>
 </section>
+
+<!-- ═══ بخش ۲: فیلتر شفاف مخاطب (D-104) ═══ -->
+{% if product.fit_for or product.not_fit_for %}
+<section class="audience-filter">
+    <div class="audience-grid">
+        {% if product.fit_for %}
+        <div class="audience-col audience-yes">
+            <h3>✅ این کالا برای شماست اگر...</h3>
+            <div class="audience-body">{{ product.fit_for|render_markup }}</div>
+        </div>
+        {% endif %}
+        {% if product.not_fit_for %}
+        <div class="audience-col audience-no">
+            <h3>🚫 لطفاً این کالا را سفارش ندهید اگر...</h3>
+            <div class="audience-body">{{ product.not_fit_for|render_markup }}</div>
+        </div>
+        {% endif %}
+    </div>
+</section>
+{% endif %}
 
 <!-- TRUST BADGES (US-058) -->
 {% include "catalog/partials/trust_badges.html" %}
@@ -913,6 +1155,118 @@
 </section>
 {% endif %}
 
+<!-- ═══ بخش ۳: داستان گزینش و آزمون کیفیت (D-104) ═══ -->
+{% if product.curation_story %}
+<section class="curation-section" id="curation">
+    <h2 class="sec-title">🔍 چطور این را انتخاب کردیم؟</h2>
+    <div class="curation-body">{{ product.curation_story|render_markup }}</div>
+</section>
+{% endif %}
+
+<!-- ═══ بخش ۴: هاب اشتراک‌گذاری ویروسی (D-104) ═══ -->
+<section class="share-hub" id="shareHub">
+    <h2 class="share-title">این انتخاب خوب را با دیگران هم در میان بگذارید 🤝</h2>
+    <p class="share-sub">اگر فکر می‌کنید این کالا به درد آشنایی‌تان می‌خورد، با یک لمس برایش بفرستید.</p>
+    <div class="share-counter" id="shareCounter">
+        🔄 <b id="shareCountNum">{{ product.share_count|fa }}</b> بار به اشتراک گذاشته شده است
+    </div>
+    <div class="share-buttons" data-share-url="{{ request.build_absolute_uri }}" data-share-slug="{{ product.slug }}">
+        <button type="button" class="share-btn share-ig" data-channel="instagram" data-share-type="story">
+            <span class="sh-ic">📸</span> استوری اینستاگرام
+        </button>
+        <button type="button" class="share-btn share-tg" data-channel="telegram" data-share-type="link" data-href="https://t.me/share/url?url={URL}&text={TEXT}">
+            <span class="sh-ic">✈️</span> تلگرام
+        </button>
+        <button type="button" class="share-btn share-wa" data-channel="whatsapp" data-share-type="link" data-href="https://wa.me/?text={TEXT}%20{URL}">
+            <span class="sh-ic">💬</span> واتساپ
+        </button>
+        <button type="button" class="share-btn share-eitaa" data-channel="eitaa" data-share-type="link" data-href="https://eitaa.com/share/url?url={URL}&text={TEXT}">
+            <span class="sh-ic">🟠</span> ایتا
+        </button>
+        <button type="button" class="share-btn share-bale" data-channel="bale" data-share-type="copy">
+            <span class="sh-ic">🔵</span> بله
+        </button>
+        <a class="share-btn share-sms" data-channel="sms" data-share-type="none" href="#" onclick="return false;">
+            <span class="sh-ic">📩</span> پیامک
+        </a>
+        <button type="button" class="share-btn share-x" data-channel="x" data-share-type="link" data-href="https://twitter.com/intent/tweet?text={TEXT}&url={URL}">
+            <span class="sh-ic">𝕏</span> توییتر
+        </button>
+        <button type="button" class="share-btn share-more" data-channel="native" data-share-type="native">
+            <span class="sh-ic">🔗</span> بیشتر
+        </button>
+    </div>
+    <div class="share-toast" id="shareToast" hidden></div>
+</section>
+
+<!-- ═══ بخش ۵: نظرات محرمانه خریداران (D-104) ═══ -->
+<section class="reviews-section" id="reviews">
+    <h2 class="sec-title">نظر خریداران واقعی 🔒</h2>
+    <p class="sec-sub">هویت نظردهنده‌ها همیشه محرمانه می‌ماند — حتی از ما.</p>
+
+    {% if product_reviews %}
+    <div class="reviews-list">
+        {% for r in product_reviews %}
+        <article class="review-card">
+            <div class="review-head">
+                <span class="review-stars" dir="ltr" aria-label="{{ r.rating|fa }} از ۵">{% for i in "12345" %}{% if forloop.counter <= r.rating %}★{% else %}☆{% endif %}{% endfor %}</span>
+                <span class="review-who">
+                    {% if r.user and not r.display_anonymously and r.user.first_name %}{{ r.user.first_name }}{% else %}خریدار تأییدشده 🔒{% endif %}
+                </span>
+                <span class="review-date">{{ r.created_at|jdate_human }}</span>
+            </div>
+            <p class="review-text">{{ r.text }}</p>
+            {% if r.admin_reply %}<div class="review-reply"><b>پاسخ ریهان:</b> {{ r.admin_reply }}</div>{% endif %}
+        </article>
+        {% endfor %}
+    </div>
+    {% else %}
+    <p class="reviews-empty">هنوز نظری ثبت نشده — اولین نفری باشید که تجربه‌اش را می‌نویسد.</p>
+    {% endif %}
+
+    <div class="review-form-box" id="reviewFormBox"
+         data-inline-url="{% url 'reviews:inline_submit' product.slug %}"
+         data-login-url="{% url 'auth_pages:login' %}">
+        <h3>ثبت نظر در ۲ ثانیه ✍️</h3>
+        <div class="rf-stars" role="radiogroup" aria-label="امتیاز شما">
+            {% for i in "54321" %}
+            <label class="rf-star" title="{{ i }} ستاره">
+                <input type="radio" name="rf_rating" value="{{ i }}" {% if forloop.last %}checked{% endif %}>
+                <span>★</span>
+            </label>
+            {% endfor %}
+        </div>
+        <textarea id="rfText" maxlength="500" rows="3" placeholder="تجربه‌تان را کوتاه بنویسید..."></textarea>
+        <label class="rf-anon"><input type="checkbox" id="rfAnon" checked> نام من به‌صورت ناشناس نمایش داده شود</label>
+        <button type="button" class="rf-submit" id="rfSubmit">ثبت نظر</button>
+        <div class="rf-msg" id="rfMsg" hidden></div>
+        <p class="rf-hint">🔒 نظرات فقط برای خریدارانِ با سفارش تحویل‌شده فعال است و پیش از نمایش، تایید می‌شود.</p>
+    </div>
+</section>
+
+<!-- ═══ بخش ۶: رفع ابهامات — سوالات متداول محصول (D-104) ═══ -->
+{% if faqs %}
+<section class="pfaq-section" id="pfaq">
+    <h2 class="sec-title">سوال‌هایی که شاید برای شما پیش بیاید</h2>
+    <div class="pfaq-list">
+        {% for f in faqs %}
+        <details class="pfaq-item" {% if forloop.first %}open{% endif %}>
+            <summary>{{ f.question }}</summary>
+            <div class="pfaq-answer">{{ f.answer|linebreaks }}</div>
+        </details>
+        {% endfor %}
+    </div>
+</section>
+{% endif %}
+
+<!-- ═══ بخش ۷: مقاله جامع برای سئو و هوش مصنوعی (D-104) ═══ -->
+{% if product.deep_dive %}
+<section class="deepdive-section" id="deepdive">
+    <h2 class="sec-title">همه‌چیز درباره {{ product.name }}</h2>
+    <div class="deepdive-body">{{ product.deep_dive|render_markup }}</div>
+</section>
+{% endif %}
+
 <!-- RELATED PRODUCTS -->
 {% if related_products %}
 <section class="related-section">
@@ -977,6 +1331,175 @@
         lightbox.addEventListener("click", closeLb);
         document.addEventListener("keydown", function (e) {
             if (e.key === "Escape") closeLb();
+        });
+    }
+})();
+</script>
+
+<!-- ═══ بخش ۸: نوار چسبان خرید سریع موبایل (D-104) ═══ -->
+<div class="sticky-buy-bar" id="stickyBuyBar" aria-hidden="true">
+    <div class="sbb-info">
+        <span class="sbb-name">{{ product.name|truncatechars:28 }}</span>
+        <span class="sbb-price" id="sbbPrice">{{ product.final_price|money }} <small>تومان</small></span>
+    </div>
+    <button type="button" class="sbb-btn" id="sbbBuy">خرید سریع</button>
+</div>
+
+<script>
+(function(){
+    'use strict';
+    function getCookieX(name){
+        var m = document.cookie.match('(^|;)\\s*' + name + '\\s*=\\s*([^;]+)');
+        return m ? m.pop() : '';
+    }
+
+    // ─────────── نوار چسبان موبایل ───────────
+    var bar = document.getElementById('stickyBuyBar');
+    var hero = document.querySelector('.product-hero');
+    if (bar && hero) {
+        var io = new IntersectionObserver(function(entries){
+            entries.forEach(function(en){
+                var show = !en.isIntersecting && window.innerWidth <= 900;
+                bar.classList.toggle('show', show);
+                bar.setAttribute('aria-hidden', show ? 'false' : 'true');
+            });
+        }, {threshold: 0.05});
+        io.observe(hero);
+        document.getElementById('sbbBuy').addEventListener('click', function(){
+            var t = document.querySelector('.product-actions, .variant-buybox');
+            if (t) t.scrollIntoView({behavior:'smooth', block:'center'});
+        });
+    }
+
+    // ─────────── هاب اشتراک‌گذاری (D-104) ───────────
+    var wrap = document.querySelector('.share-buttons');
+    if (wrap) {
+        var url = wrap.getAttribute('data-share-url');
+        var slug = wrap.getAttribute('data-share-slug');
+        var text = 'این را دیدم و ارزش فرستادن داشت: ' + document.title;
+        var toastEl = document.getElementById('shareToast');
+        function toast(msg){
+            if (!toastEl) return;
+            toastEl.textContent = msg;
+            toastEl.hidden = false;
+            clearTimeout(toastEl._t);
+            toastEl._t = setTimeout(function(){ toastEl.hidden = true; }, 3500);
+        }
+        function countIt(channel){
+            try {
+                var fd = new FormData();
+                fd.append('channel', channel);
+                fd.append('csrfmiddlewaretoken', getCookieX('csrftoken'));
+                fetch('/products/' + slug + '/share/', {
+                    method: 'POST', body: fd, credentials: 'same-origin'
+                }).then(function(r){ return r.json(); }).then(function(d){
+                    if (d && d.ok) {
+                        var el = document.getElementById('shareCountNum');
+                        if (el) el.textContent = d.count_fa;
+                        var box = document.getElementById('shareCounter');
+                        if (box) { box.classList.remove('bump'); void box.offsetWidth; box.classList.add('bump'); }
+                    }
+                }).catch(function(){});
+            } catch(e) {}
+        }
+        function copyLink(cb){
+            function fallback(){
+                var ta = document.createElement('textarea');
+                ta.value = url; ta.style.cssText = 'position:fixed;top:-999px;opacity:0;';
+                document.body.appendChild(ta); ta.focus(); ta.select();
+                try { document.execCommand('copy'); } catch(e) {}
+                document.body.removeChild(ta);
+                if (cb) cb();
+            }
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(url).then(function(){ if (cb) cb(); }).catch(fallback);
+            } else fallback();
+        }
+        wrap.querySelectorAll('[data-channel]').forEach(function(btn){
+            btn.addEventListener('click', function(){
+                var ch = btn.getAttribute('data-channel');
+                var type = btn.getAttribute('data-share-type');
+                var tpl = btn.getAttribute('data-href') || '';
+                var target = tpl.replace('{URL}', encodeURIComponent(url)).replace('{TEXT}', encodeURIComponent(text));
+                countIt(ch);
+                if (type === 'story') {
+                    copyLink(function(){
+                        toast('✅ لینک کپی شد! حالا در اینستاگرام استیکر «Link» را بزنید و بچسبانید.');
+                        try { window.location.href = 'instagram://story-camera'; } catch(e) {}
+                        setTimeout(function(){
+                            if (!document.hidden) window.open('https://www.instagram.com/', '_blank');
+                        }, 900);
+                    });
+                } else if (type === 'copy') {
+                    copyLink(function(){ toast('✅ لینک کپی شد؛ در پیام‌رسان بچسبانید.'); });
+                } else if (type === 'native') {
+                    if (navigator.share) {
+                        navigator.share({title: document.title, text: text, url: url}).catch(function(){});
+                    } else {
+                        copyLink(function(){ toast('✅ لینک کپی شد.'); });
+                    }
+                } else if (type === 'link' && target) {
+                    window.open(target, '_blank', 'noopener');
+                }
+            });
+        });
+        var smsBtn = wrap.querySelector('.share-sms');
+        if (smsBtn) {
+            var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+            smsBtn.setAttribute('href', (isIOS ? 'sms:&' : 'sms:?') + 'body=' + encodeURIComponent(text + ' ' + url));
+            smsBtn.addEventListener('click', function(){ countIt('sms'); });
+        }
+    }
+
+    // ─────────── فرم ثبت نظر ۲ ثانیه‌ای (D-104) ───────────
+    var rfBox = document.getElementById('reviewFormBox');
+    if (rfBox) {
+        var stars = rfBox.querySelectorAll('.rf-star');
+        function paintStars(v){
+            stars.forEach(function(l2){
+                l2.classList.toggle('on', Number(l2.querySelector('input').value) <= Number(v));
+            });
+        }
+        stars.forEach(function(lb){
+            lb.querySelector('input').addEventListener('change', function(){
+                paintStars(this.value);
+            });
+        });
+        var checkedNow = rfBox.querySelector('input[name="rf_rating"]:checked');
+        if (checkedNow) paintStars(checkedNow.value);
+
+        var submit = document.getElementById('rfSubmit');
+        submit.addEventListener('click', function(){
+            var msg = document.getElementById('rfMsg');
+            var rating = (rfBox.querySelector('input[name="rf_rating"]:checked') || {}).value || '';
+            var text = document.getElementById('rfText').value.trim();
+            var anon = document.getElementById('rfAnon').checked ? 'on' : '';
+            function show(ok, m){
+                msg.hidden = false;
+                msg.className = 'rf-msg ' + (ok ? 'ok' : 'err');
+                msg.textContent = m;
+            }
+            submit.disabled = true;
+            var fd = new FormData();
+            fd.append('rating', rating);
+            fd.append('text', text);
+            fd.append('anonymous', anon);
+            fd.append('csrfmiddlewaretoken', getCookieX('csrftoken'));
+            fetch(rfBox.getAttribute('data-inline-url'), {
+                method: 'POST', body: fd, credentials: 'same-origin'
+            }).then(function(r){
+                if (r.status === 403) {
+                    show(false, 'برای ثبت نظر، اول با شماره موبایل وارد شوید. در حال انتقال...');
+                    setTimeout(function(){ window.location.href = rfBox.getAttribute('data-login-url') + '?next=' + encodeURIComponent(location.pathname); }, 1600);
+                    return null;
+                }
+                return r.json();
+            }).then(function(d){
+                if (!d) return;
+                show(d.success, d.message || (d.errors || []).join(' '));
+                if (d.success) document.getElementById('rfText').value = '';
+            }).catch(function(){ show(false, 'خطای شبکه؛ دوباره تلاش کنید.'); })
+              .finally(function(){ submit.disabled = false; });
         });
     }
 })();
