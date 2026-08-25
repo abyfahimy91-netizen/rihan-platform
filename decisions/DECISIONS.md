@@ -1132,8 +1132,10 @@ M14 (معماری) → M5 (RBAC) → M15 (Ledger) + M16 (State Machine) → M3, 
 | D-101 | مبلغ واریز صفحه پرداخت به ریال + ترتیب بخش‌ها مطابق اپ بانکی | Accepted | 1405/06/02 |
 | D-102 | آدرس‌های ذخیره‌شده + تسویه‌حساب بدون اصطکاک + تب آدرس در پروفایل | Accepted | 1405/06/02 |
 | D-103 | سرویس‌دهنده‌های پیامک ادمین‌محور + کنترل روش‌های ورود + failover خودکار | Accepted | 1405/06/03 |
+| D-104 | صفحه فروش اقناعی هشت‌بخشی + اشتراک ویروسی + نظرات محرمانه + JSON-LD | Accepted | 1405/06/03 |
 
 **سند کامل:** decisions/D-100-ADMIN-EDITABLE-PAGES-FAQ.md
 **سند کامل:** decisions/D-101-RIAL-AMOUNT-BANK-APP-ORDER.md
 **سند کامل:** decisions/D-102-SAVED-ADDRESSES-FRICTIONLESS-CHECKOUT.md
 **سند کامل:** decisions/D-103-SMS-PROVIDERS-AUTH-ADMIN.md
+**سند کامل:** decisions/D-104-PERSUASIVE-SALES-PAGE.md
