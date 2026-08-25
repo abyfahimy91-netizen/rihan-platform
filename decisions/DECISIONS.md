@@ -1141,3 +1141,4 @@ M14 (معماری) → M5 (RBAC) → M15 (Ledger) + M16 (State Machine) → M3, 
 **سند کامل:** decisions/D-104-PERSUASIVE-SALES-PAGE.md
 **سند کامل:** decisions/D-105-FULFILLMENT.md
 **سند کامل:** decisions/D-106-PARALLEL-SMS.md
+**سند کامل:** decisions/D-107-SHARE-STORY-SMS.md
