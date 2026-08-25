@@ -360,6 +360,10 @@ def send_supplier_assignment_sms(shipment) -> bool:
 
     if shipment.fulfiller != Shipment.FulfillerType.SUPPLIER or not shipment.supplier:
         return False
+    # D-106: کلید ادمین — پیامک تامین‌کننده می‌تواند کلاً خاموش باشد (سیستم موازی)
+    if not notify_suppliers_enabled():
+        logger.info('Supplier SMS skipped (disabled in SiteSettings) for shipment %s', shipment.id)
+        return False
     phone = (shipment.supplier.phone or '').strip()
     brief = '، '.join(
         item_line(si.order_item).lstrip('- ')

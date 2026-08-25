@@ -466,3 +466,78 @@ def logout_view(request):
     logout(request)
     messages.success(request, 'با موفقیت خارج شدید. به امید دیدار! 🌿')
     return redirect('/')
+
+
+# ══════════════════════════════════════════════════════════
+# D-106: ثبت‌نام با رمز عبور — مسیر موازی بدون نیاز به پیامک
+# وقتی ادمین OTP را خاموش کند (یا پیامک در دسترس نباشد)، مشتری
+# می‌تواند مستقیم با شماره + رمز عبور حساب بسازد.
+# کلید دسترسی: AuthSettings.password_enabled (پنل ادمین)
+# ══════════════════════════════════════════════════════════
+
+_FA_DIGITS = str.maketrans('۰۱۲۳۴۵۶۷۸۹٠١٢٣٤٥٦٧٨٩', '01234567890123456789')
+
+
+def _normalize_phone(value) -> str:
+    return str(value or '').translate(_FA_DIGITS).strip()
+
+
+def register_page_view(request):
+    """ثبت‌نام با نام، شماره موبایل و رمز عبور — بدون پیامک"""
+    if request.user.is_authenticated:
+        return redirect('auth_pages:profile')
+
+    from .models import AuthSettings
+    try:
+        _s = AuthSettings.load()
+    except Exception:
+        _s = None
+    password_enabled = bool(_s.password_enabled) if _s else True
+    next_url = request.GET.get('next') or request.POST.get('next') or '/'
+
+    if not password_enabled:
+        messages.info(request, 'ثبت‌نام فعلاً فقط از راه کد پیامکی انجام می‌شود.')
+        return redirect('auth_pages:login')
+
+    ctx = {'next_url': next_url, 'form_values': {}}
+
+    if request.method == 'POST':
+        name = (request.POST.get('full_name') or '').strip()
+        raw_phone = _normalize_phone(request.POST.get('phone'))
+        p1 = request.POST.get('password1') or ''
+        p2 = request.POST.get('password2') or ''
+        ctx['form_values'] = {'full_name': name[:100]}
+
+        is_valid_phone, phone = OtpService.validate_phone(raw_phone)
+        if not is_valid_phone:
+            messages.error(request, 'شماره موبایل معتبر نیست. مثال: 09123456789')
+        elif User.objects.filter(username=phone).exists():
+            messages.error(
+                request,
+                'این شماره قبلاً ثبت شده است. وارد شوید یا «رمزم را فراموش کرده‌ام» را بزنید.')
+        elif p1 != p2:
+            messages.error(request, 'رمز عبور و تکرار آن یکسان نیستند.')
+        else:
+            ok, err = PasswordService.validate_strength(p1)
+            if not ok:
+                messages.error(request, err)
+            else:
+                parts = name.split(' ', 1)
+                user = User.objects.create_user(
+                    username=phone,
+                    password=p1,
+                    first_name=(parts[0] or '')[:30],
+                    last_name=(parts[1][:60] if len(parts) > 1 else ''),
+                )
+                login(request, user)
+                _merge_guest_cart(request, user)
+                fname = (parts[0] or '').strip()
+                messages.success(
+                    request,
+                    f'حساب شما ساخته شد؛ خوش آمدید {fname}! 🎉'
+                    if fname else 'حساب شما ساخته شد؛ خوش آمدید! 🎉')
+                response = redirect(next_url if next_url.startswith('/') else '/')
+                _remember_device(response, request, user)
+                return response
+
+    return render(request, 'accounts/register.html', ctx)

@@ -272,6 +272,13 @@
                 <button type="submit" class="auth-btn">ورود به حساب</button>
             </form>
 
+            {% if password_enabled %}
+            <div style="margin-top:14px;text-align:center;">
+                <span style="font-size:13px;color:#7a847d;">حساب ندارید؟</span>
+                <a class="link-btn" href="{% url 'auth_pages:register' %}{% if next_url and next_url != '/' %}?next={{ next_url|urlencode }}{% endif %}">ثبت‌نام با رمز عبور ✍️</a>
+            </div>
+            {% endif %}
+
             <div class="trust-note">
                 🔒 بعد از ۵ تلاش ناموفق، ورود موقتاً قفل می‌شود تا حساب شما امن بماند<br>
                 حساب ندارید؟ با «کد پیامکی» وارد شوید — حساب خودکار ساخته می‌شود ✨

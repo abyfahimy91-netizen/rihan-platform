@@ -1,0 +1,87 @@
+{% extends "catalog/base.html" %}
+
+{% block title %}ثبت‌نام | ریحان{% endblock %}
+{% block meta_description %}ساخت حساب کاربری در فروشگاه ریحان با شماره موبایل و رمز عبور — بدون نیاز به پیامک{% endblock %}
+
+{% block extra_css %}
+<style>
+    .auth-wrap { max-width: 480px; margin: 40px auto 96px; }
+    .auth-card {
+        background: #fff; border-radius: 20px;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.08);
+        border: 1px solid var(--color-border);
+        padding: 36px 32px 30px; text-align: center;
+    }
+    .auth-logo-badge {
+        width: 64px; height: 64px; margin: 0 auto 14px;
+        background: linear-gradient(135deg, var(--color-primary), var(--color-primary-dark));
+        border-radius: 50%; display: flex; align-items: center; justify-content: center;
+        color: #fff; font-size: 28px; font-weight: 900;
+    }
+    .auth-card h1 { font-size: 24px; font-weight: 900; color: var(--color-text); margin-bottom: 6px; }
+    .auth-sub { font-size: 13.5px; color: var(--color-text-muted); margin-bottom: 22px; line-height: 1.9; }
+    .field-row { margin-bottom: 12px; text-align: right; }
+    .auth-input {
+        width: 100%; padding: 13px 16px; border-radius: 12px;
+        border: 1.5px solid var(--color-border); font-family: inherit; font-size: 15px;
+        background: #fbfcfb; transition: border-color .2s;
+    }
+    .auth-input:focus { outline: none; border-color: var(--color-primary); background: #fff; }
+    .auth-btn {
+        width: 100%; margin-top: 8px; padding: 14px; border: none; border-radius: 12px;
+        background: var(--color-primary); color: #fff; font-family: inherit;
+        font-size: 15.5px; font-weight: 800; cursor: pointer;
+    }
+    .auth-btn:hover { filter: brightness(1.08); }
+    .trust-note { margin-top: 18px; font-size: 12px; color: #98a19a; line-height: 2; }
+    .auth-msg { padding: 10px 14px; border-radius: 10px; font-size: 13.5px; margin-bottom: 16px; line-height: 1.9; }
+    .auth-msg.error { background: #fdecea; color: #b3261e; }
+    .auth-msg.success { background: #e6f4ec; color: #1d7a45; }
+    .auth-msg.info { background: #eef3f7; color: #35618e; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="auth-wrap">
+        <div class="auth-card">
+            <div class="auth-logo-badge">ر</div>
+            <h1>ساخت حساب کاربری</h1>
+            <p class="auth-sub">با شماره موبایل و رمز عبور — سریع و بدون نیاز به پیامک ✨<br>نام کاربری شما در ریحان همان <b>شماره موبایل</b> است.</p>
+
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="auth-msg {% if message.tags == 'error' %}error{% elif message.tags == 'success' %}success{% else %}info{% endif %}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+
+            <form method="post" action="{% url 'auth_pages:register' %}">
+                {% csrf_token %}
+                <input type="hidden" name="next" value="{{ next_url }}">
+                <div class="field-row">
+                    <input class="auth-input" type="text" name="full_name" placeholder="نام و نام خانوادگی"
+                           maxlength="100" value="{{ form_values.full_name|default:'' }}" autocomplete="name">
+                </div>
+                <div class="field-row">
+                    <input class="auth-input" type="tel" name="phone" dir="ltr" maxlength="11"
+                           placeholder="09123456789" autocomplete="username" inputmode="numeric" required>
+                </div>
+                <div class="field-row">
+                    <input class="auth-input" type="password" name="password1" placeholder="رمز عبور (حداقل ۸ کاراکتر، حرف + رقم)"
+                           minlength="8" required autocomplete="new-password">
+                </div>
+                <div class="field-row">
+                    <input class="auth-input" type="password" name="password2" placeholder="تکرار رمز عبور"
+                           minlength="8" required autocomplete="new-password">
+                </div>
+                <button type="submit" class="auth-btn">ساخت حساب و ورود</button>
+            </form>
+
+            <div class="trust-note">
+                قبلاً ثبت‌نام کرده‌اید؟ <a href="{% url 'auth_pages:login' %}">وارد شوید</a><br>
+                🔒 رمز عبور شما به‌صورت رمزنگاری‌شده ذخیره می‌شود.
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

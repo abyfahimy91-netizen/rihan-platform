@@ -59,6 +59,11 @@ class SiteSettingsAdmin(admin.ModelAdmin):
             'description': 'هر خط یک تعهد — در صفحه محصول، زیر دکمه خرید نمایش داده می‌شود. (مثلاً: ۷ روز ضمانت بازگشت وجه)',
             'classes': ('collapse',),
         }),
+        ('📨 پیامک سفارشات (فعال/غیرفعال)', {
+            'fields': ('sms_notify_suppliers', 'sms_notify_customers'),
+            'description': 'D-106: سیستم پیامک موازی است — تا وقتی خط ارسال آماده نیست، هر دو را خاموش بگذارید؛ هیچ پیامکی تلاش نمی‌شود و فقط در «لاگ اطلاع‌رسانی» سفارشات ثبت می‌شود. بعد از فعال‌شدن خط کاوه‌نگار، همین‌جا روشن کنید.',
+            'classes': ('collapse',),
+        }),
         ('🦶 فوتر سایت', {
             'fields': ('footer_tagline', 'footer_description', 'footer_copyright'),
             'classes': ('collapse',),
