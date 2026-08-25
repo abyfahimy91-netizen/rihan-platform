@@ -64,6 +64,29 @@ class SiteSettings(models.Model):
         help_text='پس از ثبت کد رهگیری، مشتری لینک پیگیری یک‌کلیکی دریافت کند',
     )
 
+    # ── D-107: برند لاتین + قالب پیامک‌ها + اشتراک‌گذاری ──
+    brand_name_latin = models.CharField(
+        'نام برند (لاتین، برای پیامک و استوری)', max_length=40, default='Rihan',
+        help_text='در همه پیامک‌ها، متن دستور ارسال و تصویر استوری با همین املای لاتین نمایش داده می‌شود',
+    )
+    sms_text_customer_shipped = models.TextField(
+        'قالب پیامک رهگیری به مشتری', blank=True, default='',
+        help_text='متغیرها: {order_number} {carrier} {tracking_code} {link} {brand} — خالی = قالب پیش‌فرض',
+    )
+    sms_text_supplier_assign = models.TextField(
+        'قالب پیامک سفارش جدید به تامین‌کننده', blank=True, default='',
+        help_text='متغیرها: {order_number} {items} {link} {brand} — خالی = قالب پیش‌فرض',
+    )
+    share_message_text = models.TextField(
+        'متن پیام اشتراک‌گذاری محصول', blank=True, default='',
+        help_text='اول پیام هنگام ارسال محصول در پیام‌رسان‌ها؛ بعد از آن نام محصول، لینک کوتاه و هشتگ‌ها خودکار می‌آید',
+    )
+    share_hashtags = models.CharField(
+        'هشتگ‌های اشتراک‌گذاری', max_length=300, blank=True,
+        default='#Rihan #فروشگاه_آنلاین #خرید_آنلاین',
+        help_text='با فاصله جدا شود؛ در کپشن استوری و پیام اشتراک‌گذاری می‌آید',
+    )
+
     # ── شبکه‌های اجتماعی ──
     instagram_url = models.URLField('آدرس اینستاگرام', blank=True, default='')
     telegram_url = models.URLField('آدرس تلگرام', blank=True, default='')

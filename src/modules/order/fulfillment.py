@@ -193,8 +193,43 @@ def build_shipments(order, user=None, notify=True):
 
 
 # ────────────────────────────────────────────────
-# متن دستور ارسال محوله (بدون قیمت!)
+# D-107: قالب پیامک‌ها از پنل ادمین + برند لاتین
 # ────────────────────────────────────────────────
+
+DEFAULT_CUSTOMER_SHIPPED_SMS = (
+    'سفارش {order_number} ارسال شد ({carrier}).'
+    '\nکد رهگیری: {tracking_code}'
+    '\nپیگیری فوری:\n{link}'
+    '\n{brand}'
+)
+
+DEFAULT_SUPPLIER_ASSIGN_SMS = (
+    '{brand} | سفارش جدید {order_number}\n'
+    '{items}\n'
+    'مشاهده آدرس و ثبت کد رهگیری:\n{link}'
+)
+
+
+def _sms_brand() -> str:
+    s = _site_settings()
+    brand = getattr(s, 'brand_name_latin', '') if s else ''
+    return (brand or 'Rihan').strip()
+
+
+def render_sms_template(custom: str, default: str, ctx: dict) -> str:
+    """قالب ادمین را با متغیرها پر می‌کند؛ قالب خراب/خالی → پیش‌فرض امن"""
+    template = (custom or '').strip()
+    if not template:
+        return default.format(**ctx)
+    try:
+        out = template.format(**ctx)
+        if '{' in out and '}' in out:  # متغیر ناشناخته جا مانده
+            raise ValueError('unresolved placeholder')
+        return out
+    except Exception:
+        logger.warning('Custom SMS template invalid; using default. ctx=%s', list(ctx))
+        return default.format(**ctx)
+
 
 def item_line(order_item) -> str:
     title = order_item.product_name_snapshot
@@ -215,7 +250,7 @@ def dispatch_instruction_text(shipment) -> str:
     postal = (order.guest_postal_code or '').strip()
 
     lines = [
-        '📦 دستور ارسال محوله — فروشگاه ریّان',
+        f'📦 دستور ارسال محوله — {_sms_brand()}',
         f'مرسوله: #{str(shipment.id)[:8].upper()}',
         f'سفارش: {order.order_number}',
         f'تاریخ: {jalali_human(order.created_at)}',
@@ -341,17 +376,19 @@ def mark_delivered(shipment, user=None):
 # ────────────────────────────────────────────────
 
 def customer_shipped_text(shipment) -> str:
-    """کوتاه و کم‌اصطکاک: کد رهگیری + لینک یک‌کلیکی که سامانه پست را باز می‌کند"""
+    """کوتاه و کم‌اصطکاک: کد رهگیری + لینک یک‌کلیکی (قالب از ادمین)"""
     order = shipment.order
     code = shipment.tracking_code
-    link = short_tracking_link(code)
-    carrier = shipment.get_carrier_display()
-    return (
-        f'سفارش {order.order_number} ارسال شد ({carrier}).'
-        f'\nکد رهگیری: {code}'
-        f'\nپیگیری فوری:\n{link}'
-        f'\nفروشگاه ریّان'
-    )
+    ctx = {
+        'brand': _sms_brand(),
+        'order_number': order.order_number,
+        'carrier': shipment.get_carrier_display(),
+        'tracking_code': code,
+        'link': short_tracking_link(code),
+    }
+    return render_sms_template(
+        getattr(_site_settings(), 'sms_text_customer_shipped', ''),
+        DEFAULT_CUSTOMER_SHIPPED_SMS, ctx)
 
 
 def send_supplier_assignment_sms(shipment) -> bool:
@@ -370,11 +407,15 @@ def send_supplier_assignment_sms(shipment) -> bool:
         for si in shipment.items.select_related('order_item')[:4]
     )
     more = '' if shipment.items.count() <= 4 else ' …'
-    message = (
-        f'ریّان | سفارش جدید {shipment.order.order_number}\n'
-        f'{brief}{more}\n'
-        f'مشاهده آدرس و ثبت کد رهگیری:\n{SITE_BASE_URL}/supplier/'
-    )
+    ctx = {
+        'brand': _sms_brand(),
+        'order_number': shipment.order.order_number,
+        'items': brief + more,
+        'link': f'{SITE_BASE_URL}/supplier/',
+    }
+    message = render_sms_template(
+        getattr(_site_settings(), 'sms_text_supplier_assign', ''),
+        DEFAULT_SUPPLIER_ASSIGN_SMS, ctx)
     ok = _send_sms('SUPPLIER_ASSIGN', phone, message, order=shipment.order, shipment=shipment)
     now = timezone.now()
     shipment.sent_to_supplier_at = shipment.sent_to_supplier_at or now

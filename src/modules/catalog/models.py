@@ -572,3 +572,38 @@ def sync_parent_inventory_for(product_id):
     inv.quantity = totals["s"]
     inv.reserved_quantity = totals["r"] or 0
     inv.save(update_fields=["quantity", "reserved_quantity"])
+
+# ═══════════════════════════════════════════════════════════
+# D-107 — لینک کوتاه محصول: rihan360.ir/p/<code>
+# برای اشتراک‌گذاری تمیز در پیام‌رسان‌ها و پیامک (بدون لینک بلند یونیکد)
+# ═══════════════════════════════════════════════════════════
+
+class ShortLink(models.Model):
+    """نگاشت کد کوتاه ۸ نویسه‌ای به محصول — یکتا و پایدار"""
+    code = models.CharField('کد', max_length=12, unique=True, db_index=True)
+    product = models.ForeignKey(
+        Product, on_delete=models.CASCADE, related_name='short_links',
+        verbose_name="محصول")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = "لینک کوتاه"
+        verbose_name_plural = "لینک‌های کوتاه"
+
+    def __str__(self):
+        return f'/p/{self.code}/ → {self.product_id}'
+
+    @classmethod
+    def get_for_product(cls, product) -> 'ShortLink':
+        existing = cls.objects.filter(product=product).first()
+        if existing:
+            return existing
+        alphabet = 'abcdefghjkmnpqrstuvwxyzABCDEFGHJKMNPQRSTUVWXYZ23456789'
+        import secrets as _secrets
+        for _ in range(20):
+            code = ''.join(_secrets.choice(alphabet) for _ in range(8))
+            try:
+                return cls.objects.create(code=code, product=product)
+            except Exception:
+                continue  # تصادم نادر → کد جدید
+        raise RuntimeError('could not generate unique short code')

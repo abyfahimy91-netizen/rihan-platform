@@ -64,6 +64,16 @@ class SiteSettingsAdmin(admin.ModelAdmin):
             'description': 'D-106: سیستم پیامک موازی است — تا وقتی خط ارسال آماده نیست، هر دو را خاموش بگذارید؛ هیچ پیامکی تلاش نمی‌شود و فقط در «لاگ اطلاع‌رسانی» سفارشات ثبت می‌شود. بعد از فعال‌شدن خط کاوه‌نگار، همین‌جا روشن کنید.',
             'classes': ('collapse',),
         }),
+        ('✉️ قالب پیامک‌ها (پیشرفته)', {
+            'fields': ('brand_name_latin', 'sms_text_customer_shipped', 'sms_text_supplier_assign'),
+            'description': 'برند لاتین در همه پیامک‌ها استفاده می‌شود. قالب‌ها خالی = پیش‌فرض سیستم. متغیرهای مجاز: {order_number} {carrier} {tracking_code} {link} {items} {brand}',
+            'classes': ('collapse',),
+        }),
+        ('🔗 اشتراک‌گذاری محصولات', {
+            'fields': ('share_message_text', 'share_hashtags'),
+            'description': 'متن اول پیامی که مشتری با تلگرام/واتساپ/استوری می‌فرستد. بعد از آن نام محصول، لینک کوتاه تمیز (rihan360.ir/p/کد) و هشتگ‌ها خودکار اضافه می‌شود.',
+            'classes': ('collapse',),
+        }),
         ('🦶 فوتر سایت', {
             'fields': ('footer_tagline', 'footer_description', 'footer_copyright'),
             'classes': ('collapse',),

@@ -10,6 +10,12 @@
 {% block og_type %}product{% endblock %}
 
 {% block extra_head %}
+    {# ── D-107: پیش‌نمایش جذاب در پیام‌رسان‌ها (تلگرام/واتساپ/آی‌مسیج) ── #}
+    <meta property="og:image" content="{{ og_image|default:'' }}">
+    <meta property="og:site_name" content="{{ brand_latin|default:'Rihan' }}">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:image" content="{{ og_image|default:'' }}">
+
 <!-- ─── داده ساختاریافته برای گوگل و هوش‌های مصنوعی (D-104) ─── -->
 <script type="application/ld+json">
 {
@@ -1177,8 +1183,10 @@
     <div class="share-counter" id="shareCounter">
         🔄 <b id="shareCountNum">{{ product.share_count|fa }}</b> بار به اشتراک گذاشته شده است
     </div>
-    <div class="share-buttons" data-share-url="{{ request.build_absolute_uri }}" data-share-slug="{{ product.slug }}">
-        <button type="button" class="share-btn share-ig" data-channel="instagram" data-share-type="story" aria-label="اشتراک در استوری اینستاگرام">
+    <div class="share-buttons" data-share-url="{{ short_url|default:request.build_absolute_uri }}" data-share-text="{{ share_caption }}" data-share-slug="{{ product.slug }}">
+        <button type="button" class="share-btn share-ig" data-channel="instagram" data-share-type="story"
+                data-img="{{ product.main_image_url }}" data-title="{{ product.name }}"
+                data-price="{{ product.final_price|money }} تومان" aria-label="اشتراک در استوری اینستاگرام">
             <svg class="sh-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><rect x="2.5" y="2.5" width="19" height="19" rx="5.5"/><circle cx="12" cy="12" r="4.4"/><circle cx="17.6" cy="6.4" r="1.15" fill="currentColor" stroke="none"/></svg>
             <span>استوری اینستاگرام</span>
         </button>
@@ -1213,6 +1221,45 @@
     </div>
     <div class="share-toast" id="shareToast" hidden></div>
 </section>
+
+<!-- ═══ D-107: مودال استوری اینستاگرام با محتوای تولیدی ═══ -->
+<div class="story-modal" id="storyModal" hidden>
+    <div class="story-sheet">
+        <div class="story-head">
+            <b>استوری آماده‌ی شما 🎨</b>
+            <button type="button" class="story-close" id="storyClose" aria-label="بستن">✕</button>
+        </div>
+        <canvas id="storyCanvas" width="1080" height="1920"></canvas>
+        <p class="story-hint">۱) تصویر را ذخیره یا مستقیم به اشتراک بگذارید &nbsp;۲) کپشن را کپی کنید &nbsp;۳) در اینستاگرام استوری بگذارید</p>
+        <div class="story-actions">
+            <button type="button" class="story-btn primary" id="storyShare">📤 ارسال مستقیم</button>
+            <button type="button" class="story-btn" id="storyDownload">⬇️ ذخیره تصویر</button>
+            <button type="button" class="story-btn gold" id="storyCaption">📋 کپی کپشن و هشتگ</button>
+        </div>
+        <button type="button" class="story-openig" id="storyOpenIg">باز کردن اینستاگرام ↗</button>
+    </div>
+</div>
+<style>
+    .story-modal { position: fixed; inset: 0; background: rgba(9,26,20,.72); z-index: 99999;
+        display: flex; align-items: center; justify-content: center; padding: 16px; backdrop-filter: blur(3px); }
+    .story-modal[hidden] { display: none; }
+    .story-sheet { background: #fff; border-radius: 22px; max-width: 380px; width: 100%;
+        max-height: 94vh; overflow-y: auto; padding: 18px 18px 14px; text-align: center;
+        box-shadow: 0 24px 64px rgba(0,0,0,.35); }
+    .story-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+    .story-head b { font-size: 15.5px; color: #0D3B2E; }
+    .story-close { border: none; background: #f1f4f1; width: 34px; height: 34px; border-radius: 50%; cursor: pointer; font-size: 15px; }
+    #storyCanvas { width: min(100%, 250px); aspect-ratio: 9/16; height: auto; border-radius: 14px;
+        box-shadow: 0 6px 22px rgba(13,59,46,.25); margin-bottom: 12px; }
+    .story-hint { font-size: 11.5px; color: #7a847d; line-height: 1.9; margin-bottom: 10px; }
+    .story-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .story-btn { border: none; border-radius: 12px; padding: 11px 8px; font-family: inherit;
+        font-size: 13px; font-weight: 700; cursor: pointer; background: #eef3ef; color: #0D3B2E; }
+    .story-btn.primary { background: #0D3B2E; color: #fff; }
+    .story-btn.gold { background: #EAD9A7; color: #5c4a17; }
+    .story-openig { width: 100%; margin-top: 8px; background: linear-gradient(45deg,#F58529,#DD2A7B,#8134AF);
+        color: #fff; border: none; border-radius: 12px; padding: 12px; font-family: inherit; font-size: 13.5px; font-weight: 800; cursor: pointer; }
+</style>
 
 <!-- ═══ بخش ۵: نظرات محرمانه خریداران (D-104) ═══ -->
 <section class="reviews-section" id="reviews">
@@ -1391,7 +1438,7 @@
     if (wrap) {
         var url = wrap.getAttribute('data-share-url');
         var slug = wrap.getAttribute('data-share-slug');
-        var text = 'این را دیدم و ارزش فرستادن داشت: ' + document.title;
+        var text = wrap.getAttribute('data-share-text') || ('این را دیدم و ارزش فرستادن داشت: ' + document.title);
         var toastEl = document.getElementById('shareToast');
         var lastClick = {};
 
@@ -1455,13 +1502,7 @@
             var target = tpl.replace('{URL}', encodeURIComponent(url)).replace('{TEXT}', encodeURIComponent(text));
 
             if (type === 'story') {
-                copyLink(function(){
-                    toast('✅ لینک کپی شد! حالا در اینستاگرام استیکر «Link» را بزنید و بچسبانید.');
-                    try { window.location.href = 'instagram://story-camera'; } catch(err) {}
-                    setTimeout(function(){
-                        if (!document.hidden) window.open('https://www.instagram.com/', '_blank');
-                    }, 900);
-                });
+                openStoryModal(btn);
             } else if (type === 'copy') {
                 copyLink(function(){ toast('✅ لینک کپی شد؛ در پیام‌رسان بچسبانید.'); });
             } else if (type === 'native') {
@@ -1477,6 +1518,146 @@
                 window.open(target, '_blank', 'noopener');
             }
         });
+
+        // ═══ D-107: استوری اینستاگرام با محتوای تولیدی (کانواس) ═══
+        var storyModal = document.getElementById('storyModal');
+        if (storyModal) {
+            var storyCanvas = document.getElementById('storyCanvas');
+
+            function roundRect(c, x, y, w, h, r){
+                c.beginPath();
+                c.moveTo(x+r, y);
+                c.arcTo(x+w, y, x+w, y+h, r);
+                c.arcTo(x+w, y+h, x, y+h, r);
+                c.arcTo(x, y+h, x, y, r);
+                c.arcTo(x, y, x+w, y, r);
+                c.closePath();
+            }
+            function wrapLines(c, txt, maxW, maxLines){
+                var words = String(txt||'').split(/\s+/).filter(Boolean);
+                var lines = [], line = '';
+                for (var i = 0; i < words.length; i++){
+                    var t = line ? line + ' ' + words[i] : words[i];
+                    if (c.measureText(t).width > maxW && line){ lines.push(line); line = words[i]; if (lines.length === maxLines) return lines; }
+                    else line = t;
+                }
+                if (line && lines.length < maxLines) lines.push(line);
+                return lines;
+            }
+            function drawStory(data){
+                var c = storyCanvas.getContext('2d');
+                var W = 1080, H = 1920;
+                var g = c.createLinearGradient(0, 0, W, H);
+                g.addColorStop(0, '#0B3327'); g.addColorStop(.55, '#104535'); g.addColorStop(1, '#17573F');
+                c.fillStyle = g; c.fillRect(0, 0, W, H);
+                var rg = c.createRadialGradient(W/2, 300, 40, W/2, 300, 700);
+                rg.addColorStop(0, 'rgba(201,169,97,.30)'); rg.addColorStop(1, 'rgba(201,169,97,0)');
+                c.fillStyle = rg; c.fillRect(0, 0, W, 1150);
+
+                c.textAlign = 'center';
+                c.fillStyle = '#EAD9A7';
+                c.font = '900 72px Vazirmatn, Tahoma, sans-serif';
+                c.fillText(data.brand || 'Rihan', W/2, 200);
+                c.font = '500 36px Tahoma, sans-serif';
+                c.fillStyle = 'rgba(255,255,255,.78)';
+                c.fillText('rihan360.ir', W/2, 262);
+
+                // کارت محصول با عکس (cover-fit)
+                var cx = 130, cy = 360, cw = W - 260, ch = 980;
+                c.save();
+                roundRect(c, cx, cy, cw, ch, 44);
+                c.shadowColor = 'rgba(0,0,0,.4)'; c.shadowBlur = 40; c.shadowOffsetY = 18;
+                c.fillStyle = '#ffffff'; c.fill();
+                c.restore();
+                roundRect(c, cx, cy, cw, ch, 44); c.stroke();
+
+                var finishTexts = function(){
+                    var ty = cy + ch + 130;
+                    c.fillStyle = '#ffffff';
+                    c.font = '800 58px Vazirmatn, Tahoma, sans-serif';
+                    var lines = wrapLines(c, data.title, cw - 60, 2);
+                    lines.forEach(function(l, i){ c.fillText(l, W/2, ty + i * 82); });
+                    ty += Math.max(lines.length,1) * 82 + 30;
+                    // پیل قیمت طلایی
+                    c.font = '900 52px Vazirmatn, Tahoma, sans-serif';
+                    var pw = c.measureText(data.price).width + 90;
+                    roundRect(c, W/2 - pw/2, ty - 58, pw, 96, 48);
+                    c.fillStyle = '#C9A961'; c.fill();
+                    c.fillStyle = '#3c2f10';
+                    c.fillText(data.price, W/2, ty + 10);
+                    c.font = '500 34px Tahoma, sans-serif';
+                    c.fillStyle = 'rgba(255,255,255,.65)';
+                    c.fillText('ارسال به سراسر ایران • ضمانت اصالت کالا', W/2, ty + 170);
+                };
+
+                if (!data.img) { finishTexts(); return; }
+                var im = new Image();
+                im.onload = function(){
+                    c.save();
+                    roundRect(c, cx + 14, cy + 14, cw - 28, ch - 28, 32);
+                    c.clip();
+                    var iw = im.width, ih = im.height;
+                    var scale = Math.max((cw - 28) / iw, (ch - 28) / ih);
+                    var dw = iw * scale, dh = ih * scale;
+                    c.drawImage(im, cx + 14 + (cw - 28 - dw)/2, cy + 14 + (ch - 28 - dh)/2, dw, dh);
+                    c.restore();
+                    finishTexts();
+                };
+                im.onerror = function(){ finishTexts(); };
+                im.src = data.img;
+            }
+
+            function openStoryModal(btn){
+                var data = {
+                    brand: 'Rihan',
+                    img: btn.getAttribute('data-img') || '',
+                    title: btn.getAttribute('data-title') || '',
+                    price: btn.getAttribute('data-price') || ''
+                };
+                if (data.img && data.img.indexOf('/') === 0) data.img = location.origin + data.img;
+                storyDataCaption = text;
+                storyModal.hidden = false;
+                drawStory(data);
+            }
+            var storyDataCaption = '';
+
+            document.getElementById('storyClose').addEventListener('click', function(){ storyModal.hidden = true; });
+            storyModal.addEventListener('click', function(e){ if (e.target === storyModal) storyModal.hidden = true; });
+
+            document.getElementById('storyCaption').addEventListener('click', function(){
+                function ok(){ toast('✅ کپشن و هشتگ‌ها کپی شد'); }
+                if (navigator.clipboard && window.isSecureContext)
+                    navigator.clipboard.writeText(storyDataCaption).then(ok);
+                else { copyLink(ok); }
+            });
+            document.getElementById('storyDownload').addEventListener('click', function(){
+                storyCanvas.toBlob(function(blob){
+                    var a = document.createElement('a');
+                    a.href = URL.createObjectURL(blob);
+                    a.download = 'rihan-story.png';
+                    document.body.appendChild(a); a.click(); a.remove();
+                    toast('📥 تصویر ذخیره شد؛ حالا در اینستاگرام استوری بگذارید');
+                }, 'image/png');
+            });
+            var shBtn = document.getElementById('storyShare');
+            if (navigator.canShare && window.isSecureContext) {
+                shBtn.addEventListener('click', function(){
+                    storyCanvas.toBlob(function(blob){
+                        var file = new File([blob], 'rihan-story.png', {type: 'image/png'});
+                        if (navigator.canShare({files:[file]})) {
+                            navigator.share({files:[file], text: storyDataCaption}).catch(function(){});
+                        } else {
+                            toast('اشتراک مستقیم پشتیبانی نمی‌شود؛ از «ذخیره تصویر» استفاده کنید');
+                        }
+                    }, 'image/png');
+                });
+            } else { shBtn.style.display = 'none'; }
+
+            document.getElementById('storyOpenIg').addEventListener('click', function(){
+                try { window.location.href = 'instagram://story-camera'; } catch(err) {}
+                setTimeout(function(){ if (!document.hidden) window.open('https://www.instagram.com/', '_blank'); }, 900);
+            });
+        }
     }
 
     // ─────────── فرم ثبت نظر ۲ ثانیه‌ای (D-104) ───────────
