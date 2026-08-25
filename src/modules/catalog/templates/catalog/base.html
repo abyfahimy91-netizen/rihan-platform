@@ -328,6 +328,79 @@
     </style>
     
     {% block extra_css %}{% endblock %}
+<style>
+/* ─── تایپوگرافی متن‌های محتوایی مارک‌آپ (pm-*) — راست‌چین، جاستیفای، ریتم عمودی یکنواخت ───
+   مبنا: خطوط ۵۰–۷۵ کاراکتری، فاصلهٔ خط ~۲ برای فارسی، پاراگراف‌بندی با فاصله (نه تورفتگی) */
+
+.pm-p {
+    font-size: 16px;
+    line-height: 2.05;
+    letter-spacing: normal;
+    word-spacing: normal;
+    text-align: justify;
+    text-justify: inter-word;
+    hyphens: none;
+    -webkit-hyphens: none;
+    margin: 0 0 1em;
+}
+
+.pm-p:last-child { margin-bottom: 0; }
+
+.pm-heading {
+    font-size: clamp(18px, 2.5vw, 21px);
+    font-weight: 800;
+    line-height: 1.75;
+    margin: 1.7em 0 0.75em;
+    padding-inline-start: 0.7rem;
+    border-inline-start: 4px solid var(--color-primary, #0B3327);
+}
+
+.pm-heading:first-child { margin-top: 0; }
+
+.pm-list,
+.pm-olist {
+    padding-inline-start: 1.55em;
+    margin: 0 0 1em;
+}
+
+.pm-list li,
+.pm-olist li {
+    font-size: 15.5px;
+    line-height: 2;
+    text-align: justify;
+    text-justify: inter-word;
+    hyphens: none;
+    -webkit-hyphens: none;
+    margin-bottom: 0.5em;
+}
+
+.pm-list li::marker { color: #C9A961; }
+.pm-olist li::marker { color: var(--color-primary, #0B3327); font-weight: 700; }
+
+.pm-quote {
+    background: rgba(201, 169, 97, 0.08);
+    border-inline-start: 4px solid #C9A961;
+    border-radius: 10px;
+    padding: 1rem 1.25rem;
+    margin: 0 0 1.1em;
+    font-size: 16px;
+    line-height: 2;
+    text-align: justify;
+}
+
+/* کانتینرهای متن بلند صفحه محصول: عرض مطالعهٔ بهینه + تراز دوطرفه */
+.curation-body,
+.deepdive-body {
+    max-width: 72ch;
+    margin-inline: auto;
+    text-align: justify;
+}
+
+.origin-story-content p {
+    text-align: justify;
+    line-height: 2;
+}
+</style>
 </head>
 <body>
     {% if site_settings.announcement_active and site_settings.announcement_text %}
