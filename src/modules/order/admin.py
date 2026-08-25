@@ -410,6 +410,7 @@ class BankAccountAdmin(admin.ModelAdmin):
 # ═══════════════════════════════════════════════════════════════════
 
 from django.urls import reverse as _admin_reverse
+from django.utils.safestring import mark_safe
 
 from .models import Shipment, ShipmentItem, NotificationLog
 from . import fulfillment as _fulfillment
@@ -430,7 +431,7 @@ class ShipmentInline(admin.TabularInline):
     def shipment_link(self, obj):
         if not obj or not obj.pk:
             return '-'
-        url = _admin_reverse('order_shipment_change', args=[obj.pk])
+        url = _admin_reverse('admin:order_shipment_change', args=[obj.pk])
         label = f'#{str(obj.pk)[:8].upper()}'
         return format_html('<a href="{}"><b>{}</b></a>', url, label)
 
@@ -478,7 +479,7 @@ class ShipmentAdmin(admin.ModelAdmin):
 
     @admin.display(description='سفارش', ordering='order__order_number')
     def order_link(self, obj):
-        url = _admin_reverse('order_order_change', args=[obj.order.pk])
+        url = _admin_reverse('admin:order_order_change', args=[obj.order.pk])
         return format_html('<a href="{}">{}</a>', url, obj.order.order_number)
 
     @admin.display(description='ارسال توسط')
