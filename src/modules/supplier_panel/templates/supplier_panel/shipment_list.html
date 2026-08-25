@@ -1,0 +1,50 @@
+{% extends "supplier_panel/base.html" %}{% load fa_tags %}
+
+{% block title %}مرسوله‌های من | ریهان{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">مرسوله‌های من</h1>
+
+<div class="card">
+    <a href="{% url 'supplier_panel:shipment_list' %}" class="btn btn-secondary" style="margin-inline-end:8px;{% if not status_filter %}opacity:.5;{% endif %}">همه</a>
+    {% for st in statuses %}
+        <a href="?status={{ st.value }}" class="btn btn-secondary" style="margin-inline-end:8px;{% if status_filter == st.value %}opacity:.5;{% endif %}">{{ st.label }}</a>
+    {% endfor %}
+</div>
+
+{% if shipments %}
+<div class="card">
+    <table class="table">
+        <thead>
+            <tr><th>سفارش</th><th>اقلام (بدون قیمت)</th><th>تاریخ</th><th>وضعیت</th><th>عملیات</th></tr>
+        </thead>
+        <tbody>
+        {% for s in shipments %}
+            <tr>
+                <td dir="ltr">{{ s.order.order_number }}</td>
+                <td>
+                    {% for si in s.items.all %}
+                        {{ si.order_item.product_name_snapshot }}{% if si.order_item.variant_title %} ({{ si.order_item.variant_title }}){% endif %} ×{{ si.quantity|fa }}{% if not forloop.last %}، {% endif %}
+                    {% endfor %}
+                </td>
+                <td>{{ s.created_at|jdate }}</td>
+                <td>
+                    {% if s.status == 'NEW' %}<span class="badge b-new">در انتظار ارسال</span>
+                    {% elif s.status == 'SHIPPED' %}<span class="badge b-shipped">ارسال شده</span>
+                    {% else %}<span class="badge b-delivered">تحویل شد</span>{% endif %}
+                </td>
+                <td>
+                    <a class="btn btn-primary" href="{% url 'supplier_panel:shipment_detail' s.pk %}">
+                        {% if s.status == 'NEW' %}مشاهده و ثبت کد رهگیری{% else %}مشاهده جزئیات{% endif %}
+                    </a>
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<div class="card muted">مرسوله‌ای با این فیلتر پیدا نشد.</div>
+{% endif %}
+
+{% endblock %}

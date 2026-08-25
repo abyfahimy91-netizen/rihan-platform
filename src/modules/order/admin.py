@@ -403,3 +403,201 @@ class BankAccountAdmin(admin.ModelAdmin):
     def created_at_fa(self, obj):
         return jalali_datetime_str(obj.created_at)
     created_at_fa.short_description = 'تاریخ'
+
+# ═══════════════════════════════════════════════════════════════════
+# D-105 — ادمین مرسوله‌ها + لاگ اطلاع‌رسانی
+# جریان: پرداخت تایید شد → مرسوله‌ها خودکار ساخته می‌شوند؛ اینجا مدیریت/پیگیری
+# ═══════════════════════════════════════════════════════════════════
+
+from django.urls import reverse as _admin_reverse
+
+from .models import Shipment, ShipmentItem, NotificationLog
+from . import fulfillment as _fulfillment
+
+
+class ShipmentInline(admin.TabularInline):
+    """مرسوله‌های سفارش — فقط خواندنی؛ ویرایش از صفحه اختصاصی مرسوله"""
+    model = Shipment
+    extra = 0
+    can_delete = False
+    show_change_link = True
+    fields = ['shipment_link', 'supplier_or_rihan', 'status', 'carrier', 'tracking_code', 'shipped_at_fa_inline']
+    readonly_fields = ['shipment_link', 'supplier_or_rihan', 'status', 'carrier', 'tracking_code', 'shipped_at_fa_inline']
+    verbose_name = "مرسوله"
+    verbose_name_plural = "مرسوله‌های این سفارش"
+
+    @admin.display(description='مرسوله')
+    def shipment_link(self, obj):
+        if not obj or not obj.pk:
+            return '-'
+        url = _admin_reverse('order_shipment_change', args=[obj.pk])
+        label = f'#{str(obj.pk)[:8].upper()}'
+        return format_html('<a href="{}"><b>{}</b></a>', url, label)
+
+    @admin.display(description='ارسال توسط')
+    def supplier_or_rihan(self, obj):
+        if not obj:
+            return '-'
+        return obj.supplier.title if obj.supplier_id else 'ریهان'
+
+    @admin.display(description='زمان ارسال')
+    def shipped_at_fa_inline(self, obj):
+        from src.core.fa import jalali_human
+        return jalali_human(obj.shipped_at) if obj and obj.shipped_at else '-'
+
+
+# اتصال اینلاین به ادمین موجود سفارش
+OrderAdmin.inlines = [*OrderAdmin.inlines, ShipmentInline]
+
+
+@admin.register(Shipment)
+class ShipmentAdmin(admin.ModelAdmin):
+    formfield_overrides = {}  # placeholder تا فیلدهای سفارشی لازم نشود
+
+    list_display = ['shipment_id_short', 'order_link', 'supplier_or_rihan', 'status_badge',
+                    'carrier_label', 'tracking_code_ltr', 'notified_summary', 'shipped_at_fa']
+    list_filter = ['status', 'fulfiller', 'carrier']
+    search_fields = ['tracking_code', 'order__order_number', 'supplier__title']
+    ordering = ['-created_at']
+    autocomplete_fields = []
+    readonly_fields = ['order', 'fulfiller', 'supplier', 'sent_to_supplier_at', 'last_notified_at',
+                       'supplier_notified_count', 'created_at', 'updated_at', 'dispatch_preview']
+    fieldsets = [
+        ('مرسوله', {'fields': ['order', 'fulfiller', 'supplier', 'status', 'notes']}),
+        ('ارسال (کد رهگیری)', {'fields': ['carrier', 'tracking_code', 'shipped_at', 'delivered_at']}),
+        ('اطلاع‌رسانی به تامین‌کننده', {'fields': ['sent_to_supplier_at', 'last_notified_at', 'supplier_notified_count']}),
+        ('📋 متن دستور ارسال محوله (کپی برای تامین‌کننده)', {'fields': ['dispatch_preview']}),
+        ('زمان‌ها', {'classes': ['collapse'], 'fields': ['created_at', 'updated_at']}),
+    ]
+    actions = ['action_mark_delivered', 'action_resend_supplier_sms', 'action_resend_customer_sms']
+
+    # ── ستون‌های لیست ──
+    @admin.display(description='مرسوله', ordering='id')
+    def shipment_id_short(self, obj):
+        return f'#{str(obj.pk)[:8].upper()}'
+
+    @admin.display(description='سفارش', ordering='order__order_number')
+    def order_link(self, obj):
+        url = _admin_reverse('order_order_change', args=[obj.order.pk])
+        return format_html('<a href="{}">{}</a>', url, obj.order.order_number)
+
+    @admin.display(description='ارسال توسط')
+    def supplier_or_rihan(self, obj):
+        return obj.supplier.title if obj.supplier_id else 'ریهان'
+
+    @admin.display(description='وضعیت')
+    def status_badge(self, obj):
+        colors = {
+            Shipment.Status.NEW: '#c8a24b',
+            Shipment.Status.SHIPPED: '#28a745',
+            Shipment.Status.DELIVERED: '#0D3B2E',
+            Shipment.Status.CANCELED: '#999999',
+        }
+        return format_html(
+            '<span style="background:{};color:#fff;padding:2px 10px;border-radius:12px;font-size:11px;">{}</span>',
+            colors.get(obj.status, '#666'), obj.get_status_display())
+
+    @admin.display(description='شرکت حمل')
+    def carrier_label(self, obj):
+        return obj.get_carrier_display()
+
+    @admin.display(description='کد رهگیری')
+    def tracking_code_ltr(self, obj):
+        if not obj.tracking_code:
+            return format_html('<span style="color:#c00;">ثبت نشده</span>')
+        return format_html('<span dir="ltr" style="font-family:monospace;">{}</span>', obj.tracking_code)
+
+    @admin.display(description='اطلاع‌رسانی')
+    def notified_summary(self, obj):
+        if not obj.supplier_id:
+            return '—'
+        if obj.sent_to_supplier_at:
+            from src.core.fa import jalali_human
+            return f'✅ ×{obj.supplier_notified_count} | {jalali_human(obj.last_notified_at)}'
+        return format_html('<span style="color:#c00;">هنوز اطلاع داده نشده</span>')
+
+    @admin.display(description='زمان ارسال')
+    def shipped_at_fa(self, obj):
+        from src.core.fa import jalali_human
+        return jalali_human(obj.shipped_at) if obj.shipped_at else '-'
+
+    # ── متن دستور ارسال با دکمه کپی ──
+    @admin.display(description='متن آماده ارسال به تامین‌کننده')
+    def dispatch_preview(self, obj):
+        if not obj or not obj.pk:
+            return '-'
+        text = _fulfillment.dispatch_instruction_text(obj)
+        copy_js = (
+            '<script>'
+            'document.addEventListener("click",function(e){'
+            'var b=e.target.closest(".rihan-copy-dispatch");if(!b)return;'
+            'var t=document.getElementById("rihan-dispatch-text");if(!t)return;'
+            'var txt=t.textContent.trim();'
+            'var done=function(){var o=b.textContent;b.textContent="\u2705 \u06a9\u067e\u06cc \u0634\u062f";'
+            'setTimeout(function(){b.textContent=o},1800)};'
+            'if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(txt).then(done);}else{'
+            'var r=document.createRange();r.selectNodeContents(t);var s=window.getSelection();s.removeAllRanges();s.addRange(r);'
+            'try{document.execCommand("copy");done();}catch(err){}}});'
+            '</script>'
+        )
+        button = '<button type="button" class="button rihan-copy-dispatch">\U0001f4cb \u06a9\u067e\u06cc \u0645\u062a\u0646 \u062f\u0633\u062a\u0648\u0631 \u0627\u0631\u0633\u0627\u0644</button>'
+        pre = format_html(
+            '<pre dir="rtl" id="rihan-dispatch-text" '
+            'style="white-space:pre-wrap;background:#FAF7F0;padding:14px;border-radius:10px;'
+            'border:1px solid #ddd;line-height:1.9;font-size:13px;">{}</pre>', text)
+        return format_html('{}{}{}', mark_safe(button), pre, mark_safe(copy_js))
+
+    # ── اکشن‌ها ──
+    @admin.action(description='✅ علامت‌گذاری «تحویل داده شد»')
+    def action_mark_delivered(self, request, queryset):
+        n = 0
+        for shipment in queryset.exclude(status=Shipment.Status.DELIVERED):
+            _fulfillment.mark_delivered(shipment, user=request.user)
+            n += 1
+        self.message_user(request, f'{n} مرسوله تحویل‌شده علامت خورد.')
+
+    @admin.action(description='📨 ارسال دوباره پیامک به تامین‌کننده')
+    def action_resend_supplier_sms(self, request, queryset):
+        ok = fail = 0
+        for shipment in queryset.filter(fulfiller=Shipment.FulfillerType.SUPPLIER).exclude(supplier=None):
+            if _fulfillment.send_supplier_assignment_sms(shipment):
+                ok += 1
+            else:
+                fail += 1
+        msg = f'{ok} پیامک موفق'
+        if fail:
+            msg += f'، {fail} ناموفق (جزئیات در «لاگ اطلاع‌رسانی»)'
+        self.message_user(request, msg)
+
+    @admin.action(description='📩 ارسال/ارسال مجدد پیامک رهگیری به مشتری')
+    def action_resend_customer_sms(self, request, queryset):
+        ok = skip = 0
+        for shipment in queryset.exclude(tracking_code=''):
+            phone = _fulfillment.customer_phone(shipment.order)
+            sent = _fulfillment._send_sms(
+                'CUSTOMER_SHIPPED', phone,
+                _fulfillment.customer_shipped_text(shipment),
+                order=shipment.order, shipment=shipment)
+            ok += int(bool(sent))
+            skip += int(not sent)
+        self.message_user(request, f'{ok} پیامک ارسال شد، {skip} ناموفق/بدون شماره.')
+
+
+@admin.register(NotificationLog)
+class NotificationLogAdmin(admin.ModelAdmin):
+    list_display = ['kind_label', 'recipient', 'success_icon', 'detail', 'order_number', 'created_at']
+    list_filter = ['kind', 'success']
+    search_fields = ['recipient', 'order__order_number', 'detail']
+    ordering = ['-created_at']
+
+    @admin.display(description='نوع')
+    def kind_label(self, obj):
+        return obj.get_kind_display()
+
+    @admin.display(description='نتیجه', boolean=True)
+    def success_icon(self, obj):
+        return obj.success
+
+    @admin.display(description='سفارش')
+    def order_number(self, obj):
+        return obj.order.order_number if obj.order_id else '-'

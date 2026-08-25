@@ -251,7 +251,9 @@ class CardToCardPaymentTest(TestCase):
         payment.refresh_from_db()
         self.inventory.refresh_from_db()
         
-        self.assertEqual(order.status, Order.OrderStatus.PAID)
+        # D-105: پس از تایید، مرسوله‌ها خودکار ساخته و سفارش «در حال آماده‌سازی» می‌شود
+        self.assertEqual(order.status, Order.OrderStatus.PROCESSING)
+        self.assertTrue(order.shipments.count() >= 1)
         self.assertEqual(payment.status, Payment.PaymentStatus.SUCCESS)
         self.assertEqual(payment.reviewed_by, self.admin)
         self.assertEqual(payment.sender_card_last4, '9999')  # Evidence preserved
@@ -395,7 +397,9 @@ class CardToCardPaymentTest(TestCase):
         payment.refresh_from_db()
         self.inventory.refresh_from_db()
         
-        self.assertEqual(order.status, Order.OrderStatus.PAID)
+        # D-105: پس از تایید، مرسوله‌ها خودکار ساخته و سفارش «در حال آماده‌سازی» می‌شود
+        self.assertEqual(order.status, Order.OrderStatus.PROCESSING)
+        self.assertTrue(order.shipments.count() >= 1)
         self.assertEqual(payment.status, Payment.PaymentStatus.SUCCESS)
         self.assertEqual(float(self.inventory.quantity), 95.0)  # 100 - 5
         self.assertEqual(float(self.inventory.reserved_quantity), 0.0)

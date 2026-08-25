@@ -1,139 +1,143 @@
 """
-تست‌های پنل تأمین‌کننده (M4)
-منطبق بر US-028 و US-029
+تست‌های پنل تامین‌کننده — نسخه D-105 (مرسوله‌محور)
+تامین‌کننده فقط مرسوله‌های خودش را می‌بیند؛ بدون هیچ قیمتی.
 """
 from django.test import TestCase, Client
 from django.contrib.auth import get_user_model
 from django.urls import reverse
+from unittest.mock import patch
 
 from src.modules.catalog.models import Supplier, Product, Category
-from src.modules.order.models import Order, OrderItem
+from src.modules.order.models import Order, OrderItem, Shipment
+from src.modules.order.fulfillment import build_shipments, mark_shipped
 from src.modules.rbac.services.role_service import RoleService
 
 User = get_user_model()
 
 
 class SupplierPanelTestCase(TestCase):
-    """تست‌های پایه پنل تأمین‌کننده"""
-    
+    """تست‌های پایه پنل تأمین‌کننده (D-105)"""
+
     def setUp(self):
-        """ایجاد داده‌های تست"""
         self.client = Client()
-        
-        # ایجاد نقش‌های سیستمی
         RoleService.create_system_roles()
-        
-        # ایجاد کاربر تأمین‌کننده
-        self.supplier_user = User.objects.create_user(
-            username='supplier1',
-            password='testpass123',
-        )
-        
-        # ایجاد Supplier و اتصال به کاربر
+
+        self.supplier_user = User.objects.create_user(username='supplier1', password='testpass123')
         self.supplier = Supplier.objects.create(
-            title='تأمین‌کننده خشکبار هوراند',
-            city='هوراند',
-            phone='09121234567',
-            user=self.supplier_user,
+            title='تأمین‌کننده خشکبار', city='تبریز',
+            phone='09121234567', user=self.supplier_user,
         )
-        
-        # اعطای نقش supplier
         RoleService.assign_role(self.supplier_user, 'supplier')
-        
-        # ایجاد کاربر عادی (بدون نقش supplier)
-        self.regular_user = User.objects.create_user(
-            username='customer1',
-            password='testpass123',
-        )
-        
-        # ایجاد دسته‌بندی و محصول
-        self.category = Category.objects.create(
-            name='خشکبار',
-            slug='dried-fruits',
-        )
-        
+
+        self.regular_user = User.objects.create_user(username='customer1', password='testpass123')
+
+        self.category = Category.objects.create(name='خشکبار', slug='dried-fruits')
         self.product = Product.objects.create(
-            name='سماق هوراند',
-            slug='sumac-horand',
-            category=self.category,
-            supplier=self.supplier,
-            base_price=50000,
-            final_price=65000,
-            short_description='سماق درجه یک هوراند',
-            origin_story='از مزارع هوراند',
+            name='سماق ممتاز', slug='sumac-premium',
+            category=self.category, supplier=self.supplier,
+            base_price=50000, final_price=65000,
+            short_description='سماق درجه یک', origin_story='تست',
             status='active',
         )
-        
-        # ایجاد سفارش با محصول تأمین‌کننده
+
         self.order = Order.objects.create(
-            user=self.regular_user,
-            status='PAID',
-            subtotal=65000,
-            total_price=65000,
-            guest_name='تست مشتری',
-            guest_phone='09129876543',
+            user=self.regular_user, status='PAID',
+            subtotal=65000, total_price=65000,
+            guest_name='مشتری تستی', guest_phone='09129876543',
+            guest_postal_code='5151411111',
+            guest_address='تبریز، خیابان تست، پلاک ۱',
         )
-        
         self.order_item = OrderItem.objects.create(
-            order=self.order,
-            product=self.product,
-            quantity=1,
-            unit_price_at_purchase=65000,
-            product_name_snapshot='سماق هوراند',
+            order=self.order, product=self.product, quantity=2,
+            unit_price_at_purchase=65000, product_name_snapshot='سماق ممتاز',
         )
-    
+        # D-105: ساخت مرسوله برای سفارش پرداخت‌شده
+        self.shipment = build_shipments(self.order)[0]
+
     def test_supplier_dashboard_access(self):
-        """US-028: تأمین‌کننده می‌تواند وارد داشبورد شود"""
         self.client.login(username='supplier1', password='testpass123')
         response = self.client.get(reverse('supplier_panel:dashboard'))
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, 'پنل تأمین‌کننده')
-    
+        self.assertContains(response, 'پنل تامین‌کننده')
+
     def test_regular_user_cannot_access_supplier_panel(self):
-        """امنیت: کاربر عادی نمی‌تواند به پنل تأمین‌کننده دسترسی پیدا کند"""
         self.client.login(username='customer1', password='testpass123')
         response = self.client.get(reverse('supplier_panel:dashboard'))
         self.assertEqual(response.status_code, 403)
-    
-    def test_supplier_sees_only_own_orders(self):
-        """US-029: تأمین‌کننده فقط سفارشات خودش را می‌بیند"""
+
+    def test_supplier_sees_only_own_shipments(self):
         self.client.login(username='supplier1', password='testpass123')
-        response = self.client.get(reverse('supplier_panel:order_list'))
+        response = self.client.get(reverse('supplier_panel:shipment_list'))
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, self.order.order_number)
-    
-    def test_submit_tracking_code(self):
-        """US-029: تأمین‌کننده می‌تواند کد رهگیری ثبت کند"""
+
+    def test_shipment_detail_has_no_prices(self):
+        """امنیت تجاری: صفحه مرسوله هرگز قیمت ندارد — فقط مقدار و آدرس"""
         self.client.login(username='supplier1', password='testpass123')
-        
-        url = reverse('supplier_panel:submit_tracking', args=[self.order.id])
-        response = self.client.post(url, {
-            'tracking_code': '12345678901234567890',
-            'shipping_method': 'post',
-        })
-        
-        self.assertEqual(response.status_code, 302)  # Redirect
-        
-        # بررسی تغییر وضعیت سفارش
+        response = self.client.get(reverse('supplier_panel:shipment_detail', args=[self.shipment.pk]))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'سماق ممتاز')
+        self.assertContains(response, '09129876543')
+        self.assertNotContains(response, '65000')
+        self.assertNotContains(response, 'تومان')
+
+    def test_submit_tracking_code_sends_customer_sms(self):
+        self.client.login(username='supplier1', password='testpass123')
+        url = reverse('supplier_panel:shipment_detail', args=[self.shipment.pk])
+
+        with patch('src.modules.auth.services.sms_service.SmsService.send_sms') as mock_sms:
+            mock_sms.return_value = (True, 'mock')
+            response = self.client.post(url, {
+                'carrier': 'POST',
+                'tracking_code': '12345678901234567890',
+            })
+
+        self.assertEqual(response.status_code, 302)
+        self.shipment.refresh_from_db()
+        self.assertEqual(self.shipment.status, Shipment.Status.SHIPPED)
+        self.assertEqual(self.shipment.tracking_code, '12345678901234567890')
         self.order.refresh_from_db()
         self.assertEqual(self.order.status, 'SHIPPED')
-        self.assertEqual(self.order.tracking_code, '12345678901234567890')
-    
-    def test_supplier_cannot_submit_tracking_for_other_orders(self):
-        """امنیت: تأمین‌کننده نمی‌تواند برای سفارش دیگران کد ثبت کند"""
-        # ایجاد سفارش بدون محصول این تأمین‌کننده
-        other_order = Order.objects.create(
-            user=self.regular_user,
-            status='PAID',
-            subtotal=100000,
-            total_price=100000,
-            guest_name='مشتری دیگر',
-            guest_phone='09121111111',
-        )
-        
+        # پیامک مشتری دقیقاً یک‌بار ارسال شده
+        self.assertEqual(mock_sms.call_count, 1)
+        message = mock_sms.call_args[0][1]
+        self.assertIn('/order/t/', message)
+
+    def test_persian_digits_accepted(self):
         self.client.login(username='supplier1', password='testpass123')
-        url = reverse('supplier_panel:submit_tracking', args=[other_order.id])
+        url = reverse('supplier_panel:shipment_detail', args=[self.shipment.pk])
+        with patch('src.modules.auth.services.sms_service.SmsService.send_sms') as mock_sms:
+            mock_sms.return_value = (True, 'mock')
+            response = self.client.post(url, {
+                'carrier': 'POST',
+                'tracking_code': '۱۲۳۴۵۶۷۸۹۰۱۲۳۴۵۶۷۸۹۰',
+            })
+        self.assertEqual(response.status_code, 302)
+        self.shipment.refresh_from_db()
+        self.assertEqual(self.shipment.tracking_code, '12345678901234567890')
+
+    def test_supplier_cannot_access_other_suppliers_shipment(self):
+        other_supplier = Supplier.objects.create(title='دیگری', city='تهران', phone='09350000000')
+        other_order = Order.objects.create(
+            user=self.regular_user, status='PAID',
+            subtotal=100000, total_price=100000,
+            guest_name='مشتری دیگر', guest_phone='09121111111',
+        )
+        # محصول بدون تامین‌کننده → مرسوله ریهان (نه این تامین‌کننده)
+        no_sup_product = Product.objects.create(
+            name='محصول داخلی', slug='inhouse-product',
+            category=self.category, base_price=10000, final_price=12000,
+            short_description='x', origin_story='x', status='active',
+        )
+        item = OrderItem.objects.create(
+            order=other_order, product=no_sup_product, quantity=1,
+            unit_price_at_purchase=10000, product_name_snapshot='محصول داخلی',
+        )
+        riha_shipment = build_shipments(other_order)[0]
+        self.assertEqual(riha_shipment.fulfiller, Shipment.FulfillerType.RIHAN)
+
+        self.client.login(username='supplier1', password='testpass123')
+        url = reverse('supplier_panel:shipment_detail', args=[riha_shipment.pk])
         response = self.client.get(url)
-        
-        # باید 404 برگردد چون سفارش مرتبط با این تأمین‌کننده نیست
+        # مرسوله ریهان متعلق به هیچ تامین‌کننده‌ای نیست → ۴۰۴
         self.assertEqual(response.status_code, 404)

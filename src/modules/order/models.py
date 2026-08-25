@@ -474,3 +474,136 @@ class BankAccount(models.Model):
 
     def __str__(self):
         return '{} - {}'.format(self.bank_name, self.card_grouped)
+
+# ═══════════════════════════════════════════════════════════════════
+# D-105 — مرسوله‌ها (Shipment): تفکیک ارسال بر اساس تامین‌کننده / ریهان
+# هر سفارش می‌تواند چند مرسوله داشته باشد (سفارش چندتامین‌کننده‌ای)؛
+# هر مرسوله کد رهگیری مستقل خودش را دارد.
+# ═══════════════════════════════════════════════════════════════════
+
+class Shipment(models.Model):
+    """یک بسته‌ی ارسالی از یک سفارش — یا به عهده تامین‌کننده یا ریهان"""
+
+    class FulfillerType(models.TextChoices):
+        SUPPLIER = 'SUPPLIER', 'تامین‌کننده'
+        RIHAN = 'RIHAN', 'ریهان (ارسال داخلی)'
+
+    class Status(models.TextChoices):
+        NEW = 'NEW', 'در انتظار ارسال'
+        SHIPPED = 'SHIPPED', 'ارسال شده'
+        DELIVERED = 'DELIVERED', 'تحویل داده شد'
+        CANCELED = 'CANCELED', 'لغو شده'
+
+    class Carrier(models.TextChoices):
+        POST = 'POST', 'پست پیشتاز'
+        TIPAX = 'TIPAX', 'تیپاکس'
+        CHAPAR = 'CHAPAR', 'چاپار'
+        OTHER = 'OTHER', 'سایر'
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    order = models.ForeignKey(
+        Order, on_delete=models.CASCADE, related_name='shipments', verbose_name="سفارش")
+    fulfiller = models.CharField(
+        max_length=10, choices=FulfillerType.choices, default=FulfillerType.SUPPLIER,
+        verbose_name="ارسال توسط")
+    supplier = models.ForeignKey(
+        'catalog.Supplier', on_delete=models.SET_NULL, null=True, blank=True,
+        related_name='shipments', verbose_name="تامین‌کننده")
+
+    status = models.CharField(
+        max_length=10, choices=Status.choices, default=Status.NEW,
+        db_index=True, verbose_name="وضعیت")
+    carrier = models.CharField(
+        max_length=10, choices=Carrier.choices, default=Carrier.POST,
+        verbose_name="شرکت حمل")
+    tracking_code = models.CharField(
+        max_length=40, blank=True, default='', db_index=True,
+        verbose_name="کد رهگیری")
+
+    # اطلاع‌رسانی به تامین‌کننده
+    sent_to_supplier_at = models.DateTimeField(
+        null=True, blank=True, verbose_name="زمان اولین اطلاع‌رسانی")
+    last_notified_at = models.DateTimeField(
+        null=True, blank=True, verbose_name="آخرین یادآوری")
+    supplier_notified_count = models.PositiveSmallIntegerField(
+        default=0, verbose_name="تعداد پیامک ارسالی به تامین‌کننده")
+
+    shipped_at = models.DateTimeField(null=True, blank=True, verbose_name="زمان ارسال")
+    delivered_at = models.DateTimeField(null=True, blank=True, verbose_name="زمان تحویل")
+    notes = models.TextField(blank=True, default='', verbose_name="یادداشت هماهنگی ارسال")
+
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="ایجاد")
+    updated_at = models.DateTimeField(auto_now=True, verbose_name="به‌روزرسانی")
+
+    class Meta:
+        verbose_name = "مرسوله"
+        verbose_name_plural = "مرسوله‌ها"
+        ordering = ['-created_at']
+
+    def __str__(self):
+        who = self.supplier.title if self.supplier_id else self.get_fulfiller_display()
+        return f'{self.order.order_number} ← {who}'
+
+    @property
+    def tracking_url(self):
+        """لینک مستقیم سامانه باربری که با باز شدن، جست‌وجو با کد انجام شده است"""
+        if not self.tracking_code:
+            return ''
+        from .fulfillment import build_tracking_url
+        return build_tracking_url(self.carrier, self.tracking_code)
+
+
+class ShipmentItem(models.Model):
+    """اتصال اقلام سفارش به مرسوله — مقدار بدون قیمت"""
+    shipment = models.ForeignKey(
+        Shipment, on_delete=models.CASCADE, related_name='items', verbose_name="مرسوله")
+    order_item = models.ForeignKey(
+        OrderItem, on_delete=models.CASCADE, related_name='shipment_items',
+        verbose_name="قلم سفارش")
+    quantity = models.PositiveIntegerField(default=1, verbose_name="تعداد")
+
+    class Meta:
+        verbose_name = "قلم مرسوله"
+        verbose_name_plural = "اقلام مرسوله"
+        constraints = [
+            models.UniqueConstraint(fields=['shipment', 'order_item'], name='uniq_shipment_order_item')
+        ]
+
+    def __str__(self):
+        return f'{self.order_item} → مرسوله {self.shipment_id}'
+
+
+# ═══════════════════════════════════════════════════════════════════
+# D-105 — لاگ اطلاع‌رسانی: حتی اگر پیامک نرفت، ادمین می‌بیند چه اتفاقی افتاد
+# ═══════════════════════════════════════════════════════════════════
+
+class NotificationLog(models.Model):
+    """ثبت همه پیامک‌های عملیاتی (تخصیص به تامین‌کننده / رهگیری برای مشتری)"""
+
+    class Kind(models.TextChoices):
+        SUPPLIER_ASSIGN = 'SUPPLIER_ASSIGN', 'پیامک سفارش جدید به تامین‌کننده'
+        CUSTOMER_SHIPPED = 'CUSTOMER_SHIPPED', 'پیامک کد رهگیری به مشتری'
+        SYSTEM = 'SYSTEM', 'سیستمی'
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    kind = models.CharField(max_length=20, choices=Kind.choices, db_index=True,
+                            verbose_name="نوع اطلاع‌رسانی")
+    recipient = models.CharField(max_length=20, blank=True, verbose_name="گیرنده")
+    success = models.BooleanField(default=False, verbose_name="ارسال موفق")
+    detail = models.CharField(max_length=250, blank=True, default='',
+                              verbose_name="جزئیات / سرویس‌دهنده")
+    order = models.ForeignKey(
+        Order, on_delete=models.SET_NULL, null=True, blank=True,
+        related_name='notifications', verbose_name="سفارش")
+    shipment = models.ForeignKey(
+        Shipment, on_delete=models.SET_NULL, null=True, blank=True,
+        related_name='notifications', verbose_name="مرسوله")
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="زمان")
+
+    class Meta:
+        verbose_name = "لاگ اطلاع‌رسانی"
+        verbose_name_plural = "لاگ اطلاع‌رسانی‌ها"
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f'{self.get_kind_display()} ← {self.recipient} ({"" if self.success else "ناموفق"})'

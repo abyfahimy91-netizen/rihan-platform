@@ -187,7 +187,9 @@ class OrderInventoryIntegrationTestCase(TestCase):
         order = create_order_from_cart(cart, user=self.user)
         order = confirm_payment(order, admin_user=self.admin)
         
-        self.assertEqual(order.status, Order.OrderStatus.PAID)
+        # D-105: پس از تایید، مرسوله‌ها خودکار ساخته و سفارش «در حال آماده‌سازی» می‌شود
+        self.assertEqual(order.status, Order.OrderStatus.PROCESSING)
+        self.assertTrue(order.shipments.count() >= 1)
         
         inventory = Inventory.objects.get(product=self.product_a)
         self.assertEqual(inventory.quantity, Decimal('7'))

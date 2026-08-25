@@ -1,0 +1,458 @@
+{% extends "catalog/base.html" %}{% load fa_tags %}
+
+{% block title %}پرداخت سفارش {{ order.order_number }} | ریهان{% endblock %}
+{% block meta_description %}پرداخت امن سفارش با کارت‌به‌کارت — کپی سریع شماره کارت و ثبت آسان رسید{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* ── چیدمان کلی ── */
+    .pay-wrap{max-width:680px;margin:0 auto;}
+    .pay-head{text-align:center;margin-bottom:8px;}
+    .pay-head h1{font-size:32px;font-weight:900;color:var(--color-text);margin-bottom:6px;}
+    .pay-sub{color:var(--color-text-muted);font-size:15px;}
+
+    /* ── چیپ شماره سفارش ── */
+    .order-chip{display:inline-flex;align-items:center;gap:10px;background:#fff;border:1.5px dashed var(--color-secondary);
+        border-radius:999px;padding:8px 18px;margin-top:14px;font-size:14px;color:var(--color-text-muted);}
+    .order-chip b{font-family:monospace;font-size:16px;color:var(--color-primary);letter-spacing:1px;}
+    .chip-copy{background:var(--color-secondary);border:none;color:#fff;font-size:12px;font-weight:700;
+        padding:5px 12px;border-radius:999px;cursor:pointer;font-family:inherit;transition:.2s;}
+    .chip-copy:hover{filter:brightness(.94);}
+
+    /* ── هیرو مبلغ ── */
+    .pay-hero{background:#fff;border-radius:18px;border:1px solid var(--color-border);box-shadow:0 4px 20px rgba(0,0,0,.05);
+        padding:22px 26px;margin:26px 0;display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;}
+    .pay-hero .lbl{font-size:13.5px;color:var(--color-text-muted);margin-bottom:4px;}
+    .pay-hero .amt{font-size:30px;font-weight:900;color:var(--color-primary);}
+    .pay-hero .amt small{font-size:15px;font-weight:700;color:var(--color-text-muted);}
+
+    /* ── کارت بانکی مقصد ── */
+    .sec-title{display:flex;align-items:center;gap:10px;font-size:19px;font-weight:800;color:var(--color-text);margin:30px 0 14px;}
+    .sec-title .num{width:28px;height:28px;border-radius:50%;background:var(--color-primary);color:#fff;display:flex;
+        align-items:center;justify-content:center;font-size:14px;font-weight:800;}
+    .bank-card{position:relative;background:linear-gradient(135deg,#0D3B2E 0%,#155742 55%,#092A21 100%);
+        border-radius:18px;padding:22px 22px 18px;color:#fff;box-shadow:0 12px 32px rgba(13,59,46,.28);
+        overflow:hidden;margin-bottom:16px;}
+    .bank-card::before{content:'';position:absolute;inset:0;
+        background:radial-gradient(circle at 88% -15%,rgba(201,169,97,.35),transparent 52%);pointer-events:none;}
+    .bc-top{display:flex;justify-content:space-between;align-items:center;gap:10px;position:relative;}
+    .bc-bank{display:flex;align-items:center;gap:9px;font-weight:800;font-size:16px;}
+    .bc-chip{width:38px;height:28px;border-radius:6px;background:linear-gradient(135deg,#E8CE8C,#C9A961 45%,#B3924A);
+        display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+    .bc-label{background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.25);border-radius:999px;
+        font-size:11.5px;padding:4px 12px;color:#F5EBD3;}
+    .bc-number{direction:ltr;text-align:center;font-family:'SF Mono',Consolas,monospace;font-size:clamp(17px,4.6vw,23px);
+        font-weight:700;letter-spacing:3px;margin:20px 0 16px;text-shadow:0 1px 3px rgba(0,0,0,.35);word-break:keep-all;}
+    .bc-bottom{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;position:relative;}
+    .bc-holder{font-size:13.5px;color:#DFEAE4;}
+    .bc-holder b{color:#fff;font-weight:700;}
+    .copy-btn{display:inline-flex;align-items:center;gap:6px;background:linear-gradient(135deg,#E3C98A,#C9A961);
+        color:#12362a;border:none;font-family:inherit;font-weight:800;font-size:13px;padding:8px 16px;border-radius:10px;
+        cursor:pointer;transition:all .2s;white-space:nowrap;}
+    .copy-btn:hover{transform:translateY(-1px);box-shadow:0 6px 16px rgba(201,169,97,.4);}
+    .copy-btn:active{transform:translateY(0);}
+    .copy-btn.ghosty{background:rgba(255,255,255,.12);color:#fff;border:1px solid rgba(255,255,255,.3);}
+    .copy-btn svg{width:15px;height:15px;flex-shrink:0;}
+
+    /* ── راهنما ── */
+    .guide-box{background:#FBF7EC;border:1px solid rgba(201,169,97,.35);border-radius:16px;padding:18px 20px;margin:22px 0;}
+    .guide-box h3{font-size:15px;font-weight:800;color:var(--color-primary);margin-bottom:12px;display:flex;align-items:center;gap:8px;}
+    .guide-steps{display:flex;gap:10px;flex-wrap:wrap;}
+    .guide-item{flex:1;min-width:150px;background:#fff;border-radius:12px;padding:12px 14px;font-size:13px;
+        color:var(--color-text-muted);line-height:1.9;display:flex;gap:9px;align-items:flex-start;}
+    .guide-item .gi{font-size:19px;line-height:1.4;}
+    .guide-item b{color:var(--color-text);}
+
+    /* ── فرم ثبت رسید ── */
+    .evidence-form{background:#fff;border-radius:18px;border:1px solid var(--color-border);
+        box-shadow:0 4px 20px rgba(0,0,0,.05);padding:26px;}
+    .fg{margin-bottom:20px;}
+    .fg > label{display:block;font-size:14px;font-weight:700;color:var(--color-text);margin-bottom:9px;}
+    .last4-input{width:190px;max-width:100%;text-align:center;font-family:monospace;font-size:27px;font-weight:800;
+        letter-spacing:10px;padding:13px 4px 13px 14px;border:2px solid var(--color-border);border-radius:14px;
+        direction:ltr;background:#FAFAF7;transition:.2s;display:block;margin:0 auto;}
+    .last4-input:focus{outline:none;border-color:var(--color-primary);background:#fff;box-shadow:0 0 0 4px rgba(13,59,46,.08);}
+    .last4-hint{text-align:center;font-size:12px;color:var(--color-text-muted);margin-top:8px;}
+    .upload-zone{border:2px dashed var(--color-border);border-radius:14px;padding:22px;text-align:center;cursor:pointer;
+        transition:.2s;background:#FCFBF7;}
+    .upload-zone:hover,.upload-zone.drag{border-color:var(--color-secondary);background:#FBF7EC;}
+    .upload-zone .uz-icon{font-size:28px;margin-bottom:6px;}
+    .upload-zone .uz-t{font-size:14px;font-weight:700;color:var(--color-text);}
+    .upload-zone .uz-s{font-size:12px;color:var(--color-text-muted);margin-top:4px;}
+    .upload-zone input{display:none;}
+    .file-pill{display:none;align-items:center;gap:10px;background:#F2F7EF;border:1px solid #CFE3CC;border-radius:12px;
+        padding:10px 14px;font-size:13px;color:var(--color-text);margin-top:10px;}
+    .file-pill img{width:44px;height:44px;object-fit:cover;border-radius:8px;}
+    .file-pill .fp-x{margin-right:auto;background:none;border:none;color:#b3402f;cursor:pointer;font-size:12px;font-weight:700;font-family:inherit;}
+    details.adv{border-top:1px dashed var(--color-border);padding-top:14px;margin-top:4px;}
+    details.adv summary{cursor:pointer;font-size:13px;font-weight:700;color:var(--color-text-muted);list-style:none;
+        display:flex;align-items:center;gap:7px;}
+    details.adv summary::before{content:'＋';font-size:15px;color:var(--color-secondary);}
+    details.adv[open] summary::before{content:'－';}
+    .adv-body{margin-top:12px;}
+    .dt-input{width:100%;max-width:280px;padding:11px 14px;border:1.5px solid var(--color-border);border-radius:10px;
+        font-family:inherit;font-size:14px;background:#FAFAF7;direction:ltr;}
+    .submit-btn{width:100%;padding:17px;border:none;border-radius:14px;cursor:pointer;font-family:inherit;font-size:16.5px;
+        font-weight:800;color:#fff;background:linear-gradient(135deg,var(--color-primary),#17604a);
+        display:flex;align-items:center;justify-content:center;gap:10px;transition:all .25s;margin-top:8px;}
+    .submit-btn:hover{transform:translateY(-2px);box-shadow:0 12px 26px rgba(13,59,46,.32);}
+    .submit-btn:disabled{opacity:.65;cursor:not-allowed;transform:none;box-shadow:none;}
+    .submit-btn .spin{display:none;width:19px;height:19px;border:2.5px solid rgba(255,255,255,.4);
+        border-top-color:#fff;border-radius:50%;animation:rx-spin .7s linear infinite;}
+    .submit-btn.loading .spin{display:inline-block;}
+    @keyframes rx-spin{to{transform:rotate(360deg);}}
+    .form-note{text-align:center;font-size:12.5px;color:var(--color-text-muted);margin-top:14px;line-height:2;}
+
+    /* ── هشدارها ── */
+    .alert-box{border-radius:14px;padding:14px 18px;margin:0 0 18px;font-size:14px;line-height:1.9;}
+    .alert-err{background:#FDEEEC;border:1px solid #F2C9C2;color:#9c3a2a;}
+    .alert-ok{background:#EFF6EC;border:1px solid #CDE3C8;color:#2c5c33;}
+    .alert-info{background:#FBF7EC;border:1px solid rgba(201,169,97,.4);color:#7a6330;}
+
+    /* ── نوار اعتماد ── */
+    .trust-row{display:flex;justify-content:center;gap:20px;flex-wrap:wrap;margin:26px 0 8px;
+        font-size:12.5px;color:var(--color-text-muted);}
+    .trust-row span{display:inline-flex;align-items:center;gap:6px;}
+
+    /* ── توست ── */
+    .rx-toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(20px);background:#132A21;color:#fff;
+        padding:12px 26px;border-radius:999px;font-size:14px;font-weight:700;z-index:9999;opacity:0;
+        pointer-events:none;transition:all .3s;box-shadow:0 10px 30px rgba(0,0,0,.3);}
+    .rx-toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+    /* ── مهلت رزرو موجودی (D-099) ── */
+    .ttl-box{display:flex;align-items:center;justify-content:center;gap:12px;background:#fff;
+        border:1.5px dashed var(--color-secondary);border-radius:14px;padding:13px 18px;margin:18px 0 0;
+        font-size:14px;color:var(--color-text-muted);flex-wrap:wrap;text-align:center;}
+    .ttl-timer{font-family:monospace;font-size:21px;font-weight:800;color:var(--color-primary);
+        background:#F4F1E9;border-radius:10px;padding:3px 14px;direction:ltr;min-width:96px;text-align:center;}
+    .ttl-box.urgent{border-color:#e0a196;}
+    .ttl-box.urgent .ttl-timer{color:#c0392b;background:#FDEEEC;}
+    .cancel-form{margin-top:16px;text-align:center;}
+    .cancel-btn{background:none;border:none;color:#9c3a2a;font-family:inherit;font-size:13px;font-weight:700;
+        cursor:pointer;text-decoration:underline;text-decoration-color:rgba(156,58,42,.4);
+        text-underline-offset:4px;padding:8px 10px;}
+    .cancel-btn:hover{color:#7c2417;}
+
+    @media(max-width:560px){
+        .pay-head h1{font-size:25px;}
+        .pay-hero{padding:18px 20px;flex-direction:column;text-align:center;}
+        .pay-hero .amt{font-size:25px;}
+        .evidence-form{padding:20px 16px;}
+        .bank-card{padding:18px 16px 16px;}
+        .ttl-box{font-size:12.5px;padding:12px 14px;gap:9px;}
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    {% include "order/partials/checkout_steps.html" with current=3 %}
+
+    <div class="pay-wrap">
+        <div class="pay-head">
+            {% if order_cancelled %}
+            <h1>این سفارش لغو شده است</h1>
+            <p class="pay-sub">موجودی رزرو‌شده آزاد شده و هیچ پرداختی از شما ثبت نشده.</p>
+            {% else %}
+            <h1>پرداخت سفارش</h1>
+            <p class="pay-sub">تقریباً تموم شد! فقط واریز و ثبت رسید مانده 🌿</p>
+            {% endif %}
+            <div class="order-chip">
+                <span>شماره سفارش:</span>
+                <b dir="ltr">{{ order.order_number }}</b>
+                <button type="button" class="chip-copy js-copy" data-copy="{{ order.order_number }}" data-msg="شماره سفارش کپی شد ✓">کپی</button>
+            </div>
+
+            {% if can_pay and order.expires_at %}
+            <div class="ttl-box" id="ttlBox">
+                <span>⏳ موجودی این سفارش تا چند دقیقه دیگر فقط برای شما رزرو شده:</span>
+                <span class="ttl-timer" id="ttlTimer" data-remaining="{{ remaining_seconds }}">{% widthratio remaining_seconds 60 1 %} دقیقه</span>
+            </div>
+            {% endif %}
+        </div>
+
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert-box {% if message.tags == 'error' %}alert-err{% else %}alert-ok{% endif %}">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+
+        {% if errors %}
+            <div class="alert-box alert-err">
+                {% for e in errors %}<div>• {{ e }}</div>{% endfor %}
+            </div>
+        {% endif %}
+
+        {% if already_submitted %}
+            <div class="alert-box alert-info">
+                ✅ شما قبلاً رسید این سفارش را ثبت کرده‌اید. در صورت نیاز می‌توانید اطلاعات را دوباره ثبت کنید یا
+                <a href="{% url 'order_pages:tracking_page' order.order_number %}" style="font-weight:700;">وضعیت سفارش را پیگیری کنید</a>.
+            </div>
+        {% endif %}
+
+        {% if order_cancelled %}
+        <div class="alert-box alert-err" style="margin-top:26px;">
+            ⌛ این سفارش به دلیل تکمیل‌نشده پرداخت در مهلت مقرر، لغو شده و موجودی آن آزاد شده است.<br>
+            اگر قبلاً واریزی انجام داده‌اید، لطفاً پیش از خرید مجدد با پشتیبانی در تماس باشید.
+            {% if support_phone %}<div dir="ltr" style="text-align:center;font-weight:800;margin-top:6px;">{{ support_phone }}</div>{% endif %}
+        </div>
+        <div style="text-align:center;margin-top:20px;">
+            <a href="{% url 'order_pages:cart_page' %}" style="display:inline-flex;align-items:center;justify-content:center;gap:9px;
+               background:linear-gradient(135deg,var(--color-primary),#17604a);color:#fff;font-weight:800;font-size:15.5px;
+               padding:15px 34px;border-radius:13px;text-decoration:none;">بازگشت به سبد خرید</a>
+        </div>
+        {% elif accounts %}
+        <div class="pay-hero">
+            <div>
+                <div class="lbl">مبلغ قابل پرداخت</div>
+                <div class="amt">{{ amount_display|fa }} <small>تومان</small></div>
+            </div>
+            <button type="button" class="copy-btn js-copy"
+                    data-copy="{{ order.total_price }}"
+                    data-msg="مبلغ کپی شد ✓">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+                کپی مبلغ
+            </button>
+        </div>
+
+        <div class="sec-title"><span class="num">{{ 1|fa }}</span> به یکی از کارت‌های زیر واریز کنید</div>
+
+        {% for acc in accounts %}
+        <div class="bank-card">
+            <div class="bc-top">
+                <div class="bc-bank">
+                    <span class="bc-chip">
+                        <svg width="22" height="18" viewBox="0 0 24 18" fill="none"><rect x="1" y="1" width="22" height="16" rx="3" fill="none" stroke="#7a6330" stroke-width="1.6"/><path d="M4 6h6M4 9h6M4 12h4" stroke="#7a6330" stroke-width="1.4" stroke-linecap="round"/></svg>
+                    </span>
+                    {{ acc.bank_name }}
+                </div>
+                {% if acc.label %}<span class="bc-label">{{ acc.label }}</span>{% endif %}
+            </div>
+            <div class="bc-number">{{ acc.card_grouped }}</div>
+            <div class="bc-bottom">
+                <div class="bc-holder">به نام <b>{{ acc.card_holder }}</b></div>
+                <button type="button" class="copy-btn js-copy" data-copy="{{ acc.card_number }}" data-msg="شماره کارت کپی شد ✓ حالا در همراه بانک بچسبانید">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+                    کپی شماره کارت
+                </button>
+            </div>
+            {% if acc.iban %}
+            <div class="bc-bottom" style="margin-top:12px;">
+                <div class="bc-holder" dir="ltr" style="font-family:monospace;">{{ acc.iban }}</div>
+                <button type="button" class="copy-btn ghosty js-copy" data-copy="{{ acc.iban }}" data-msg="شماره شبا کپی شد ✓">
+                    کپی شبا
+                </button>
+            </div>
+            {% endif %}
+        </div>
+        {% endfor %}
+
+        <div class="guide-box">
+            <h3>💡 راهنمای سریع پرداخت</h3>
+            <div class="guide-steps">
+                <div class="guide-item"><span class="gi">📋</span><span>شماره کارت را با دکمه <b>«کپی»</b> بردارید و در اپ بانکی خود بچسبانید.</span></div>
+                <div class="guide-item"><span class="gi">💳</span><span>مبلغ را دقیقاً به <b>تومان</b> واریز کنید؛ نیازی به یادداشت کردن چیزی نیست.</span></div>
+                <div class="guide-item"><span class="gi">✍️</span><span>برگردید به همین صفحه و فقط <b>۴ رقم آخر کارت خودتان</b> را وارد کنید.</span></div>
+            </div>
+        </div>
+
+        <div class="sec-title"><span class="num">{{ 2|fa }}</span> رسید پرداخت را ثبت کنید</div>
+
+        <form method="post" enctype="multipart/form-data" class="evidence-form" id="evidenceForm">
+            {% csrf_token %}
+
+            <div class="fg">
+                <label for="id_last4">۴ رقم آخر کارتی که با آن پرداخت کردید</label>
+                <input type="text" id="id_last4" name="sender_card_last4" class="last4-input js-digits"
+                       inputmode="numeric" autocomplete="off" maxlength="4" placeholder="••••"
+                       value="{{ last4_input }}" required>
+                <div class="last4-hint">فقط همین! بررسی صورت‌حساب بانکی با ما 🙂</div>
+            </div>
+
+            <div class="fg">
+                <label>عکس رسید (اختیاری — باعث تایید سریع‌تر می‌شود)</label>
+                <label class="upload-zone" id="uploadZone">
+                    <input type="file" name="receipt_image" id="receiptInput" accept="image/*">
+                    <div class="uz-icon">🧾</div>
+                    <div class="uz-t">انتخاب یا کشیدن عکس رسید</div>
+                    <div class="uz-s">JPG یا PNG — حداکثر ۵ مگابایت</div>
+                </label>
+                <div class="file-pill" id="filePill">
+                    <img id="fileThumb" alt="">
+                    <div><div id="fileName" style="font-weight:700;"></div><div id="fileSize" style="color:var(--color-text-muted);font-size:12px;"></div></div>
+                    <button type="button" class="fp-x" id="fileRemove">حذف</button>
+                </div>
+            </div>
+
+            <details class="adv">
+                <summary>زمان واریز من متفاوت بود</summary>
+                <div class="adv-body">
+                    <input type="datetime-local" name="transfer_time" id="transferTime" class="dt-input">
+                    <div style="font-size:12px;color:var(--color-text-muted);margin-top:7px;">
+                        اگر همین حالا واریز کرده‌اید، لازم نیست این قسمت را تغییر دهید.
+                    </div>
+                </div>
+            </details>
+
+            <button type="submit" class="submit-btn" id="submitBtn">
+                <span class="spin"></span>
+                ثبت اطلاعات پرداخت
+                <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2.4"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+            </button>
+
+            <div class="form-note">
+                پس از ثبت، همکاران ما واریزی را از صورت‌حساب بانکی بررسی می‌کنند<br>
+                و سفارش شما برای آماده‌سازی نهایی می‌شود. 🌿
+            </div>
+        </form>
+        {% else %}
+        <div class="alert-box alert-err" style="margin-top:26px;">
+            در حال حاضر حسابی برای دریافت پرداخت ثبت نشده است.<br>
+            لطفاً با پشتیبانی در تماس باشید تا سفارش شما را ثبت کنیم.
+            {% if support_phone %}<div dir="ltr" style="text-align:right;font-weight:800;margin-top:6px;">{{ support_phone }}</div>{% endif %}
+        </div>
+        {% endif %}
+
+        {% if can_cancel %}
+        <form method="post" action="{% url 'order_pages:cancel_order' order.order_number %}" class="cancel-form"
+              onsubmit="return confirm('سفارش لغو شود؟ موجودی رزرو‌شده بلافاصله آزاد می‌شود.');">
+            {% csrf_token %}
+            <input type="hidden" name="next" value="{{ request.get_full_path }}">
+            <button type="submit" class="cancel-btn">انصراف از این سفارش و آزادسازی موجودی</button>
+        </form>
+        {% endif %}
+
+        <div class="trust-row">
+            <span>🔒 پرداخت امن</span>
+            <span>🧾 رسید شما ثبت و پیگیری می‌شود</span>
+            {% if support_phone %}<span dir="rtl">☎️ پشتیبانی: <b dir="ltr">{{ support_phone }}</b></span>{% endif %}
+        </div>
+    </div>
+</div>
+
+<div class="rx-toast" id="rxToast"></div>
+
+<script>
+    // ─── توست ───
+    var toastTimer;
+    function rxToast(msg){
+        var t = document.getElementById('rxToast');
+        t.textContent = msg;
+        t.classList.add('show');
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(function(){ t.classList.remove('show'); }, 2200);
+    }
+
+    // ─── کپی با پشتیبان iOS ───
+    function rxCopy(text, msg){
+        function done(){ rxToast(msg || 'کپی شد ✓'); }
+        function fallback(){
+            var ta = document.createElement('textarea');
+            ta.value = text;
+            ta.style.cssText = 'position:fixed;top:-999px;opacity:0;';
+            document.body.appendChild(ta);
+            ta.focus(); ta.select();
+            try { document.execCommand('copy'); done(); }
+            catch(e){ rxToast('متأسفانه کپی نشد؛ لطفاً دستی انتخاب و کپی کنید'); }
+            document.body.removeChild(ta);
+        }
+        if(navigator.clipboard && window.isSecureContext){
+            navigator.clipboard.writeText(text).then(done).catch(fallback);
+        } else { fallback(); }
+    }
+
+    document.querySelectorAll('.js-copy').forEach(function(btn){
+        btn.addEventListener('click', function(){
+            rxCopy(btn.getAttribute('data-copy'), btn.getAttribute('data-msg'));
+        });
+    });
+
+    // ─── تبدیل ارقام فارسی به لاتین در ورودی عددی ───
+    var FA = '۰۱۲۳۴۵۶۷۸۹', EN = '01234567890123456789';
+    document.querySelectorAll('.js-digits').forEach(function(inp){
+        inp.addEventListener('input', function(){
+            var v = inp.value.replace(/[۰-۹٠-٩]/g, function(d){ return EN[FA.indexOf(d) > -1 ? FA.indexOf(d) : FA.indexOf(d)+10]; });
+            v = v.replace(/[^0-9]/g, '');
+            inp.value = v.slice(0, 4);
+        });
+    });
+
+    // ─── زمان واریز پیش‌فرض: همین حالا ───
+    (function(){
+        var el = document.getElementById('transferTime');
+        if(!el || el.value) return;
+        var d = new Date(); d.setSeconds(0, 0);
+        el.value = new Date(d.getTime() - d.getTimezoneOffset()*60000).toISOString().slice(0,16);
+    })();
+
+    // ─── پیش‌نمایش فایل رسید ───
+    (function(){
+        var input = document.getElementById('receiptInput');
+        if(!input) return;
+        var zone = document.getElementById('uploadZone'),
+            pill = document.getElementById('filePill');
+        ['dragover','dragenter'].forEach(function(ev){
+            zone.addEventListener(ev, function(e){ e.preventDefault(); zone.classList.add('drag'); });
+        });
+        ['dragleave','drop'].forEach(function(ev){
+            zone.addEventListener(ev, function(e){ e.preventDefault(); zone.classList.remove('drag'); });
+        });
+        zone.addEventListener('drop', function(e){
+            if(e.dataTransfer.files.length){ input.files = e.dataTransfer.files; showFile(input.files[0]); }
+        });
+        input.addEventListener('change', function(){ if(input.files.length) showFile(input.files[0]); });
+        function fmtSize(bytes){
+            return bytes > 1048576 ? (bytes/1048576).toFixed(1) + ' MB' : Math.round(bytes/1024) + ' KB';
+        }
+        function showFile(f){
+            document.getElementById('fileName').textContent = f.name;
+            document.getElementById('fileSize').textContent = fmtSize(f.size);
+            var th = document.getElementById('fileThumb');
+            if(th.src) URL.revokeObjectURL(th.src);
+            th.src = URL.createObjectURL(f);
+            pill.style.display = 'flex';
+            zone.style.display = 'none';
+        }
+        document.getElementById('fileRemove').addEventListener('click', function(){
+            input.value = '';
+            pill.style.display = 'none';
+            zone.style.display = 'block';
+        });
+    })();
+
+    // ─── شمارش معکوس مهلت رزرو موجودی (D-099) ───
+    (function(){
+        var box = document.getElementById('ttlBox');
+        if(!box) return;
+        var timer = document.getElementById('ttlTimer');
+        var remain = parseInt(timer.getAttribute('data-remaining') || '0', 10);
+        var faD = ['۰','۱','۲','۳','۴','۵','۶','۷','۸','۹'];
+        function faNum(n){ var s = String(n), out=''; for (var i=0;i<s.length;i++){ out += faD[s.charAt(i)]; } return out; }
+        function render(){
+            var m = Math.floor(remain/60), s = remain%60;
+            timer.textContent = faNum(m) + ':' + (s < 10 ? '۰' : '') + faNum(s);
+            box.classList.toggle('urgent', remain <= 300);
+        }
+        render();
+        var iv = setInterval(function(){
+            remain--;
+            if(remain <= 0){
+                clearInterval(iv);
+                timer.textContent = '۰:۰۰';
+                setTimeout(function(){ location.reload(); }, 2500);
+                return;
+            }
+            render();
+        }, 1000);
+    })();
+
+    // ─── حالت بارگذاری دکمه ثبت ───
+    document.getElementById('evidenceForm').addEventListener('submit', function(){
+        var b = document.getElementById('submitBtn');
+        b.disabled = true;
+        b.classList.add('loading');
+        setTimeout(function(){ b.disabled = false; b.classList.remove('loading'); }, 12000); // پشتیبان خطا
+    });
+</script>
+{% endblock %}

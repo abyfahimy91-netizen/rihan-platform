@@ -25,6 +25,11 @@ class MockSmsProvider(SmsProvider):
             f"[MOCK SMS] Phone: {phone}, OTP: {otp_code}"
         )
         return True
+
+    def send_sms(self, phone: str, message: str) -> bool:
+        """پیامک عملیاتی — در محیط توسعه فقط لاگ می‌شود"""
+        logger.info("[MOCK SMS] Phone: %s | Message: %s", phone, message.replace('\n', ' ⏎ '))
+        return True
     
     def is_available(self) -> bool:
         """همیشه در دسترس است"""

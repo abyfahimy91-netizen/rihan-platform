@@ -101,3 +101,60 @@ class SmsService:
             MockSmsProvider().send_otp(phone, code)  # فقط لاگ
             return False, True, 'screen'
         return False, False, ''
+
+    # ────────────────────────────────────────────────
+    # D-105: پیامک عملیاتی (غیر OTP) — اطلاع به تامین‌کننده و مشتری
+    # همان زنجیره failover؛ بدون fallback صفحه (پیامک عملیاتی جای نمایش ندارد)
+    # ────────────────────────────────────────────────
+
+    @classmethod
+    def send_sms(cls, phone: str, message: str) -> Tuple[bool, str]:
+        """
+        ارسال پیامک متنی.
+        خروجی: (sent, provider_name)
+        """
+        message = (message or '').strip()
+        if not phone or not message:
+            return False, ''
+
+        rows = list(SmsProvider.objects.all())
+        active = [r for r in rows if r.is_active]
+        standbys = sorted(
+            (r for r in rows if not r.is_active and r.api_key.strip()),
+            key=lambda r: (r.priority, r.id),
+        )
+        ordered = active + standbys
+
+        if not ordered:
+            from ..sms_providers import KavenegarProvider
+            env_provider = KavenegarProvider()
+            try:
+                if env_provider.is_available() and env_provider.send_sms(phone, message):
+                    return True, 'env:kavenegar'
+            except Exception as e:
+                logger.warning('env kavenegar send_sms failed: %s', e)
+            return False, ''
+
+        errors = []
+        for row in ordered:
+            provider = build_provider(row)
+            if provider is None:
+                errors.append(f'{row.name}: نوع پشتیبانی‌نشده')
+                continue
+            if not provider.is_available():
+                cls._mark(row, 'کلید API تنظیم نشده است')
+                errors.append(f'{row.name}: بدون کلید')
+                continue
+            try:
+                ok = provider.send_sms(phone, message)
+            except Exception as e:
+                logger.warning('SMS send failed via %s: %s', row.name, e)
+                ok = False
+            if ok:
+                cls._mark(row, '✅ ارسال موفق', used=True)
+                return True, row.name
+            cls._mark(row, '❌ پیامک عملیاتی ناموفق')
+            errors.append(f'{row.name}: ناموفق')
+
+        logger.error('All SMS providers failed for send_sms: %s', ' | '.join(errors))
+        return False, ''

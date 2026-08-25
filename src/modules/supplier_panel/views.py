@@ -1,6 +1,13 @@
 """
-ویوهای پنل تأمین‌کننده (M4)
-منطبق بر US-028 و US-029
+ویوهای پنل تأمین‌کننده — نسخه D-105 (مرسوله‌محور)
+
+تغییر مهم نسبت به قبل: تامین‌کننده دیگر «کل سفارش» را نمی‌بیند؛
+فقط مرسوله‌های خودش را می‌بیند که شامل:
+- اقلام او (نام محصول + واریانت + تعداد — بدون هیچ قیمتی)
+- نام/موبایل/کدپستی/آدرس گیرنده
+و پس از ارسال، کد رهگیری را در همین صفحه ثبت می‌کند؛
+ثبت کد = پیامک خودکار رهگیری برای مشتری.
+
 امنیت: RBAC + User-Supplier Link (D-085)
 """
 import logging
@@ -9,8 +16,13 @@ from django.contrib import messages
 from django.shortcuts import render, get_object_or_404, redirect
 from django.utils import timezone
 
-from src.modules.order.models import Order
 from src.modules.catalog.models import Supplier
+from src.modules.order.models import Shipment
+from src.modules.order.fulfillment import (
+    FulfillmentError,
+    dispatch_instruction_text,
+    mark_shipped,
+)
 from src.modules.rbac.decorators import require_supplier
 
 from .forms import TrackingCodeForm
@@ -19,120 +31,146 @@ logger = logging.getLogger(__name__)
 
 
 def get_supplier_for_user(user):
-    """
-    دریافت Supplier مرتبط با کاربر.
-    D-085: User-Supplier Link via OneToOneField
-    """
+    """دریافت Supplier مرتبط با کاربر (D-085: OneToOne link)"""
     try:
         return user.supplier_profile
     except Supplier.DoesNotExist:
         return None
 
 
+def _own_shipments(supplier):
+    return (
+        Shipment.objects.filter(supplier=supplier)
+        .exclude(status=Shipment.Status.CANCELED)
+        .select_related('order')
+        .prefetch_related('items__order_item')
+        .order_by('-created_at')
+    )
+
+
 @require_supplier
 def supplier_dashboard(request):
-    """
-    داشبورد تأمین‌کننده
-    US-028: ورود تأمین‌کننده
-    """
+    """داشبورد: چند مرسوله منتظر اقدام شماست؟"""
     supplier = get_supplier_for_user(request.user)
-    
+
     if not supplier:
         messages.error(request, 'حساب کاربری شما به تأمین‌کننده‌ای متصل نیست. لطفاً با ادمین تماس بگیرید.')
         return redirect('home')
-    
-    pending_orders = Order.objects.filter(
-        items__product__supplier=supplier,
-        status__in=['PAID', 'PROCESSING'],
-    ).distinct().count()
-    
-    shipped_orders = Order.objects.filter(
-        items__product__supplier=supplier,
-        status='SHIPPED',
-    ).distinct().count()
-    
+
+    qs = _own_shipments(supplier)
     context = {
         'supplier': supplier,
-        'pending_orders': pending_orders,
-        'shipped_orders': shipped_orders,
+        'new_count': qs.filter(status=Shipment.Status.NEW).count(),
+        'shipped_count': qs.filter(status=Shipment.Status.SHIPPED).count(),
+        'delivered_count': qs.filter(status=Shipment.Status.DELIVERED).count(),
+        'recent_new': list(qs.filter(status=Shipment.Status.NEW)[:5]),
     }
-    
     return render(request, 'supplier_panel/dashboard.html', context)
 
 
 @require_supplier
-def supplier_order_list(request):
-    """
-    لیست سفارشات تأمین‌کننده
-    US-029: فقط سفارشات مرتبط با محصولات تأمین‌کننده
-    """
+def shipment_list(request):
+    """لیست مرسوله‌های تامین‌کننده با فیلتر وضعیت"""
     supplier = get_supplier_for_user(request.user)
-    
+
     if not supplier:
         messages.error(request, 'حساب کاربری شما به تأمین‌کننده‌ای متصل نیست.')
         return redirect('home')
-    
-    orders = Order.objects.filter(
-        items__product__supplier=supplier,
-    ).select_related('user').prefetch_related('items__product').distinct().order_by('-created_at')
-    
+
+    shipments = _own_shipments(supplier)
     status_filter = request.GET.get('status', '')
-    if status_filter:
-        orders = orders.filter(status=status_filter)
-    
+    valid_statuses = {c for c, _ in Shipment.Status.choices if c != Shipment.Status.CANCELED}
+    if status_filter in valid_statuses:
+        shipments = shipments.filter(status=status_filter)
+
     context = {
         'supplier': supplier,
-        'orders': orders,
+        'shipments': shipments,
         'status_filter': status_filter,
+        'statuses': [
+            {'value': value, 'label': label}
+            for value, label in Shipment.Status.choices
+            if value != Shipment.Status.CANCELED
+        ],
     }
-    
-    return render(request, 'supplier_panel/order_list.html', context)
+    return render(request, 'supplier_panel/shipment_list.html', context)
 
 
 @require_supplier
-def submit_tracking_code(request, order_id):
+def shipment_detail(request, pk):
     """
-    ثبت کد رهگیری برای سفارش
-    US-029: تأمین‌کننده کد رهگیری مرسوله را ثبت می‌کند
-    امنیت: فقط سفارشات مرتبط با محصولات تأمین‌کننده
+    جزئیات مرسوله: اقلام (بدون قیمت) + گیرنده + ثبت کد رهگیری.
+    POST فرم → mark_shipped → پیامک خودکار رهگیری برای مشتری.
     """
     supplier = get_supplier_for_user(request.user)
-    
+
     if not supplier:
         messages.error(request, 'حساب کاربری شما به تأمین‌کننده‌ای متصل نیست.')
         return redirect('home')
-    
-    order = get_object_or_404(
-        Order,
-        id=order_id,
-        items__product__supplier=supplier,
+
+    # امنیت: فقط مرسوله‌های متعلق به همین تامین‌کننده
+    shipment = get_object_or_404(
+        Shipment.objects.select_related('order').prefetch_related('items__order_item'),
+        pk=pk,
+        supplier=supplier,
     )
-    
+    order = shipment.order
+
     if request.method == 'POST':
         form = TrackingCodeForm(request.POST)
         if form.is_valid():
-            tracking_code = form.cleaned_data['tracking_code']
-            shipping_method = form.cleaned_data['shipping_method']
-            
-            order.tracking_code = tracking_code
-            order.status = 'SHIPPED'
-            order.shipped_at = timezone.now()
-            order.save()
-            
-            logger.info(
-                f"Supplier {supplier.title} submitted tracking code "
-                f"{tracking_code} for order {order.order_number}"
-            )
-            
-            messages.success(request, 'کد رهگیری با موفقیت ثبت شد. مشتری می‌تواند سفارش را پیگیری کند.')
-            return redirect('supplier_panel:order_list')
+            try:
+                mark_shipped(
+                    shipment,
+                    carrier=form.cleaned_data['carrier'],
+                    tracking_code=form.cleaned_data['tracking_code'],
+                    user=request.user,
+                    via='supplier',
+                )
+                messages.success(
+                    request,
+                    'کد رهگیری ثبت شد ✅ پیامک رهگیری برای مشتری ارسال شد.'
+                )
+                return redirect('supplier_panel:shipment_detail', pk=shipment.pk)
+            except FulfillmentError as e:
+                messages.error(request, str(e))
+        else:
+            messages.error(request, 'لطفاً خطاهای فرم را برطرف کنید.')
     else:
-        form = TrackingCodeForm()
-    
+        initial = {}
+        if not shipment.carrier:
+            initial['carrier'] = Shipment.Carrier.POST
+        form = TrackingCodeForm(initial=initial)
+
+    items = []
+    for si in shipment.items.all():
+        title = si.order_item.product_name_snapshot
+        variant = (si.order_item.variant_title or '').strip()
+        if variant:
+            title += f' — {variant}'
+        items.append({'title': title, 'quantity': si.quantity})
+
     context = {
         'supplier': supplier,
+        'shipment': shipment,
         'order': order,
         'form': form,
+        'items': items,
+        'receiver_name': order.guest_name or (order.user.get_full_name() if order.user else ''),
+        'receiver_phone': order.guest_phone or (order.user.get_username() if order.user else ''),
+        'address_text': (
+            f"نام: {order.guest_name}\n"
+            f"موبایل: {order.guest_phone}\n"
+            f"کد پستی: {order.guest_postal_code}\n"
+            f"آدرس: {order.guest_address}"
+        ),
+        'dispatch_text': dispatch_instruction_text(shipment),
     }
-    
-    return render(request, 'supplier_panel/submit_tracking.html', context)
+    return render(request, 'supplier_panel/shipment_detail.html', context)
+
+
+# ── سازگاری با لینک‌های قدیمی ──
+
+@require_supplier
+def legacy_order_redirect(request, **kwargs):
+    return redirect('supplier_panel:shipment_list')

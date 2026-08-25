@@ -1,5 +1,5 @@
 """
-URLهای پنل تأمین‌کننده (M4)
+URLهای پنل تأمین‌کننده (D-105 — مرسوله‌محور)
 """
 from django.urls import path
 from . import views
@@ -8,6 +8,6 @@ app_name = 'supplier_panel'
 
 urlpatterns = [
     path('', views.supplier_dashboard, name='dashboard'),
-    path('orders/', views.supplier_order_list, name='order_list'),
-    path('orders/<uuid:order_id>/track/', views.submit_tracking_code, name='submit_tracking'),
+    path('shipments/', views.shipment_list, name='shipment_list'),
+    path('shipments/<uuid:pk>/', views.shipment_detail, name='shipment_detail'),
 ]

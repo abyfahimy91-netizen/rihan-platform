@@ -235,7 +235,15 @@ class CheckoutService:
             'order': order,
             'admin_user': admin_user,
         })
-        
+
+        # D-105: ساخت خودکار مرسوله‌ها (تفکیک بر اساس تامین‌کننده / ریهان) + پیامک تامین‌کننده
+        # هرگز نباید خطای این بخش، تایید پرداخت را بشکند
+        try:
+            from .fulfillment import build_shipments
+            build_shipments(order, user=admin_user)
+        except Exception:
+            logger.exception('Fulfillment shipments build failed for %s', order.order_number)
+
         return order
     
     # ========================================================================

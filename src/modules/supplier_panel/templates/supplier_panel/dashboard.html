@@ -1,35 +1,44 @@
 {% extends "supplier_panel/base.html" %}{% load fa_tags %}
-{% block title %}داشبورد تأمین‌کننده | ریهان{% endblock %}
+
+{% block title %}داشبورد تامین‌کننده | ریهان{% endblock %}
 
 {% block content %}
-<div class="container mt-4" dir="rtl">
-    <h1 class="mb-4">پنل تأمین‌کننده</h1>
-    
-    <div class="alert alert-info">
-        <strong>{{ supplier.title }}</strong> — {{ supplier.city }}
+<h1 class="mb-4">سلام، {{ supplier.title }} 👋</h1>
+
+<div class="card">
+    <div class="stats">
+        <div class="stat"><b>{{ new_count|fa }}</b>در انتظار ارسال</div>
+        <div class="stat"><b>{{ shipped_count|fa }}</b>ارسال‌شده</div>
+        <div class="stat"><b>{{ delivered_count|fa }}</b>تحویل‌داده‌شده</div>
     </div>
-    
-    <div class="row mb-4">
-        <div class="col-md-4">
-            <div class="card bg-warning text-dark">
-                <div class="card-body text-center">
-                    <h2>{{ pending_orders|fa }}</h2>
-                    <p>سفارش در انتظار ارسال</p>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-4">
-            <div class="card bg-success text-white">
-                <div class="card-body text-center">
-                    <h2>{{ shipped_orders|fa }}</h2>
-                    <p>سفارش ارسال شده</p>
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <a href="{% url 'supplier_panel:order_list' %}" class="btn btn-primary btn-lg">
-        مشاهده سفارشات
-    </a>
+    {% if new_count > 0 %}
+        <p class="mt-3"><a href="{% url 'supplier_panel:shipment_list' %}?status=NEW" class="btn btn-primary">مشاهده مرسوله‌های در انتظار ارسال</a></p>
+    {% endif %}
 </div>
+
+{% if recent_new %}
+<div class="card">
+    <h3 class="mb-3">جدیدترین مرسوله‌ها</h3>
+    <table class="table">
+        <thead><tr><th>سفارش</th><th>اقلام</th><th>تاریخ</th><th></th></tr></thead>
+        <tbody>
+        {% for s in recent_new %}
+            <tr>
+                <td dir="ltr">{{ s.order.order_number }}</td>
+                <td>
+                    {% for si in s.items.all %}
+                        {{ si.order_item.product_name_snapshot }} ×{{ si.quantity|fa }}{% if not forloop.last %}، {% endif %}
+                    {% endfor %}
+                </td>
+                <td>{{ s.created_at|jdate }}</td>
+                <td><a class="btn btn-primary" href="{% url 'supplier_panel:shipment_detail' s.pk %}">مشاهده و ارسال</a></td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<div class="card muted">فعلاً مرسوله جدیدی ندارید. به‌محض ثبت سفارش جدید، پیامک دریافت می‌کنید.</div>
+{% endif %}
+
 {% endblock %}

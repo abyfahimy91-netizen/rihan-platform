@@ -1,38 +1,39 @@
 """
-فرم‌های پنل تأمین‌کننده (M4)
-منطبق بر US-029: ثبت کد رهگیری
+فرم‌های پنل تامین‌کننده (D-105): ثبت شرکت حمل + کد رهگیری
+ارقام فارسی خودکار به لاتین تبدیل می‌شود تا تایپی از موبایل هم قبول شود.
 """
 from django import forms
 
+from src.modules.order.models import Shipment
+from src.modules.order.fulfillment import normalize_tracking_code
+
 
 class TrackingCodeForm(forms.Form):
-    """فرم ثبت کد رهگیری پست"""
-    
-    tracking_code = forms.CharField(
-        label='کد رهگیری پست',
-        max_length=50,
-        min_length=10,
-        widget=forms.TextInput(attrs={
-            'class': 'form-control',
-            'placeholder': 'کد رهگیری ۲۴ رقمی پست را وارد کنید',
-            'dir': 'ltr',
-        }),
-        help_text='کد رهگیری مرسوله پستی را وارد کنید',
-    )
-    
-    shipping_method = forms.ChoiceField(
-        label='روش ارسال',
-        choices=[
-            ('post', 'پست پیشتاز'),
-            ('tipax', 'تیپاکس'),
-            ('courier', 'پیک'),
-        ],
-        initial='post',
+    """فرم ثبت کد رهگیری مرسوله"""
+
+    carrier = forms.ChoiceField(
+        label='شرکت حمل',
+        choices=Shipment.Carrier.choices,
+        initial=Shipment.Carrier.POST,
         widget=forms.Select(attrs={'class': 'form-control'}),
     )
-    
+
+    tracking_code = forms.CharField(
+        label='کد رهگیری',
+        max_length=40,
+        min_length=5,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'کد رهگیری مرسوله را وارد کنید',
+            'dir': 'ltr',
+            'inputmode': 'latin',
+            'autocomplete': 'off',
+        }),
+        help_text='کد رهگیری روی رسید پست/باربری — ارقام فارسی هم قبول است',
+    )
+
     def clean_tracking_code(self):
-        code = self.cleaned_data['tracking_code'].strip()
-        if not code.isalnum():
-            raise forms.ValidationError('کد رهگیری فقط می‌تواند شامل حروف و اعداد باشد')
+        code = normalize_tracking_code(self.cleaned_data['tracking_code'])
+        if len(code) < 5:
+            raise forms.ValidationError('کد رهگیری معتبر نیست (حداقل ۵ نویسه حروف/اعداد).')
         return code

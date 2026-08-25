@@ -1,0 +1,72 @@
+{% extends "supplier_panel/base.html" %}{% load fa_tags %}
+
+{% block title %}مرسوله {{ order.order_number }} | ریهان{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">مرسوله سفارش <span dir="ltr">{{ order.order_number }}</span></h1>
+
+<div class="card">
+    {% if shipment.status == 'NEW' %}
+        <span class="badge b-new">در انتظار ارسال</span>
+        <p class="muted mt-3">تاریخ ثبت: {{ shipment.created_at|jdate }}</p>
+    {% elif shipment.status == 'SHIPPED' %}
+        <span class="badge b-shipped">ارسال شده</span>
+        <p class="mt-3">کد رهگیری ثبت‌شده: <code class="latin" id="tc">{{ shipment.tracking_code }}</code>
+            <button class="copy-btn" data-copy-target="#tc">📋 کپی کد</button>
+            {% if shipment.tracking_url %}
+                — <a href="{{ shipment.tracking_url }}" target="_blank" rel="noopener">پیگیری در سایت {{ shipment.get_carrier_display }}</a>
+            {% endif %}
+        </p>
+    {% else %}
+        <span class="badge b-delivered">تحویل داده شد ✓</span>
+    {% endif %}
+</div>
+
+<div class="card">
+    <h3 class="mb-3">📦 اقلام ارسالی (بدون قیمت)</h3>
+    <table class="table">
+        <thead><tr><th>محصول</th><th>تعداد</th></tr></thead>
+        <tbody>
+        {% for it in items %}
+            <tr><td>{{ it.title }}</td><td>{{ it.quantity|fa }}</td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;">
+        <h3>📍 گیرنده</h3>
+        <button class="copy-btn" data-copy-target="#addr-block">📋 کپی اطلاعات ارسال</button>
+    </div>
+    <pre id="addr-block" class="addr" style="white-space:pre-wrap;font-family:inherit;">{{ address_text }}</pre>
+    <p class="muted mt-3">⚠️ لطفاً بسته را محکم و بدون فاکتور قیمت ببندید. ارسال با «{{ form.carrier.field.initial|default:"پست پیشتاز" }}» طبق توافق است.</p>
+</div>
+
+<div class="card">
+    {% if shipment.status == 'NEW' %}
+        <h3 class="mb-3">🚚 پس از ارسال، کد رهگیری را ثبت کنید</h3>
+        <p class="muted mb-3">به‌محض ثبت، مشتری به‌صورت خودکار پیامک حاوی کد رهگیری و لینک پیگیری دریافت می‌کند.</p>
+        <form method="post">
+            {% csrf_token %}
+            <div class="mb-3">
+                <label>{{ form.carrier.label }}</label>
+                {{ form.carrier }}
+                {% if form.carrier.errors %}<p style="color:#c00;font-size:13px;">{{ form.carrier.errors.0 }}</p>{% endif %}
+            </div>
+            <div class="mb-3">
+                <label>{{ form.tracking_code.label }}</label>
+                {{ form.tracking_code }}
+                {% if form.tracking_code.errors %}<p style="color:#c00;font-size:13px;">{{ form.tracking_code.errors.0 }}</p>{% endif %}
+                <p class="muted">{{ form.tracking_code.help_text }}</p>
+            </div>
+            <button type="submit" class="btn btn-success">ثبت کد رهگیری و اطلاع به مشتری</button>
+        </form>
+    {% else %}
+        <p class="muted">کد رهگیری این مرسوله قبلاً ثبت شده است.</p>
+    {% endif %}
+</div>
+
+<p><a href="{% url 'supplier_panel:shipment_list' %}" class="btn btn-primary">← بازگشت به لیست</a></p>
+
+{% endblock %}

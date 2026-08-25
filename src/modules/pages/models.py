@@ -54,6 +54,16 @@ class SiteSettings(models.Model):
         'ساعات پاسخگویی', max_length=120, default='هر روز ۱۱ تا ۱۹',
     )
 
+    # ── D-105: اطلاع‌رسانی پیامکی زنجیره ارسال ──
+    sms_notify_suppliers = models.BooleanField(
+        'پیامک سفارش جدید به تامین‌کننده', default=True,
+        help_text='با ثبت سفارشِ محصولِ تامین‌کننده‌دار، پیامک خودکار دریافت کند',
+    )
+    sms_notify_customers = models.BooleanField(
+        'پیامک کد رهگیری به مشتری', default=True,
+        help_text='پس از ثبت کد رهگیری، مشتری لینک پیگیری یک‌کلیکی دریافت کند',
+    )
+
     # ── شبکه‌های اجتماعی ──
     instagram_url = models.URLField('آدرس اینستاگرام', blank=True, default='')
     telegram_url = models.URLField('آدرس تلگرام', blank=True, default='')

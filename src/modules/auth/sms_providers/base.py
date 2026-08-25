@@ -45,3 +45,12 @@ class SmsProvider(ABC):
             True اگر Provider در دسترس است
         """
         pass
+
+    def send_sms(self, phone: str, message: str) -> bool:
+        """
+        ارسال پیامک متنی عملیاتی (D-105: اطلاع تامین‌کننده / کد رهگیری مشتری).
+        پیش‌فرض پشتیبانی نمی‌شود؛ هر Provider باید خودش پیاده‌سازی کند.
+        Returns:
+            True اگر ارسال موفق بود
+        """
+        return False

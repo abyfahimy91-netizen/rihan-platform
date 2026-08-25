@@ -15,7 +15,7 @@ from django.contrib import messages
 from django.utils import timezone
 from django.utils.dateparse import parse_datetime
 
-from .models import Order, Payment, Shipment
+from .models import Order, Payment
 from .payment_gateway import get_payment_gateway
 from .checkout_service import CheckoutService
 from .expiry import release_expired_orders
@@ -161,10 +161,6 @@ def payment_page_view(request, order_number):
         'payment': payment,
         'accounts': accounts,
         'amount_display': money(order.total_price),
-        # مبلغ واریز باید ریالی باشد — اپ‌های بانکی مبلغ را ریال می‌پذیرند (D-101)
-        # int() تا مقدار کپی‌شده عدد تمیز باشد نه «5000000.00» (DecimalField داری اعشار است)
-        'amount_rial': int(order.total_price * 10),
-        'amount_rial_display': money(order.total_price * 10),
         'items_count': sum(i.quantity for i in order.items.all()),
         'already_submitted': already_submitted,
         'errors': errors,
@@ -190,7 +186,6 @@ def payment_success_view(request, order_number):
         'order': order,
         'payment': payment,
         'amount_display': money(order.total_price),
-        'amount_rial_display': money(order.total_price * 10),
         'card_last4': payment.sender_card_last4 if payment else '',
         'support_phone': _get_support_phone(),
     }
@@ -301,17 +296,10 @@ def tracking_page_view(request, order_number):
         if not (h.description or '').startswith('تغییر وضعیت به:')
     ]
 
-    # D-105: مرسوله‌های سفارش — هر بسته کد رهگیری و لینک پیگیری یک‌کلیکی خودش را دارد
-    shipments = [
-        s for s in order.shipments.prefetch_related('items__order_item')
-        if s.status != Shipment.Status.CANCELED
-    ]
-
     context = {
         'order': order,
         'history': history_items,
         'timeline': timeline,
-        'shipments': shipments,
         'payment': order.payments.order_by('-created_at').first(),
         'items_count': sum(i.quantity for i in order.items.all()),
         'amount_display': money(order.total_price),
@@ -368,32 +356,3 @@ def tracking_lookup_view(request):
         'error': error_message,
         'form_data': form_data,
     })
-
-
-# ═════════════════════════════════════════════════════════════
-# D-105 — لینک رهگیری یک‌کلیکی: /order/t/<کد>/
-# پیامک مشتری این لینک کوتاه را دارد؛ با باز شدن مستقیم به سامانه
-# باربری (پست/تیپاکس/...) با کدِ پرشده ریدایرکت می‌شود — صفر اصطکاک.
-# ═════════════════════════════════════════════════════════════
-
-def tracking_redirect_view(request, code):
-    normalized = ''.join(
-        ch.upper() if ch.isalpha() else ch
-        for ch in _to_en_digits(code) if ch.isalnum()
-    )
-    shipment = (
-        Shipment.objects.filter(tracking_code=normalized)
-        .exclude(status=Shipment.Status.CANCELED)
-        .select_related('order')
-        .order_by('-shipped_at', '-created_at')
-        .first()
-    )
-    if not shipment:
-        messages.warning(request, 'کد رهگیری در سیستم ما پیدا نشد. از شماره سفارش استفاده کنید.')
-        return redirect('order_pages:tracking_lookup')
-
-    url = shipment.tracking_url
-    if not url:
-        # شرکت حمل بدون لینک مستقیم → صفحه پیگیری خود سفارش
-        return redirect('order_pages:tracking_page', order_number=shipment.order.order_number)
-    return redirect(url)

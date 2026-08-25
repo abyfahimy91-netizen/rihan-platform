@@ -15,6 +15,8 @@ urlpatterns = [
     path('checkout/', cart_views.checkout_page_view, name='checkout_page'),
     path('lookup/', tracking_views.tracking_lookup_view, name='tracking_lookup'),
     path('tracking/<str:order_number>/', tracking_views.tracking_page_view, name='tracking_page'),
+    # D-105: لینک یک‌کلیکی رهگیری مرسوله (در پیامک مشتری)
+    path('t/<str:code>/', tracking_views.tracking_redirect_view, name='tracking_redirect'),
     path('payment/<str:order_number>/', tracking_views.payment_page_view, name='payment_page'),
     path('payment/<str:order_number>/success/', tracking_views.payment_success_view, name='payment_success'),
     path('payment/<str:order_number>/cancel/', tracking_views.cancel_order_view, name='cancel_order'),
