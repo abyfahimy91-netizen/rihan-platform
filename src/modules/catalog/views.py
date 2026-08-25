@@ -132,11 +132,19 @@ class ProductDetailView(DetailView):
         context['share_caption'] = caption
         context['brand_latin'] = brand
 
-        # OG image مطلق با cache-buster برای به‌روز شدن پیش‌نمایش پیام‌رسان‌ها
+        # OG image مطلق با cache-buster — نسخه اصلی JPEG برای سازگاری حداکثری پیام‌رسان‌ها
         img_url = ''
         try:
-            if product.main_image_url:
-                img_url = self.request.build_absolute_uri(str(product.main_image_url))
+            original = ''
+            try:
+                first_img = product.gallery.first()
+                if first_img and first_img.image:
+                    original = first_img.image.url
+            except Exception:
+                original = ''
+            raw = original or (str(product.main_image_url) if product.main_image_url else '')
+            if raw:
+                img_url = self.request.build_absolute_uri(raw)
                 bust = getattr(product, 'updated_at', None)
                 if bust:
                     img_url += f'?v={int(bust.timestamp())}'

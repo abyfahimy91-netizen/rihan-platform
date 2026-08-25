@@ -1524,7 +1524,7 @@
         if (storyModal) {
             var storyCanvas = document.getElementById('storyCanvas');
 
-            function roundRect(c, x, y, w, h, r){
+            var roundRect = function (c, x, y, w, h, r){
                 c.beginPath();
                 c.moveTo(x+r, y);
                 c.arcTo(x+w, y, x+w, y+h, r);
@@ -1533,7 +1533,7 @@
                 c.arcTo(x, y, x+w, y, r);
                 c.closePath();
             }
-            function wrapLines(c, txt, maxW, maxLines){
+            var wrapLines = function (c, txt, maxW, maxLines){
                 var words = String(txt||'').split(/\s+/).filter(Boolean);
                 var lines = [], line = '';
                 for (var i = 0; i < words.length; i++){
@@ -1544,7 +1544,7 @@
                 if (line && lines.length < maxLines) lines.push(line);
                 return lines;
             }
-            function drawStory(data){
+            var drawStory = function (data){
                 var c = storyCanvas.getContext('2d');
                 var W = 1080, H = 1920;
                 var g = c.createLinearGradient(0, 0, W, H);
@@ -1607,7 +1607,7 @@
                 im.src = data.img;
             }
 
-            function openStoryModal(btn){
+            var openStoryModal = function (btn){
                 var data = {
                     brand: 'Rihan',
                     img: btn.getAttribute('data-img') || '',
