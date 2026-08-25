@@ -1176,6 +1176,14 @@
 </section>
 {% endif %}
 
+<!-- ═══ مشخصات و توضیحات کامل ═══ -->
+{% if product.long_description %}
+<section class="curation-section" id="specs">
+    <h2 class="sec-title">📋 مشخصات و توضیحات کامل</h2>
+    <div class="curation-body">{{ product.long_description|render_markup }}</div>
+</section>
+{% endif %}
+
 <!-- ═══ بخش ۴: هاب اشتراک‌گذاری ویروسی (D-104) ═══ -->
 <section class="share-hub" id="shareHub">
     <h2 class="share-title">این انتخاب خوب را با دیگران هم در میان بگذارید 🤝</h2>
