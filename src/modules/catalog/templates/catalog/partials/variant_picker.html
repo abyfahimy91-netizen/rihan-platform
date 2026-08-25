@@ -40,11 +40,11 @@
             <button type="submit" class="btn-view-cart">افزودن به سبد</button>
         </form>
     </div>
+    {% if buy_commitments %}
     <div class="buy-commitments">
-        <span>✅ ۷ روز ضمانت بازگشت وجه</span>
-        <span>📦 ارسال ایمن و بیمه‌شده</span>
-        <span>🎁 بسته‌بندی محرمانه و تضمین سلامت</span>
+        {% for c in buy_commitments %}<span>✓ {{ c }}</span>{% endfor %}
     </div>
+    {% endif %}
     <div class="variant-stock-note" id="variant-stock-note"></div>
     <div class="product-meta" style="margin-top: 14px;">
         <div class="meta-item">

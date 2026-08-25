@@ -54,6 +54,11 @@ class SiteSettingsAdmin(admin.ModelAdmin):
             'description': 'خود سوال‌ها و جواب‌ها را از بخش جداگانه «سوالات متداول» در همین پنل مدیریت کنید.',
             'classes': ('collapse',),
         }),
+        ('🛡 تعهدهای زیر دکمه خرید', {
+            'fields': ('buy_commitments',),
+            'description': 'هر خط یک تعهد — در صفحه محصول، زیر دکمه خرید نمایش داده می‌شود. (مثلاً: ۷ روز ضمانت بازگشت وجه)',
+            'classes': ('collapse',),
+        }),
         ('🦶 فوتر سایت', {
             'fields': ('footer_tagline', 'footer_description', 'footer_copyright'),
             'classes': ('collapse',),

@@ -102,6 +102,7 @@ class ProductDetailView(DetailView):
 
         # ─── صفحه فروش اقناعی (D-104) ───
         from src.modules.reviews.models import Review
+        from src.modules.pages.models import SiteSettings
         approved_reviews = (
             Review.objects.filter(product=product, is_approved=True)
             .select_related('user').order_by('-created_at')[:12]
@@ -111,12 +112,18 @@ class ProductDetailView(DetailView):
         if review_count:
             avg_rating = round(sum(r.rating for r in approved_reviews) / review_count, 1)
 
+        _ss = SiteSettings.load()
         context.update(
             faqs=product.faqs.filter(is_active=True).order_by('sort_order', 'id'),
             product_reviews=approved_reviews,
             review_count=review_count,
             avg_rating=avg_rating,
             discount_percent=product.discount_percent,
+            # تعهدهای زیر دکمه خرید از تنظیمات سایت (D-104)
+            buy_commitments=[
+                ln.strip() for ln in (_ss.buy_commitments or '').splitlines()
+                if ln.strip()
+            ],
         )
 
         # Related products (same category)
