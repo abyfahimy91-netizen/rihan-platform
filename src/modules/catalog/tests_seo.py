@@ -41,3 +41,18 @@ class SitemapTest(TestCase):
         response = self.client.get('/robots.txt')
         self.assertEqual(response.status_code, 200)
         self.assertIn('Sitemap:', response.content.decode())
+
+    def test_sitemap_includes_faq_and_policy(self):
+        """Sitemap should include faq and return-policy pages"""
+        response = self.client.get('/sitemap.xml')
+        content = response.content.decode()
+        self.assertIn('/faq/', content)
+        self.assertIn('/return-policy/', content)
+
+    def test_llms_txt(self):
+        """llms.txt should be accessible and list active products"""
+        response = self.client.get('/llms.txt')
+        self.assertEqual(response.status_code, 200)
+        content = response.content.decode()
+        self.assertIn('rihan360.ir', content)
+        self.assertIn('test-product', content)

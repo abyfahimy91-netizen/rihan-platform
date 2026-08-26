@@ -4,6 +4,15 @@
 {% block title %}ریهان - انتخاب مطمئن{% endblock %}
 {% block meta_description %}ریهان - فروشگاه آنلاین اعتمادمحور. انتخاب‌های دقیق و باوقار برای شما.{% endblock %}
 
+{% block extra_head %}
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"Organization","name":"Rihan | ریهان","url":"https://rihan360.ir/","contactPoint":{"@type":"ContactPoint","telephone":"{{ site_settings.contact_phone }}","contactType":"customer service","areaServed":"IR","availableLanguage":"fa"}}
+</script>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebSite","name":"Rihan | ریهان","url":"https://rihan360.ir/","inLanguage":"fa-IR"}
+</script>
+{% endblock %}
+
 {% block extra_css %}
 <style>
     /* === HERO SECTION === */
