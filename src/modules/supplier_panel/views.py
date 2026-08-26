@@ -55,7 +55,7 @@ def supplier_dashboard(request):
 
     if not supplier:
         messages.error(request, 'حساب کاربری شما به تأمین‌کننده‌ای متصل نیست. لطفاً با ادمین تماس بگیرید.')
-        return redirect('home')
+        return redirect('/')
 
     qs = _own_shipments(supplier)
     context = {
@@ -75,7 +75,7 @@ def shipment_list(request):
 
     if not supplier:
         messages.error(request, 'حساب کاربری شما به تأمین‌کننده‌ای متصل نیست.')
-        return redirect('home')
+        return redirect('/')
 
     shipments = _own_shipments(supplier)
     status_filter = request.GET.get('status', '')
@@ -106,7 +106,7 @@ def shipment_detail(request, pk):
 
     if not supplier:
         messages.error(request, 'حساب کاربری شما به تأمین‌کننده‌ای متصل نیست.')
-        return redirect('home')
+        return redirect('/')
 
     # امنیت: فقط مرسوله‌های متعلق به همین تامین‌کننده
     shipment = get_object_or_404(
