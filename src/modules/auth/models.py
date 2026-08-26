@@ -456,3 +456,22 @@ class SmsProvider(models.Model):
         if self.is_active:
             SmsProvider.objects.filter(is_active=True).exclude(pk=self.pk).update(is_active=False)
         super().save(*args, **kwargs)
+
+
+class AdminLoginAttempt(models.Model):
+    """ثبت تلاش‌های ورود پنل مدیریت برای قفل ضد Brute-Force (فاز ۶).
+
+    عمداً پایگاه‌داده‌ای است (نه کش) تا بین ۳ ورکر گانیکورن شمارنده یکسان بماند.
+    """
+
+    username = models.CharField(max_length=64, blank=True, default='', db_index=True)
+    ip = models.GenericIPAddressField(null=True, blank=True, db_index=True)
+    succeeded = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True, db_index=True)
+
+    class Meta:
+        verbose_name = 'تلاش ورود ادمین'
+        verbose_name_plural = 'تلاش‌های ورود ادمین'
+
+    def __str__(self):
+        return '%s@%s %s' % (self.username or '-', self.ip or '-', 'OK' if self.succeeded else 'FAIL')

@@ -6,6 +6,7 @@ from django.utils import timezone
 from django.core.validators import MinValueValidator
 from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
+from src.core.upload_validation import validate_upload_image
 
 
 class Category(models.Model):
@@ -479,6 +480,7 @@ class ProductImage(models.Model):
     )
     image = models.ImageField(
         upload_to='products/%Y/%m/',
+        validators=[validate_upload_image],
         verbose_name='فایل تصویر',
     )
     caption = models.CharField(max_length=255, blank=True, verbose_name='متن جایگزین (Alt)')

@@ -3,6 +3,7 @@ import jdatetime
 from django.db import models
 from django.conf import settings
 from django.utils import timezone
+from src.core.upload_validation import validate_upload_image
 
 
 def generate_order_number():
@@ -251,9 +252,10 @@ class Payment(models.Model):
         verbose_name="زمان واریز"
     )
     receipt_image = models.ImageField(
-        upload_to='payment_receipts/%Y/%m/', 
-        null=True, 
-        blank=True, 
+        upload_to='payment_receipts/%Y/%m/',
+        null=True,
+        blank=True,
+        validators=[validate_upload_image],
         verbose_name="تصویر رسید پرداخت"
     )
     
