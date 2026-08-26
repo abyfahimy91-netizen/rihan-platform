@@ -46,6 +46,17 @@ def return_policy_view(request):
     return render(request, "pages/return_policy.html", context)
 
 
+def privacy_view(request):
+    """صفحه حریم خصوصی — محتوا از تنظیمات سایت (D-109 — پیش‌نیاز اینماد)"""
+    s = SiteSettings.load()
+    context = {
+        "page_title": s.privacy_title,
+        "privacy_title": s.privacy_title,
+        "privacy_html": render_page_markup(s.privacy_body),
+    }
+    return render(request, "pages/privacy.html", context)
+
+
 def faq_view(request):
     """سوالات متداول — سوال‌ها از پنل ادمین مدیریت می‌شوند (D-100)"""
     s = SiteSettings.load()

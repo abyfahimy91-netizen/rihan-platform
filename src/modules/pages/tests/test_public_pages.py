@@ -169,3 +169,47 @@ class FaqItemAdminTest(TestCase):
         self.client.force_login(self.admin)
         response = self.client.get('/admin/pages/faqitem/add/')
         self.assertEqual(response.status_code, 200)
+
+
+class PrivacyPageTest(TestCase):
+    """صفحه حریم خصوصی — D-109 (پیش‌نیاز چک‌لیست اینماد)"""
+
+    def setUp(self):
+        self.client = Client(HTTP_HOST=HOST)
+
+    def test_privacy_url_resolves(self):
+        """لینک /privacy/ باید 200 بدهد — هم با reverse هم مسیر مستقیم"""
+        url = reverse('pages:privacy')
+        self.assertEqual(url, '/privacy/')
+        self.assertEqual(self.client.get(url).status_code, 200)
+        self.assertEqual(self.client.get('/privacy/').status_code, 200)
+
+    def test_privacy_renders_default_content(self):
+        """محتوای پیش‌فرض کامل باید با تیترهای رندرشده نمایش داده شود"""
+        response = self.client.get('/privacy/')
+        self.assertContains(response, 'سیاست حریم خصوصی')
+        # موتور مارک‌آپ باید تیتر و فهرست تولید کرده باشد
+        self.assertContains(response, '<h2 class="pm-heading">')
+        self.assertContains(response, '<ul class="pm-list">')
+
+    def test_privacy_admin_editable(self):
+        """محتوا باید از تنظیمات سایت (پنل ادمین) خوانده شود"""
+        s = SiteSettings.load()
+        s.privacy_title = 'قوانین حفاظت از داده‌ها'
+        s.privacy_body = '# بخش اول\n\nمتن آزمایشی حریم خصوصی'
+        s.save()
+        response = self.client.get('/privacy/')
+        self.assertContains(response, 'قوانین حفاظت از داده‌ها')
+        self.assertContains(response, 'متن آزمایشی حریم خصوصی')
+
+    def test_privacy_link_in_footer(self):
+        """لینک حریم خصوصی در فوتر همه صفحات باشد"""
+        for path in ('/', '/contact/', '/faq/'):
+            response = self.client.get(path)
+            self.assertContains(response, '<a href="/privacy/">حریم خصوصی</a>')
+
+    def test_privacy_in_sitemap(self):
+        """/privacy/ باید در sitemap.xml ثبت شده باشد"""
+        response = self.client.get('/sitemap.xml')
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, '<loc>https://rihan360.ir/privacy/</loc>')

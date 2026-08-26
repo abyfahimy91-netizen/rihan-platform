@@ -1,0 +1,37 @@
+{% extends "catalog/base.html" %}
+{% load fa_tags %}
+
+{% block title %}{{ privacy_title }} | {{ site_settings.site_name }}{% endblock %}
+{% block meta_description %}{{ privacy_title }} {{ site_settings.site_name }} - نحوه جمع‌آوری، استفاده و حفاظت از اطلاعات کاربران{% endblock %}
+
+{% block content %}
+<style>
+    .privacy-page .pm-heading { font-size: 1.5rem; margin: 34px 0 18px; color: #1a1a1a; }
+    .privacy-page .pm-p { line-height: 2; font-size: 1.08rem; margin-bottom: 16px; }
+    .privacy-page .pm-list, .privacy-page .pm-olist { line-height: 2; font-size: 1.08rem; padding-right: 24px; margin-bottom: 20px; }
+    .privacy-page .pm-quote {
+        border-right: 4px solid var(--color-primary);
+        background: var(--color-bg);
+        padding: 18px 22px;
+        border-radius: 8px;
+        color: var(--color-text-muted);
+        margin: 24px 0;
+        font-size: 1.05rem;
+    }
+</style>
+
+<div class="privacy-page" dir="rtl">
+    <div class="container" style="max-width: 800px; margin: 0 auto; padding: 40px 20px;">
+
+        <h1 style="font-size: 2.5rem; margin-bottom: 30px; color: #1a1a1a;">{{ privacy_title }}</h1>
+
+        <div class="policy-content">{{ privacy_html|safe }}</div>
+
+        <div style="text-align: center; margin-top: 40px; background: var(--color-bg); padding: 30px; border-radius: 8px;">
+            <p style="font-size: 1.1rem; margin-bottom: 20px;">سؤالی درباره اطلاعات خود دارید؟</p>
+            <a href="{% url 'pages:contact' %}" style="display: inline-block; background: var(--color-primary); color: white; padding: 15px 40px; border-radius: 8px; text-decoration: none; font-weight: bold;">تماس با پشتیبانی</a>
+        </div>
+
+    </div>
+</div>
+{% endblock %}

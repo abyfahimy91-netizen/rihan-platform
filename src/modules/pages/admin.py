@@ -49,6 +49,11 @@ class SiteSettingsAdmin(admin.ModelAdmin):
             'description': MARKUP_HELP,
             'classes': ('collapse',),
         }),
+        ('🔒 محتوای صفحه حریم خصوصی', {
+            'fields': ('privacy_title', 'privacy_body'),
+            'description': MARKUP_HELP + ' این صفحه برای اعتماد مشتری و الزامات نماد اعتماد الکترونیکی (اینماد) لازم است.',
+            'classes': ('collapse',),
+        }),
         ('❓ صفحه سوالات متداول', {
             'fields': ('faq_intro',),
             'description': 'خود سوال‌ها و جواب‌ها را از بخش جداگانه «سوالات متداول» در همین پنل مدیریت کنید.',

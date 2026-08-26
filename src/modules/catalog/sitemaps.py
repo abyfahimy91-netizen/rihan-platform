@@ -32,7 +32,7 @@ class StaticViewSitemap(Sitemap):
     protocol = 'https'
     
     def items(self):
-        return ['home', 'about', 'contact', 'faq', 'return-policy']
+        return ['home', 'about', 'contact', 'faq', 'return-policy', 'privacy']
 
     def location(self, item):
         urls = {
@@ -41,5 +41,6 @@ class StaticViewSitemap(Sitemap):
             'contact': '/contact/',
             'faq': '/faq/',
             'return-policy': '/return-policy/',
+            'privacy': '/privacy/',
         }
         return urls.get(item, '/')
