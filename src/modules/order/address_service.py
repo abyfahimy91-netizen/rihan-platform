@@ -30,8 +30,9 @@ def validate_address_data(data: dict) -> tuple[dict, list]:
         errors.append('شماره موبایل معتبر وارد کنید (مثل 09123456789).')
     if len(clean['detailed_address']) < 10:
         errors.append('آدرس را کامل‌تر بنویسید تا بتوانیم ارسال کنیم.')
-    if clean['postal_code'] and not re.match(r'^\d{10}$', clean['postal_code']):
-        errors.append('کد پستی باید ۱۰ رقم باشد.')
+    # D-111: کد پستی ۱۰ رقمی الزامی است (الزام اداره پست برای ثبت مرسوله)
+    if not re.match(r'^\d{10}$', clean['postal_code']):
+        errors.append('کد پستی ۱۰ رقمی الزامی است — اداره پست بدون آن مرسوله را ثبت نمی‌کند.')
     return clean, errors
 
 

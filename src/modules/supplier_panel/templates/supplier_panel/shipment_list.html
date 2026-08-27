@@ -5,38 +5,46 @@
 {% block content %}
 <h1 class="mb-4">مرسوله‌های من</h1>
 
+<!-- ── فیلتر وضعیت ── -->
 <div class="card">
-    <a href="{% url 'supplier_panel:shipment_list' %}" class="btn btn-secondary" style="margin-inline-end:8px;{% if not status_filter %}opacity:.5;{% endif %}">همه</a>
-    {% for st in statuses %}
-        <a href="?status={{ st.value }}" class="btn btn-secondary" style="margin-inline-end:8px;{% if status_filter == st.value %}opacity:.5;{% endif %}">{{ st.label }}</a>
-    {% endfor %}
+    <p class="muted mb-3">فقط مرسوله‌های خودتان را می‌بینید. برای ارسال هر مرسوله، روی دکمه سمت چپ بزنید.</p>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <a class="btn {% if not status_filter %}btn-primary{% else %}btn-gold{% endif %}" href="{% url 'supplier_panel:shipment_list' %}">همه</a>
+        {% for st in statuses %}
+        <a class="btn {% if status_filter == st.value %}btn-primary{% else %}btn-gold{% endif %}"
+           href="{% url 'supplier_panel:shipment_list' %}?status={{ st.value }}">
+            {% if st.value == 'NEW' %}⏳{% elif st.value == 'SHIPPED' %}🚚{% else %}✅{% endif %} {{ st.label }}
+        </a>
+        {% endfor %}
+    </div>
 </div>
 
 {% if shipments %}
-<div class="card">
+<div class="card" style="overflow-x:auto;">
     <table class="table">
-        <thead>
-            <tr><th>سفارش</th><th>اقلام (بدون قیمت)</th><th>تاریخ</th><th>وضعیت</th><th>عملیات</th></tr>
-        </thead>
+        <thead><tr><th>سفارش</th><th>اقلام</th><th>وضعیت</th><th>کد رهگیری</th><th>تاریخ</th><th></th></tr></thead>
         <tbody>
         {% for s in shipments %}
             <tr>
                 <td dir="ltr">{{ s.order.order_number }}</td>
                 <td>
                     {% for si in s.items.all %}
-                        {{ si.order_item.product_name_snapshot }}{% if si.order_item.variant_title %} ({{ si.order_item.variant_title }}){% endif %} ×{{ si.quantity|fa }}{% if not forloop.last %}، {% endif %}
+                        {{ si.order_item.product_name_snapshot }} ×{{ si.quantity|fa }}{% if not forloop.last %}، {% endif %}
                     {% endfor %}
                 </td>
-                <td>{{ s.created_at|jdate }}</td>
                 <td>
                     {% if s.status == 'NEW' %}<span class="badge b-new">در انتظار ارسال</span>
                     {% elif s.status == 'SHIPPED' %}<span class="badge b-shipped">ارسال شده</span>
                     {% else %}<span class="badge b-delivered">تحویل شد</span>{% endif %}
                 </td>
+                <td>{% if s.tracking_code %}<code class="latin">{{ s.tracking_code }}</code>{% elif s.carrier == 'OTHER' %}<span class="muted">{{ s.other_carrier_name|default:"ارسال با شرکت دیگر" }}</span>{% else %}<span class="muted">—</span>{% endif %}</td>
+                <td>{{ s.created_at|jdate }}</td>
                 <td>
-                    <a class="btn btn-primary" href="{% url 'supplier_panel:shipment_detail' s.pk %}">
-                        {% if s.status == 'NEW' %}مشاهده و ثبت کد رهگیری{% else %}مشاهده جزئیات{% endif %}
-                    </a>
+                    {% if s.status == 'NEW' %}
+                        <a class="btn btn-gold" href="{% url 'supplier_panel:shipment_detail' s.pk %}">مشاهده و ارسال</a>
+                    {% else %}
+                        <a class="btn btn-primary" href="{% url 'supplier_panel:shipment_detail' s.pk %}">مشاهده</a>
+                    {% endif %}
                 </td>
             </tr>
         {% endfor %}
@@ -44,7 +52,12 @@
     </table>
 </div>
 {% else %}
-<div class="card muted">مرسوله‌ای با این فیلتر پیدا نشد.</div>
+<div class="card" style="text-align:center;padding:30px 20px;">
+    <div style="font-size:38px;">📭</div>
+    <h3 style="margin:10px 0 6px;">مرسوله‌ای در این وضعیت نیست</h3>
+    <p class="muted">فیلتر دیگری را امتحان کنید یا منتظر سفارش جدید بمانید — به‌محض ثبت سفارش، پیامک می‌گیرید.</p>
+    <a class="btn btn-primary mt-3" href="{% url 'supplier_panel:dashboard' %}">بازگشت به داشبورد</a>
+</div>
 {% endif %}
 
 {% endblock %}

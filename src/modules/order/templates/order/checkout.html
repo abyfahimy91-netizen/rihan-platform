@@ -253,9 +253,11 @@
                                   placeholder="استان، شهر، خیابان، پلاک و واحد...">{{ form_data.address|default:'' }}</textarea>
                     </div>
                     <div class="form-group">
-                        <label for="id_postal_code">کد پستی (اختیاری)</label>
-                        <input type="text" id="id_postal_code" name="postal_code" class="form-control" dir="ltr"
-                               value="{{ form_data.postal_code|default:'' }}" placeholder="10 رقم">
+                        <label for="id_postal_code">کد پستی (الزامی — ۱۰ رقم)</label>
+                        <input type="text" id="id_postal_code" name="postal_code" class="form-control" dir="ltr" required
+                               inputmode="numeric" pattern="[0-9۰-۹]{10}" maxlength="10"
+                               value="{{ form_data.postal_code|default:'' }}" placeholder="مثلاً 5151411111">
+                        <p style="font-size:12px;color:#777;margin-top:5px;">کد پستی ۱۰ رقمی منزل/محل گیرنده — اداره پست بدون آن مرسوله را ثبت نمی‌کند.</p>
                     </div>
                 </div>
             </div>
@@ -317,7 +319,7 @@
                 var el = fields.querySelector('[name="' + n + '"]');
                 if(el){
                     el.disabled = !isNew;
-                    if(n !== 'title' && n !== 'postal_code') el.required = isNew;
+                    if(n !== 'title') el.required = isNew;
                 }
             });
         }

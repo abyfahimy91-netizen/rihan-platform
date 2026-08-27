@@ -327,7 +327,7 @@ def profile_view(request):
     except Exception:
         pass
 
-    orders = u.orders.prefetch_related('items', 'payments').order_by('-created_at')[:20]
+    orders = u.orders.prefetch_related('items', 'payments', 'shipments').order_by('-created_at')[:20]
 
     order_list = []
     for o in orders:
@@ -337,17 +337,33 @@ def profile_view(request):
         )
         remaining = o.remaining_seconds
         can_cancel = o.status == 'PENDING' and remaining > 0 and not evidence_submitted
+        # D-111: برچسب وضعیت با توجه به رسید ثبت‌شده + مرسوله‌ها با لینک رهگیری
+        status_fa = 'در انتظار تایید' if o.awaiting_review else ORDER_STATUS_FA.get(o.status, o.status)
+        badge_code = 'PENDING_REVIEW' if o.awaiting_review else o.status
+        shipments = [
+            {
+                'carrier_label': s.carrier_full_label,
+                'tracking_code': s.tracking_code,
+                'tracking_url': s.tracking_url,
+                'status': s.status,
+                'status_label': s.get_status_display(),
+                'other_details': s.other_details_text,
+            }
+            for s in o.shipments.exclude(status='CANCELED').order_by('created_at')
+        ]
         order_list.append({
             'order_number': o.order_number,
             'created_at': o.created_at,
             'status': o.status,
-            'status_fa': ORDER_STATUS_FA.get(o.status, o.status),
+            'status_fa': status_fa,
+            'badge_code': badge_code,
+            'shipments': shipments,
             'total_price': o.total_price,
             'items_count': sum(i.quantity for i in o.items.all()),
             # D-099: مهلت رزرو + امکانات لغو/پرداخت
             'remaining_seconds': remaining,
             'is_expired': o.is_reservation_expired,
-            'can_pay': o.status == 'PENDING' and remaining > 0,
+            'can_pay': o.status == 'PENDING' and remaining > 0 and not evidence_submitted,
             'can_cancel': can_cancel,
         })
 

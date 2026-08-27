@@ -14,6 +14,13 @@ from .services import get_or_create_cart, add_to_cart, update_cart_item, remove_
 from src.modules.catalog.models import Product
 from src.modules.catalog.services.exceptions import InsufficientStockError
 
+# D-111: نرمال‌سازی ارقام فارسی/عربی کد پستی به لاتین
+_FA_EN_DIGITS = str.maketrans('۰۱۲۳۴۵۶۷۸۹٠١٢٣٤٥٦٧٨٩', '01234567890123456789')
+
+
+def _to_en(value: str) -> str:
+    return str(value or '').translate(_FA_EN_DIGITS).strip()
+
 
 @require_GET
 def cart_page_view(request):
@@ -173,6 +180,17 @@ def checkout_page_view(request):
                     'saved_addresses': saved_addresses, 'address_choice': 'new',
                     'form_data': _default_form_data(request),
                 })
+            # D-111: آدرس ذخیره‌شده قدیمی ممکن است کد پستی نداشته باشد
+            if selected_address and not (selected_address.postal_code or '').strip():
+                messages.error(request,
+                    'آدرس ذخیره‌شده شما کد پستی ندارد. لطفاً گزینه «افزودن آدرس جدید» را انتخاب کنید '
+                    'و کد پستی ۱۰ رقمی را وارد کنید (اداره پست بدون آن مرسوله را قبول نمی‌کند).')
+                return render(request, 'order/checkout.html', {
+                    'items': items, 'subtotal': subtotal,
+                    'shipping': shipping, 'total': total,
+                    'saved_addresses': saved_addresses, 'address_choice': 'new',
+                    'form_data': _default_form_data(request),
+                })
 
         if selected_address is not None:
             # آدرس ذخیره‌شده — بدون تکرار اعتبارسنجی دستی
@@ -189,7 +207,7 @@ def checkout_page_view(request):
                 'name': (request.POST.get('name') or '').strip(),
                 'phone': (request.POST.get('phone') or '').strip(),
                 'address': (request.POST.get('address') or '').strip(),
-                'postal_code': (request.POST.get('postal_code') or '').strip(),
+                'postal_code': _to_en((request.POST.get('postal_code') or '').strip()),
                 'title': (request.POST.get('title') or '').strip(),
             }
             errors = []
@@ -199,8 +217,9 @@ def checkout_page_view(request):
                 errors.append('شماره موبایل معتبر وارد کنید (مثل 09123456789).')
             if len(form_data['address']) < 10:
                 errors.append('آدرس را کامل‌تر بنویسید تا بتوانیم ارسال کنیم.')
-            if form_data['postal_code'] and not _re.fullmatch(r'\d{10}', form_data['postal_code']):
-                errors.append('کد پستی باید ۱۰ رقم باشد.')
+            # D-111: کد پستی الزامی است — پست بدون کد پستی ۱۰ رقمی مرسوله را ثبت نمی‌کند
+            if not _re.fullmatch(r'\d{10}', _to_en(form_data['postal_code'])):
+                errors.append('کد پستی ۱۰ رقمی الزامی است — اداره پست بدون آن مرسوله را ثبت نمی‌کند. (مثلاً 5151411111)')
 
             if not items.exists():
                 errors.append('سبد خرید شما خالی است.')

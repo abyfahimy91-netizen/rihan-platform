@@ -126,6 +126,9 @@ def shipment_detail(request, pk):
                     tracking_code=form.cleaned_data['tracking_code'],
                     user=request.user,
                     via='supplier',
+                    other_carrier_name=form.cleaned_data.get('other_carrier_name', ''),
+                    other_carrier_person=form.cleaned_data.get('other_carrier_person', ''),
+                    other_carrier_phone=form.cleaned_data.get('other_carrier_phone', ''),
                 )
                 messages.success(
                     request,

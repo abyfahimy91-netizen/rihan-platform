@@ -63,6 +63,76 @@ def build_tracking_url(carrier: str, code: str) -> str:
     return template.format(code=code)
 
 
+# ═══════════════════════════════════════════════════════════════
+# D-111 — اعتبارسنجی استاندارد کد رهگیری هر شرکت حمل
+# منبع: پست پیشتاز ۲۰ تا ۲۴ رقم؛ تیپاکس ۱۵ تا ۲۵ رقم؛
+# چاپار شماره بارنامه دقیقاً ۱۴ رقم؛ «سایر» آزاد (اختیاری با ثبت جزئیات).
+# ═══════════════════════════════════════════════════════════════
+
+CARRIER_CODE_RULES = {
+    'POST': {
+        'min_len': 20, 'max_len': 24, 'digits_only': True,
+        'hint': '۲۰ تا ۲۴ رقم (پیشتاز/ویژه) یا فرمت RA123456789IR (بین‌المللی)',
+        'error': 'کد رهگیری پست باید ۲۰ تا ۲۴ رقم باشد (یا فرمت بین‌المللی مثل RA123456789IR). لطفاً کد روی رسید پست را دقیقاً و کامل وارد کنید.',
+    },
+    'TIPAX': {
+        'min_len': 15, 'max_len': 25, 'digits_only': True,
+        'hint': '۱۵ تا ۲۵ رقم — کد رهگیری روی رسید تیپاکس',
+        'error': 'کد رهگیری تیپاکس باید ۱۵ تا ۲۵ رقم باشد. کد روی رسید تیپاکس را کامل وارد کنید.',
+    },
+    'CHAPAR': {
+        'min_len': 14, 'max_len': 14, 'digits_only': True,
+        'hint': 'دقیقاً ۱۴ رقم — شماره بارنامه چاپار',
+        'error': 'کد رهگیری چاپار باید دقیقاً ۱۴ رقم باشد (شماره بارنامه روی رسید).',
+    },
+    'OTHER': {
+        'min_len': 3, 'max_len': 40, 'digits_only': False,
+        'hint': 'اختیاری — اگر شناسه/کد پیگیری دارید وارد کنید',
+        'error': 'کد پیگیری واردشده کوتاه است؛ اگر شناسه‌ای وجود ندارد آن را خالی بگذارید و جزئیات ارسال‌کننده را کامل کنید.',
+    },
+}
+
+
+def carrier_code_hint(carrier: str) -> str:
+    """راهنمای فرمت کد رهگیری برای نمایش زیر فیلد (ادمین/پنل تامین‌کننده)"""
+    rule = CARRIER_CODE_RULES.get(carrier or '')
+    return rule['hint'] if rule else ''
+
+
+def validate_tracking_code(carrier: str, code: str) -> str:
+    """
+    کد نرمال‌شده را با استاندارد شرکت حمل می‌سنجد.
+    خروجی: کد (خالی مجاز فقط برای OTHER) — نامعتبر: FulfillmentError با پیام فارسی.
+    """
+    import re
+    from .models import Shipment
+
+    rule = CARRIER_CODE_RULES.get(carrier or '')
+    if rule is None:
+        raise FulfillmentError('شرکت حمل انتخاب‌شده معتبر نیست.')
+
+    code = normalize_tracking_code(code)
+
+    if carrier == Shipment.Carrier.OTHER:
+        if code and len(code) < rule['min_len']:
+            raise FulfillmentError(rule['error'])
+        return code  # برای «سایر» خالی هم مجاز است
+
+    if not code:
+        raise FulfillmentError('لطفاً کد رهگیری مرسوله را وارد کنید.')
+
+    # پست: فرمت بین‌المللی S10 مثل RA123456789IR / RR123456789IR هم معتبر است
+    if carrier == Shipment.Carrier.POST and re.match(r'^[A-Z]{2}\d{9}[A-Z]{2}$', code):
+        return code
+
+    if rule['digits_only'] and not code.isdigit():
+        raise FulfillmentError(
+            f'کد رهگیری این شرکت حمل فقط باید رقم باشد. {rule["error"]}')
+    if not (rule['min_len'] <= len(code) <= rule['max_len']):
+        raise FulfillmentError(rule['error'])
+    return code
+
+
 def short_tracking_link(code: str) ->str:
     """لینک کوتاه دامنه خودمان → ریدایرکت به سامانه باربری (/order/t/<code>/)"""
     return f'{SITE_BASE_URL}/order/t/{code}'
@@ -203,6 +273,13 @@ DEFAULT_CUSTOMER_SHIPPED_SMS = (
     '\n{brand}'
 )
 
+# D-111: ارسال بدون کد رهگیری (شرکت حمل «سایر») — جزئیات ارسال‌کننده به‌جای کد
+DEFAULT_CUSTOMER_SHIPPED_SMS_OTHER = (
+    'سفارش {order_number} ارسال شد ({carrier}).'
+    '\n{other_details}'
+    '\n{brand}'
+)
+
 DEFAULT_SUPPLIER_ASSIGN_SMS = (
     '{brand} | سفارش جدید {order_number}\n'
     '{items}\n'
@@ -255,7 +332,7 @@ def dispatch_instruction_text(shipment) -> str:
         f'سفارش: {order.order_number}',
         f'تاریخ: {jalali_human(order.created_at)}',
         '',
-        'اقلام (فقط مقدار — قیمت ندارد):',
+        'اقلام ارسالی:',
     ]
     lines += [item_line(si.order_item) for si in shipment.items.select_related('order_item')]
     lines += [
@@ -325,31 +402,53 @@ def _sync_order_after_shipment_status(shipment, user=None):
         )
 
 
-def mark_shipped(shipment, carrier: str, tracking_code: str, user=None, via='admin', send_customer_sms=True):
+def mark_shipped(shipment, carrier: str, tracking_code: str, user=None, via='admin', send_customer_sms=True,
+                 other_carrier_name='', other_carrier_person='', other_carrier_phone=''):
     """
     ثبت کد رهگیری مرسوله.
     via: 'admin' یا 'supplier' — هر دو مسیر از اینجا عبور می‌کنند.
+    D-111: اعتبارسنجی استاندارد کد برای هر شرکت حمل + جزئیات اجباری حالت «سایر».
     خروجی: (shipment, sms_sent: bool | None)
     """
     from .models import Shipment
 
-    code = normalize_tracking_code(tracking_code)
-    if len(code) < 5:
-        raise FulfillmentError('کد رهگیری واردشده معتبر نیست (حداقل ۵ نویسه لاتین/عدد).')
     if carrier not in Shipment.Carrier.values:
         carrier = Shipment.Carrier.POST
 
+    # اعتبارسنجی استاندارد کد (برای «سایر» خالی مجاز است)
+    code = validate_tracking_code(carrier, tracking_code)
+
+    if carrier == Shipment.Carrier.OTHER:
+        missing = [
+            label for label, value in (
+                ('نام شرکت حمل', other_carrier_name),
+                ('نام ارسال‌کننده/راننده', other_carrier_person),
+                ('شماره تماس حمل‌کننده', other_carrier_phone),
+            ) if not (value or '').strip()
+        ]
+        if missing:
+            raise FulfillmentError(
+                'برای گزینه «سایر» باید این موارد کامل شود: ' + '، '.join(missing) + '.')
+    else:
+        # جزئیات «سایر» برای سایر شرکت‌ها معنا ندارد — پاکسازی ورودی
+        other_carrier_name = other_carrier_person = other_carrier_phone = ''
+
     shipment.carrier = carrier
     shipment.tracking_code = code
+    shipment.other_carrier_name = (other_carrier_name or '').strip()
+    shipment.other_carrier_person = (other_carrier_person or '').strip()
+    shipment.other_carrier_phone = (other_carrier_phone or '').strip()
     shipment.status = Shipment.Status.SHIPPED
     shipment.shipped_at = timezone.now()
-    shipment.save(update_fields=['carrier', 'tracking_code', 'status', 'shipped_at', 'updated_at'])
+    shipment.save(update_fields=[
+        'carrier', 'tracking_code', 'other_carrier_name', 'other_carrier_person',
+        'other_carrier_phone', 'status', 'shipped_at', 'updated_at'])
 
     order = shipment.order
     # سازگاری با فیلدهای قدیمی سطح سفارش
     if not order.tracking_code:
         order.tracking_code = code
-        order.shipping_method = shipment.get_carrier_display()
+        order.shipping_method = shipment.carrier_full_label
     order.shipped_at = shipment.shipped_at
     order.save(update_fields=['tracking_code', 'shipping_method', 'shipped_at', 'updated_at'])
     _sync_order_after_shipment_status(shipment, user=user)
@@ -379,15 +478,29 @@ def customer_shipped_text(shipment) -> str:
     """کوتاه و کم‌اصطکاک: کد رهگیری + لینک یک‌کلیکی (قالب از ادمین)"""
     order = shipment.order
     code = shipment.tracking_code
+    settings = _site_settings()
+
+    if not code:
+        # D-111: شرکت حمل «سایر» بدون کد — جزئیات ارسال‌کننده
+        ctx = {
+            'brand': _sms_brand(),
+            'order_number': order.order_number,
+            'carrier': shipment.carrier_full_label,
+            'other_details': shipment.other_details_text or 'به‌زودی اطلاعات کامل ارسال در پروفایل شما قابل مشاهده است.',
+        }
+        return render_sms_template(
+            getattr(settings, 'sms_text_customer_shipped', ''),
+            DEFAULT_CUSTOMER_SHIPPED_SMS_OTHER, ctx)
+
     ctx = {
         'brand': _sms_brand(),
         'order_number': order.order_number,
-        'carrier': shipment.get_carrier_display(),
+        'carrier': shipment.carrier_full_label,
         'tracking_code': code,
         'link': short_tracking_link(code),
     }
     return render_sms_template(
-        getattr(_site_settings(), 'sms_text_customer_shipped', ''),
+        getattr(settings, 'sms_text_customer_shipped', ''),
         DEFAULT_CUSTOMER_SHIPPED_SMS, ctx)
 
 

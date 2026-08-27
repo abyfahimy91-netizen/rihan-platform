@@ -174,6 +174,30 @@ class Order(models.Model):
             return 0
         return max(0, int((self.expires_at - timezone.now()).total_seconds()))
 
+    # ── D-111: رسید ثبت‌شده ولی هنوز تایید نشده ──
+    @property
+    def awaiting_review(self):
+        """رسید پرداخت مشتری ثبت شده و در انتظار تایید ادمین است.
+        سفارش در این حالت دیگر «در انتظار پرداخت» نیست؛ «در انتظار تایید» است."""
+        if self.status != self.OrderStatus.PENDING:
+            return False
+        payment = self.payments.order_by('-created_at').first()
+        return bool(payment and payment.status == 'PENDING_REVIEW')
+
+    @property
+    def status_display_label(self):
+        """برچسب وضعیت با توجه به رسید ثبت‌شده (D-111: باگ «در انتظار پرداخت» بعد از ثبت رسید)"""
+        if self.awaiting_review:
+            return 'در انتظار تایید پرداخت'
+        return self.get_status_display()
+
+    @property
+    def status_badge_code(self):
+        """کد CSS برای بج وضعیت — PENDING با رسید ثبت‌شده = PENDING_REVIEW"""
+        if self.awaiting_review:
+            return 'PENDING_REVIEW'
+        return self.status
+
 
 class OrderItem(models.Model):
     '''اقلام سفارش نهایی'''
@@ -522,6 +546,18 @@ class Shipment(models.Model):
         max_length=40, blank=True, default='', db_index=True,
         verbose_name="کد رهگیری")
 
+    # D-111: جزئیات شرکت حمل «سایر» — برای اطلاع مشتری در پروفایل/پیگیری
+    other_carrier_name = models.CharField(
+        max_length=100, blank=True, default='',
+        verbose_name="نام شرکت حمل (حالت سایر)",
+        help_text="وقتی شرکت حمل «سایر» انتخاب شد، نام شرکت/سرویس را بنویسید")
+    other_carrier_person = models.CharField(
+        max_length=100, blank=True, default='',
+        verbose_name="نام ارسال‌کننده / راننده")
+    other_carrier_phone = models.CharField(
+        max_length=20, blank=True, default='',
+        verbose_name="شماره تماس حمل‌کننده")
+
     # اطلاع‌رسانی به تامین‌کننده
     sent_to_supplier_at = models.DateTimeField(
         null=True, blank=True, verbose_name="زمان اولین اطلاع‌رسانی")
@@ -553,6 +589,29 @@ class Shipment(models.Model):
             return ''
         from .fulfillment import build_tracking_url
         return build_tracking_url(self.carrier, self.tracking_code)
+
+    # ── D-111: برچسب کامل شرکت حمل + جزئیات حالت «سایر» ──
+    @property
+    def carrier_full_label(self):
+        """مثلا «پست پیشتاز» یا «سایر (پیک آقای رضایی)»"""
+        if self.carrier == self.Carrier.OTHER:
+            name = (self.other_carrier_name or '').strip()
+            return f'سایر ({name})' if name else 'سایر'
+        return self.get_carrier_display()
+
+    @property
+    def other_details_text(self):
+        """جمله‌ی اطلاع‌رسانی برای مشتری وقتی شرکت حمل «سایر» است"""
+        if self.carrier != self.Carrier.OTHER:
+            return ''
+        parts = []
+        person = (self.other_carrier_person or '').strip()
+        phone = (self.other_carrier_phone or '').strip()
+        if person:
+            parts.append(f'ارسال‌کننده: {person}')
+        if phone:
+            parts.append(f'شماره تماس: {phone}')
+        return ' — '.join(parts)
 
 
 class ShipmentItem(models.Model):

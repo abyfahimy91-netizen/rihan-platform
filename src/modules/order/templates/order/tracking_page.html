@@ -12,9 +12,30 @@
     .status-badge{display:inline-flex;align-items:center;gap:7px;border-radius:999px;font-size:13px;
         font-weight:800;padding:8px 18px;background:#FBF1DC;color:#8a6a25;}
     .status-badge.CANCELLED{background:var(--color-error-bg,#F9ECEA);color:var(--color-error,#9B2C2C);}
+    .status-badge.PENDING_REVIEW{background:#FBF1DC;color:#8a6a25;border:1.5px dashed #d9b96a;}
     .status-badge.PAID,.status-badge.DELIVERED{background:var(--color-success-bg,#EAF3EE);color:var(--color-success,#2D6A4F);}
     .status-badge.PROCESSING{background:var(--color-warning-bg,#FBF4E3);color:var(--color-warning-text,#7A6428);}
     .status-badge.SHIPPED{background:#E8EEF7;color:#2c5282;}
+    /* D-111: اعلان رسید ثبت‌شده */
+    .ev-notice{display:flex;align-items:center;gap:12px;background:#FBF6E8;border:1.5px dashed #d9b96a;
+        border-radius:14px;padding:14px 18px;margin-bottom:22px;font-size:13.5px;color:#7a6428;line-height:1.9;}
+    /* D-111: کارت مرسوله‌ها */
+    .ship-card{background:#fff;border:1px solid var(--color-border);border-radius:16px;padding:18px 20px;margin-bottom:14px;}
+    .ship-card:last-child{margin-bottom:0;}
+    .ship-head{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px;}
+    .ship-title{font-weight:800;font-size:14.5px;color:var(--color-text);}
+    .ship-badge{border-radius:999px;font-size:11.5px;font-weight:800;padding:5px 14px;white-space:nowrap;}
+    .ship-badge.NEW{background:#FBF1DC;color:#8a6a25;}
+    .ship-badge.SHIPPED{background:#E8EEF7;color:#2c5282;}
+    .ship-badge.DELIVERED{background:#EAF3EE;color:#2D6A4F;}
+    .ship-row{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;
+        padding-top:10px;border-top:1px dashed var(--color-border);}
+    .ship-code{font-family:monospace;direction:ltr;unicode-bidi:embed;font-size:14.5px;background:#F6F3EC;
+        padding:5px 12px;border-radius:8px;display:inline-block;}
+    .track-btn{display:inline-flex;align-items:center;gap:7px;background:var(--color-primary);color:#fff;
+        text-decoration:none;font-weight:800;font-size:13px;padding:9px 18px;border-radius:11px;}
+    .track-btn:hover{opacity:.92;}
+    .ship-other{font-size:13px;color:var(--color-text-muted);margin-top:8px;line-height:1.9;}
     /* مهلت رزرو (D-099) */
     .ttl-chip{display:inline-flex;align-items:center;gap:10px;background:#fff;border:1.5px dashed var(--color-secondary);
         border-radius:999px;padding:8px 18px;font-size:13.5px;color:var(--color-text-muted);}
@@ -92,9 +113,16 @@
                 </span>
                 {% endif %}
                 <span class="onum">{{ order.order_number }}</span>
-                <span class="status-badge {{ order.status }}">{{ order.get_status_display }}</span>
+                <span class="status-badge {{ status_badge_code }}">{{ status_display }}</span>
             </div>
         </div>
+
+        {% if evidence_submitted %}
+        <div class="ev-notice">
+            <span style="font-size:22px;">✅</span>
+            <span>رسید پرداخت شما ثبت شد و <b>در انتظار تایید</b> است. به‌محض تایید، فرآیند آماده‌سازی و ارسال شروع می‌شود و از طریق پیامک و همین صفحه مطلع می‌شوید.</span>
+        </div>
+        {% endif %}
 
         <div class="ftl">
             <div class="ftl-row">
@@ -135,6 +163,37 @@
             <div class="it-row">
                 <span>{{ item.product_name_snapshot|default:item.product.name }} <span class="q">× {{ item.quantity|fa }}</span></span>
                 <span>{{ item.subtotal|money }} تومان</span>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        {% if shipments %}
+        <div class="items-box">
+            <h3>🚚 مرسوله‌ها</h3>
+            {% for s in shipments %}
+            <div class="ship-card">
+                <div class="ship-head">
+                    <span class="ship-title">مرسوله {{ forloop.counter|fa }} — {{ s.carrier_full_label }}</span>
+                    <span class="ship-badge {{ s.status }}">{{ s.get_status_display }}</span>
+                </div>
+                {% if s.tracking_code %}
+                <div class="ship-row">
+                    <div>کد رهگیری: <span class="ship-code">{{ s.tracking_code }}</span></div>
+                    {% if s.tracking_url %}
+                    <a class="track-btn" href="{{ s.tracking_url }}" target="_blank" rel="noopener">🔍 رهگیری در سایت {{ s.get_carrier_display }}</a>
+                    {% else %}
+                    <a class="track-btn" href="/order/t/{{ s.tracking_code }}/" target="_blank" rel="noopener">🔍 رهگیری مرسوله</a>
+                    {% endif %}
+                </div>
+                {% elif s.other_details_text %}
+                <div class="ship-other">{{ s.other_details_text }}</div>
+                {% elif s.status == 'NEW' %}
+                <div class="ship-other">این مرسوله در حال آماده‌سازی است و به‌محض ارسال، کد رهگیری اینجا نمایش داده می‌شود.</div>
+                {% endif %}
+                {% if s.shipped_at %}
+                <div class="ship-other">📅 تاریخ ارسال: {{ s.shipped_at|jdate_human }}</div>
+                {% endif %}
             </div>
             {% endfor %}
         </div>

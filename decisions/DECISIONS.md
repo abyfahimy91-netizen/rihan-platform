@@ -1133,6 +1133,12 @@ M14 (معماری) → M5 (RBAC) → M15 (Ledger) + M16 (State Machine) → M3, 
 | D-102 | آدرس‌های ذخیره‌شده + تسویه‌حساب بدون اصطکاک + تب آدرس در پروفایل | Accepted | 1405/06/02 |
 | D-103 | سرویس‌دهنده‌های پیامک ادمین‌محور + کنترل روش‌های ورود + failover خودکار | Accepted | 1405/06/03 |
 | D-104 | صفحه فروش اقناعی هشت‌بخشی + اشتراک ویروسی + نظرات محرمانه + JSON-LD | Accepted | 1405/06/03 |
+| D-105 | زنجیره ارسال: تخصیص تامین‌کننده + کد رهگیری + پیامک‌های زنجیره | Accepted | 1405/06/03 |
+| D-106 | پیامک موازی ادمین‌محور + ثبت‌نام با رمز عبور | Accepted | 1405/06/03 |
+| D-107 | برند واحد Rihan + استوری تولیدی + لینک کوتاه اشتراک‌گذاری | Accepted | 1405/06/03 |
+| D-108 | نشان‌های اعتماد ادمین‌محور + تایپوگرافی فارسی | Accepted | 1405/06/04 |
+| D-109 | صفحه حریم خصوصی ادمین‌محور (چک‌لیست اینماد) | Accepted | 1405/06/04 |
+| D-110 | مستندات فنی لوگو و سیستم علامت تجاری (بریف رسمی فاز ۵) | Proposed | 1405/06/04 |
 
 **سند کامل:** decisions/D-100-ADMIN-EDITABLE-PAGES-FAQ.md
 **سند کامل:** decisions/D-101-RIAL-AMOUNT-BANK-APP-ORDER.md
@@ -1142,3 +1148,6 @@ M14 (معماری) → M5 (RBAC) → M15 (Ledger) + M16 (State Machine) → M3, 
 **سند کامل:** decisions/D-105-FULFILLMENT.md
 **سند کامل:** decisions/D-106-PARALLEL-SMS.md
 **سند کامل:** decisions/D-107-SHARE-STORY-SMS.md
+**سند کامل:** decisions/D-108-TRUST-BADGES-TYPOGRAPHY.md
+**سند کامل:** decisions/D-109-PRIVACY-PAGE.md
+**سند کامل:** decisions/D-110-LOGO-DESIGN-SPEC.md

@@ -55,7 +55,12 @@ def _order_flags(order, payment=None):
     return {
         'remaining_seconds': remaining,
         'is_expired': order.is_reservation_expired,
-        'can_pay': order.status == Order.OrderStatus.PENDING and remaining > 0,
+        # D-111: وقتی رسید ثبت شده، «تکمیل پرداخت» دیگر معنا ندارد
+        'can_pay': (
+            order.status == Order.OrderStatus.PENDING
+            and remaining > 0
+            and not evidence_submitted
+        ),
         'can_cancel': (
             order.status == Order.OrderStatus.PENDING
             and remaining > 0
@@ -312,6 +317,9 @@ def tracking_page_view(request, order_number):
         'history': history_items,
         'timeline': timeline,
         'shipments': shipments,
+        # D-111: برچسب وضعیت با توجه به رسید ثبت‌شده («در انتظار تایید»)
+        'status_display': order.status_display_label,
+        'status_badge_code': order.status_badge_code,
         'payment': order.payments.order_by('-created_at').first(),
         'items_count': sum(i.quantity for i in order.items.all()),
         'amount_display': money(order.total_price),

@@ -5,25 +5,46 @@
 {% block content %}
 <h1 class="mb-4">مرسوله سفارش <span dir="ltr">{{ order.order_number }}</span></h1>
 
+<!-- ── وضعیت فعلی + نقشه راه ── -->
 <div class="card">
     {% if shipment.status == 'NEW' %}
         <span class="badge b-new">در انتظار ارسال</span>
-        <p class="muted mt-3">تاریخ ثبت: {{ shipment.created_at|jdate }}</p>
+        <div class="steps mt-3">
+            <div class="step is-active">
+                <div class="step-num">۱</div>
+                <div><div class="step-t">اقلام را آماده کنید</div><div class="step-d">چک‌لیست پایین همین صفحه</div></div>
+            </div>
+            <div class="step">
+                <div class="step-num">۲</div>
+                <div><div class="step-t">آدرس را کپی و بسته بفرستید</div><div class="step-d">اطلاعات گیرنده آماده کپی است</div></div>
+            </div>
+            <div class="step">
+                <div class="step-num">۳</div>
+                <div><div class="step-t">کد رهگیری را ثبت کنید</div><div class="step-d">پایین همین صفحه — فرم سبز</div></div>
+            </div>
+        </div>
     {% elif shipment.status == 'SHIPPED' %}
-        <span class="badge b-shipped">ارسال شده</span>
+        <span class="badge b-shipped">ارسال شده ✅</span>
         <p class="mt-3">کد رهگیری ثبت‌شده: <code class="latin" id="tc">{{ shipment.tracking_code }}</code>
             <button class="copy-btn" data-copy-target="#tc">📋 کپی کد</button>
             {% if shipment.tracking_url %}
                 — <a href="{{ shipment.tracking_url }}" target="_blank" rel="noopener">پیگیری در سایت {{ shipment.get_carrier_display }}</a>
             {% endif %}
         </p>
+        {% if shipment.other_carrier_name %}
+        <p class="muted">شرکت حمل: {{ shipment.carrier_full_label }}{% if shipment.other_carrier_person %} — ارسال‌کننده: {{ shipment.other_carrier_person }}{% endif %}{% if shipment.other_carrier_phone %} — تماس: <span dir="ltr">{{ shipment.other_carrier_phone }}</span>{% endif %}</p>
+        {% endif %}
+        <div class="hint-box">✅ کار شما تمام شد. پیامک رهگیری برای مشتری ارسال شده و وقتی مشتری بسته را تحویل بگیرد، ادمین وضعیت «تحویل داده شد» را ثبت می‌کند.</div>
     {% else %}
         <span class="badge b-delivered">تحویل داده شد ✓</span>
+        <p class="muted mt-3">این مرسوله به مشتری تحویل داده شده است. ممنون از همکاری شما 🌿</p>
     {% endif %}
+    <p class="muted mt-3">تاریخ ثبت: {{ shipment.created_at|jdate }}</p>
 </div>
 
+<!-- ── قدم ۱: اقلام ── -->
 <div class="card">
-    <h3 class="mb-3">📦 اقلام ارسالی (بدون قیمت)</h3>
+    <h3 class="mb-3">📦 قدم ۱ — اقلام ارسالی</h3>
     <table class="table">
         <thead><tr><th>محصول</th><th>تعداد</th></tr></thead>
         <tbody>
@@ -34,25 +55,45 @@
     </table>
 </div>
 
+<!-- ── قدم ۲: گیرنده ── -->
 <div class="card">
     <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;">
-        <h3>📍 گیرنده</h3>
+        <h3>📍 قدم ۲ — گیرنده و آدرس</h3>
         <button class="copy-btn" data-copy-target="#addr-block">📋 کپی اطلاعات ارسال</button>
     </div>
     <pre id="addr-block" class="addr" style="white-space:pre-wrap;font-family:inherit;">{{ address_text }}</pre>
-    <p class="muted mt-3">⚠️ لطفاً بسته را محکم و بدون فاکتور قیمت ببندید. ارسال با «{{ form.carrier.field.initial|default:"پست پیشتاز" }}» طبق توافق است.</p>
+    <div class="hint-box">⚠️ بسته را <b>محکم</b> ببندید و <b>فاکتور قیمت داخل نگذارید</b>. پیشنهاد ارسال: پست پیشتاز یا تیپاکس برای شهرستان.</div>
 </div>
 
-<div class="card">
+<!-- ── قدم ۳: ثبت کد رهگیری ── -->
+<div class="card" {% if shipment.status != 'NEW' %}style="opacity:.75;"{% endif %}>
     {% if shipment.status == 'NEW' %}
-        <h3 class="mb-3">🚚 پس از ارسال، کد رهگیری را ثبت کنید</h3>
-        <p class="muted mb-3">به‌محض ثبت، مشتری به‌صورت خودکار پیامک حاوی کد رهگیری و لینک پیگیری دریافت می‌کند.</p>
+        <h3 class="mb-3">🚚 قدم ۳ — پس از ارسال، کد رهگیری را ثبت کنید</h3>
+        <div class="guide">به‌محض ثبت، مشتری <b>به‌صورت خودکار</b> پیامک حاوی کد رهگیری و لینک پیگیری دریافت می‌کند. نیازی به کار دیگری نیست.</div>
         <form method="post">
             {% csrf_token %}
             <div class="mb-3">
                 <label>{{ form.carrier.label }}</label>
                 {{ form.carrier }}
-                {% if form.carrier.errors %}<p style="color:#c00;font-size:13px;">{{ form.carrier.errors.0 }}</p>{% endif %}
+                <div id="carrier-hint" class="hint-box"></div>
+            </div>
+            <div id="other-fields" class="hidden">
+                <div class="mb-3">
+                    <label>{{ form.other_carrier_name.label }}</label>
+                    {{ form.other_carrier_name }}
+                    {% if form.other_carrier_name.errors %}<p style="color:#c00;font-size:13px;">{{ form.other_carrier_name.errors.0 }}</p>{% endif %}
+                </div>
+                <div class="mb-3">
+                    <label>{{ form.other_carrier_person.label }}</label>
+                    {{ form.other_carrier_person }}
+                    {% if form.other_carrier_person.errors %}<p style="color:#c00;font-size:13px;">{{ form.other_carrier_person.errors.0 }}</p>{% endif %}
+                </div>
+                <div class="mb-3">
+                    <label>{{ form.other_carrier_phone.label }}</label>
+                    {{ form.other_carrier_phone }}
+                    {% if form.other_carrier_phone.errors %}<p style="color:#c00;font-size:13px;">{{ form.other_carrier_phone.errors.0 }}</p>{% endif %}
+                    <p class="muted">{{ form.other_carrier_phone.help_text }}</p>
+                </div>
             </div>
             <div class="mb-3">
                 <label>{{ form.tracking_code.label }}</label>
@@ -60,13 +101,41 @@
                 {% if form.tracking_code.errors %}<p style="color:#c00;font-size:13px;">{{ form.tracking_code.errors.0 }}</p>{% endif %}
                 <p class="muted">{{ form.tracking_code.help_text }}</p>
             </div>
-            <button type="submit" class="btn btn-success">ثبت کد رهگیری و اطلاع به مشتری</button>
+            <button type="submit" class="btn btn-success" id="submit-btn">ثبت کد رهگیری و اطلاع به مشتری</button>
         </form>
     {% else %}
-        <p class="muted">کد رهگیری این مرسوله قبلاً ثبت شده است.</p>
+        <h3 class="mb-3">🚚 کد رهگیری این مرسوله قبلاً ثبت شده است</h3>
+        <p class="muted">اگر کد را اشتباه وارد کرده‌اید یا بسته با شرکت دیگری ارسال شده، با ادمین هماهنگ کنید تا اصلاح شود.</p>
     {% endif %}
 </div>
 
 <p><a href="{% url 'supplier_panel:shipment_list' %}" class="btn btn-primary">← بازگشت به لیست</a></p>
 
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // ── D-111: راهنمای فرمت کد per شرکت حمل + نمایش فیلدهای «سایر» ──
+    (function(){
+        var sel = document.getElementById('id_carrier');
+        if(!sel) return;
+        var hints = {};
+        try { hints = JSON.parse(sel.getAttribute('data-hints') || '{}'); } catch(e) {}
+        var hintBox = document.getElementById('carrier-hint');
+        var otherBox = document.getElementById('other-fields');
+        var codeInput = document.getElementById('id_tracking_code');
+        var submitBtn = document.getElementById('submit-btn');
+        function refresh(){
+            var v = sel.value;
+            var hint = hints[v] || '';
+            var isOther = (v === 'OTHER');
+            if(hintBox) hintBox.textContent = (isOther ? 'ℹ️ برای «سایر» کد رهگیری اختیاری است؛ اما ' : '💡 فرمت استاندارد: ') + hint;
+            if(otherBox) otherBox.classList.toggle('hidden', !isOther);
+            if(codeInput) codeInput.required = !isOther;
+            if(submitBtn) submitBtn.textContent = isOther ? 'ثبت ارسال و اطلاع به مشتری' : 'ثبت کد رهگیری و اطلاع به مشتری';
+        }
+        sel.addEventListener('change', refresh);
+        refresh();
+    })();
+</script>
 {% endblock %}

@@ -71,7 +71,7 @@ class AddressValidationTest(TestCase):
         base = {
             'full_name': 'کاربر تست', 'phone': '09121110002',
             'address': 'تبریز، خیابان آزادی، پلاک ۱۰',
-            'postal_code': '', 'title': 'خانه',
+            'postal_code': '5154911111', 'title': 'خانه',  # D-111: کد پستی الزامی
         }
         base.update(kw)
         return base
@@ -88,6 +88,13 @@ class AddressValidationTest(TestCase):
     def test_short_address_rejected(self):
         with self.assertRaises(ValueError):
             address_service.create_for_user(self.user, self._data(address='تهران'))
+
+    def test_missing_postal_rejected(self):
+        """D-111: کد پستی ۱۰ رقمی الزامی است"""
+        with self.assertRaises(ValueError):
+            address_service.create_for_user(self.user, self._data(postal_code=''))
+        with self.assertRaises(ValueError):
+            address_service.create_for_user(self.user, self._data(postal_code='123'))
 
 
 class CheckoutAddressTest(TestCase):
@@ -162,6 +169,7 @@ class CheckoutAddressTest(TestCase):
             'name': 'مریم احمدی',
             'phone': '09121110003',
             'address': 'تهران، ولیعصر، پلاک ۲۲',
+            'postal_code': '1234567890',
         })
         self.assertEqual(r.status_code, 302)
         self.assertEqual(self.user.addresses.count(), 0)
@@ -195,10 +203,16 @@ class ProfileAddressTest(TestCase):
             'full_name': 'مریم احمدی',
             'phone': '09121110005',
             'address': 'تبریز، آزادی، پلاک ۱۰',
-            'postal_code': '',
+            'postal_code': '5154911111',  # D-111: کد پستی الزامی شد
         }
         data.update(kw)
         return self.client.post('/accounts/profile/', data)
+
+    def test_add_address_rejects_missing_postal(self):
+        """D-111: کد پستی ۱۰ رقمی الزامی است"""
+        r = self._add(postal_code='')
+        self.user.refresh_from_db()
+        self.assertEqual(self.user.addresses.count(), 0)
 
     def test_add_address(self):
         r = self._add()

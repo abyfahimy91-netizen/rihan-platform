@@ -173,6 +173,58 @@ class OrderAdmin(admin.ModelAdmin):
 
 
 # ═══════════════════════════════════════════════════════════════
+# D-111 — اینلاین پرداخت‌ها داخل صفحه سفارش: رسید با یک کلیک باز می‌شود
+# ═══════════════════════════════════════════════════════════════
+
+class PaymentInline(admin.TabularInline):
+    """پرداخت‌های سفارش — فقط خواندنی؛ لینک مستقیم مشاهده رسید"""
+    model = Payment
+    extra = 0
+    can_delete = False
+    show_change_link = True
+    fields = ['created_at_fa_inline', 'status_display_inline', 'gateway',
+              'amount_display_inline', 'last4_inline', 'receipt_link_inline']
+    readonly_fields = fields
+    verbose_name = "پرداخت"
+    verbose_name_plural = "پرداخت‌های این سفارش (رسید را با کلیک ببینید)"
+
+    def has_add_permission(self, request, obj=None):
+        return False
+
+    @admin.display(description='تاریخ')
+    def created_at_fa_inline(self, obj):
+        return jalali_datetime_str(obj.created_at) if obj and obj.pk else '-'
+
+    @admin.display(description='وضعیت پرداخت')
+    def status_display_inline(self, obj):
+        if not obj or not obj.pk:
+            return '-'
+        colors = {
+            'PENDING': '#6c757d', 'PENDING_REVIEW': '#c8a24b',
+            'SUCCESS': '#28a745', 'FAILED': '#dc3545', 'CANCELLED': '#dc3545',
+        }
+        return format_html(
+            '<span style="background:{};color:#fff;padding:3px 10px;border-radius:10px;font-size:11px;">{}</span>',
+            colors.get(obj.status, '#666'), obj.get_status_display())
+
+    @admin.display(description='مبلغ', )
+    def amount_display_inline(self, obj):
+        return f'{fa_money(obj.amount)} تومان' if obj and obj.pk else '-'
+
+    @admin.display(description='۴ رقم کارت')
+    def last4_inline(self, obj):
+        return obj.sender_card_last4 or '-' if obj and obj.pk else '-'
+
+    @admin.display(description='رسید')
+    def receipt_link_inline(self, obj):
+        if obj and obj.pk and obj.receipt_image:
+            return format_html(
+                '<a href="{}" target="_blank" style="font-weight:bold;">📎 مشاهده رسید</a>',
+                obj.receipt_image.url)
+        return format_html('<span style="color:#888;">—</span>')
+
+
+# ═══════════════════════════════════════════════════════════════
 # Admin برای پرداخت‌ها (پنل تایید کارت‌به‌کارت)
 # ═══════════════════════════════════════════════════════════════
 
@@ -279,11 +331,14 @@ class PaymentAdmin(admin.ModelAdmin):
         if obj.transfer_time:
             parts.append(obj.transfer_time.strftime('%m/%d %H:%M'))
         if obj.receipt_image:
-            parts.append("📎 رسید")
+            # D-111: لینک کلیک‌شدنی برای مشاهده رسید
+            parts.append(format_html(
+                '<a href="{}" target="_blank" style="font-weight:bold;">📎 مشاهده رسید</a>',
+                obj.receipt_image.url))
         
         return format_html(
             '<span style="color:#2d5a2d;">{}</span>',
-            ' | '.join(parts)
+            format_html(' | '.join(['{}'] * len(parts)), *parts)
         )
     evidence_preview.short_description = 'Evidence'
     
@@ -447,13 +502,53 @@ class ShipmentInline(admin.TabularInline):
         return jalali_human(obj.shipped_at) if obj and obj.shipped_at else '-'
 
 
-# اتصال اینلاین به ادمین موجود سفارش
-OrderAdmin.inlines = [*OrderAdmin.inlines, ShipmentInline]
+# اتصال اینلاین‌ها به ادمین موجود سفارش (D-111: پرداخت‌ها هم داخل صفحه سفارش)
+OrderAdmin.inlines = [*OrderAdmin.inlines, PaymentInline, ShipmentInline]
+
+
+# ── D-111: فرم اعتبارسنجی مرسوله در ادمین — کد رهگیری استاندارد + الزامات «سایر» ──
+from django import forms as _django_forms
+
+
+class ShipmentAdminForm(_django_forms.ModelForm):
+    class Meta:
+        model = Shipment
+        fields = '__all__'
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        carrier = (self.instance.carrier if self.instance and self.instance.pk else
+                   (self.data.get('carrier') if self.data else '') or 'POST')
+        hint = _fulfillment.carrier_code_hint(carrier)
+        if hint:
+            self.fields['tracking_code'].help_text = (
+                f'فرمت استاندارد: {hint}')
+        self.fields['other_carrier_name'].help_text = 'فقط وقتی شرکت حمل «سایر» است لازم می‌شود'
+        self.fields['other_carrier_person'].help_text = 'مثلاً نام راننده/پیک — برای حالت «سایر» الزامی'
+        self.fields['other_carrier_phone'].help_text = 'برای حالت «سایر» الزامی — به مشتری نمایش داده می‌شود'
+
+    def clean(self):
+        cleaned = super().clean()
+        carrier = cleaned.get('carrier')
+        code = cleaned.get('tracking_code') or ''
+        try:
+            cleaned['tracking_code'] = _fulfillment.validate_tracking_code(carrier, code)
+        except _fulfillment.FulfillmentError as e:
+            self.add_error('tracking_code', str(e))
+        if carrier == Shipment.Carrier.OTHER:
+            for field, label in (
+                ('other_carrier_name', 'نام شرکت حمل'),
+                ('other_carrier_person', 'نام ارسال‌کننده/راننده'),
+                ('other_carrier_phone', 'شماره تماس حمل‌کننده'),
+            ):
+                if not (cleaned.get(field) or '').strip():
+                    self.add_error(field, f'در حالت «سایر»، {label} الزامی است.')
+        return cleaned
 
 
 @admin.register(Shipment)
 class ShipmentAdmin(admin.ModelAdmin):
-    formfield_overrides = {}  # placeholder تا فیلدهای سفارشی لازم نشود
+    form = ShipmentAdminForm  # D-111: اعتبارسنجی استاندارد کد رهگیری + الزامات «سایر»
 
     list_display = ['shipment_id_short', 'order_link', 'supplier_or_rihan', 'status_badge',
                     'carrier_label', 'tracking_code_ltr', 'notified_summary', 'shipped_at_fa']
@@ -465,7 +560,12 @@ class ShipmentAdmin(admin.ModelAdmin):
                        'supplier_notified_count', 'created_at', 'updated_at', 'dispatch_preview']
     fieldsets = [
         ('مرسوله', {'fields': ['order', 'fulfiller', 'supplier', 'status', 'notes']}),
-        ('ارسال (کد رهگیری)', {'fields': ['carrier', 'tracking_code', 'shipped_at', 'delivered_at']}),
+        ('ارسال (کد رهگیری)', {'fields': [
+            'carrier', 'tracking_code',
+            'other_carrier_name', 'other_carrier_person', 'other_carrier_phone',
+            'shipped_at', 'delivered_at'],
+            'description': 'کد رهگیری باید با فرمت استاندارد شرکت حمل مطابقت داشته باشد. '
+                           'برای «سایر»: نام شرکت، نام ارسال‌کننده و شماره تماس الزامی است و به مشتری نمایش داده می‌شود.'}),
         ('اطلاع‌رسانی به تامین‌کننده', {'fields': ['sent_to_supplier_at', 'last_notified_at', 'supplier_notified_count']}),
         ('📋 متن دستور ارسال محوله (کپی برای تامین‌کننده)', {'fields': ['dispatch_preview']}),
         ('زمان‌ها', {'classes': ['collapse'], 'fields': ['created_at', 'updated_at']}),
@@ -500,7 +600,7 @@ class ShipmentAdmin(admin.ModelAdmin):
 
     @admin.display(description='شرکت حمل')
     def carrier_label(self, obj):
-        return obj.get_carrier_display()
+        return obj.carrier_full_label
 
     @admin.display(description='کد رهگیری')
     def tracking_code_ltr(self, obj):

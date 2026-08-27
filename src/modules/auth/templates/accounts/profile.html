@@ -95,6 +95,7 @@
     .ord-date{font-size:12px;color:var(--color-text-muted);margin-top:2px;}
     .badge{display:inline-block;padding:5px 14px;border-radius:999px;font-size:11.5px;font-weight:800;white-space:nowrap;}
     .badge.PENDING{background:var(--color-warning-bg);color:var(--color-warning-text);}
+    .badge.PENDING_REVIEW{background:#FBF1DC;color:#8a6a25;border:1.5px dashed #d9b96a;}
     .badge.PAID{background:var(--color-success-bg);color:var(--color-success);}
     .badge.PROCESSING{background:var(--color-warning-bg);color:var(--color-secondary-dark);}
     .badge.SHIPPED{background:#E8EEF7;color:#2c5282;}
@@ -116,6 +117,17 @@
     .ord-btn.solid:hover{transform:translateY(-1px);box-shadow:0 6px 14px rgba(201,169,97,.4);}
     .ord-btn.ghost{background:#fff;color:var(--color-text);border:1.5px solid var(--color-border);}
     .ord-btn.ghost:hover{border-color:var(--color-secondary);}
+    /* D-111: مرسوله‌های سفارش در پروفایل */
+    .ord-ships{margin-top:12px;display:flex;flex-direction:column;gap:8px;}
+    .ord-ship{display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:#FAF7F0;
+        border:1px solid var(--color-border);border-radius:11px;padding:10px 14px;font-size:12.5px;}
+    .os-label{font-weight:700;color:var(--color-text);}
+    .os-code{font-family:monospace;direction:ltr;unicode-bidi:embed;background:#fff;border:1px dashed var(--color-secondary);
+        border-radius:7px;padding:3px 10px;font-size:12.5px;}
+    .os-btn{display:inline-flex;align-items:center;gap:5px;background:var(--color-primary);color:#fff;text-decoration:none;
+        font-weight:800;font-size:11.5px;padding:6px 13px;border-radius:9px;}
+    .os-btn:hover{opacity:.9;}
+    .os-other{font-size:12px;color:var(--color-text-muted);width:100%;line-height:1.9;}
     .ord-cancel{background:none;border:none;color:#9c3a2a;font-family:inherit;font-size:12px;font-weight:700;cursor:pointer;
         text-decoration:underline;text-decoration-color:rgba(156,58,42,.4);text-underline-offset:4px;padding:6px 4px;margin-right:auto;}
     .ord-cancel:hover{color:#7c2417;}
@@ -295,12 +307,27 @@
                             <div class="ord-num">{{ o.order_number }}</div>
                             <div class="ord-date">{{ o.created_at|jdate_human }}</div>
                         </div>
-                        <span class="badge {{ o.status }}">{{ o.status_fa }}</span>
+                        <span class="badge {{ o.badge_code|default:o.status }}">{{ o.status_fa }}</span>
                     </div>
                     <div class="ord-mid">
                         <span>{{ o.items_count|fa }} کالا</span>
                         <b>{{ o.total_price|money }} تومان</b>
                     </div>
+                    {% if o.shipments %}
+                    <div class="ord-ships">
+                        {% for s in o.shipments %}
+                        <div class="ord-ship">
+                            <span class="os-label">🚚 {{ s.carrier_label }} — {{ s.status_label }}</span>
+                            {% if s.tracking_code %}
+                            <span class="os-code">{{ s.tracking_code }}</span>
+                            <a class="os-btn" target="_blank" rel="noopener"
+                               {% if s.tracking_url %}href="{{ s.tracking_url }}"{% else %}href="/order/t/{{ s.tracking_code }}/"{% endif %}>🔍 رهگیری مرسوله</a>
+                            {% endif %}
+                            {% if s.other_details %}<span class="os-other">{{ s.other_details }}</span>{% endif %}
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
                     {% if o.status == 'PENDING' and o.remaining_seconds > 0 %}
                     <div class="ord-ttl" data-remaining="{{ o.remaining_seconds }}">
                         ⏳ مهلت رزرو موجودی: <b>{% widthratio o.remaining_seconds 60 1 %} دقیقه</b>
