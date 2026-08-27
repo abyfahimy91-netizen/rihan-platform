@@ -3,11 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}پنل تامین‌کننده | ریهان{% endblock %}</title>
+    <title>{% block title %}پنل تامین‌کننده | Rihan{% endblock %}</title></title></title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: Tahoma, Arial, sans-serif; background: #f4f6f4; color: #222; line-height: 1.9; }
         .topbar { background: #0D3B2E; color: #fff; padding: 12px 20px; display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+        /* D-111: برند لاتین Rihan — هم‌سبک پنل ادمین (چیپ طلایی روی نوار سبز تیره) */
+        .brand-mark { display: inline-block; background: #C9A961; color: #0D3B2E; font-weight: 800;
+            padding: 3px 14px; border-radius: 9px; font-size: 14px; letter-spacing: .5px; }
         .topbar a { color: #EAD9A7; text-decoration: none; font-size: 14px; padding: 4px 8px; border-radius: 6px; }
         .topbar a:hover { background: rgba(255,255,255,.08); }
         .topbar .brand { font-weight: bold; font-size: 16px; color: #fff; }
@@ -61,7 +64,7 @@
 </head>
 <body>
     <div class="topbar">
-        <span class="brand">🌿 پنل تامین‌کننده ریّان</span>
+        <span class="brand"><span class="brand-mark">Rihan</span> پنل تامین‌کننده</span>
         <a href="{% url 'supplier_panel:dashboard' %}">داشبورد</a>
         <a href="{% url 'supplier_panel:shipment_list' %}">مرسوله‌های من</a>
         <span style="margin-inline-start:auto;font-size:13px;color:#cfe3d8;">
