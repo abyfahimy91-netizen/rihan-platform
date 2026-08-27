@@ -103,7 +103,9 @@ def require_role(
                 f"has {user_primary_role.code if user_primary_role else 'none'}"
             )
             raise PermissionDenied(
-                f"نقش شما برای این بخش مجاز نیست."
+                "این بخش فقط برای نقش‌های مجاز است؛ "
+                f"شما با حساب «{request.user.username}» وارد شده‌اید. "
+                "اگر حساب دیگری دارید (مثلاً حساب تأمین‌کننده)، خارج و با آن وارد شوید."
             )
         
         return wrapped_view

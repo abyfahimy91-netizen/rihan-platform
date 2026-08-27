@@ -495,6 +495,11 @@ def logout_view(request):
     کاربر می‌تواند از «دستگاه‌های من» در پروفایل آن را باطل کند)"""
     logout(request)
     messages.success(request, 'با موفقیت خارج شدید. به امید دیدار! 🌿')
+    # D-111: پشتیبانی از ?next امنِ محلی — دکمه «خروج و ورود با حساب دیگر»
+    # در صفحه ۴۰۳ به‌صورت یک‌ضربه‌ای به مقصد (مثلاً /supplier/) می‌رساند.
+    nxt = request.GET.get('next') or ''
+    if nxt.startswith('/') and not nxt.startswith('//'):
+        return redirect(nxt)
     return redirect('/')
 
 
