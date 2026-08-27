@@ -194,7 +194,7 @@
             </form>
 
             <div class="switch-link">
-                شماره اشتباه است؟ <a href="{% url 'auth_pages:login' %}{% if step == 'reset_code' %}?step=forgot{% endif %}">ویرایش شماره</a>
+                شماره اشتباه است؟ <a href="{% url 'auth_pages:login' %}{% if step == 'reset_code' %}?step=forgot{% elif next_url and next_url != '/' %}?next={{ next_url|urlencode }}{% endif %}">ویرایش شماره</a>
             </div>
 
             <details class="helpbox">
@@ -246,7 +246,7 @@
 
             {% if otp_enabled and password_enabled %}
             <div class="auth-tabs">
-                <a href="{% url 'auth_pages:login' %}">کد پیامکی<small>سریع و بدون نیاز به رمز ✨</small></a>
+                <a href="{% url 'auth_pages:login' %}{% if next_url and next_url != '/' %}?next={{ next_url|urlencode }}{% endif %}">کد پیامکی<small>سریع و بدون نیاز به رمز ✨</small></a>
                 <a href="javascript:void(0)" class="on">رمز عبور<small>مناسب قطعی پیامک</small></a>
             </div>
             {% endif %}
@@ -317,7 +317,7 @@
             {% if otp_enabled and password_enabled %}
             <div class="auth-tabs">
                 <a href="javascript:void(0)" class="on">کد پیامکی<small>سریع و بدون نیاز به رمز ✨</small></a>
-                <a href="{% url 'auth_pages:login' %}?method=password">رمز عبور<small>مناسب قطعی پیامک</small></a>
+                <a href="{% url 'auth_pages:login' %}?method=password{% if next_url and next_url != '/' %}&amp;next={{ next_url|urlencode }}{% endif %}">رمز عبور<small>مناسب قطعی پیامک</small></a>
             </div>
             {% endif %}
 
