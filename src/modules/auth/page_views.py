@@ -85,6 +85,12 @@ def login_page_view(request):
     """ورود دوکاناله با راهنمای گام‌به‌گام (سفر مشتری: ۱ شماره ← ۲ تأیید ← ۳ ورود)
     D-103: روش‌های فعال و روش پیش‌فرض از تنظیمات ادمین (AuthSettings) کنترل می‌شود."""
     if request.user.is_authenticated:
+        # D-111: کاربر احرازشده (مثلاً با کوکی دستگاه) اگر ?next امنِ محلی دارد
+        # مستقیم به همان مقصد برود؛ قبلاً همیشه به پروفایل پرت می‌شد و
+        # کاربرِ پنل تامین‌کننده سرگردان می‌شد.
+        _nx = request.GET.get('next') or request.POST.get('next') or ''
+        if _nx.startswith('/') and not _nx.startswith('//'):
+            return redirect(_nx)
         return redirect('auth_pages:profile')
 
     next_url = request.GET.get('next') or request.POST.get('next') or '/'
@@ -163,6 +169,11 @@ def login_page_view(request):
                 success, message, user = OtpService.verify_otp(phone, code, ip)
                 if success:
                     login(request, user)
+                    # D-111 ریشه باگ «هر ۱۰ دقیقه از پنل پرت می‌شوم»:
+                    # در Django ≥5، set_expiry(600) مرحله‌ی OTP داخل دیتای سشن
+                    # ذخیره می‌شود و از cycle_key در login() جان سالم به در می‌برد
+                    # → نشست واقعی هم فقط ۱۰ دقیقه بود! بازنشانی به سیاست سراسری (۱۴ روز).
+                    request.session.set_expiry(None)
                     request.session.pop(SESSION_PHONE_KEY, None)
                     _merge_guest_cart(request, user)
                     fname = (user.first_name or '').strip()
@@ -181,6 +192,9 @@ def login_page_view(request):
             success, message, user = PasswordService.attempt_login(phone, password, ip, ua)
             if success:
                 login(request, user)
+                # D-111: اگر سشن قبلاً در جریان OTP با set_expiry(600) بسته شده بود،
+                # همان ۱۰ دقیقه به ورودِ با رمز هم چسبیده بود — بازنشانی به ۱۴ روز.
+                request.session.set_expiry(None)
                 _merge_guest_cart(request, user)
                 fname = (user.first_name or '').strip()
                 messages.success(request, f'خوش آمدید {fname}! 👋' if fname else 'خوش آمدید! 👋')

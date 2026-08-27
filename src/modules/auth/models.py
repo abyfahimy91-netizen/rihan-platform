@@ -228,12 +228,16 @@ class DeviceToken(models.Model):
     @classmethod
     def cleanup_old_tokens(cls, user) -> None:
         """حذف توکن‌های قدیمی (اگر بیش از ۵ دستگاه باشد)"""
+        from django.db.models import F
         MAX_DEVICES = 5
+        # D-111: در Postgres مرتب‌سازی DESC یعنی NULLS FIRST — توکن‌های
+        # بدون last_used_at «جدیدتر» دیده می‌شدند و توکن‌هایی که واقعاً
+        # استفاده شده بودند قربانی پاکسازی می‌شدند (ورود خودکار از کار می‌افتاد).
         active_tokens = cls.objects.filter(
             user=user,
             is_active=True,
             expires_at__gt=timezone.now()
-        ).order_by('-last_used_at')
+        ).order_by(F('last_used_at').desc(nulls_last=True), '-created_at')
         
         if active_tokens.count() > MAX_DEVICES:
             # حذف قدیمی‌ترین‌ها
