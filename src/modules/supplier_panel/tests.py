@@ -145,3 +145,19 @@ class SupplierPanelTestCase(TestCase):
         response = self.client.get(url)
         # مرسوله ریهان متعلق به هیچ تامین‌کننده‌ای نیست → ۴۰۴
         self.assertEqual(response.status_code, 404)
+
+    # ── D-116b: تامین‌کننده فقط تسویه خودش را می‌بیند؛ نه قیمت فروش ──
+    def test_supplier_dashboard_has_no_sale_prices(self):
+        """داشبورد تامین‌کننده هرگز قیمت فروش را نشان نمی‌دهد"""
+        self.client.login(username='supplier1', password='testpass123')
+        response = self.client.get(reverse('supplier_panel:dashboard'))
+        self.assertEqual(response.status_code, 200)
+        self.assertNotContains(response, 'فروش اقلام من')
+
+    def test_shipment_detail_branding_warning(self):
+        """هشدار بسته‌بندی: بدون فاکتور/بروشور/برچسب برند خودِ تامین‌کننده — بسته با برند Rihan"""
+        self.client.login(username='supplier1', password='testpass123')
+        response = self.client.get(reverse('supplier_panel:shipment_detail', args=[self.shipment.pk]))
+        self.assertContains(response, 'بروشور')
+        self.assertContains(response, 'Rihan')
+        self.assertContains(response, 'فاکتور')

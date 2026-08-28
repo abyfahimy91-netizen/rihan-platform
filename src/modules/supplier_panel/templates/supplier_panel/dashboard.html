@@ -22,7 +22,7 @@
             <div><div class="step-t">ثبت کد رهگیری</div><div class="step-d">مشتری خودش پیامک می‌گیرد</div></div>
         </div>
     </div>
-    ⚠️ فقط یک نکته مهم: <b>کیفیت بسته‌بندی</b> — بسته محکم باشد، بدون فاکتور قیمت، و کد رهگیری را همان روز ثبت کنید.
+    ⚠️ دو نکته مهم: <b>بسته‌بندی</b> — بسته محکم، بدون فاکتور قیمت، و بدون هر بروشور/برچسب/کارت با برند خودتان؛ بسته با برند <b>Rihan</b> فروخته شده و شما فقط ارسال‌کننده هستید. <b>زمان</b> — کد رهگیری را همان روز ثبت کنید.
 </div>
 
 <div class="card">
@@ -44,21 +44,21 @@
     {% endif %}
 </div>
 
-<!-- ── D-113: خلاصه مالی (D-116: اعداد فارسی با جداکننده) ── -->
+<!-- ── D-113/D-116b: خلاصه مالی — فقط تسویه خود تامین‌کننده؛ بدون هیچ اشاره‌ای به قیمت فروش ── -->
 <div class="card">
     <h3 class="mb-3">💰 خلاصه مالی من</h3>
     <div class="stats">
-        <a class="stat" href="{% url 'finance:supplier_dashboard' %}">
-            <b>{{ fin.sold_total|money }}</b>فروش اقلام من (تومان)
-        </a>
         <a class="stat" href="{% url 'finance:supplier_dashboard' %}">
             <b>{{ fin.balance|money }}</b>طلب من (تسویه‌نشده)
         </a>
         <a class="stat" href="{% url 'finance:supplier_dashboard' %}">
             <b>{{ fin.settled_total|money }}</b>تا امروز تسویه‌شده
         </a>
+        <a class="stat" href="{% url 'finance:supplier_dashboard' %}">
+            <b>{{ fin.shipment_count|fa }}</b>مرسوله‌های من
+        </a>
     </div>
-    <p class="muted mt-3">قابل دریافت شما = قیمت خرید اقلام + هزینه‌های ارسال/بسته‌بندی که خودتان پرداخت کرده‌اید.</p>
+    <p class="muted mt-3">قابل دریافت شما = قیمت خرید اقلام + هزینه‌های ارسال/بسته‌بندی که خودتان پرداخت کرده‌اید. قیمت فروش محصول به شما مربوط نیست و نمایش داده نمی‌شود.</p>
 </div>
 
 {% if recent_new %}

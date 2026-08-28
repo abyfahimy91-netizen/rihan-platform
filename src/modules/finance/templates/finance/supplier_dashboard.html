@@ -19,7 +19,6 @@
         <h3>💰 حساب «{{ supplier.title }}»</h3>
         <div class="stats">
             <div class="stat"><b class="num">{{ fin.shipment_count|fa }}</b><span>مرسوله من</span></div>
-            <div class="stat"><b class="num">{{ fin.sold_total|money }}</b><span>فروش اقلام من (تومان)</span></div>
             <div class="stat hl"><b class="num">{{ fin.balance|money }}</b><span>طلب من (تسویه‌نشده)</span></div>
             <div class="stat"><b class="num">{{ fin.settled_total|money }}</b><span>تا امروز تسویه‌شده</span></div>
             <div class="stat"><b class="num">{{ fin.unsettled_count|fa }}</b><span>مرسوله در انتظار تسویه</span></div>
@@ -27,7 +26,7 @@
         </div>
         <p class="muted" style="margin-top:10px;">
             قابل دریافت شما = قیمت خرید اقلام + هزینه پست/بسته‌بندی که خودتان پرداخت کرده‌اید.
-            تسویه توسط Rihan انجام و همین‌جا گزارش می‌شود.
+            قیمت فروش محصول به شما مربوط نیست و نمایش داده نمی‌شود. تسویه توسط Rihan انجام و همین‌جا گزارش می‌شود.
         </p>
     </div>
 
@@ -39,7 +38,6 @@
                 <tr>
                     <th>سفارش</th>
                     <th>وضعیت مرسوله</th>
-                    <th>ارزش اقلام</th>
                     <th>خرید اقلام</th>
                     <th>پیش‌پرداخت من (پست/سایر)</th>
                     <th>قابل دریافت</th>
@@ -56,7 +54,6 @@
                         {% elif row.shipment.status == 'SHIPPED' %}<span class="badge b-shipped">ارسال شده</span>
                         {% else %}<span class="badge b-delivered">تحویل شد</span>{% endif %}
                     </td>
-                    <td data-label="ارزش اقلام" class="num">{{ row.revenue|money }}</td>
                     <td data-label="خرید اقلام" class="num">{{ row.items_cost|money }}</td>
                     <td data-label="پیش‌پرداخت من (پست/سایر)" class="num">{{ row.supplier_extra|money }}</td>
                     <td data-label="قابل دریافت" class="num"><strong>{{ row.payable|money }}</strong></td>

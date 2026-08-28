@@ -95,6 +95,10 @@ class SupplierDashboardTests(FinanceDashboardTestBase):
         # قابل دریافت: ۱۰۰هزار × ۲
         self.assertIn('۲۰۰٬۰۰۰', content)  # D-116: خروجی money فارسی شد
         self.assertIn('در انتظار تسویه', content)
+        # D-116b: تامین‌کننده فقط تسویه خودش را می‌بیند — نه قیمت فروش، نه ستون ارزش اقلام
+        self.assertNotIn('300000', content)
+        self.assertNotIn('ارزش اقلام', content)
+        self.assertNotIn('فروش اقلام من', content)
 
     def test_settled_view_after_settlement(self):
         sup = self.order.shipments.get(supplier=self.supplier)
