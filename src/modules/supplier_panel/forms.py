@@ -75,6 +75,45 @@ class TrackingCodeForm(forms.Form):
         help_text='این اطلاعات برای مشتری در پروفایل نمایش داده می‌شود',
     )
 
+    # ── D-113: هزینه‌های واقعی ارسال — در تسویه شما محاسبه می‌شود ──
+    post_cost = forms.DecimalField(
+        label='هزینه پست/باربری (تومان)',
+        required=False,
+        min_value=0,
+        max_digits=12,
+        decimal_places=0,
+        initial=0,
+        widget=forms.NumberInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'مثلاً 95000',
+            'inputmode': 'numeric',
+        }),
+        help_text='چقدر بابت ارسال این مرسوله پرداخت کرده‌اید؟ (اگر پرداخت نکرده‌اید صفر بگذارید)',
+    )
+    other_costs = forms.DecimalField(
+        label='سایر هزینه‌ها (تومان)',
+        required=False,
+        min_value=0,
+        max_digits=12,
+        decimal_places=0,
+        initial=0,
+        widget=forms.NumberInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'بسته‌بندی، برچسب و…',
+            'inputmode': 'numeric',
+        }),
+        help_text='بسته‌بندی/برچسب/سایر — به تسویه شما اضافه می‌شود',
+    )
+    other_costs_note = forms.CharField(
+        label='توضیح سایر هزینه‌ها',
+        max_length=250,
+        required=False,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'مثلاً: کارتن + برچسب',
+        }),
+    )
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['carrier'].widget.attrs['data-hints'] = str(CARRIER_HINTS).replace("'", '"')

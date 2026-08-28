@@ -231,13 +231,19 @@ def build_shipments(order, user=None, notify=True):
             if sup_id:
                 # تامین‌کننده غیرفعال = ریهان خودش ارسال می‌کند
                 supplier = Supplier.objects.filter(pk=sup_id, is_active=True).first()
+            fulfiller = (
+                Shipment.FulfillerType.SUPPLIER if supplier
+                else Shipment.FulfillerType.RIHAN
+            )
+            # D-113: پیش‌فرض «پرداخت‌کننده هزینه‌ها» همان ارسال‌کننده است
+            payer = (Shipment.CostBearer.SUPPLIER if supplier
+                     else Shipment.CostBearer.RIHAN)
             shipment = Shipment.objects.create(
                 order=order,
-                fulfiller=(
-                    Shipment.FulfillerType.SUPPLIER if supplier
-                    else Shipment.FulfillerType.RIHAN
-                ),
+                fulfiller=fulfiller,
                 supplier=supplier,
+                post_paid_by=payer,
+                other_paid_by=payer,
             )
             ShipmentItem.objects.bulk_create([
                 ShipmentItem(shipment=shipment, order_item=item, quantity=item.quantity)

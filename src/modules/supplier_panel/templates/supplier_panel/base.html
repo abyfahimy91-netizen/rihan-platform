@@ -67,6 +67,7 @@
         <span class="brand"><span class="brand-mark">Rihan</span> پنل تامین‌کننده</span>
         <a href="{% url 'supplier_panel:dashboard' %}">داشبورد</a>
         <a href="{% url 'supplier_panel:shipment_list' %}">مرسوله‌های من</a>
+        <a href="{% url 'finance:supplier_dashboard' %}">💰 مالی و تسویه</a>
         <span style="margin-inline-start:auto;font-size:13px;color:#cfe3d8;">
             {% if supplier %}{{ supplier.title }}{% endif %}
         </span>

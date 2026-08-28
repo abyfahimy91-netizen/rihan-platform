@@ -530,6 +530,10 @@ class ProductVariant(models.Model):
                                  verbose_name="کد رنگ (اختیاری، مثل #AA2233)")
     price = models.DecimalField(max_digits=12, decimal_places=0,
                                 verbose_name="قیمت این گزینه (تومان)")
+    cost_price = models.DecimalField(
+        max_digits=12, decimal_places=0, default=0,
+        verbose_name="قیمت خرید از تامین‌کننده (تومان)",
+        help_text="بهای تمام‌شده این واریانت — مبنای محاسبه حاشیه سود و تسویه تامین‌کننده (D-113)")
     unit = models.CharField(max_length=30, default='بسته', verbose_name="واحد نمایش")
     stock_quantity = models.PositiveIntegerField(default=0, verbose_name="موجودی")
     reserved_quantity = models.PositiveIntegerField(default=0, editable=False,

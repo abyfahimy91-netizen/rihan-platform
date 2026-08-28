@@ -16,10 +16,17 @@ class OrderConfig(AppConfig):
             from . import hooks  # noqa: F401
         except Exception:
             pass
-        
+
         # D-082: Import signals for auto status history capture
         try:
             from . import signals  # noqa: F401
         except Exception as e:
             import logging
             logging.getLogger(__name__).error(f"Failed to import signals: {e}")
+
+        # D-113: سیگنال‌های مالی — به‌روزرسانی وضعیت تسویه سفارش از روی مرسوله‌ها
+        try:
+            from . import finance  # noqa: F401
+        except Exception as e:
+            import logging
+            logging.getLogger(__name__).error(f"Failed to import finance signals: {e}")

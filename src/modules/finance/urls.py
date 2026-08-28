@@ -1,5 +1,5 @@
 """
-URLهای ماژول مالی (M6)
+URLهای ماژول مالی (D-113)
 """
 from django.urls import path
 from . import views
@@ -7,12 +7,12 @@ from . import views
 app_name = 'finance'
 
 urlpatterns = [
-    # داشبورد ادمین (US-021)
+    # داشبورد مالی ادمین
     path('admin/', views.finance_dashboard_admin, name='admin_dashboard'),
-    
-    # داشبورد تأمین‌کننده (US-030)
+
+    # حساب من (تامین‌کننده)
     path('supplier/', views.finance_dashboard_supplier, name='supplier_dashboard'),
-    
-    # Export (US-031)
-    path('export/excel/', views.finance_export_excel, name='export_excel'),
+
+    # خروجی CSV (ادمین)
+    path('export/csv/', views.finance_export_csv, name='export_csv'),
 ]

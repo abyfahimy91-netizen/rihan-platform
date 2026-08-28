@@ -1,112 +1,63 @@
-{% extends "finance/base.html" %}{% load fa_tags %}
-
-{% block title %}حساب ماهانه | ریهان{% endblock %}
-
+{% extends "finance/base.html" %}
+{% block title %}حساب من | Rihan{% endblock %}
+{% block topbar_actions %}
+    <a href="/supplier/">پنل من</a>
+    <a href="/supplier/shipments/">مرسوله‌ها</a>
+{% endblock %}
 {% block content %}
-<h1 class="mb-4">💰 حساب مالی</h1>
-
-<!-- اطلاعات تأمین‌کننده -->
-<div class="alert alert-info">
-    <strong>{{ supplier.title }}</strong> — {{ supplier.city }}
-</div>
-
-<!-- موجودی کل -->
-<div class="row mb-4">
-    <div class="col-md-4">
-        <div class="card stat-card bg-success text-white">
-            <div class="card-body text-center">
-                <h2>{{ ledger.balance|floatformat:0 }}</h2>
-                <p>موجودی کل (طلب شما)</p>
-            </div>
+    <div class="card">
+        <h3>💰 حساب «{{ supplier.title }}»</h3>
+        <div class="stats">
+            <div class="stat"><b class="num">{{ fin.shipment_count }}</b><span>مرسوله من</span></div>
+            <div class="stat"><b class="num">{{ fin.sold_total }}</b><span>فروش اقلام من (تومان)</span></div>
+            <div class="stat hl"><b class="num">{{ fin.balance }}</b><span>طلب من (تسویه‌نشده)</span></div>
+            <div class="stat"><b class="num">{{ fin.settled_total }}</b><span>تا امروز تسویه‌شده</span></div>
+            <div class="stat"><b class="num">{{ fin.unsettled_count }}</b><span>مرسوله در انتظار تسویه</span></div>
+            <div class="stat"><b class="num">{{ fin.settled_count }}</b><span>مرسوله تسویه‌شده</span></div>
         </div>
+        <p class="muted" style="margin-top:10px;">
+            قابل دریافت شما = قیمت خرید اقلام + هزینه پست/بسته‌بندی که خودتان پرداخت کرده‌اید.
+            تسویه توسط ادمین انجام و همین‌جا گزارش می‌شود.
+        </p>
     </div>
-    <div class="col-md-4">
-        <div class="card stat-card bg-primary text-white">
-            <div class="card-body text-center">
-                <h2>{{ report.sales_total|money }}</h2>
-                <p>فروش این ماه</p>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-4">
-        <div class="card stat-card bg-info text-dark">
-            <div class="card-body text-center">
-                <h2>{{ report.sales_count }}</h2>
-                <p>تعداد فروش این ماه</p>
-            </div>
-        </div>
-    </div>
-</div>
 
-<!-- گزارش ماهانه -->
-<div class="card mb-4">
-    <div class="card-header bg-dark text-white">
-        <h5 class="mb-0">گزارش ماه {{ month }} سال {{ year }}</h5>
-    </div>
-    <div class="card-body">
-        {% if report.transactions %}
-        <table class="table table-hover">
+    <div class="card">
+        <h3>📦 مرسوله‌های من</h3>
+        {% if rows %}
+        <table class="table">
             <thead>
                 <tr>
-                    <th>تاریخ</th>
-                    <th>نوع</th>
-                    <th>مبلغ</th>
-                    <th>توضیحات</th>
+                    <th>سفارش</th>
+                    <th>ارزش اقلام</th>
+                    <th>خرید اقلام</th>
+                    <th>پیش‌پرداخت من (پست/سایر)</th>
+                    <th>قابل دریافت</th>
+                    <th>وضعیت تسویه</th>
+                    <th>تاریخ تسویه</th>
                 </tr>
             </thead>
             <tbody>
-                {% for transaction in report.transactions %}
+                {% for row in rows %}
                 <tr>
-                    <td>{{ transaction.created_at|jdate }}</td>
+                    <td><strong>{{ row.order_number }}</strong></td>
+                    <td class="num">{{ row.revenue }}</td>
+                    <td class="num">{{ row.items_cost }}</td>
+                    <td class="num">{{ row.supplier_extra }}</td>
+                    <td class="num"><strong>{{ row.payable }}</strong></td>
                     <td>
-                        <span class="badge bg-{% if transaction.transaction_type == 'SALE' %}success{% elif transaction.transaction_type == 'SETTLEMENT' %}primary{% else %}secondary{% endif %}">
-                            {{ transaction.get_transaction_type_display }}
-                        </span>
+                        {% if row.settled %}
+                            <span class="badge b-settled">تسویه شد ({{ row.settled_amount }})</span>
+                        {% else %}
+                            <span class="badge b-unsettled">در انتظار تسویه</span>
+                        {% endif %}
                     </td>
-                    <td>{{ transaction.amount|money }}</td>
-                    <td>{{ transaction.description }}</td>
+                    <td class="muted">{% if row.settled %}{{ row.shipment.settled_at|date:"Y/m/d" }}{% endif %}</td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
         {% else %}
-        <p class="text-muted">تراکنشی در این ماه ثبت نشده است.</p>
+            <p class="muted">هنوز مرسوله‌ای برای شما ثبت نشده است.</p>
         {% endif %}
     </div>
-</div>
-
-<!-- تسویه‌های تأیید شده -->
-<div class="card">
-    <div class="card-header bg-dark text-white">
-        <h5 class="mb-0">تسویه‌های تأیید شده</h5>
-    </div>
-    <div class="card-body">
-        {% if ledger.settlements.all %}
-        <table class="table table-hover">
-            <thead>
-                <tr>
-                    <th>تاریخ</th>
-                    <th>مبلغ</th>
-                    <th>وضعیت</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for settlement in ledger.settlements.all %}
-                <tr>
-                    <td>{{ settlement.created_at|jdate }}</td>
-                    <td>{{ settlement.amount|money }}</td>
-                    <td>
-                        <span class="badge bg-{% if settlement.status == 'COMPLETED' %}success{% elif settlement.status == 'PENDING' %}warning{% else %}danger{% endif %}">
-                            {{ settlement.get_status_display }}
-                        </span>
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-        {% else %}
-        <p class="text-muted">هنوز تسویه‌ای ثبت نشده است.</p>
-        {% endif %}
-    </div>
-</div>
 {% endblock %}

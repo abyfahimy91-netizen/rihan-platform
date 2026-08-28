@@ -82,6 +82,9 @@ class CheckoutService:
                 'unit_price': cart_item.unit_price_at_add,
                 'snapshot_name': cart_item.product.name,
                 'variant': cart_item.variant,
+                # D-113: snapshot قیمت خرید برای گزارش سود (None برای سبد قدیمی بدون واریانت)
+                'unit_cost': (cart_item.variant.cost_price
+                              if cart_item.variant is not None else None),
             })
         
         # Step 2: Create Order with DRAFT status first
@@ -107,6 +110,7 @@ class CheckoutService:
                 variant_title=(item_data['variant'].title if item_data['variant'] else ''),
                 quantity=item_data['quantity'],
                 unit_price_at_purchase=item_data['unit_price'],
+                unit_cost_at_purchase=item_data.get('unit_cost'),
             )
         
         # Step 4: Calculate totals

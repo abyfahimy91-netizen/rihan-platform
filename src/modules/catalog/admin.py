@@ -207,7 +207,7 @@ class ProductVariantInline(admin.TabularInline):
     """واریانت‌های محصول — D-094"""
     model = ProductVariant
     extra = 2
-    fields = ["title", "color_name", "color_hex", "price", "unit",
+    fields = ["title", "color_name", "color_hex", "price", "cost_price", "unit",
               "stock_quantity", "low_stock_threshold", "is_active", "sort_order"]
     verbose_name = "بسته / سایز (گزینه قابل خرید)"
     verbose_name_plural = "📦 بسته‌ها / سایزها / رنگ‌ها (هر ردیف یک گزینه خرید)"

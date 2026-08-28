@@ -50,7 +50,7 @@ def _own_shipments(supplier):
 
 @require_supplier
 def supplier_dashboard(request):
-    """داشبورد: چند مرسوله منتظر اقدام شماست؟"""
+    """داشبورد: چند مرسوله منتظر اقدام شماست؟ + خلاصه مالی (D-113)"""
     supplier = get_supplier_for_user(request.user)
 
     if not supplier:
@@ -58,12 +58,15 @@ def supplier_dashboard(request):
         return redirect('/')
 
     qs = _own_shipments(supplier)
+    from src.modules.order import finance as _finance
+    fin = _finance.supplier_financials(supplier)
     context = {
         'supplier': supplier,
         'new_count': qs.filter(status=Shipment.Status.NEW).count(),
         'shipped_count': qs.filter(status=Shipment.Status.SHIPPED).count(),
         'delivered_count': qs.filter(status=Shipment.Status.DELIVERED).count(),
         'recent_new': list(qs.filter(status=Shipment.Status.NEW)[:5]),
+        'fin': fin,
     }
     return render(request, 'supplier_panel/dashboard.html', context)
 
@@ -120,6 +123,15 @@ def shipment_detail(request, pk):
         form = TrackingCodeForm(request.POST)
         if form.is_valid():
             try:
+                # D-113: هزینه‌های واقعی ارسال تامین‌کننده — پیش‌پرداخت او حساب می‌شود
+                shipment.post_cost = form.cleaned_data.get('post_cost') or 0
+                shipment.other_costs = form.cleaned_data.get('other_costs') or 0
+                shipment.other_costs_note = (form.cleaned_data.get('other_costs_note') or '').strip()
+                shipment.post_paid_by = Shipment.CostBearer.SUPPLIER
+                shipment.other_paid_by = Shipment.CostBearer.SUPPLIER
+                shipment.save(update_fields=[
+                    'post_cost', 'other_costs', 'other_costs_note',
+                    'post_paid_by', 'other_paid_by', 'updated_at'])
                 mark_shipped(
                     shipment,
                     carrier=form.cleaned_data['carrier'],
@@ -159,6 +171,12 @@ def shipment_detail(request, pk):
         'order': order,
         'form': form,
         'items': items,
+        'fin': {
+            'items_cost': shipment.items_cost,
+            'payable': shipment.supplier_payable,
+            'settled': shipment.settlement_status == Shipment.SettlementStatus.SETTLED,
+            'settled_amount': shipment.settled_amount,
+        },
         'receiver_name': order.guest_name or (order.user.get_full_name() if order.user else ''),
         'receiver_phone': order.guest_phone or (order.user.get_username() if order.user else ''),
         'address_text': (

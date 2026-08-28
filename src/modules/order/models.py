@@ -91,7 +91,19 @@ class Order(models.Model):
     session_key = models.CharField(max_length=100, blank=True, verbose_name="شناسه نشست (برای مهمان)")
     
     status = models.CharField(max_length=20, choices=OrderStatus.choices, default=OrderStatus.DRAFT)
-    
+
+    # ── D-113: تسویه با تامین‌کننده (جدا از چرخه وضعیت مشتری) ──
+    class SettlementStatus(models.TextChoices):
+        NONE = 'NONE', 'بدون نیاز (فروش خود ادمین)'
+        PENDING = 'PENDING', 'در انتظار تسویه تامین‌کننده'
+        PARTIAL = 'PARTIAL', 'تسویه‌شده بخشی'
+        SETTLED = 'SETTLED', 'تسویه با تامین‌کننده'
+
+    settlement_status = models.CharField(
+        max_length=10, choices=SettlementStatus.choices,
+        default=SettlementStatus.NONE, db_index=True,
+        verbose_name="وضعیت تسویه تامین‌کننده")
+
     # Snapshot اطلاعات کاربر مهمان (ADR-002)
     guest_name = models.CharField(max_length=150, blank=True, verbose_name="نام خریدار (مهمان)")
     guest_phone = models.CharField(max_length=20, blank=True, verbose_name="تلفن تماس (مهمان)")
@@ -207,6 +219,10 @@ class OrderItem(models.Model):
     
     quantity = models.PositiveIntegerField(default=1)
     unit_price_at_purchase = models.DecimalField(max_digits=10, decimal_places=2)
+    # D-113: snapshot قیمت خرید واریانت در لحظه خرید — تا گزارش سود گذشته با تغییر قیمت خرید فعلی خراب نشود
+    unit_cost_at_purchase = models.DecimalField(
+        max_digits=12, decimal_places=0, null=True, blank=True,
+        verbose_name="قیمت خرید واحد در لحظه خرید")
     
     # Snapshot محصول در لحظه خرید تا در صورت تغییر نام محصول در آینده، فاکتور دست‌نخورده بماند
     product_name_snapshot = models.CharField(max_length=200, verbose_name="نام محصول در لحظه خرید")
@@ -558,6 +574,50 @@ class Shipment(models.Model):
         max_length=20, blank=True, default='',
         verbose_name="شماره تماس حمل‌کننده")
 
+    # ═══ D-113: هزینه‌های واقعی ارسال + تسویه تامین‌کننده ═══
+    class CostBearer(models.TextChoices):
+        RIHAN = 'RIHAN', 'ریهان'
+        SUPPLIER = 'SUPPLIER', 'تامین‌کننده'
+
+    post_cost = models.DecimalField(
+        max_digits=12, decimal_places=0, default=0,
+        verbose_name="هزینه پست/باربری (تومان)",
+        help_text="هزینه واقعی ارسال این مرسوله — دستی وارد می‌شود")
+    post_paid_by = models.CharField(
+        max_length=10, choices=CostBearer.choices, default=CostBearer.SUPPLIER,
+        verbose_name="هزینه پست پرداخت‌شده توسط",
+        help_text="اگر تامین‌کننده پرداخت کرده باشد، در تسویه به او برگردانده می‌شود")
+    other_costs = models.DecimalField(
+        max_digits=12, decimal_places=0, default=0,
+        verbose_name="سایر هزینه‌ها (بسته‌بندی/برچسب/…)")
+    other_costs_note = models.CharField(
+        max_length=250, blank=True, default='',
+        verbose_name="توضیح سایر هزینه‌ها")
+    other_paid_by = models.CharField(
+        max_length=10, choices=CostBearer.choices, default=CostBearer.SUPPLIER,
+        verbose_name="سایر هزینه‌ها پرداخت‌شده توسط")
+
+    class SettlementStatus(models.TextChoices):
+        UNSETTLED = 'UNSETTLED', 'در انتظار تسویه'
+        SETTLED = 'SETTLED', 'تسویه شد'
+
+    settlement_status = models.CharField(
+        max_length=10, choices=SettlementStatus.choices,
+        default=SettlementStatus.UNSETTLED, db_index=True,
+        verbose_name="وضعیت تسویه")
+    settled_amount = models.DecimalField(
+        max_digits=12, decimal_places=0, null=True, blank=True, editable=False,
+        verbose_name="مبلغ تسویه‌شده (snapshot)")
+    settled_at = models.DateTimeField(
+        null=True, blank=True, editable=False, verbose_name="زمان تسویه")
+    settled_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL,
+        null=True, blank=True, editable=False,
+        related_name='settled_shipments', verbose_name="تسویه‌کننده")
+    settlement_note = models.CharField(
+        max_length=250, blank=True, default='',
+        verbose_name="یادداشت تسویه")
+
     # اطلاع‌رسانی به تامین‌کننده
     sent_to_supplier_at = models.DateTimeField(
         null=True, blank=True, verbose_name="زمان اولین اطلاع‌رسانی")
@@ -612,6 +672,63 @@ class Shipment(models.Model):
         if phone:
             parts.append(f'شماره تماس: {phone}')
         return ' — '.join(parts)
+
+    # ═══ D-113: پراپرتی‌های مالی ═══
+
+    @property
+    def items_cost(self):
+        """جمع قیمت خرید (snapshot) اقلام این مرسوله"""
+        from decimal import Decimal
+        total = Decimal('0')
+        for si in self.items.all():
+            unit = si.order_item.unit_cost_at_purchase
+            if unit is not None:
+                total += Decimal(unit) * si.quantity
+        return total
+
+    @property
+    def supplier_extra_costs(self):
+        """هزینه‌های پیش‌پرداخت‌شده توسط تامین‌کننده (پست/سایر) — در تسویه به او برمی‌گردد"""
+        from decimal import Decimal
+        extra = Decimal('0')
+        if self.post_paid_by == self.CostBearer.SUPPLIER:
+            extra += self.post_cost or Decimal('0')
+        if self.other_paid_by == self.CostBearer.SUPPLIER:
+            extra += self.other_costs or Decimal('0')
+        return extra
+
+    @property
+    def rihan_extra_costs(self):
+        """هزینه‌هایی که خود ریهان پرداخت کرده — فقط در گزارش سود می‌آید، نه تسویه"""
+        from decimal import Decimal
+        all_extra = (self.post_cost or Decimal('0')) + (self.other_costs or Decimal('0'))
+        return all_extra - self.supplier_extra_costs
+
+    @property
+    def supplier_payable(self):
+        """قابل پرداخت به تامین‌کننده = قیمت خرید اقلام + هزینه‌های پیش‌پرداخت او"""
+        from decimal import Decimal
+        if self.fulfiller != self.FulfillerType.SUPPLIER or not self.supplier_id:
+            return Decimal('0')
+        return self.items_cost + self.supplier_extra_costs
+
+    @property
+    def is_settleable(self):
+        """آیا این مرسوله مشمول تسویه است؟ (ارسال تامین‌کننده، لغو نشده)"""
+        return bool(
+            self.fulfiller == self.FulfillerType.SUPPLIER
+            and self.supplier_id
+            and self.status != self.Status.CANCELED
+        )
+
+    @property
+    def items_revenue(self):
+        """ارزش فروش اقلام این مرسوله (قیمت فروش snapshot)"""
+        from decimal import Decimal
+        total = Decimal('0')
+        for si in self.items.all():
+            total += Decimal(si.order_item.unit_price_at_purchase) * si.quantity
+        return total
 
 
 class ShipmentItem(models.Model):

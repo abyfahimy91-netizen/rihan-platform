@@ -44,6 +44,23 @@
     {% endif %}
 </div>
 
+<!-- ── D-113: خلاصه مالی ── -->
+<div class="card">
+    <h3 class="mb-3">💰 خلاصه مالی من</h3>
+    <div class="stats">
+        <a class="stat" href="{% url 'finance:supplier_dashboard' %}">
+            <b>{{ fin.sold_total|fa }}</b>فروش اقلام من (تومان)
+        </a>
+        <a class="stat" href="{% url 'finance:supplier_dashboard' %}">
+            <b>{{ fin.balance|fa }}</b>طلب من (تسویه‌نشده)
+        </a>
+        <a class="stat" href="{% url 'finance:supplier_dashboard' %}">
+            <b>{{ fin.settled_total|fa }}</b>تا امروز تسویه‌شده
+        </a>
+    </div>
+    <p class="muted mt-3">قابل دریافت شما = قیمت خرید اقلام + هزینه‌های ارسال/بسته‌بندی که خودتان پرداخت کرده‌اید.</p>
+</div>
+
 {% if recent_new %}
 <div class="card">
     <h3 class="mb-3">🆕 جدیدترین مرسوله‌های در انتظار ارسال شما</h3>

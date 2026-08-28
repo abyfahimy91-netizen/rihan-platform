@@ -1,41 +1,47 @@
-<!DOCTYPE html>
+{% load static %}<!DOCTYPE html>
 <html lang="fa" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}داشبورد مالی | ریهان{% endblock %}</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css" rel="stylesheet">
+    <title>{% block title %}مالی | Rihan{% endblock %}</title>
     <style>
-        body { font-family: 'Vazirmatn', 'Tahoma', sans-serif; }
-        .card { margin-bottom: 1rem; }
-        .stat-card { border-radius: 12px; }
-        .stat-card h2 { font-size: 2.5rem; font-weight: bold; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Tahoma, Arial, sans-serif; background: #f4f6f4; color: #222; line-height: 1.9; }
+        .topbar { background: #0D3B2E; color: #fff; padding: 12px 20px; display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+        .brand-mark { display: inline-block; background: #C9A961; color: #0D3B2E; font-weight: 800;
+            padding: 3px 14px; border-radius: 9px; font-size: 14px; letter-spacing: .5px; }
+        .topbar a { color: #EAD9A7; text-decoration: none; font-size: 14px; padding: 4px 8px; border-radius: 6px; }
+        .topbar a:hover { background: rgba(255,255,255,.08); }
+        .container { max-width: 1050px; margin: 0 auto; padding: 20px; }
+        .card { background: white; border-radius: 12px; padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+        .card > h3 { font-size: 16px; color: #0D3B2E; margin-bottom: 12px; }
+        .stats { display: grid; grid-template-columns: repeat(auto-fit,minmax(150px,1fr)); gap: 12px; }
+        .stat { background: #FAF7F0; border-radius: 10px; padding: 16px; text-align: center; }
+        .stat b { display: block; font-size: 22px; color: #0D3B2E; }
+        .stat span { font-size: 12.5px; color: #777; }
+        .stat.hl { background: #0D3B2E; } .stat.hl b { color: #EAD9A7; } .stat.hl span { color: #cfe0d6; }
+        .table { width: 100%; border-collapse: collapse; }
+        .table th, .table td { padding: 12px; text-align: right; border-bottom: 1px solid #e5e5e5; font-size: 14px; }
+        .table th { background: #FAF7F0; font-size: 12.5px; color: #665; }
+        .table tfoot td { font-weight: bold; background: #FAF7F0; color: #0D3B2E; }
+        .badge { padding: 4px 12px; border-radius: 12px; font-size: 12px; color: #fff; display: inline-block; white-space: nowrap; }
+        .b-unsettled { background: #c8a24b; } .b-settled { background: #0D3B2E; } .b-canceled { background: #999; }
+        .muted { color: #888; font-size: 13px; }
+        .num { font-variant-numeric: tabular-nums; white-space: nowrap; }
+        @media (max-width: 640px) {
+            .container { padding: 12px; }
+            .table th, .table td { padding: 8px 6px; font-size: 12.5px; }
+        }
     </style>
 </head>
 <body>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-        <div class="container">
-            <a class="navbar-brand" href="/">🌿 ریهان</a>
-            <div class="navbar-nav">
-                <a class="nav-link" href="{% url 'admin:index' %}">پنل مدیریت</a>
-                <a class="nav-link" href="{% url 'finance:admin_dashboard' %}">داشبورد مالی</a>
-            </div>
-        </div>
-    </nav>
-    
-    <main class="container mt-4">
-        {% if messages %}
-            {% for message in messages %}
-                <div class="alert alert-{{ message.tags }} alert-dismissible fade show">
-                    {{ message }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                </div>
-            {% endfor %}
-        {% endif %}
-        
+    <div class="topbar">
+        <span class="brand-mark">Rihan</span>
+        <strong>مؤدی مالی</strong>
+        {% block topbar_actions %}{% endblock %}
+    </div>
+    <div class="container">
         {% block content %}{% endblock %}
-    </main>
-    
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    </div>
 </body>
 </html>

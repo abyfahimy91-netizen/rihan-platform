@@ -72,14 +72,18 @@ class SupplierPanelTestCase(TestCase):
         self.assertContains(response, self.order.order_number)
 
     def test_shipment_detail_has_no_prices(self):
-        """امنیت تجاری: صفحه مرسوله هرگز قیمت ندارد — فقط مقدار و آدرس"""
+        """امنیت تجاری (به‌روز D-113): تامین‌کننده هرگز قیمت «فروش» را نمی‌بیند —
+        ولی فرم ورود هزینه‌های خودش (پست/بسته‌بندی به تومان) روی همان صفحه مجاز است"""
         self.client.login(username='supplier1', password='testpass123')
         response = self.client.get(reverse('supplier_panel:shipment_detail', args=[self.shipment.pk]))
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'سماق ممتاز')
         self.assertContains(response, '09129876543')
+        # قیمت فروش / مبلغ سفارش هرگز نباید دیده شود:
         self.assertNotContains(response, '65000')
-        self.assertNotContains(response, 'تومان')
+        self.assertNotContains(response, 'مبلغ نهایی')
+        self.assertNotContains(response, 'جمع کل کالاها')
+        self.assertNotContains(response, 'قیمت فروش')
 
     def test_submit_tracking_code_sends_customer_sms(self):
         self.client.login(username='supplier1', password='testpass123')

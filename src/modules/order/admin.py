@@ -10,6 +10,7 @@ from django.utils import timezone
 from django.db.models import Count, Sum, Q
 from django.urls import reverse
 from .models import Cart, CartItem, Order, OrderItem, Payment, Address, BankAccount
+from . import finance as _finance
 from src.core.fa import money as fa_money, jalali_datetime_str
 
 
@@ -65,7 +66,8 @@ class OrderItemInline(admin.TabularInline):
     model = OrderItem
     extra = 0
     can_delete = False
-    readonly_fields = ['product', 'product_name_snapshot', 'quantity', 'unit_price_at_purchase', 'subtotal']
+    readonly_fields = ['product', 'product_name_snapshot', 'variant_title', 'quantity',
+                       'unit_price_at_purchase', 'unit_cost_at_purchase', 'subtotal']
     
     def has_add_permission(self, request, obj=None):
         return False
@@ -75,16 +77,19 @@ class OrderItemInline(admin.TabularInline):
 class OrderAdmin(admin.ModelAdmin):
     list_display = [
         'order_number', 'customer_display', 'status_badge',
-        'total_amount', 'payment_status', 'items_count', 'created_at_fa', 'expires_at_fa'
+        'total_amount', 'payment_status', 'items_count', 'settlement_badge',
+        'created_at_fa', 'expires_at_fa'
     ]
-    list_filter = ['status', 'created_at', 'updated_at']
+    list_filter = ['status', 'settlement_status', 'created_at', 'updated_at']
     search_fields = ['order_number', 'guest_name', 'guest_phone', 'user__username']
     readonly_fields = [
         'id', 'order_number', 'subtotal', 'total_price', 'shipping_cost',
+        'settlement_status',
         'created_at', 'updated_at'
     ]
     inlines = [OrderItemInline]
     date_hierarchy = 'created_at'
+    actions = ['action_settle_suppliers']
 
     def has_delete_permission(self, request, obj=None):
         # D-112: حذف سفارش ممنوع است — رزرو موجودی آزاد نمی‌شود (قفل همیشگی کالا)
@@ -158,6 +163,37 @@ class OrderAdmin(admin.ModelAdmin):
     def items_count(self, obj):
         return obj.items.count()
     items_count.short_description = 'اقلام'
+
+    # ── D-113: تسویه با تامین‌کننده ──
+
+    def settlement_badge(self, obj):
+        colors = {
+            'NONE': '#b9c4bf',
+            'PENDING': '#c8a24b',
+            'PARTIAL': '#e08c2b',
+            'SETTLED': '#0D3B2E',
+        }
+        color = colors.get(obj.settlement_status, '#6c757d')
+        return format_html(
+            '<span style="background:{}; color:white; padding:3px 10px; border-radius:10px; font-size:11px;">{}</span>',
+            color, obj.get_settlement_status_display()
+        )
+    settlement_badge.short_description = 'تسویه'
+    settlement_badge.admin_order_field = 'settlement_status'
+
+    @admin.action(description='💰 تسویه با تامین‌کننده (همه مرسوله‌های تامین‌کننده‌دار)')
+    def action_settle_suppliers(self, request, queryset):
+        settled = skipped = 0
+        for order in queryset:
+            n, s = _finance.settle_shipments(
+                order.shipments.all(), request.user,
+                note=f'تسویه گروهی از لیست سفارش‌ها توسط {request.user.get_username()}')
+            settled += n
+            skipped += s
+        msg = f'{settled} مرسوله تسویه شد.'
+        if skipped:
+            msg += f' ({skipped} مورد نامعتبر/قبلاً تسویه‌شده رد شد)'
+        self.message_user(request, msg)
 
     def created_at_fa(self, obj):
         return jalali_datetime_str(obj.created_at)
@@ -557,13 +593,16 @@ class ShipmentAdmin(admin.ModelAdmin):
     form = ShipmentAdminForm  # D-111: اعتبارسنجی استاندارد کد رهگیری + الزامات «سایر»
 
     list_display = ['shipment_id_short', 'order_link', 'supplier_or_rihan', 'status_badge',
-                    'carrier_label', 'tracking_code_ltr', 'notified_summary', 'shipped_at_fa']
-    list_filter = ['status', 'fulfiller', 'carrier']
+                    'carrier_label', 'tracking_code_ltr', 'payable_display', 'settlement_badge',
+                    'notified_summary', 'shipped_at_fa']
+    list_filter = ['status', 'fulfiller', 'carrier', 'settlement_status']
     search_fields = ['tracking_code', 'order__order_number', 'supplier__title']
     ordering = ['-created_at']
     autocomplete_fields = []
     readonly_fields = ['order', 'fulfiller', 'supplier', 'sent_to_supplier_at', 'last_notified_at',
-                       'supplier_notified_count', 'created_at', 'updated_at', 'dispatch_preview']
+                       'supplier_notified_count', 'created_at', 'updated_at', 'dispatch_preview',
+                       'settlement_status', 'settled_amount', 'settled_at', 'settled_by',
+                       'payable_preview']
     fieldsets = [
         ('مرسوله', {'fields': ['order', 'fulfiller', 'supplier', 'status', 'notes']}),
         ('ارسال (کد رهگیری)', {'fields': [
@@ -572,11 +611,23 @@ class ShipmentAdmin(admin.ModelAdmin):
             'shipped_at', 'delivered_at'],
             'description': 'کد رهگیری باید با فرمت استاندارد شرکت حمل مطابقت داشته باشد. '
                            'برای «سایر»: نام شرکت، نام ارسال‌کننده و شماره تماس الزامی است و به مشتری نمایش داده می‌شود.'}),
+        ('💸 هزینه‌های واقعی ارسال (D-113)', {'fields': [
+            'post_cost', 'post_paid_by', 'other_costs', 'other_costs_note', 'other_paid_by'],
+            'description': 'هزینه پست/باربری و سایر هزینه‌ها (بسته‌بندی، برچسب و…) را دستی وارد کنید. '
+                           'هر کدام که «تامین‌کننده» پرداخت کرده باشد در تسویه به او برگردانده می‌شود؛ '
+                           'آن‌ها که «ریهان» پرداخت کرده فقط در گزارش سود حساب می‌شوند.'}),
+        ('💰 تسویه با تامین‌کننده', {'fields': [
+            'payable_preview', 'settlement_status', 'settled_amount', 'settled_at',
+            'settled_by', 'settlement_note'],
+            'description': 'مبلغ قابل پرداخت به‌صورت خودکار محاسبه می‌شود: قیمت خرید اقلام + '
+                           'هزینه‌های پیش‌پرداخت تامین‌کننده. تسویه از اکشن‌های لیست یا سفارش انجام شود تا مبلغ snapshot گردد.',
+            'classes': ['collapse']}),
         ('اطلاع‌رسانی به تامین‌کننده', {'fields': ['sent_to_supplier_at', 'last_notified_at', 'supplier_notified_count']}),
         ('📋 متن دستور ارسال محوله (کپی برای تامین‌کننده)', {'fields': ['dispatch_preview']}),
         ('زمان‌ها', {'classes': ['collapse'], 'fields': ['created_at', 'updated_at']}),
     ]
-    actions = ['action_mark_delivered', 'action_resend_supplier_sms', 'action_resend_customer_sms']
+    actions = ['action_mark_delivered', 'action_resend_supplier_sms', 'action_resend_customer_sms',
+               'action_settle', 'action_reopen_settlement']
 
     # ── ستون‌های لیست ──
     @admin.display(description='مرسوله', ordering='id')
@@ -627,6 +678,61 @@ class ShipmentAdmin(admin.ModelAdmin):
     def shipped_at_fa(self, obj):
         from src.core.fa import jalali_human
         return jalali_human(obj.shipped_at) if obj.shipped_at else '-'
+
+    # ── D-113: ستون‌ها و اکشن‌های مالی ──
+
+    @admin.display(description='قابل پرداخت تامین‌کننده')
+    def payable_display(self, obj):
+        payable = obj.supplier_payable
+        if payable == 0:
+            return format_html('<span style="color:#999;">—</span>')
+        settled = obj.settlement_status == Shipment.SettlementStatus.SETTLED
+        color = '#0D3B2E' if settled else '#b3261e'
+        label = 'تسویه شده' if settled else fa_money(payable)
+        return format_html('<strong style="color:{};">{} تومان</strong>', color, label)
+
+    @admin.display(description='وضعیت تسویه')
+    def settlement_badge(self, obj):
+        colors = {
+            Shipment.SettlementStatus.UNSETTLED: '#c8a24b',
+            Shipment.SettlementStatus.SETTLED: '#0D3B2E',
+        }
+        return format_html(
+            '<span style="background:{};color:#fff;padding:3px 10px;border-radius:10px;font-size:11px;">{}</span>',
+            colors.get(obj.settlement_status, '#666'), obj.get_settlement_status_display())
+
+    @admin.display(description='مبلغ قابل پرداخت (محاسبه خودکار)')
+    def payable_preview(self, obj):
+        if not obj or not obj.pk:
+            return '— پس از ذخیره محاسبه می‌شود —'
+        f = _finance.shipment_financials(obj)
+        return format_html(
+            '<div dir="rtl" style="line-height:2.2;font-size:13px;">'
+            'قیمت خرید اقلام: <b>{} تومان</b><br>'
+            'هزینه‌های پیش‌پرداخت تامین‌کننده: <b>{} تومان</b><br>'
+            'هزینه‌های پرداخت‌شده توسط ریهان (فقط گزارش سود): {} تومان<br>'
+            '<span style="font-size:15px;color:#0D3B2E;">قابل پرداخت به تامین‌کننده: '
+            '<b>{} تومان</b></span></div>',
+            fa_money(f['items_cost']), fa_money(f['supplier_extra']),
+            fa_money(f['rihan_extra']), fa_money(f['payable']))
+
+    @admin.action(description='💰 تسویه شد (با snapshot مبلغ فعلی)')
+    def action_settle(self, request, queryset):
+        settled, skipped = _finance.settle_shipments(
+            queryset, request.user,
+            note=f'تسویه از لیست مرسوله‌ها توسط {request.user.get_username()}')
+        msg = f'{settled} مرسوله تسویه شد.'
+        if skipped:
+            msg += f' ({skipped} مورد نامعتبر یا قبلاً تسویه‌شده رد شد)'
+        self.message_user(request, msg)
+
+    @admin.action(description='↩️ بازکردن تسویه (مثلاً مرجوعی)')
+    def action_reopen_settlement(self, request, queryset):
+        reopened, skipped = _finance.reopen_shipments(queryset, request.user)
+        msg = f'{reopened} تسویه باز شد.'
+        if skipped:
+            msg += f' ({skipped} مورد اصلاً تسویه نبود)'
+        self.message_user(request, msg)
 
     # ── متن دستور ارسال با دکمه کپی ──
     @admin.display(description='متن آماده ارسال به تامین‌کننده')

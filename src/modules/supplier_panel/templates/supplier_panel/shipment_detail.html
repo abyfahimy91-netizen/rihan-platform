@@ -40,6 +40,16 @@
         <p class="muted mt-3">این مرسوله به مشتری تحویل داده شده است. ممنون از همکاری شما 🌿</p>
     {% endif %}
     <p class="muted mt-3">تاریخ ثبت: {{ shipment.created_at|jdate }}</p>
+    {% if fin.settled %}
+        <div class="hint-box" style="background:#F0F9F0;border-color:#8fc79a;color:#2e5137;">
+            💰 این مرسوله <b>تسویه شد</b> — مبلغ {{ fin.settled_amount|fa }} تومان به حساب شما واریز شده است.
+        </div>
+    {% else %}
+        <div class="hint-box">
+            💰 قابل دریافت شما از این مرسوله: <b>قیمت خرید اقلام + هزینه‌هایی که پرداخت کرده‌اید</b>.
+            جزئیات در <a href="{% url 'finance:supplier_dashboard' %}">💰 مالی و تسویه</a>.
+        </div>
+    {% endif %}
 </div>
 
 <!-- ── قدم ۱: اقلام ── -->
@@ -101,6 +111,29 @@
                 {% if form.tracking_code.errors %}<p style="color:#c00;font-size:13px;">{{ form.tracking_code.errors.0 }}</p>{% endif %}
                 <p class="muted">{{ form.tracking_code.help_text }}</p>
             </div>
+
+            <!-- ── D-113: هزینه‌های واقعی ارسال — مبنای تسویه شما ── -->
+            <div class="hint-box" style="margin-bottom:14px;">
+                💰 <b>هزینه‌های واقعی ارسال را وارد کنید</b> — این مبالغ «طلب شما» از ریهان را می‌سازند:
+                قیمت خرید اقلام + همین هزینه‌ها. اگر چیزی پرداخت نکرده‌اید صفر بگذارید.
+            </div>
+            <div class="mb-3">
+                <label>{{ form.post_cost.label }}</label>
+                {{ form.post_cost }}
+                {% if form.post_cost.errors %}<p style="color:#c00;font-size:13px;">{{ form.post_cost.errors.0 }}</p>{% endif %}
+                <p class="muted">{{ form.post_cost.help_text }}</p>
+            </div>
+            <div class="mb-3">
+                <label>{{ form.other_costs.label }}</label>
+                {{ form.other_costs }}
+                {% if form.other_costs.errors %}<p style="color:#c00;font-size:13px;">{{ form.other_costs.errors.0 }}</p>{% endif %}
+                <p class="muted">{{ form.other_costs.help_text }}</p>
+            </div>
+            <div class="mb-3">
+                <label>{{ form.other_costs_note.label }}</label>
+                {{ form.other_costs_note }}
+            </div>
+
             <button type="submit" class="btn btn-success" id="submit-btn">ثبت کد رهگیری و اطلاع به مشتری</button>
         </form>
     {% else %}

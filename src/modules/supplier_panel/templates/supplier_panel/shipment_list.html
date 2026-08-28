@@ -22,7 +22,7 @@
 {% if shipments %}
 <div class="card" style="overflow-x:auto;">
     <table class="table">
-        <thead><tr><th>سفارش</th><th>اقلام</th><th>وضعیت</th><th>کد رهگیری</th><th>تاریخ</th><th></th></tr></thead>
+        <thead><tr><th>سفارش</th><th>اقلام</th><th>وضعیت</th><th>کد رهگیری</th><th>تاریخ</th><th>تسویه</th><th></th></tr></thead>
         <tbody>
         {% for s in shipments %}
             <tr>
@@ -39,6 +39,10 @@
                 </td>
                 <td>{% if s.tracking_code %}<code class="latin">{{ s.tracking_code }}</code>{% elif s.carrier == 'OTHER' %}<span class="muted">{{ s.other_carrier_name|default:"ارسال با شرکت دیگر" }}</span>{% else %}<span class="muted">—</span>{% endif %}</td>
                 <td>{{ s.created_at|jdate }}</td>
+                <td>
+                    {% if s.settlement_status == 'SETTLED' %}<span class="badge b-delivered">تسویه شد</span>
+                    {% else %}<span class="badge b-new">در انتظار</span>{% endif %}
+                </td>
                 <td>
                     {% if s.status == 'NEW' %}
                         <a class="btn btn-gold" href="{% url 'supplier_panel:shipment_detail' s.pk %}">مشاهده و ارسال</a>
