@@ -214,6 +214,30 @@ class ProfileAddressTest(TestCase):
         self.user.refresh_from_db()
         self.assertEqual(self.user.addresses.count(), 0)
 
+    def test_add_address_error_same_page_no_data_loss(self):
+        """D-113c: خطای کدپستی → بدون ریدایرکت؛ همان صفحه باز می‌شود و داده‌های تایپ‌شده حفظ است"""
+        r = self._add(postal_code='')
+        self.assertEqual(r.status_code, 200)  # نه 302 — کاربر «پرت» نمی‌شود
+        content = r.content.decode()
+        self.assertIn('adr-errors', content)              # خطا داخل خود فرم
+        self.assertIn('اداره پست', content)                # توضیح قانع‌کننده الزام
+        self.assertIn('مریم احمدی', content)               # نام تایپ‌شده حفظ شده
+        self.assertIn('تبریز، آزادی، پلاک ۱۰', content)    # آدرس تایپ‌شده حفظ شده
+        self.assertIn('adr-form-box" open', content)       # فرم خودکار باز است
+        self.assertEqual(self.user.addresses.count(), 0)
+
+    def test_edit_address_error_same_page_no_data_loss(self):
+        """D-113c: خطا هنگام ویرایش → بازرندر با داده‌های تایپ‌شده؛ آدرس اصلی دست‌نخورده"""
+        self._add()
+        a = self.user.addresses.first()
+        r = self._add(address_id=a.pk, postal_code='123')
+        self.assertEqual(r.status_code, 200)
+        content = r.content.decode()
+        self.assertIn('adr-errors', content)
+        self.assertIn(f'value="{a.pk}"', content)          # hidden address_id حفظ شده
+        a.refresh_from_db()
+        self.assertIn('آزادی', a.detailed_address)         # آدرس اصلی تغییر نکرده
+
     def test_add_address(self):
         r = self._add()
         self.assertEqual(r.status_code, 302)

@@ -297,7 +297,12 @@ def profile_view(request):
         action = request.POST.get('action', 'save_info')
 
         # D-102: اکشن‌های مدیریت آدرس‌ها (ذخیره/پیش‌فرض/حذف)
-        if _handle_address_actions(request, u):
+        # D-113c: خطای اعتبارسنجی = dict برمی‌گردد → همان صفحه با همان داده‌های
+        # تایپ‌شده کاربر رندر می‌شود (بدون پرت‌شدن و بدون پاک‌شدن فرم)
+        addr_result = _handle_address_actions(request, u)
+        if isinstance(addr_result, dict):
+            return _render_profile(request, u, extra_context=addr_result)
+        if addr_result:
             return redirect('auth_pages:profile')
 
         if action == 'save_info':
@@ -334,6 +339,12 @@ def profile_view(request):
 
         return redirect('auth_pages:profile')
 
+    return _render_profile(request, u)
+
+
+def _render_profile(request, u, extra_context=None):
+    """رندر صفحه پروفایل — هم GET هم بازرندر خطای فرم آدرس (D-113c)؛
+    خطای اعتبارسنجی بدون ریدایرکت در همین صفحه با داده‌های کاربر نشان داده می‌شود"""
     # آزادسازی سفارش‌های منقضی تا وضعیت‌ها همیشه تازه باشد (D-099)
     try:
         from src.modules.order.expiry import release_expired_orders
@@ -405,7 +416,7 @@ def profile_view(request):
             device_type = '🌐 مرورگر'
         devices.append({**d, 'device_type': device_type})
 
-    return render(request, 'accounts/profile.html', {
+    ctx = {
         'orders': order_list,
         'stats': profile_stats,
         'devices': devices,
@@ -413,7 +424,10 @@ def profile_view(request):
         # D-102: مدیریت آدرس‌ها در پروفایل
         'addresses': u.addresses.all(),
         'edit_address': _get_edit_address(u, request),
-    })
+    }
+    if extra_context:
+        ctx.update(extra_context)
+    return render(request, 'accounts/profile.html', ctx)
 
 
 # ══════════════════════════ آدرس‌ها (D-102) ══════════════════════════
@@ -427,8 +441,28 @@ def _get_edit_address(user, request):
     return None
 
 
+def _address_error_context(request, data, errors, addr=None):
+    """D-113c: زمینه بازرندر فرم آدرس در همان صفحه — داده‌های تایپ‌شده حفظ می‌شوند.
+    مقادیر خالیِ تایپ‌نشده با مقدار قبلی آدرس (در ویرایش) پر می‌شوند تا قالب
+    هرگز لازم نباشد روی edit_address زنجیره default ببندد (edit_address ممکن است None باشد)"""
+    d = dict(data)
+    d['is_default'] = request.POST.get('is_default') == 'on'
+    if addr:
+        d['title'] = d.get('title') or addr.title
+        d['full_name'] = d.get('full_name') or addr.full_name
+        d['phone'] = d.get('phone') or addr.phone
+        d['address'] = d.get('address') or addr.detailed_address
+        d['postal_code'] = d.get('postal_code') or addr.postal_code
+    return {
+        'address_form_errors': errors,
+        'address_form_data': d,
+        'edit_address': addr,
+    }
+
+
 def _handle_address_actions(request, u):
-    """اکشن‌های POST مربوط به آدرس‌ها در پروفایل — خروجی: True اگر هندل شد"""
+    """اکشن‌های POST مربوط به آدرس‌ها در پروفایل — خروجی: True اگر هندل شد؛
+    dict اگر خطای اعتبارسنجی بود (بازرندر همان صفحه با داده‌های کاربر، D-113c)"""
     from src.modules.order import address_service
 
     action = request.POST.get('action', '')
@@ -449,9 +483,8 @@ def _handle_address_actions(request, u):
                 return True
             clean, errors = address_service.validate_address_data(data)
             if errors:
-                for e in errors:
-                    messages.error(request, e)
-                return True
+                # D-113c: بدون ریدایرکت — همان صفحه با داده‌های تایپ‌شده بازرندر می‌شود
+                return _address_error_context(request, data, errors, addr)
             make_default = request.POST.get('is_default') == 'on'
             addr.title = clean['title']
             addr.full_name = clean['full_name']
@@ -467,8 +500,7 @@ def _handle_address_actions(request, u):
                 address_service.create_for_user(u, data)
                 messages.success(request, 'آدرس جدید ذخیره شد ✅ حالا در تسویه‌حساب با یک کلیک در دسترس است.')
             except ValueError as e:
-                for m in str(e).split(' | '):
-                    messages.error(request, m)
+                return _address_error_context(request, data, str(e).split(' | '), None)
         return True
 
     if action == 'address_default':

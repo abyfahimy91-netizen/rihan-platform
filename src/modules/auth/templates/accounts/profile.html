@@ -500,41 +500,55 @@
                 .adr-def-row{display:flex;align-items:center;gap:9px;margin:14px 0;cursor:pointer;}
                 .adr-def-row input{width:17px;height:17px;accent-color:var(--color-primary);}
                 .adr-def-row span{font-size:13.5px;font-weight:600;color:var(--color-text);}
+                .req-star{color:#b3402f;font-weight:800;}
+                .adr-errors{background:#FDECEA;border:1.5px solid #E8A9A0;border-radius:10px;padding:10px 14px;margin-bottom:14px;}
+                .adr-errors p{margin:3px 0;font-size:13px;color:#8f2c1e;font-weight:600;}
+                .pf-hint-why{font-size:12px;line-height:1.9;color:#6b6b6b;margin-top:6px;}
+                .pf-hint-why a{color:var(--color-primary);font-weight:700;}
             </style>
             <div class="pf-card">
                 <h2>📍 آدرس‌های من</h2>
                 <p class="pf-hint">آدرس‌های ذخیره‌شده در تسویه‌حساب با یک کلیک انتخاب می‌شوند؛ آدرس پیش‌فرض خودکار انتخاب می‌شود.</p>
 
-                <details class="adr-form-box" {% if edit_address %}open{% endif %}>
+                <details class="adr-form-box"{% if edit_address or address_form_errors %} open{% endif %}>
                     <summary>{% if edit_address %}✏️ ویرایش آدرس{% else %}➕ افزودن آدرس جدید{% endif %}</summary>
                     <form method="post" action="{% url 'auth_pages:profile' %}" style="margin-top:16px;">
                         {% csrf_token %}
                         <input type="hidden" name="action" value="address_save">
                         {% if edit_address %}<input type="hidden" name="address_id" value="{{ edit_address.pk }}">{% endif %}
+                        {% if address_form_errors %}
+                        <div class="adr-errors" role="alert">
+                            {% for e in address_form_errors %}<p>⚠️ {{ e }}</p>{% endfor %}
+                        </div>
+                        {% endif %}
                         <div class="pf-field">
                             <label>عنوان آدرس (اختیاری)</label>
-                            <input class="pf-input" name="title" maxlength="60" value="{{ edit_address.title|default:'' }}" placeholder="مثلاً: خانه، محل کار">
+                            <input class="pf-input" name="title" maxlength="60" value="{% if address_form_data %}{{ address_form_data.title }}{% else %}{{ edit_address.title|default:'' }}{% endif %}" placeholder="مثلاً: خانه، محل کار">
                         </div>
                         <div class="pf-grid2">
                             <div class="pf-field">
                                 <label>نام و نام خانوادگی گیرنده</label>
-                                <input class="pf-input" name="full_name" value="{{ edit_address.full_name|default:user.first_name|default:'' }}" placeholder="مثلاً: مریم احمدی" required>
+                                <input class="pf-input" name="full_name" value="{% if address_form_data %}{{ address_form_data.full_name }}{% else %}{{ edit_address.full_name|default:user.first_name|default:'' }}{% endif %}" placeholder="مثلاً: مریم احمدی" required>
                             </div>
                             <div class="pf-field">
                                 <label>شماره موبایل گیرنده</label>
-                                <input class="pf-input" dir="ltr" name="phone" value="{{ edit_address.phone|default:user.username|default:'' }}" placeholder="09123456789" required>
+                                <input class="pf-input" dir="ltr" name="phone" value="{% if address_form_data %}{{ address_form_data.phone }}{% else %}{{ edit_address.phone|default:user.username|default:'' }}{% endif %}" placeholder="09123456789" required>
                             </div>
                         </div>
                         <div class="pf-field">
                             <label>آدرس کامل</label>
-                            <textarea class="pf-input" name="address" rows="3" placeholder="استان، شهر، خیابان، پلاک و واحد..." required>{{ edit_address.detailed_address|default:'' }}</textarea>
+                            <textarea class="pf-input" name="address" rows="3" placeholder="استان، شهر، خیابان، پلاک و واحد..." required>{% if address_form_data %}{{ address_form_data.address }}{% else %}{{ edit_address.detailed_address|default:'' }}{% endif %}</textarea>
                         </div>
                         <div class="pf-field">
-                            <label>کد پستی (اختیاری)</label>
-                            <input class="pf-input" dir="ltr" name="postal_code" maxlength="10" value="{{ edit_address.postal_code|default:'' }}" placeholder="10 رقم">
+                            <label>کد پستی ۱۰ رقمی <span class="req-star">*</span></label>
+                            <input class="pf-input" dir="ltr" name="postal_code" maxlength="10" inputmode="numeric" pattern="\d{10}"
+                                   title="کد پستی ۱۰ رقمی، بدون خط تیره" required aria-required="true"
+                                   value="{% if address_form_data %}{{ address_form_data.postal_code }}{% else %}{{ edit_address.postal_code|default:'' }}{% endif %}"
+                                   placeholder="مثلاً 5151411111">
+                            <p class="pf-hint-why">اداره پست بدون کدپستی مرسوله را ثبت نمی‌کند؛ با کدپستی بسته سریع‌تر و بدون خطا به همان پلاک و واحد تحویل داده می‌شود. کد را نمی‌دانید؟ از <a href="https://www.post.ir" target="_blank" rel="noopener">سایت پست</a> یا اپلیکیشن «پیشخوان دولت» استعلام بگیرید.</p>
                         </div>
                         <label class="adr-def-row">
-                            <input type="checkbox" name="is_default" {% if edit_address.is_default or not edit_address and not addresses %}checked{% endif %}>
+                            <input type="checkbox" name="is_default" {% if address_form_data %}{% if address_form_data.is_default %}checked{% endif %}{% elif edit_address.is_default or not edit_address and not addresses %}checked{% endif %}>
                             <span>⭐ این آدرس پیش‌فرض من باشد</span>
                         </label>
                         <div style="display:flex;gap:10px;flex-wrap:wrap;">
