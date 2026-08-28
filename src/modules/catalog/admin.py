@@ -207,7 +207,7 @@ class ProductVariantInline(admin.TabularInline):
     """واریانت‌های محصول — D-094"""
     model = ProductVariant
     extra = 2
-    fields = ["title", "color_name", "color_hex", "price", "cost_price", "unit",
+    fields = ["title", "color_name", "color_hex", "price", "cost_price", "is_default", "unit",
               "stock_quantity", "low_stock_threshold", "is_active", "sort_order"]
     verbose_name = "بسته / سایز (گزینه قابل خرید)"
     verbose_name_plural = "📦 بسته‌ها / سایزها / رنگ‌ها (هر ردیف یک گزینه خرید)"
@@ -245,8 +245,9 @@ class ProductAdmin(admin.ModelAdmin):
             'fields': ('name', 'slug', 'category', 'supplier', 'unit', 'status', 'is_featured'),
         }),
         ('💰 قیمت‌گذاری', {
-            'description': 'قیمت نهایی خودکار محاسبه می‌شود: قیمت پایه + هزینه ارسال + حاشیه سود',
-            'fields': ('base_price', 'shipping_cost', 'margin_percent', 'final_price', 'compare_at_price'),
+            'description': 'قیمت‌ها از بخش «📦 بسته‌ها/سایزها» پایین همین صفحه مدیریت می‌شود: '
+                           'قیمت فروش هر گزینه + قیمت خرید آن. فرمول قدیمی (قیمت پایه/ارسال/حاشیه) حذف شد (D-113).',
+            'fields': ('compare_at_price',),
         }),
         ('🛒 صفحه فروش اقناعی (D-104)', {
             'description': 'تیتر نتیجه‌محور بالای نام محصول نمایش داده می‌شود. سه تعهد زیر دکمه خرید ثابت است: ۷ روز ضمانت بازگشت، ارسال بیمه‌شده، بسته‌بندی محرمانه.',
@@ -275,7 +276,7 @@ class ProductAdmin(admin.ModelAdmin):
         }),
     )
 
-    readonly_fields = ('final_price', 'share_count', 'id', 'created_at', 'updated_at', 'deleted_at')
+    readonly_fields = ('share_count', 'id', 'created_at', 'updated_at', 'deleted_at')
 
     # ─── ستون‌های لیست ───
 
@@ -291,8 +292,8 @@ class ProductAdmin(admin.ModelAdmin):
     thumb.short_description = ''
 
     def price_display(self, obj):
-        return toman(obj.final_price)
-    price_display.short_description = 'قیمت نهایی'
+        return toman(obj.display_price)
+    price_display.short_description = 'قیمت نمایشی'
     price_display.admin_order_field = 'final_price'
 
     def stock_display(self, obj):

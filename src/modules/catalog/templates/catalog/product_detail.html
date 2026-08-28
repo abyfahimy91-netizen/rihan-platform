@@ -30,7 +30,7 @@
     "@type": "Offer",
     "url": "{{ request.scheme }}://{{ request.get_host }}{{ request.get_full_path }}",
     "priceCurrency": "IRR",
-    "price": "{% widthratio product.final_price 1 10 %}",
+    "price": "{% widthratio product.display_price 1 10 %}",
     "availability": "{% if product.inventory and product.inventory.available_quantity > 0 %}https://schema.org/InStock{% else %}https://schema.org/OutOfStock{% endif %}"
   }{% if review_count %},
   "aggregateRating": {
@@ -950,7 +950,7 @@
                 <span class="price-old">{{ product.compare_at_price|money }}</span>
                 {% endif %}
                 <div class="product-price" id="product-price-display">
-                    {{ product.final_price|money }}
+                    {{ product.display_price|money }}
                     <small>تومان</small>
                 </div>
             </div>
@@ -1188,7 +1188,7 @@
     <div class="share-buttons" data-share-url="{{ short_url|default:request.build_absolute_uri }}" data-share-text="{{ share_caption }}" data-share-slug="{{ product.slug }}">
         <button type="button" class="share-btn share-ig" data-channel="instagram" data-share-type="story"
                 data-img="{{ product.main_image_url }}" data-title="{{ product.name }}"
-                data-price="{{ product.final_price|money }} تومان" aria-label="اشتراک در استوری اینستاگرام">
+                data-price="{{ product.display_price|money }} تومان" aria-label="اشتراک در استوری اینستاگرام">
             <svg class="sh-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><rect x="2.5" y="2.5" width="19" height="19" rx="5.5"/><circle cx="12" cy="12" r="4.4"/><circle cx="17.6" cy="6.4" r="1.15" fill="currentColor" stroke="none"/></svg>
             <span>استوری اینستاگرام</span>
         </button>
@@ -1353,7 +1353,7 @@
                 {% endif %}
                 <div class="related-card-info">
                     <h4>{{ rp.name }}</h4>
-                    <div class="related-card-price">{{ rp.final_price|money }} تومان</div>
+                    <div class="related-card-price">{{ rp.display_price|money }} تومان</div>
                 </div>
             </a>
         </div>
@@ -1404,7 +1404,7 @@
 <div class="sticky-buy-bar" id="stickyBuyBar" aria-hidden="true">
     <div class="sbb-info">
         <span class="sbb-name">{{ product.name|truncatechars:28 }}</span>
-        <span class="sbb-price" id="sbbPrice">{{ product.final_price|money }} <small>تومان</small></span>
+        <span class="sbb-price" id="sbbPrice">{{ product.display_price|money }} <small>تومان</small></span>
     </div>
     <button type="button" class="sbb-btn" id="sbbBuy">خرید سریع</button>
 </div>

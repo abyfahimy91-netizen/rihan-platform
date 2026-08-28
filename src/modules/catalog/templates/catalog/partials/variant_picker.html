@@ -9,6 +9,7 @@
                     class="variant-chip{% if not v.is_in_stock %} out-of-stock{% endif %}"
                     data-variant-id="{{ v.id }}"
                     data-price="{{ v.price|floatformat:0 }}"
+                    {% if v.is_default %}data-default="1"{% endif %}
                     data-stock="{{ v.available_quantity }}"
                     data-threshold="{{ v.low_stock_threshold }}"
                     {% if not v.is_in_stock %}disabled aria-disabled="true"{% endif %}
@@ -80,7 +81,9 @@
     chips.forEach(function (chip) {
         if (!chip.disabled) { chip.addEventListener('click', function () { select(chip); }); }
     });
-    var firstAvailable = Array.prototype.find.call(chips, function (c) { return !c.disabled; });
+    var firstAvailable =
+        Array.prototype.find.call(chips, function (c) { return !c.disabled && c.dataset.default === '1'; }) ||
+        Array.prototype.find.call(chips, function (c) { return !c.disabled; });
     if (firstAvailable) { select(firstAvailable); }
 })();
 </script>

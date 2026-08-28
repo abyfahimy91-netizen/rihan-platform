@@ -158,9 +158,34 @@ class Product(models.Model):
     @property
     def discount_percent(self):
         """درصد تخفیف نسبت به قیمت مقایسه‌ای (D-104) — 0 یعنی بدون تخفیف"""
-        if self.compare_at_price and self.compare_at_price > self.final_price:
-            return int(round((1 - self.final_price / self.compare_at_price) * 100))
+        if self.compare_at_price and self.compare_at_price > self.display_price:
+            return int(round((1 - self.display_price / self.compare_at_price) * 100))
         return 0
+
+    # ─── D-113: قیمت نمایشی = قیمت گزینه استاندارد (نه فرمول قدیمی) ───
+
+    @property
+    def display_variant(self):
+        """گزینه استاندارد برای نمایش قیمت — پیش‌فرض دستی، وگرنه ارزان‌ترین گزینه فعال"""
+        active = self.variants.filter(is_active=True)
+        default = active.filter(is_default=True).first()
+        if default:
+            return default
+        return active.order_by('price', 'id').first()
+
+    @property
+    def display_price(self):
+        """قیمتی که در لیست/صفحه اصلی/اسکیما نمایش داده می‌شود"""
+        dv = self.display_variant
+        if dv is not None:
+            return dv.price
+        # محصول بدون واریانت (legacy) — همان قیمت قدیمی
+        return self.final_price
+
+    @property
+    def has_variant_choice(self):
+        """آیا بیش از یک گزینه فعال دارد؟ (نمایش عنوان گزینه کنار قیمت در کارت‌ها)"""
+        return self.variants.filter(is_active=True).count() > 1
 
     @property
     def main_image_url(self):
@@ -534,6 +559,10 @@ class ProductVariant(models.Model):
         max_digits=12, decimal_places=0, default=0,
         verbose_name="قیمت خرید از تامین‌کننده (تومان)",
         help_text="بهای تمام‌شده این واریانت — مبنای محاسبه حاشیه سود و تسویه تامین‌کننده (D-113)")
+    is_default = models.BooleanField(
+        default=False,
+        verbose_name="گزینه استاندارد (نمایش در صفحه اصلی و لیست)",
+        help_text="قیمت همین گزینه به‌عنوان قیمت اصلی محصول در لیست/صفحه اصلی نمایش داده می‌شود — فقط یکی از گزینه‌ها")
     unit = models.CharField(max_length=30, default='بسته', verbose_name="واحد نمایش")
     stock_quantity = models.PositiveIntegerField(default=0, verbose_name="موجودی")
     reserved_quantity = models.PositiveIntegerField(default=0, editable=False,
@@ -560,6 +589,15 @@ class ProductVariant(models.Model):
     @property
     def is_in_stock(self):
         return self.available_quantity > 0
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        # D-113: فقط یک گزینه استاندارد برای هر محصول
+        if self.is_default:
+            siblings = ProductVariant.objects.filter(
+                product=self.product, is_default=True).exclude(pk=self.pk)
+            if siblings.exists():
+                siblings.update(is_default=False)
 
 @receiver(post_save, sender=ProductVariant)
 @receiver(post_delete, sender=ProductVariant)

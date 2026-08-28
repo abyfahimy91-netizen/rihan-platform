@@ -438,8 +438,11 @@
                 {% endif %}
                 <div class="product-footer">
                     <div class="product-price">
-                        {{ product.final_price|money }}
+                        {{ product.display_price|money }}
                         <small>تومان</small>
+                        {% if product.has_variant_choice and product.display_variant %}
+                        <small style="display:block;color:#8a8477;font-size:11px;margin-top:2px;">{{ product.display_variant.title }}</small>
+                        {% endif %}
                     </div>
                     <a href="{% url 'catalog:product_detail' product.slug %}" class="product-btn">
                         مشاهده
