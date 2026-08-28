@@ -8,13 +8,13 @@
 {% block og_title %}{{ seo_title }}{% endblock %}
 {% block og_description %}{{ seo_description }}{% endblock %}
 {% block og_type %}product{% endblock %}
+{% block og_image_url %}{{ og_image|default:'' }}{% endblock %}
+{% block twitter_image_url %}{{ og_image|default:'' }}{% endblock %}
 
 {% block extra_head %}
     {# ── D-107: پیش‌نمایش جذاب در پیام‌رسان‌ها (تلگرام/واتساپ/آی‌مسیج) ── #}
-    <meta property="og:image" content="{{ og_image|default:'' }}">
     <meta property="og:site_name" content="{{ brand_latin|default:'Rihan' }}">
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:image" content="{{ og_image|default:'' }}">
 
 <!-- ─── داده ساختاریافته برای گوگل و هوش‌های مصنوعی (D-104) ─── -->
 <script type="application/ld+json">

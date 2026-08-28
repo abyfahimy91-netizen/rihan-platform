@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}پنل تامین‌کننده | Rihan{% endblock %}</title></title></title>
+    <title>{% block title %}پنل تامین‌کننده | Rihan{% endblock %}</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: Tahoma, Arial, sans-serif; background: #f4f6f4; color: #222; line-height: 1.9; }
@@ -64,7 +64,7 @@
 </head>
 <body>
     <div class="topbar">
-        <span class="brand"><span class="brand-mark">Rihan</span> پنل تامین‌کننده</span>
+        <span class="brand"><img src="/static/img/logo/rihan-logo-badge.png" alt="Rihan" style="width:34px;height:34px;border-radius:50%;vertical-align:middle;margin-inline-end:8px;box-shadow:0 0 0 2px rgba(201,169,97,.45);">پنل تامین‌کننده</span>
         <a href="{% url 'supplier_panel:dashboard' %}">داشبورد</a>
         <a href="{% url 'supplier_panel:shipment_list' %}">مرسوله‌های من</a>
         <a href="{% url 'finance:supplier_dashboard' %}">💰 مالی و تسویه</a>
