@@ -8,7 +8,7 @@
 <!-- ── وضعیت فعلی + نقشه راه ── -->
 <div class="card">
     {% if shipment.status == 'NEW' %}
-        <span class="badge b-new">در انتظار ارسال</span>
+        <span class="badge b-new">⏳ در انتظار ارسال</span>
         <div class="steps mt-3">
             <div class="step is-active">
                 <div class="step-num">۱</div>
@@ -31,6 +31,7 @@
                 — <a href="{{ shipment.tracking_url }}" target="_blank" rel="noopener">پیگیری در سایت {{ shipment.get_carrier_display }}</a>
             {% endif %}
         </p>
+        <p class="muted">تاریخ ارسال: {{ shipment.shipped_at|jtime }}</p>
         {% if shipment.other_carrier_name %}
         <p class="muted">شرکت حمل: {{ shipment.carrier_full_label }}{% if shipment.other_carrier_person %} — ارسال‌کننده: {{ shipment.other_carrier_person }}{% endif %}{% if shipment.other_carrier_phone %} — تماس: <span dir="ltr">{{ shipment.other_carrier_phone }}</span>{% endif %}</p>
         {% endif %}
@@ -39,15 +40,25 @@
         <span class="badge b-delivered">تحویل داده شد ✓</span>
         <p class="muted mt-3">این مرسوله به مشتری تحویل داده شده است. ممنون از همکاری شما 🌿</p>
     {% endif %}
-    <p class="muted mt-3">تاریخ ثبت: {{ shipment.created_at|jdate }}</p>
+    <p class="muted mt-3">تاریخ ثبت سفارش: {{ shipment.created_at|jtime }}</p>
+
     {% if fin.settled %}
-        <div class="hint-box" style="background:#F0F9F0;border-color:#8fc79a;color:#2e5137;">
-            💰 این مرسوله <b>تسویه شد</b> — مبلغ {{ fin.settled_amount|fa }} تومان به حساب شما واریز شده است.
+        <div class="cost-box" style="background:#F0F9F0;border-color:#8fc79a;">
+            <div class="cb-title">✅ این مرسوله <b>تسویه شد</b> — مبلغ زیر به حساب شما واریز شده است:</div>
+            <div class="cb-amount">{{ fin.settled_amount|money }} <small>تومان</small></div>
+            <div class="cb-sub">جزئیات کامل در <a href="{% url 'finance:supplier_dashboard' %}">💰 مالی و تسویه</a></div>
+        </div>
+    {% elif shipment.status == 'NEW' %}
+        <div class="cost-box">
+            <div class="cb-title">💰 قیمت خرید اقلام این مرسوله (مبنای تسویه شما):</div>
+            <div class="cb-amount">{{ fin.items_cost|money }} <small>تومان</small></div>
+            <div class="cb-sub">هزینه‌های پست/بسته‌بندی که خودتان پرداخت می‌کنید، در فرم پایین اضافه می‌شود و «قابل دریافت» نهایی شما را می‌سازد — جزئیات در <a href="{% url 'finance:supplier_dashboard' %}">مالی و تسویه</a>.</div>
         </div>
     {% else %}
-        <div class="hint-box">
-            💰 قابل دریافت شما از این مرسوله: <b>قیمت خرید اقلام + هزینه‌هایی که پرداخت کرده‌اید</b>.
-            جزئیات در <a href="{% url 'finance:supplier_dashboard' %}">💰 مالی و تسویه</a>.
+        <div class="cost-box">
+            <div class="cb-title">💰 قابل دریافت شما از این مرسوله:</div>
+            <div class="cb-amount">{{ fin.payable|money }} <small>تومان</small></div>
+            <div class="cb-sub">= قیمت خرید اقلام + هزینه‌هایی که خودتان پرداخت کرده‌اید. تسویه توسط Rihan انجام و در <a href="{% url 'finance:supplier_dashboard' %}">مالی و تسویه</a> گزارش می‌شود.</div>
         </div>
     {% endif %}
 </div>
@@ -112,29 +123,38 @@
                 <p class="muted">{{ form.tracking_code.help_text }}</p>
             </div>
 
-            <!-- ── D-113: هزینه‌های واقعی ارسال — مبنای تسویه شما ── -->
-            <div class="hint-box" style="margin-bottom:14px;">
-                💰 <b>هزینه‌های واقعی ارسال را وارد کنید</b> — این مبالغ «طلب شما» از ریهان را می‌سازند:
-                قیمت خرید اقلام + همین هزینه‌ها. اگر چیزی پرداخت نکرده‌اید صفر بگذارید.
-            </div>
-            <div class="mb-3">
-                <label>{{ form.post_cost.label }}</label>
-                {{ form.post_cost }}
-                {% if form.post_cost.errors %}<p style="color:#c00;font-size:13px;">{{ form.post_cost.errors.0 }}</p>{% endif %}
-                <p class="muted">{{ form.post_cost.help_text }}</p>
-            </div>
-            <div class="mb-3">
-                <label>{{ form.other_costs.label }}</label>
-                {{ form.other_costs }}
-                {% if form.other_costs.errors %}<p style="color:#c00;font-size:13px;">{{ form.other_costs.errors.0 }}</p>{% endif %}
-                <p class="muted">{{ form.other_costs.help_text }}</p>
-            </div>
-            <div class="mb-3">
-                <label>{{ form.other_costs_note.label }}</label>
-                {{ form.other_costs_note }}
+            <!-- ── D-113/D-116: هزینه‌های واقعی ارسال — مبنای تسویه شما ── -->
+            <div class="cost-fields">
+                <div class="cf-title">💰 هزینه‌هایی که خودتان پرداخت کرده‌اید</div>
+                <p class="muted" style="margin:4px 0 12px;">
+                    این مبالغ به «قیمت خرید اقلام» اضافه می‌شوند و طلب شما از Rihan را می‌سازند.
+                    اگر چیزی پرداخت نکرده‌اید، صفر بماند.
+                </p>
+                <div class="mb-3">
+                    <label>{{ form.post_cost.label }}</label>
+                    {{ form.post_cost }}
+                    {% if form.post_cost.errors %}<p style="color:#c00;font-size:13px;">{{ form.post_cost.errors.0 }}</p>{% endif %}
+                    <p class="muted">{{ form.post_cost.help_text }}</p>
+                </div>
+                <div class="mb-3">
+                    <label>{{ form.other_costs.label }}</label>
+                    {{ form.other_costs }}
+                    {% if form.other_costs.errors %}<p style="color:#c00;font-size:13px;">{{ form.other_costs.errors.0 }}</p>{% endif %}
+                    <p class="muted">{{ form.other_costs.help_text }}</p>
+                </div>
+                <div class="mb-3">
+                    <label>{{ form.other_costs_note.label }}</label>
+                    {{ form.other_costs_note }}
+                </div>
+                <div class="payline" id="payline" data-base="{{ fin.items_cost }}">
+                    <span>قابل دریافت شما از این مرسوله:</span>
+                    <span><b id="payable-num">{{ fin.payable|money }}</b> تومان</span>
+                </div>
             </div>
 
-            <button type="submit" class="btn btn-success" id="submit-btn">ثبت کد رهگیری و اطلاع به مشتری</button>
+            <div class="sticky-submit">
+                <button type="submit" class="btn btn-success" id="submit-btn">ثبت کد رهگیری و اطلاع به مشتری</button>
+            </div>
         </form>
     {% else %}
         <h3 class="mb-3">🚚 کد رهگیری این مرسوله قبلاً ثبت شده است</h3>
@@ -148,8 +168,33 @@
 
 {% block extra_js %}
 <script>
-    // ── D-111: راهنمای فرمت کد per شرکت حمل + نمایش فیلدهای «سایر» ──
     (function(){
+        // ── D-116: پیش‌نمایش زنده «قابل دریافت» = قیمت خرید اقلام + هزینه‌های تایپ‌شده ──
+        var PD = '۰۱۲۳۴۵۶۷۸۹';
+        function faNum(n) {
+            var s = String(Math.round(n));
+            s = s.replace(/\B(?=(\d{3})+(?!\d))/g, '٬');
+            return s.replace(/[0-9]/g, function (d) { return PD[+d]; });
+        }
+        var payline = document.getElementById('payline');
+        if (payline) {
+            var base = parseFloat(payline.getAttribute('data-base')) || 0;
+            var postEl = document.getElementById('id_post_cost');
+            var otherEl = document.getElementById('id_other_costs');
+            function updPay() {
+                var p = parseFloat((postEl && postEl.value) || '') || 0;
+                var o = parseFloat((otherEl && otherEl.value) || '') || 0;
+                document.getElementById('payable-num').textContent = faNum(base + p + o);
+            }
+            [postEl, otherEl].forEach(function (el) {
+                if (!el) return;
+                el.addEventListener('input', updPay);
+                el.addEventListener('change', updPay);
+            });
+            updPay();
+        }
+
+        // ── D-111: راهنمای فرمت کد per شرکت حمل + نمایش فیلدهای «سایر» ──
         var sel = document.getElementById('id_carrier');
         if(!sel) return;
         var hints = {};

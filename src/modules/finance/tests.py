@@ -93,7 +93,7 @@ class SupplierDashboardTests(FinanceDashboardTestBase):
         self.assertEqual(r.status_code, 200)
         content = r.content.decode()
         # قابل دریافت: ۱۰۰هزار × ۲
-        self.assertIn('200000', content)
+        self.assertIn('۲۰۰٬۰۰۰', content)  # D-116: خروجی money فارسی شد
         self.assertIn('در انتظار تسویه', content)
 
     def test_settled_view_after_settlement(self):

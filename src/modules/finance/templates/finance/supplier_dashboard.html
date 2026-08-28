@@ -1,33 +1,44 @@
-{% extends "finance/base.html" %}
+{% extends "finance/base.html" %}{% load fa_tags %}
 {% block title %}حساب من | Rihan{% endblock %}
 {% block topbar_actions %}
     <a href="/supplier/">پنل من</a>
     <a href="/supplier/shipments/">مرسوله‌ها</a>
 {% endblock %}
 {% block content %}
+    <style>
+        /* D-116: جدول ریسپانسیو موبایل برای صفحه مالی تامین‌کننده */
+        @media (max-width: 700px) {
+            .rwd-table thead { display: none; }
+            .rwd-table, .rwd-table tbody, .rwd-table tr, .rwd-table td { display: block; width: 100%; }
+            .rwd-table tr { border: 1.5px solid #e7e7e2; border-radius: 12px; margin-bottom: 12px; padding: 6px 0; background: #fff; }
+            .rwd-table td { border: none; display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+            .rwd-table td::before { content: attr(data-label); font-weight: bold; color: #0D3B2E; font-size: 12.5px; flex-shrink: 0; }
+        }
+    </style>
     <div class="card">
         <h3>💰 حساب «{{ supplier.title }}»</h3>
         <div class="stats">
-            <div class="stat"><b class="num">{{ fin.shipment_count }}</b><span>مرسوله من</span></div>
-            <div class="stat"><b class="num">{{ fin.sold_total }}</b><span>فروش اقلام من (تومان)</span></div>
-            <div class="stat hl"><b class="num">{{ fin.balance }}</b><span>طلب من (تسویه‌نشده)</span></div>
-            <div class="stat"><b class="num">{{ fin.settled_total }}</b><span>تا امروز تسویه‌شده</span></div>
-            <div class="stat"><b class="num">{{ fin.unsettled_count }}</b><span>مرسوله در انتظار تسویه</span></div>
-            <div class="stat"><b class="num">{{ fin.settled_count }}</b><span>مرسوله تسویه‌شده</span></div>
+            <div class="stat"><b class="num">{{ fin.shipment_count|fa }}</b><span>مرسوله من</span></div>
+            <div class="stat"><b class="num">{{ fin.sold_total|money }}</b><span>فروش اقلام من (تومان)</span></div>
+            <div class="stat hl"><b class="num">{{ fin.balance|money }}</b><span>طلب من (تسویه‌نشده)</span></div>
+            <div class="stat"><b class="num">{{ fin.settled_total|money }}</b><span>تا امروز تسویه‌شده</span></div>
+            <div class="stat"><b class="num">{{ fin.unsettled_count|fa }}</b><span>مرسوله در انتظار تسویه</span></div>
+            <div class="stat"><b class="num">{{ fin.settled_count|fa }}</b><span>مرسوله تسویه‌شده</span></div>
         </div>
         <p class="muted" style="margin-top:10px;">
             قابل دریافت شما = قیمت خرید اقلام + هزینه پست/بسته‌بندی که خودتان پرداخت کرده‌اید.
-            تسویه توسط ادمین انجام و همین‌جا گزارش می‌شود.
+            تسویه توسط Rihan انجام و همین‌جا گزارش می‌شود.
         </p>
     </div>
 
     <div class="card">
         <h3>📦 مرسوله‌های من</h3>
         {% if rows %}
-        <table class="table">
+        <table class="table rwd-table">
             <thead>
                 <tr>
                     <th>سفارش</th>
+                    <th>وضعیت مرسوله</th>
                     <th>ارزش اقلام</th>
                     <th>خرید اقلام</th>
                     <th>پیش‌پرداخت من (پست/سایر)</th>
@@ -39,19 +50,24 @@
             <tbody>
                 {% for row in rows %}
                 <tr>
-                    <td><strong>{{ row.order_number }}</strong></td>
-                    <td class="num">{{ row.revenue }}</td>
-                    <td class="num">{{ row.items_cost }}</td>
-                    <td class="num">{{ row.supplier_extra }}</td>
-                    <td class="num"><strong>{{ row.payable }}</strong></td>
-                    <td>
+                    <td data-label="سفارش" dir="ltr" style="text-align:left;"><strong>{{ row.order_number }}</strong></td>
+                    <td data-label="وضعیت مرسوله">
+                        {% if row.shipment.status == 'NEW' %}<span class="badge b-new">در انتظار ارسال</span>
+                        {% elif row.shipment.status == 'SHIPPED' %}<span class="badge b-shipped">ارسال شده</span>
+                        {% else %}<span class="badge b-delivered">تحویل شد</span>{% endif %}
+                    </td>
+                    <td data-label="ارزش اقلام" class="num">{{ row.revenue|money }}</td>
+                    <td data-label="خرید اقلام" class="num">{{ row.items_cost|money }}</td>
+                    <td data-label="پیش‌پرداخت من (پست/سایر)" class="num">{{ row.supplier_extra|money }}</td>
+                    <td data-label="قابل دریافت" class="num"><strong>{{ row.payable|money }}</strong></td>
+                    <td data-label="وضعیت تسویه">
                         {% if row.settled %}
-                            <span class="badge b-settled">تسویه شد ({{ row.settled_amount }})</span>
+                            <span class="badge b-settled">تسویه شد ({{ row.settled_amount|money }})</span>
                         {% else %}
                             <span class="badge b-unsettled">در انتظار تسویه</span>
                         {% endif %}
                     </td>
-                    <td class="muted">{% if row.settled %}{{ row.shipment.settled_at|date:"Y/m/d" }}{% endif %}</td>
+                    <td data-label="تاریخ تسویه" class="muted">{% if row.settled %}{{ row.shipment.settled_at|jdate }}{% endif %}</td>
                 </tr>
                 {% endfor %}
             </tbody>

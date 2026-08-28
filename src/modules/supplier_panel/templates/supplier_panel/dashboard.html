@@ -39,23 +39,23 @@
     </div>
     {% if new_count > 0 %}
         <p class="mt-3">
-            <a href="{% url 'supplier_panel:shipment_list' %}?status=NEW" class="btn btn-primary">🚚 شروع کنید: مرسوله‌های در انتظار ارسال ({{ new_count|fa }})</a>
+            <a href="{% url 'supplier_panel:shipment_list' %}?status=NEW" class="btn btn-primary btn-lg">🚚 شروع کنید: مرسوله‌های در انتظار ارسال ({{ new_count|fa }})</a>
         </p>
     {% endif %}
 </div>
 
-<!-- ── D-113: خلاصه مالی ── -->
+<!-- ── D-113: خلاصه مالی (D-116: اعداد فارسی با جداکننده) ── -->
 <div class="card">
     <h3 class="mb-3">💰 خلاصه مالی من</h3>
     <div class="stats">
         <a class="stat" href="{% url 'finance:supplier_dashboard' %}">
-            <b>{{ fin.sold_total|fa }}</b>فروش اقلام من (تومان)
+            <b>{{ fin.sold_total|money }}</b>فروش اقلام من (تومان)
         </a>
         <a class="stat" href="{% url 'finance:supplier_dashboard' %}">
-            <b>{{ fin.balance|fa }}</b>طلب من (تسویه‌نشده)
+            <b>{{ fin.balance|money }}</b>طلب من (تسویه‌نشده)
         </a>
         <a class="stat" href="{% url 'finance:supplier_dashboard' %}">
-            <b>{{ fin.settled_total|fa }}</b>تا امروز تسویه‌شده
+            <b>{{ fin.settled_total|money }}</b>تا امروز تسویه‌شده
         </a>
     </div>
     <p class="muted mt-3">قابل دریافت شما = قیمت خرید اقلام + هزینه‌های ارسال/بسته‌بندی که خودتان پرداخت کرده‌اید.</p>
@@ -65,20 +65,20 @@
 <div class="card">
     <h3 class="mb-3">🆕 جدیدترین مرسوله‌های در انتظار ارسال شما</h3>
     <p class="muted mb-3">روی «مشاهده و ارسال» بزنید تا اقلام، آدرس گیرنده و فرم ثبت کد رهگیری را ببینید.</p>
-    <div class="table" style="overflow-x:auto;">
-    <table class="table">
+    <div style="overflow-x:auto;">
+    <table class="table rwd-table">
         <thead><tr><th>سفارش</th><th>اقلام</th><th>تاریخ</th><th></th></tr></thead>
         <tbody>
         {% for s in recent_new %}
             <tr>
-                <td dir="ltr">{{ s.order.order_number }}</td>
-                <td>
+                <td data-label="سفارش" dir="ltr" style="text-align:left;">{{ s.order.order_number }}</td>
+                <td data-label="اقلام">
                     {% for si in s.items.all %}
-                        {{ si.order_item.product_name_snapshot }} ×{{ si.quantity|fa }}{% if not forloop.last %}، {% endif %}
+                        {{ si.order_item.product_name_snapshot }}{% if si.order_item.variant_title %} ({{ si.order_item.variant_title }}){% endif %} ×{{ si.quantity|fa }}{% if not forloop.last %}، {% endif %}
                     {% endfor %}
                 </td>
-                <td>{{ s.created_at|jdate }}</td>
-                <td><a class="btn btn-gold" href="{% url 'supplier_panel:shipment_detail' s.pk %}">مشاهده و ارسال</a></td>
+                <td data-label="تاریخ">{{ s.created_at|jtime }}</td>
+                <td data-label="عملیات" class="act"><a class="btn btn-gold" href="{% url 'supplier_panel:shipment_detail' s.pk %}">مشاهده و ارسال</a></td>
             </tr>
         {% endfor %}
         </tbody>
@@ -89,8 +89,8 @@
 <div class="card" style="text-align:center;padding:34px 20px;">
     <div style="font-size:40px;">🌱</div>
     <h3 style="margin:10px 0 6px;">فعلاً مرسوله جدیدی ندارید</h3>
-    <p class="muted">به‌محض ثبت سفارش جدید، پیامک اطلاع‌رسانی برای شما ارسال می‌شود.<br>
-    آن‌وقت کافی است به همین صفحه بیایید و روی مرسوله بزنید؛ همه‌چیز قدم‌به‌قدم راهنمایی می‌شود. 🌿</p>
+    <p class="muted">به‌محض ثبت سفارش جدید، اینجا اطلاع‌رسانی می‌شود.<br>
+    کافی است به همین صفحه بیایید و روی مرسوله بزنید؛ همه‌چیز قدم‌به‌قدم راهنمایی می‌شود. 🌿</p>
 </div>
 {% endif %}
 

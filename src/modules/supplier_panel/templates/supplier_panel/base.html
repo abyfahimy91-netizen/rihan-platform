@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#0D3B2E">
     <title>{% block title %}پنل تامین‌کننده | Rihan{% endblock %}</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -13,6 +14,7 @@
             padding: 3px 14px; border-radius: 9px; font-size: 14px; letter-spacing: .5px; }
         .topbar a { color: #EAD9A7; text-decoration: none; font-size: 14px; padding: 4px 8px; border-radius: 6px; }
         .topbar a:hover { background: rgba(255,255,255,.08); }
+        .topbar a.on { background: #C9A961; color: #0D3B2E; font-weight: bold; }
         .topbar .brand { font-weight: bold; font-size: 16px; color: #fff; }
         .container { max-width: 1000px; margin: 0 auto; padding: 20px; }
         .card { background: white; border-radius: 12px; padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
@@ -21,6 +23,7 @@
         .btn-primary { background: #0D3B2E; color: #fff; }
         .btn-success { background: #28a745; color: #fff; }
         .btn-gold { background: #C9A961; color: #12362a; }
+        .btn-lg { font-size: 15.5px; padding: 14px 22px; }
         .table { width: 100%; border-collapse: collapse; }
         .table th, .table td { padding: 12px; text-align: right; border-bottom: 1px solid #e5e5e5; font-size: 14px; }
         .table th { background: #FAF7F0; font-size: 12.5px; color: #665; }
@@ -56,17 +59,44 @@
         .guide b { color: #0D3B2E; }
         .hint-box { background: #FBF6E8; border-right: 4px solid #C9A961; border-radius: 8px; padding: 10px 14px; font-size: 13px; color: #6e5a24; margin-top: 8px; line-height: 2; }
         .hidden { display: none; }
+
+        /* ── D-116: جعبه‌های مالی + فیلدهای هزینه + دکمه چسبان + جدول ریسپانسیو ── */
+        .cost-box { background: #F6FBF4; border: 1.5px solid #9fc4a8; border-radius: 12px; padding: 14px 16px; margin-top: 10px; }
+        .cost-box .cb-title { font-size: 13.5px; color: #2e5137; }
+        .cost-box .cb-amount { font-size: 24px; font-weight: 800; color: #0D3B2E; margin-top: 2px; }
+        .cost-box .cb-amount small { font-size: 13px; font-weight: normal; color: #555; }
+        .cost-box .cb-sub { font-size: 12.5px; color: #5a6b5e; margin-top: 4px; line-height: 2; }
+        .cost-fields { border: 1.5px dashed #C9A961; background: #FDFAF2; border-radius: 12px; padding: 14px 16px; margin: 16px 0; }
+        .cost-fields .cf-title { font-weight: bold; color: #0D3B2E; font-size: 14px; }
+        .payline { background: #0D3B2E; color: #fff; border-radius: 10px; padding: 12px 16px; margin-top: 12px;
+            font-size: 14px; display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+        .payline b { color: #EAD9A7; font-size: 20px; }
+        .sticky-submit { position: sticky; bottom: 8px; margin-top: 14px; z-index: 6; }
+        .sticky-submit .btn { width: 100%; padding: 14px; font-size: 15.5px; box-shadow: 0 8px 22px rgba(13,59,46,.28); }
+        .sub-card { border: 1px solid #eee; border-radius: 10px; padding: 10px 14px; margin-top: 10px; background: #FCFCFA; }
+
+        @media (max-width: 700px) {
+            .rwd-table thead { display: none; }
+            .rwd-table, .rwd-table tbody, .rwd-table tr, .rwd-table td { display: block; width: 100%; }
+            .rwd-table tr { background: #fff; border: 1.5px solid #e7e7e2; border-radius: 12px; margin-bottom: 12px;
+                padding: 6px 0; box-shadow: 0 1px 4px rgba(0,0,0,.05); }
+            .rwd-table td { border: none; padding: 7px 14px; display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+            .rwd-table td::before { content: attr(data-label); font-weight: bold; color: #0D3B2E; font-size: 12.5px; flex-shrink: 0; }
+            .rwd-table td.act { text-align: left; }
+        }
         @media (max-width: 640px) {
             .container { padding: 12px; }
             .step { min-width: 100%; }
+            .btn { padding: 12px 18px; }
+            .topbar { gap: 8px; padding: 10px 12px; }
         }
     </style>
 </head>
 <body>
     <div class="topbar">
         <span class="brand"><img src="/static/img/logo/rihan-logo-badge.png" alt="Rihan" style="width:34px;height:34px;border-radius:50%;vertical-align:middle;margin-inline-end:8px;box-shadow:0 0 0 2px rgba(201,169,97,.45);">پنل تامین‌کننده</span>
-        <a href="{% url 'supplier_panel:dashboard' %}">داشبورد</a>
-        <a href="{% url 'supplier_panel:shipment_list' %}">مرسوله‌های من</a>
+        <a href="{% url 'supplier_panel:dashboard' %}" class="{% if request.resolver_match.url_name == 'dashboard' %}on{% endif %}">داشبورد</a>
+        <a href="{% url 'supplier_panel:shipment_list' %}" class="{% if request.resolver_match.url_name == 'shipment_list' or request.resolver_match.url_name == 'shipment_detail' %}on{% endif %}">مرسوله‌های من</a>
         <a href="{% url 'finance:supplier_dashboard' %}">💰 مالی و تسویه</a>
         <span style="margin-inline-start:auto;font-size:13px;color:#cfe3d8;">
             {% if supplier %}{{ supplier.title }}{% endif %}
