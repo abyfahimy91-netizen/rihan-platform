@@ -743,7 +743,10 @@
         if (s1) s1.textContent = data.subtotal + " تومان";
         if (s2) s2.textContent = data.total + " تومان";
         if (s3) s3.textContent = data.count_fa + " قلم";
-        if (badge) badge.textContent = data.count_fa;
+        if (badge) {
+            badge.textContent = data.count_fa;
+            badge.hidden = !(data.item_count > 0);
+        }
     }
 
     function removeRow(row) {

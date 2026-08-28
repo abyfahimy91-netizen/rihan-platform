@@ -5,6 +5,10 @@ D-108: علاوه بر site_settings، نشان‌های اعتماد پارس�
 """
 import re
 
+from django.db.models import Sum
+
+from src.core.fa import fa_digits
+
 from .models import SiteSettings
 
 _FA_DIGITS = str.maketrans('۰۱۲۳۴۵۶۷۸۹', '0123456789')
@@ -42,4 +46,34 @@ def site_settings(request):
         "site_settings": s,
         "trust_badges": _parse_trust(s.trust_badges),
         "support_whatsapp": _intl_digits(s.whatsapp_number),
+    }
+
+
+def cart_badge(request):
+    """🛒 تعداد اقلام سبد برای نشانِ قرمزِ آیکون سبد در هدر (D-115).
+
+    فقط-خواندنی است و هرگز سبد نمی‌سازد (برخلاف get_or_create_cart) تا برای
+    هر بازدیدکننده ناشناس رکورد DB ساخته نشود. تا قبل از نخستین افزودن به سبد،
+    بج مخفی است؛ بعد از آن تعداد واقعی روی همه صفحات سرور-رندر می‌شود،
+    پس بلافاصله بعد از «افزودن به سبد» عدد درست دیده می‌شود.
+    """
+    from src.modules.order.models import Cart
+
+    cart = None
+    if request.user.is_authenticated:
+        cart = Cart.objects.filter(user=request.user, is_active=True).first()
+    else:
+        session_key = request.session.session_key
+        if session_key:
+            cart = Cart.objects.filter(
+                session_key=session_key, user=None, is_active=True
+            ).first()
+
+    count = 0
+    if cart:
+        count = cart.items.aggregate(total=Sum('quantity'))['total'] or 0
+
+    return {
+        'cart_item_count': count,
+        'cart_item_count_fa': fa_digits(count),
     }
