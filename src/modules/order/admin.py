@@ -64,6 +64,7 @@ class CartAdmin(admin.ModelAdmin):
 class OrderItemInline(admin.TabularInline):
     model = OrderItem
     extra = 0
+    can_delete = False
     readonly_fields = ['product', 'product_name_snapshot', 'quantity', 'unit_price_at_purchase', 'subtotal']
     
     def has_add_permission(self, request, obj=None):
@@ -84,7 +85,12 @@ class OrderAdmin(admin.ModelAdmin):
     ]
     inlines = [OrderItemInline]
     date_hierarchy = 'created_at'
-    
+
+    def has_delete_permission(self, request, obj=None):
+        # D-112: حذف سفارش ممنوع است — رزرو موجودی آزاد نمی‌شود (قفل همیشگی کالا)
+        # و سوابق مالی/پیامک/مرسوله یتیم می‌شوند. لغو سفارش فقط از مسیر سرویس/انقضا.
+        return False
+
     fieldsets = (
         ('اطلاعات سفارش', {
             'fields': ('order_number', 'status', 'user')
