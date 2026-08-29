@@ -31,12 +31,19 @@
     "url": "{{ request.scheme }}://{{ request.get_host }}{{ request.get_full_path }}",
     "priceCurrency": "IRR",
     "price": "{% widthratio product.display_price 1 10 %}",
-    "availability": "{% if product.inventory and product.inventory.available_quantity > 0 %}https://schema.org/InStock{% else %}https://schema.org/OutOfStock{% endif %}"
-  }{% if review_count %},
+    "priceValidUntil": "{{ price_valid_until }}",
+    "itemCondition": "https://schema.org/NewCondition",
+    "availability": "{% if product.inventory and product.inventory.available_quantity > 0 %}https://schema.org/InStock{% else %}https://schema.org/OutOfStock{% endif %}",
+    "seller": {"@type": "Organization", "name": "{{ site_settings.site_name|default:'ریهان'|escapejs }}"}
+  },
+  "countryOfOrigin": {"@type": "Country", "name": "{{ product.metadata.country_of_origin|default:'Iran'|escapejs }}"}{% if product.metadata.facts %},
+  "additionalProperty": [
+    {% for fact in product.metadata.facts %}{"@type": "PropertyValue", "name": "{{ fact.name|escapejs }}", "value": "{{ fact.value|escapejs }}"}{% if not forloop.last %},{% endif %}{% endfor %}
+  ]{% endif %}{% if review_total %},
   "aggregateRating": {
     "@type": "AggregateRating",
-    "ratingValue": "{{ avg_rating }}",
-    "reviewCount": {{ review_count }}
+    "ratingValue": "{{ review_avg }}",
+    "reviewCount": {{ review_total }}
   }{% endif %}
 }
 </script>
@@ -99,6 +106,21 @@
     /* تیترهای بخش‌ها */
     .sec-title { font-size: 21px; font-weight: 900; color: var(--color-text); margin-bottom: 6px; }
     .sec-sub { color: var(--color-text-muted); font-size: 13.5px; margin-bottom: 18px; }
+
+    /* ═══ D-118 GEO: کادر پاسخ سریع (Direct Answer Box) + جدول مقایسه ═══ */
+    .geo-answer-section { max-width: 1100px; margin: 26px auto 0; padding: 0 20px; }
+    .geo-answer-section .sec-title { font-size: 18.5px; margin-bottom: 10px; }
+    .geo-answer-body {
+        background: linear-gradient(135deg, #F4F8F2, #FBF7EC);
+        border: 1.5px solid #CFE3CC; border-radius: 16px;
+        padding: 18px 22px; line-height: 2.1; font-size: 14.5px; color: var(--color-text);
+    }
+    .geo-answer-body .pm-p { margin: 0; }
+    .pm-table-wrap { overflow-x: auto; margin: 14px 0; -webkit-overflow-scrolling: touch; }
+    .pm-table { width: 100%; border-collapse: collapse; font-size: 13.5px; line-height: 1.9; background: #fff; }
+    .pm-table th, .pm-table td { border: 1px solid var(--color-border); padding: 10px 12px; text-align: right; vertical-align: top; }
+    .pm-table thead th { background: var(--color-primary); color: #fff; font-weight: 800; white-space: nowrap; }
+    .pm-table tbody tr:nth-child(even) { background: #F7FAF5; }
     .curation-section, .share-hub, .reviews-section, .pfaq-section, .deepdive-section {
         max-width: 900px; margin: 44px auto 0; padding: 0 20px;
     }
@@ -1018,6 +1040,14 @@
         {% endif %}
     </div>
 </section>
+
+<!-- ═══ D-118 GEO: کادر پاسخ سریع — Direct Answer Box برای هوش‌های مصنوعی ═══ -->
+{% if product.geo_answer %}
+<section class="geo-answer-section" id="quick-answer">
+    <h2 class="sec-title">پاسخ سریع: چرا {{ product.name }}؟</h2>
+    <div class="geo-answer-body">{{ product.geo_answer|render_markup }}</div>
+</section>
+{% endif %}
 
 <!-- ═══ بخش ۲: فیلتر شفاف مخاطب (D-104) ═══ -->
 {% if product.fit_for or product.not_fit_for %}

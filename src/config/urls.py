@@ -5,7 +5,8 @@ from django.conf.urls.static import static
 from django.contrib.sitemaps.views import sitemap
 
 from src.modules.catalog.sitemaps import ProductSitemap, StaticViewSitemap
-from src.modules.catalog.seo_views import robots_txt, llms_txt
+from src.modules.catalog.seo_views import robots_txt, llms_txt, indexnow_key_file
+from src.modules.catalog.indexnow import INDEXNOW_KEY
 
 import src.modules.auth.admin_login  # noqa: E402 - ورود ادمین با یادآوری دستگاه
 
@@ -24,8 +25,9 @@ urlpatterns = [
     path('supplier/', include('src.modules.supplier_panel.urls')),
     # SEO endpoints (D-079)
     path('sitemap.xml', sitemap, {'sitemaps': sitemaps}, name='django.contrib.sitemaps.views.sitemap'),
-    path('robots.txt', robots_txt, name='robots_txt'),
+        path('robots.txt', robots_txt, name='robots_txt'),
     path('llms.txt', llms_txt, name='llms_txt'),
+    path(f'{INDEXNOW_KEY}.txt', indexnow_key_file, name='indexnow_key'),
     
     # Catalog at root (Homepage)
     path('', include('src.modules.catalog.urls')),

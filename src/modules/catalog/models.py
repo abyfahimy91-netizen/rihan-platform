@@ -143,6 +143,11 @@ class Product(models.Model):
         "مقاله جامع سئو (Deep-Dive)", blank=True, default='',
         help_text='متن ساختاریافته انتهای صفحه برای گوگل و هوش‌های مصنوعی. همان قواعد متن بالا.',
     )
+    geo_answer = models.TextField(
+        "پاسخ سریع (GEO)", blank=True, default='',
+        help_text='کادر «پاسخ سریع» بالای صفحه محصول — ۲ تا ۳ جملهٔ پر از فکت (خاستگاه، بافت، بدون افزودنی، ضمانت). '
+                  'همان متنی که هوش‌های مصنوعی به‌عنوان پاسخ مستقیم نقل می‌کنند (D-118).',
+    )
     share_count = models.PositiveIntegerField(
         "تعداد اشتراک‌گذاری", default=0, editable=False,
     )

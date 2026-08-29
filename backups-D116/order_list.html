@@ -1,0 +1,60 @@
+{% extends "supplier_panel/base.html" %}{% load fa_tags %}
+
+{% block title %}سفارشات من | ریهان{% endblock %}
+
+{% block content %}
+<div class="container mt-4" dir="rtl">
+    <h1 class="mb-4">سفارشات من</h1>
+    
+    {% if orders %}
+    <div class="table-responsive">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>شماره سفارش</th>
+                    <th>مشتری</th>
+                    <th>تاریخ</th>
+                    <th>وضعیت</th>
+                    <th>عملیات</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for order in orders %}
+                <tr>
+                    <td>{{ order.order_number }}</td>
+                    <td>{{ order.guest_name|default:order.user.username }}</td>
+                    <td>{{ order.created_at|jdate }}</td>
+                    <td>
+                        {% if order.status == 'PAID' %}
+                            <span class="badge bg-info">پرداخت شده</span>
+                        {% elif order.status == 'PROCESSING' %}
+                            <span class="badge bg-warning">در حال پردازش</span>
+                        {% elif order.status == 'SHIPPED' %}
+                            <span class="badge bg-success">ارسال شده</span>
+                        {% else %}
+                            <span class="badge bg-secondary">{{ order.get_status_display }}</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if order.status != 'SHIPPED' %}
+                        <a href="{% url 'supplier_panel:submit_tracking' order.id %}" class="btn btn-sm btn-primary">
+                            ثبت کد رهگیری
+                        </a>
+                        {% else %}
+                        <span class="text-muted">کد: {{ order.tracking_code }}</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="alert alert-warning">
+        سفارشی برای شما یافت نشد.
+    </div>
+    {% endif %}
+    
+    <a href="{% url 'supplier_panel:dashboard' %}" class="btn btn-secondary mt-3">بازگشت به داشبورد</a>
+</div>
+{% endblock %}

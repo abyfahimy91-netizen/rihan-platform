@@ -7,6 +7,7 @@
   - > متن     → نقل‌قول برجسته
   - - متن     → فهرست نقطه‌ای (چند خط پشت‌سرهم)
   - ۱. متن    → فهرست شماره‌ای (ارقام فارسی یا لاتین)
+  - | a | b | → جدول؛ سطر اول = سرستون (بلوک پشت‌سرهم)؛ سطر جداکنندهٔ |---| نادیده گرفته می‌شود
   - بقیه      → پاراگراف معمولی
 
 همهٔ خط‌ها قبل از ساخت HTML escape می‌شوند؛ هیچ HTML خامی از ورودی اجرا نمی‌شود.
@@ -60,6 +61,27 @@ def render_page_markup(text: str) -> str:
         if all(ln.startswith('>') for ln in lines):
             inner = ' '.join(html.escape(ln[1:].strip()) for ln in lines)
             out.append('<blockquote class="pm-quote">%s</blockquote>' % inner)
+            continue
+
+        # جدول (D-118 GEO): همهٔ خط‌ها با | شروع شوند؛ سطر اول = سرستون
+        if all(ln.startswith('|') for ln in lines):
+            rows = []
+            for ln in lines:
+                cells = [c.strip() for c in ln.strip().strip('|').split('|')]
+                # سطر جداکنندهٔ سبک مارک‌داون (|---|---|) نادیده گرفته می‌شود
+                if cells and all(re.fullmatch(r':?-{2,}:?', c) for c in cells):
+                    continue
+                rows.append([html.escape(c) for c in cells])
+            if not rows:
+                continue
+            head, body = rows[0], rows[1:]
+            parts = ['<div class="pm-table-wrap"><table class="pm-table">']
+            if any(head):
+                parts.append('<thead><tr>%s</tr></thead>' % ''.join('<th>%s</th>' % c for c in head))
+            parts.append('<tbody>')
+            parts += ['<tr>%s</tr>' % ''.join('<td>%s</td>' % c for c in r) for r in body]
+            parts.append('</tbody></table></div>')
+            out.append(''.join(parts))
             continue
 
         # پاراگراف معمولی

@@ -1,0 +1,63 @@
+{% extends "finance/base.html" %}
+{% block title %}حساب من | Rihan{% endblock %}
+{% block topbar_actions %}
+    <a href="/supplier/">پنل من</a>
+    <a href="/supplier/shipments/">مرسوله‌ها</a>
+{% endblock %}
+{% block content %}
+    <div class="card">
+        <h3>💰 حساب «{{ supplier.title }}»</h3>
+        <div class="stats">
+            <div class="stat"><b class="num">{{ fin.shipment_count }}</b><span>مرسوله من</span></div>
+            <div class="stat"><b class="num">{{ fin.sold_total }}</b><span>فروش اقلام من (تومان)</span></div>
+            <div class="stat hl"><b class="num">{{ fin.balance }}</b><span>طلب من (تسویه‌نشده)</span></div>
+            <div class="stat"><b class="num">{{ fin.settled_total }}</b><span>تا امروز تسویه‌شده</span></div>
+            <div class="stat"><b class="num">{{ fin.unsettled_count }}</b><span>مرسوله در انتظار تسویه</span></div>
+            <div class="stat"><b class="num">{{ fin.settled_count }}</b><span>مرسوله تسویه‌شده</span></div>
+        </div>
+        <p class="muted" style="margin-top:10px;">
+            قابل دریافت شما = قیمت خرید اقلام + هزینه پست/بسته‌بندی که خودتان پرداخت کرده‌اید.
+            تسویه توسط ادمین انجام و همین‌جا گزارش می‌شود.
+        </p>
+    </div>
+
+    <div class="card">
+        <h3>📦 مرسوله‌های من</h3>
+        {% if rows %}
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>سفارش</th>
+                    <th>ارزش اقلام</th>
+                    <th>خرید اقلام</th>
+                    <th>پیش‌پرداخت من (پست/سایر)</th>
+                    <th>قابل دریافت</th>
+                    <th>وضعیت تسویه</th>
+                    <th>تاریخ تسویه</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in rows %}
+                <tr>
+                    <td><strong>{{ row.order_number }}</strong></td>
+                    <td class="num">{{ row.revenue }}</td>
+                    <td class="num">{{ row.items_cost }}</td>
+                    <td class="num">{{ row.supplier_extra }}</td>
+                    <td class="num"><strong>{{ row.payable }}</strong></td>
+                    <td>
+                        {% if row.settled %}
+                            <span class="badge b-settled">تسویه شد ({{ row.settled_amount }})</span>
+                        {% else %}
+                            <span class="badge b-unsettled">در انتظار تسویه</span>
+                        {% endif %}
+                    </td>
+                    <td class="muted">{% if row.settled %}{{ row.shipment.settled_at|date:"Y/m/d" }}{% endif %}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+            <p class="muted">هنوز مرسوله‌ای برای شما ثبت نشده است.</p>
+        {% endif %}
+    </div>
+{% endblock %}

@@ -1,0 +1,101 @@
+{% extends "supplier_panel/base.html" %}{% load fa_tags %}
+
+{% block title %}داشبورد تامین‌کننده | ریهان{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">سلام، {{ supplier.title }} 👋</h1>
+
+<!-- ── سفر کار: سه قدم ساده ── -->
+<div class="guide">
+    <b>📦 سفر ارسال هر سفارش فقط ۳ قدم است:</b>
+    <div class="steps">
+        <div class="step {% if new_count > 0 %}is-active{% else %}is-done{% endif %}">
+            <div class="step-num">۱</div>
+            <div><div class="step-t">مرسوله را باز کنید</div><div class="step-d">اقلام و آدرس گیرنده را ببینید</div></div>
+        </div>
+        <div class="step">
+            <div class="step-num">۲</div>
+            <div><div class="step-t">بسته‌بندی و ارسال</div><div class="step-d">با پست، تیپاکس، چاپار یا پیک</div></div>
+        </div>
+        <div class="step">
+            <div class="step-num">۳</div>
+            <div><div class="step-t">ثبت کد رهگیری</div><div class="step-d">مشتری خودش پیامک می‌گیرد</div></div>
+        </div>
+    </div>
+    ⚠️ فقط یک نکته مهم: <b>کیفیت بسته‌بندی</b> — بسته محکم باشد، بدون فاکتور قیمت، و کد رهگیری را همان روز ثبت کنید.
+</div>
+
+<div class="card">
+    <div class="stats">
+        <a class="stat" href="{% url 'supplier_panel:shipment_list' %}?status=NEW">
+            <b>{{ new_count|fa }}</b>در انتظار ارسال
+        </a>
+        <a class="stat" href="{% url 'supplier_panel:shipment_list' %}?status=SHIPPED">
+            <b>{{ shipped_count|fa }}</b>ارسال‌شده (کد ثبت شده)
+        </a>
+        <a class="stat" href="{% url 'supplier_panel:shipment_list' %}?status=DELIVERED">
+            <b>{{ delivered_count|fa }}</b>تحویل‌داده‌شده
+        </a>
+    </div>
+    {% if new_count > 0 %}
+        <p class="mt-3">
+            <a href="{% url 'supplier_panel:shipment_list' %}?status=NEW" class="btn btn-primary">🚚 شروع کنید: مرسوله‌های در انتظار ارسال ({{ new_count|fa }})</a>
+        </p>
+    {% endif %}
+</div>
+
+<!-- ── D-113: خلاصه مالی ── -->
+<div class="card">
+    <h3 class="mb-3">💰 خلاصه مالی من</h3>
+    <div class="stats">
+        <a class="stat" href="{% url 'finance:supplier_dashboard' %}">
+            <b>{{ fin.sold_total|fa }}</b>فروش اقلام من (تومان)
+        </a>
+        <a class="stat" href="{% url 'finance:supplier_dashboard' %}">
+            <b>{{ fin.balance|fa }}</b>طلب من (تسویه‌نشده)
+        </a>
+        <a class="stat" href="{% url 'finance:supplier_dashboard' %}">
+            <b>{{ fin.settled_total|fa }}</b>تا امروز تسویه‌شده
+        </a>
+    </div>
+    <p class="muted mt-3">قابل دریافت شما = قیمت خرید اقلام + هزینه‌های ارسال/بسته‌بندی که خودتان پرداخت کرده‌اید.</p>
+</div>
+
+{% if recent_new %}
+<div class="card">
+    <h3 class="mb-3">🆕 جدیدترین مرسوله‌های در انتظار ارسال شما</h3>
+    <p class="muted mb-3">روی «مشاهده و ارسال» بزنید تا اقلام، آدرس گیرنده و فرم ثبت کد رهگیری را ببینید.</p>
+    <div class="table" style="overflow-x:auto;">
+    <table class="table">
+        <thead><tr><th>سفارش</th><th>اقلام</th><th>تاریخ</th><th></th></tr></thead>
+        <tbody>
+        {% for s in recent_new %}
+            <tr>
+                <td dir="ltr">{{ s.order.order_number }}</td>
+                <td>
+                    {% for si in s.items.all %}
+                        {{ si.order_item.product_name_snapshot }} ×{{ si.quantity|fa }}{% if not forloop.last %}، {% endif %}
+                    {% endfor %}
+                </td>
+                <td>{{ s.created_at|jdate }}</td>
+                <td><a class="btn btn-gold" href="{% url 'supplier_panel:shipment_detail' s.pk %}">مشاهده و ارسال</a></td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    </div>
+</div>
+{% else %}
+<div class="card" style="text-align:center;padding:34px 20px;">
+    <div style="font-size:40px;">🌱</div>
+    <h3 style="margin:10px 0 6px;">فعلاً مرسوله جدیدی ندارید</h3>
+    <p class="muted">به‌محض ثبت سفارش جدید، پیامک اطلاع‌رسانی برای شما ارسال می‌شود.<br>
+    آن‌وقت کافی است به همین صفحه بیایید و روی مرسوله بزنید؛ همه‌چیز قدم‌به‌قدم راهنمایی می‌شود. 🌿</p>
+</div>
+{% endif %}
+
+<div class="card muted" style="font-size:12.5px;">
+    💡 راهنمای سریع فرمت کد رهگیری: <b>پست پیشتاز</b> ۲۰ تا ۲۴ رقم • <b>تیپاکس</b> ۱۵ تا ۲۵ رقم • <b>چاپار</b> ۱۴ رقم (شماره بارنامه) • <b>سایر/پیک</b>: کد اختیاری، ثبت نام شرکت و شماره تماس الزامی
+</div>
+
+{% endblock %}

@@ -165,6 +165,20 @@ class ProductDetailView(DetailView):
         context['blocks'] = list(direct_blocks)
         context['blocks'] += [pb.block for pb in linked_blocks]
         
+        # ── D-118 GEO: آمار «همهٔ» نظرات تاییدشده برای aggregateRating اسکیما
+        #    (برخلاف review_count که سقف نمایش ۱۲ دارد) + اعتبار قیمت اسکیما
+        from datetime import timedelta
+        from django.db.models import Avg, Count
+        from django.utils import timezone
+        from src.modules.reviews.models import Review
+
+        rev_stats = Review.objects.filter(product=product, is_approved=True).aggregate(
+            total=Count('id'), avg=Avg('rating'))
+        context['review_total'] = rev_stats['total'] or 0
+        context['review_avg'] = round(rev_stats['avg'], 1) if rev_stats['avg'] else 0
+        context['price_valid_until'] = (timezone.localdate() + timedelta(days=180)).isoformat()
+        
+        
         # SEO
         context['seo_title'] = product.seo_title or product.name
         context['seo_description'] = product.seo_description or product.short_description
