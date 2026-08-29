@@ -104,6 +104,18 @@
     @keyframes rx-spin{to{transform:rotate(360deg);}}
     .form-note{text-align:center;font-size:12.5px;color:var(--color-text-muted);margin-top:14px;line-height:2;}
 
+    /* ── D-120: کارت تأیید آدرس تحویل ── */
+    .addr-verify{background:#FBF7EC;border:1px solid rgba(201,169,97,.4);border-radius:16px;padding:16px 20px;margin:0 0 20px;}
+    .av-head{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:6px;font-size:14px;}
+    .av-head b{color:var(--color-primary);}
+    .av-name{color:var(--color-text);font-weight:700;}
+    .av-name small{color:var(--color-text-muted);font-weight:600;}
+    .av-body{font-size:14px;line-height:2;color:var(--color-text);word-break:break-word;}
+    .av-actions{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-top:10px;font-size:12.5px;color:var(--color-text-muted);}
+    .av-map{display:inline-flex;align-items:center;gap:6px;background:#fff;border:1.5px solid var(--color-secondary);color:var(--color-primary);font-weight:800;font-size:12.5px;padding:7px 14px;border-radius:999px;text-decoration:none;transition:.2s;}
+    .av-map:hover{background:#F4F1E9;}
+    .av-actions b{color:var(--color-text);}
+
     /* ── هشدارها ── */
     .alert-box{border-radius:14px;padding:14px 18px;margin:0 0 18px;font-size:14px;line-height:1.9;}
     .alert-err{background:#FDEEEC;border:1px solid #F2C9C2;color:#9c3a2a;}
@@ -172,6 +184,21 @@
             </div>
             {% endif %}
         </div>
+
+        {% if order.guest_address and not order_cancelled %}
+        <div class="addr-verify">
+            <div class="av-head">
+                <span>📍</span>
+                <b>تحویل به:</b>
+                <span class="av-name">{{ order.guest_name }} <small dir="ltr">{{ order.guest_phone }}</small></span>
+            </div>
+            <div class="av-body">{{ order.guest_address }} — کدپستی {{ order.guest_postal_code|fa }}</div>
+            <div class="av-actions">
+                <a class="av-map" href="https://balad.ir/search?q={{ order.guest_address|urlencode }}" target="_blank" rel="noopener">🗺 روی نقشه ببینید</a>
+                <span>آدرس اشتباه است؟{% if support_phone %} با <b dir="ltr">{{ support_phone }}</b> تماس بگیرید{% else %} با پشتیبانی تماس بگیرید{% endif %}</span>
+            </div>
+        </div>
+        {% endif %}
 
         {% if messages %}
             {% for message in messages %}

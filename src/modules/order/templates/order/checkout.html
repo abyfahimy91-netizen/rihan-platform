@@ -171,6 +171,15 @@
     }
     .save-addr-row input { width: 17px; height: 17px; accent-color: var(--color-primary); }
     .save-addr-row span { font-size: 13.5px; color: var(--color-text); font-weight: 600; }
+
+    /* ── D-120: بازبینی زنده «تحویل به» + شمارنده کد پستی ── */
+    .delivery-preview { margin: 6px 0 16px; background: #F4F8F2; border: 1.5px solid #DCE8D8; border-radius: 14px; padding: 14px 16px; }
+    .dp-title { font-weight: 800; font-size: 13.5px; color: var(--color-primary); margin-bottom: 6px; }
+    .dp-body { font-size: 13.5px; color: var(--color-text); line-height: 1.9; word-break: break-word; }
+    .pc-live { font-size: 12px; color: #8a8a8a; margin-top: 6px; min-height: 18px; }
+    .pc-live.ok { color: #2e7d32; font-weight: 800; }
+    .pc-live.warn { color: #b3402f; font-weight: 700; }
+    .form-control.is-ok { border-color: #2e7d32; }
 </style>
 {% endblock %}
 
@@ -231,32 +240,35 @@
                     {% endif %}
                     <div class="form-group">
                         <label for="id_title">عنوان آدرس (اختیاری)</label>
-                        <input type="text" id="id_title" name="title" class="form-control"
+                        <input type="text" id="id_title" name="title" class="form-control" autocomplete="off"
                                value="{{ form_data.title|default:'' }}" placeholder="مثلاً: خانه، محل کار">
                     </div>
                     <div class="form-row">
                         <div class="form-group">
                             <label for="id_name">نام و نام خانوادگی <span class="req">*</span></label>
-                            <input type="text" id="id_name" name="name" class="form-control"
+                            <input type="text" id="id_name" name="name" class="form-control" autocomplete="name" autocapitalize="words"
                                    value="{{ form_data.name|default:'' }}" placeholder="مثلاً: مریم احمدی">
                         </div>
                         <div class="form-group">
                             <label for="id_phone">شماره موبایل <span class="req">*</span></label>
-                            <input type="tel" id="id_phone" name="phone" class="form-control" dir="ltr"
+                            <input type="tel" id="id_phone" name="phone" class="form-control" dir="ltr" autocomplete="tel"
+                                   inputmode="tel" autocapitalize="off" spellcheck="false" enterkeyhint="next"
                                    value="{{ form_data.phone|default:'' }}" placeholder="09123456789">
                             <div class="form-hint">برای هماهنگی ارسال با شما تماس می‌گیریم.</div>
                         </div>
                     </div>
                     <div class="form-group">
                         <label for="id_address">آدرس کامل <span class="req">*</span></label>
-                        <textarea id="id_address" name="address" class="form-control"
+                        <textarea id="id_address" name="address" class="form-control" autocomplete="street-address" enterkeyhint="next"
                                   placeholder="استان، شهر، خیابان، پلاک و واحد...">{{ form_data.address|default:'' }}</textarea>
                     </div>
                     <div class="form-group">
                         <label for="id_postal_code">کد پستی (الزامی — ۱۰ رقم)</label>
                         <input type="text" id="id_postal_code" name="postal_code" class="form-control" dir="ltr" required
-                               inputmode="numeric" pattern="[0-9۰-۹]{10}" maxlength="10"
+                               inputmode="numeric" pattern="[0-9۰-۹]{10}" maxlength="10" autocomplete="postal-code"
+                               autocapitalize="off" spellcheck="false" enterkeyhint="done"
                                value="{{ form_data.postal_code|default:'' }}" placeholder="مثلاً 5151411111">
+                        <div class="pc-live" id="pcLive" aria-live="polite"></div>
                         <p style="font-size:12px;color:#777;margin-top:5px;">کد پستی ۱۰ رقمی منزل/محل گیرنده — اداره پست بدون آن مرسوله را ثبت نمی‌کند و بسته بدون آن سریع‌تر به مقصد نمی‌رسد. کد را نمی‌دانید؟ از <a href="https://www.post.ir" target="_blank" rel="noopener" style="color:#0D3B2E;font-weight:700;">سایت پست</a> استعلام بگیرید.</p>
                     </div>
                 </div>
@@ -274,6 +286,11 @@
             <div class="summary-total-row">
                 <span>مبلغ قابل پرداخت</span>
                 <span>{{ total|money }} تومان</span>
+            </div>
+
+            <div class="delivery-preview" id="deliveryPreview" hidden>
+                <div class="dp-title">📍 تحویل به:</div>
+                <div class="dp-body" id="dpBody"></div>
             </div>
 
             <button type="submit" class="btn-submit-order">
@@ -329,6 +346,81 @@
 
         // اگر خطا بود و فرم پر شده، خودکار روی «آدرس جدید» بیا
         {% if form_data.address %}radios.forEach(function(r){ r.checked = (r.value === 'new'); }); sync();{% endif %}
+    })();
+
+    // ─── D-120: فرم هوشمند — نرمال‌سازی زنده + بازبینی «تحویل به» ───
+    (function(){
+        function digits(v){
+            return String(v || '').replace(/[۰-۹]/g, function(d){ return '۰۱۲۳۴۵۶۷۸۹'.indexOf(d); })
+                                  .replace(/[^0-9]/g, '');
+        }
+        function faNum(s){ return String(s || '').replace(/\d/g, function(d){ return '۰۱۲۳۴۵۶۷۸۹'[d]; }); }
+        function esc(s){ var d = document.createElement('div'); d.textContent = s == null ? '' : s; return d.innerHTML; }
+
+        // پیش‌نمایش «تحویل به» — آدرس ذخیره‌شده انتخابی یا فیلدهای فرم جدید
+        var prev = document.getElementById('deliveryPreview'), dpBody = document.getElementById('dpBody');
+        function updatePreview(){
+            if (!prev || !dpBody) return;
+            var sel = document.querySelector('[data-addr-radio]:checked');
+            var html = '';
+            if (sel && sel.value.indexOf('id:') === 0) {
+                var card = sel.closest('.addr-card');
+                if (card) {
+                    var nm = card.querySelector('.addr-name'), tx = card.querySelector('.addr-text');
+                    html = esc(nm ? nm.textContent : '') + '<br>' + esc(tx ? tx.textContent : '');
+                }
+            } else {
+                function f(id){ var el = document.getElementById(id); return (el && !el.disabled) ? el.value.trim() : ''; }
+                var n = f('id_name'), p = f('id_phone'), a = f('id_address'), c = digits(f('id_postal_code'));
+                if (n || a) {
+                    html = (n ? '<b>' + esc(n) + '</b>' : '') +
+                           (p ? ' · <span dir="ltr">' + esc(p) + '</span>' : '') + '<br>' + esc(a);
+                    if (c) html += ' — کدپستی ' + faNum(c);
+                }
+            }
+            dpBody.innerHTML = html;
+            prev.hidden = !html;
+        }
+
+        // کد پستی: فقط رقم + شمارنده زنده ۱۰ خانگی
+        var pc = document.getElementById('id_postal_code'), pcLive = document.getElementById('pcLive');
+        function pcState(){
+            var v = digits(pc.value);
+            if (v !== pc.value) pc.value = v;
+            var n = v.length;
+            pc.classList.toggle('is-ok', n === 10 && !/^(\d)\1{9}$/.test(v));
+            if (!pcLive) return;
+            if (n === 0) { pcLive.textContent = '۱۰ رقمی، بدون خط تیره'; pcLive.className = 'pc-live'; }
+            else if (n === 10) { pcLive.textContent = '✓ کامل شد — عالی!'; pcLive.className = 'pc-live ok'; }
+            else { pcLive.textContent = faNum(n) + ' از ۱۰ رقم…'; pcLive.className = 'pc-live warn'; }
+        }
+        if (pc) {
+            pc.addEventListener('input', pcState);
+            pcState();
+        }
+
+        // موبایل: تبدیل ارقام فارسی + افزودن خودکار صفر / +98
+        var ph = document.getElementById('id_phone');
+        function phState(){
+            var v = digits(ph.value);
+            if (v.length === 14 && v.indexOf('0098') === 0) v = '0' + v.slice(4);
+            else if (v.length === 12 && v.indexOf('98') === 0) v = '0' + v.slice(2);
+            else if (v.length === 10 && v.charAt(0) === '9') v = '0' + v;
+            if (v !== ph.value) ph.value = v;
+            ph.classList.toggle('is-ok', /^09\d{9}$/.test(v));
+        }
+        if (ph) {
+            ph.addEventListener('input', phState);
+            ph.addEventListener('input', updatePreview);
+        }
+        ['id_name', 'id_address', 'id_postal_code'].forEach(function(id){
+            var el = document.getElementById(id);
+            if (el) el.addEventListener('input', updatePreview);
+        });
+        document.querySelectorAll('[data-addr-radio]').forEach(function(r){
+            r.addEventListener('change', updatePreview);
+        });
+        updatePreview();
     })();
 </script>
 {% endblock %}

@@ -11,6 +11,7 @@ from django.views.decorators.http import require_GET, require_POST
 from src.core.fa import money, fa_digits
 
 from .services import get_or_create_cart, add_to_cart, update_cart_item, remove_from_cart
+from .address_service import normalize_phone, normalize_postal_code  # D-120: ورودی آدرسِ بخشنده
 from src.modules.catalog.models import Product
 from src.modules.catalog.services.exceptions import InsufficientStockError
 
@@ -205,9 +206,10 @@ def checkout_page_view(request):
         else:
             form_data = {
                 'name': (request.POST.get('name') or '').strip(),
-                'phone': (request.POST.get('phone') or '').strip(),
+                # D-120: نرمال‌سازی بخشنده — «0912 345 6789» / +98 / ارقام فارسی / «۵۱۵۱۴-۱۱۱۱۱» هم قبول است
+                'phone': normalize_phone(request.POST.get('phone')),
                 'address': (request.POST.get('address') or '').strip(),
-                'postal_code': _to_en((request.POST.get('postal_code') or '').strip()),
+                'postal_code': normalize_postal_code(request.POST.get('postal_code')),
                 'title': (request.POST.get('title') or '').strip(),
             }
             errors = []

@@ -258,6 +258,46 @@
     });
 })();
 </script>
+<script>
+    // ─── D-120: فرم آدرس هوشمند — نرمال‌سازی زنده کد پستی و موبایل ───
+    (function(){
+        var form = document.querySelector('.adr-form-box form');
+        if (!form) return;
+        function digits(v){
+            return String(v || '').replace(/[۰-۹]/g, function(d){ return '۰۱۲۳۴۵۶۷۸۹'.indexOf(d); })
+                                  .replace(/[^0-9]/g, '');
+        }
+        function faNum(s){ return String(s || '').replace(/\d/g, function(d){ return '۰۱۲۳۴۵۶۷۸۹'[d]; }); }
+
+        var pc = form.querySelector('input[name="postal_code"]'), pcLive = document.getElementById('pfPcLive');
+        if (pc && pcLive) {
+            var pcState = function(){
+                var v = digits(pc.value);
+                if (v !== pc.value) pc.value = v;
+                var n = v.length;
+                pc.classList.toggle('is-ok', n === 10 && !/^(\d)\1{9}$/.test(v));
+                if (n === 0) { pcLive.textContent = '۱۰ رقمی، بدون خط تیره'; pcLive.className = 'pc-live'; }
+                else if (n === 10) { pcLive.textContent = '✓ کامل شد — عالی!'; pcLive.className = 'pc-live ok'; }
+                else { pcLive.textContent = faNum(n) + ' از ۱۰ رقم…'; pcLive.className = 'pc-live warn'; }
+            };
+            pc.addEventListener('input', pcState);
+            pcState();
+        }
+
+        var ph = form.querySelector('input[name="phone"]');
+        if (ph) {
+            var phState = function(){
+                var v = digits(ph.value);
+                if (v.length === 14 && v.indexOf('0098') === 0) v = '0' + v.slice(4);
+                else if (v.length === 12 && v.indexOf('98') === 0) v = '0' + v.slice(2);
+                else if (v.length === 10 && v.charAt(0) === '9') v = '0' + v;
+                if (v !== ph.value) ph.value = v;
+                ph.classList.toggle('is-ok', /^09\d{9}$/.test(v));
+            };
+            ph.addEventListener('input', phState);
+        }
+    })();
+</script>
 {% endblock %}
 
 {% block content %}
@@ -370,11 +410,11 @@
                     <div class="pf-grid2">
                         <div class="pf-field">
                             <label>نام</label>
-                            <input class="pf-input" name="first_name" value="{{ user.first_name }}" placeholder="مثلاً: مریم">
+                            <input class="pf-input" name="first_name" autocomplete="given-name" value="{{ user.first_name }}" placeholder="مثلاً: مریم">
                         </div>
                         <div class="pf-field">
                             <label>نام خانوادگی</label>
-                            <input class="pf-input" name="last_name" value="{{ user.last_name }}" placeholder="مثلاً: احمدی">
+                            <input class="pf-input" name="last_name" autocomplete="family-name" value="{{ user.last_name }}" placeholder="مثلاً: احمدی">
                         </div>
                     </div>
                     <div class="pf-field">
@@ -383,7 +423,7 @@
                     </div>
                     <div class="pf-field">
                         <label>ایمیل (اختیاری)</label>
-                        <input class="pf-input" dir="ltr" name="email" value="{{ user.email }}" placeholder="you@example.com">
+                        <input class="pf-input" dir="ltr" name="email" autocomplete="email" value="{{ user.email }}" placeholder="you@example.com">
                     </div>
                     <button type="submit" class="pf-save">ذخیره تغییرات</button>
                 </form>
@@ -505,6 +545,10 @@
                 .adr-errors p{margin:3px 0;font-size:13px;color:#8f2c1e;font-weight:600;}
                 .pf-hint-why{font-size:12px;line-height:1.9;color:#6b6b6b;margin-top:6px;}
                 .pf-hint-why a{color:var(--color-primary);font-weight:700;}
+                .pc-live{font-size:12px;color:#8a8a8a;margin-top:6px;min-height:18px;}
+                .pc-live.ok{color:#2e7d32;font-weight:800;}
+                .pc-live.warn{color:#b3402f;font-weight:700;}
+                .pf-input.is-ok{border-color:#2e7d32;}
             </style>
             <div class="pf-card">
                 <h2>📍 آدرس‌های من</h2>
@@ -523,28 +567,30 @@
                         {% endif %}
                         <div class="pf-field">
                             <label>عنوان آدرس (اختیاری)</label>
-                            <input class="pf-input" name="title" maxlength="60" value="{% if address_form_data %}{{ address_form_data.title }}{% else %}{{ edit_address.title|default:'' }}{% endif %}" placeholder="مثلاً: خانه، محل کار">
+                            <input class="pf-input" name="title" maxlength="60" autocomplete="off" value="{% if address_form_data %}{{ address_form_data.title }}{% else %}{{ edit_address.title|default:'' }}{% endif %}" placeholder="مثلاً: خانه، محل کار">
                         </div>
                         <div class="pf-grid2">
                             <div class="pf-field">
                                 <label>نام و نام خانوادگی گیرنده</label>
-                                <input class="pf-input" name="full_name" value="{% if address_form_data %}{{ address_form_data.full_name }}{% else %}{{ edit_address.full_name|default:user.first_name|default:'' }}{% endif %}" placeholder="مثلاً: مریم احمدی" required>
+                                <input class="pf-input" name="full_name" autocomplete="name" autocapitalize="words" value="{% if address_form_data %}{{ address_form_data.full_name }}{% else %}{{ edit_address.full_name|default:user.first_name|default:'' }}{% endif %}" placeholder="مثلاً: مریم احمدی" required>
                             </div>
                             <div class="pf-field">
                                 <label>شماره موبایل گیرنده</label>
-                                <input class="pf-input" dir="ltr" name="phone" value="{% if address_form_data %}{{ address_form_data.phone }}{% else %}{{ edit_address.phone|default:user.username|default:'' }}{% endif %}" placeholder="09123456789" required>
+                                <input class="pf-input" dir="ltr" name="phone" autocomplete="tel" inputmode="tel" autocapitalize="off" spellcheck="false" enterkeyhint="next" value="{% if address_form_data %}{{ address_form_data.phone }}{% else %}{{ edit_address.phone|default:user.username|default:'' }}{% endif %}" placeholder="09123456789" required>
                             </div>
                         </div>
                         <div class="pf-field">
                             <label>آدرس کامل</label>
-                            <textarea class="pf-input" name="address" rows="3" placeholder="استان، شهر، خیابان، پلاک و واحد..." required>{% if address_form_data %}{{ address_form_data.address }}{% else %}{{ edit_address.detailed_address|default:'' }}{% endif %}</textarea>
+                            <textarea class="pf-input" name="address" rows="3" autocomplete="street-address" enterkeyhint="next" placeholder="استان، شهر، خیابان، پلاک و واحد..." required>{% if address_form_data %}{{ address_form_data.address }}{% else %}{{ edit_address.detailed_address|default:'' }}{% endif %}</textarea>
                         </div>
                         <div class="pf-field">
                             <label>کد پستی ۱۰ رقمی <span class="req-star">*</span></label>
                             <input class="pf-input" dir="ltr" name="postal_code" maxlength="10" inputmode="numeric" pattern="\d{10}"
+                                   autocomplete="postal-code" autocapitalize="off" spellcheck="false" enterkeyhint="done"
                                    title="کد پستی ۱۰ رقمی، بدون خط تیره" required aria-required="true"
                                    value="{% if address_form_data %}{{ address_form_data.postal_code }}{% else %}{{ edit_address.postal_code|default:'' }}{% endif %}"
                                    placeholder="مثلاً 5151411111">
+                            <div class="pc-live" id="pfPcLive" aria-live="polite"></div>
                             <p class="pf-hint-why">اداره پست بدون کدپستی مرسوله را ثبت نمی‌کند؛ با کدپستی بسته سریع‌تر و بدون خطا به همان پلاک و واحد تحویل داده می‌شود. کد را نمی‌دانید؟ از <a href="https://www.post.ir" target="_blank" rel="noopener">سایت پست</a> یا اپلیکیشن «پیشخوان دولت» استعلام بگیرید.</p>
                         </div>
                         <label class="adr-def-row">

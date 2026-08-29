@@ -13,15 +13,39 @@ from .models import Address
 
 PHONE_RE = re.compile(r'^09\d{9}$')
 
+# D-120: نرمال‌سازی ورودی کاربر — ارقام فارسی/عربی، فاصله، خط تیره، +98 و 0098
+_EN_DIGITS = str.maketrans('۰۱۲۳۴۵۶۷۸۹٠١٢٣٤٥٦٧٨٩', '01234567890123456789')
+
+
+def _digits_only(value) -> str:
+    return ''.join(ch for ch in str(value or '').translate(_EN_DIGITS) if ch.isdigit())
+
+
+def normalize_phone(value) -> str:
+    """موبایل به قالب 09xxxxxxxxx — «0912 345 6789» / +98 / 0098 / 9123456789 هم می‌پذیرد"""
+    s = _digits_only(value)
+    if s.startswith('0098') and len(s) == 14:
+        s = '0' + s[4:]
+    elif s.startswith('98') and len(s) == 12:
+        s = '0' + s[2:]
+    elif len(s) == 10 and s.startswith('9'):
+        s = '0' + s
+    return s
+
+
+def normalize_postal_code(value) -> str:
+    """کد پستی فقط رقم — «۵۱۵۱۴-۱۱۱۱۱» یا «51514 11111» هم قبول می‌شود"""
+    return _digits_only(value)
+
 
 def validate_address_data(data: dict) -> tuple[dict, list]:
     """اعتبارسنجی داده‌های آدرس — خروجی: (داده تمیز, لیست خطاها)"""
     clean = {
         'title': (data.get('title') or '').strip()[:50],
         'full_name': (data.get('full_name') or data.get('name') or '').strip(),
-        'phone': (data.get('phone') or '').strip(),
+        'phone': normalize_phone(data.get('phone')),
         'detailed_address': (data.get('address') or data.get('detailed_address') or '').strip(),
-        'postal_code': (data.get('postal_code') or '').strip(),
+        'postal_code': normalize_postal_code(data.get('postal_code')),
     }
     errors = []
     if len(clean['full_name']) < 3:
