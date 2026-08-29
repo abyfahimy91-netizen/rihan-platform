@@ -112,8 +112,6 @@
     .av-name small{color:var(--color-text-muted);font-weight:600;}
     .av-body{font-size:14px;line-height:2;color:var(--color-text);word-break:break-word;}
     .av-actions{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-top:10px;font-size:12.5px;color:var(--color-text-muted);}
-    .av-map{display:inline-flex;align-items:center;gap:6px;background:#fff;border:1.5px solid var(--color-secondary);color:var(--color-primary);font-weight:800;font-size:12.5px;padding:7px 14px;border-radius:999px;text-decoration:none;transition:.2s;}
-    .av-map:hover{background:#F4F1E9;}
     .av-actions b{color:var(--color-text);}
 
     /* ── هشدارها ── */
@@ -194,7 +192,6 @@
             </div>
             <div class="av-body">{{ order.guest_address }} — کدپستی {{ order.guest_postal_code|fa }}</div>
             <div class="av-actions">
-                <a class="av-map" href="https://balad.ir/search?q={{ order.guest_address|urlencode }}" target="_blank" rel="noopener">🗺 روی نقشه ببینید</a>
                 <span>آدرس اشتباه است؟{% if support_phone %} با <b dir="ltr">{{ support_phone }}</b> تماس بگیرید{% else %} با پشتیبانی تماس بگیرید{% endif %}</span>
             </div>
         </div>

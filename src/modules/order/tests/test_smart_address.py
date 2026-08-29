@@ -141,8 +141,8 @@ class SmartAddressTest(TestCase):
         self.assertIn('autocomplete="family-name"', c)
         self.assertIn('id="pfPcLive"', c)
 
-    # ── صفحه پرداخت: کارت «تحویل به» + لینک نقشه بلد ──
-    def test_payment_page_shows_address_and_map_link(self):
+    # ── صفحه پرداخت: کارت «تحویل به» (بدون لینک نقشه — D-120b: جستجوی متنی آدرس اعتمادشکن است) ──
+    def test_payment_page_shows_address_card(self):
         r = self._post_checkout()
         self.assertEqual(r.status_code, 302)
         order = Order.objects.latest('id')
@@ -152,7 +152,7 @@ class SmartAddressTest(TestCase):
         self.assertIn('تحویل به:', c)
         self.assertIn('آزادی', c)
         self.assertIn('مریم احمدی', c)
-        self.assertIn('balad.ir/search', c)
+        self.assertNotIn('balad.ir', c)
 
     def test_payment_page_hides_address_card_when_cancelled(self):
         self._post_checkout()
