@@ -472,6 +472,7 @@
                     <a href="/contact/">تماس</a>
                     <a href="/order/lookup/">پیگیری سفارش</a>
                 </nav>
+                {% if user.is_authenticated %}<a href="{% url 'auth_pages:profile' %}" style="color:var(--color-text);font-weight:700;text-decoration:none;margin-left:18px;font-size:14px;">👤 حساب من</a>{% else %}<a href="{% url 'auth_pages:login' %}" style="color:var(--color-text);font-weight:700;text-decoration:none;margin-left:18px;font-size:14px;">ورود / ثبت‌نام</a>{% endif %}
                 {% if user.is_authenticated %}
                 <span class="notif-wrap">
                   <button type="button" class="notif-bell" id="notif-bell" title="اعلان‌ها" aria-label="اعلان‌ها" aria-expanded="false">

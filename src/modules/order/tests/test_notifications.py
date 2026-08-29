@@ -169,6 +169,23 @@ class HeaderBellTests(NotificationTestBase):
         self.assertNotIn('id="notif-bell"', body)
         self.assertNotIn('id="notif-count"', body)
 
+    # ── D-119b: زنگوله هرگز جای لینک ورود/حساب من را نگیرد ──
+    def test_anonymous_still_sees_login_button(self):
+        body = self._client().get('/').content.decode()
+        self.assertIn('ورود / ثبت‌نام', body)
+        self.assertIn('/accounts/login/', body)
+        # ترتیب درست: ورود و ثبت‌نام قبل از زنگوله (سمت راست آن در RTL)
+        self.assertLess(body.find('/accounts/login/'), body.find('id="notif-bell"') if 'id="notif-bell"' in body else 10**9)
+
+    def test_authenticated_sees_profile_and_bell_before_cart(self):
+        c = self._client()
+        c.force_login(self.owner)
+        body = c.get('/').content.decode()
+        self.assertIn('حساب من', body)
+        self.assertIn('id="notif-bell"', body)
+        self.assertLess(body.find('حساب من'), body.find('id="notif-bell"'))
+        self.assertLess(body.find('id="notif-bell"'), body.find('id="cart-count"'))
+
     def test_badge_hidden_when_zero_unread(self):
         c = self._client()
         c.force_login(self.owner)
