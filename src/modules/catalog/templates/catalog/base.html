@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf" content="{{ csrf_token }}">
     <title>{% block title %}ریهان - انتخاب مطمئن{% endblock %}</title>
     <meta name="description" content="{% block meta_description %}ریهان - انتخاب مطمئن، هر محصولی که باشد{% endblock %}">
     
@@ -421,6 +422,40 @@
     text-align: justify;
     line-height: 2;
 }
+
+/* ── 🔔 اعلان‌های هدر (D-119) ── */
+.notif-wrap{position:relative;display:inline-flex;vertical-align:middle;}
+.notif-bell{position:relative;background:none;border:none;color:var(--color-text);cursor:pointer;
+            padding:6px;margin-inline-start:14px;line-height:0;border-radius:8px;transition:.15s;}
+.notif-bell:hover{color:var(--color-primary);}
+.notif-badge{position:absolute;top:-4px;left:-4px;background:#d93025;color:#fff;font-size:10.5px;
+             font-weight:800;line-height:1;min-width:17px;padding:3px 4px;border-radius:999px;
+             border:1.5px solid #fff;text-align:center;}
+.notif-badge[hidden]{display:none;}
+.notif-panel{position:absolute;top:calc(100% + 10px);left:50%;transform:translateX(-50%);z-index:999;
+             width:min(420px, calc(100vw - 24px));
+             background:#fff;border:1.5px solid var(--color-border);border-radius:16px;
+             box-shadow:0 16px 44px rgba(13,59,46,.18);overflow:hidden;}
+.notif-panel[hidden]{display:none;}
+.notif-panel-head{display:flex;align-items:center;justify-content:space-between;gap:8px;
+                  padding:12px 16px;border-bottom:1px solid #efeade;font-size:13.5px;font-weight:800;color:var(--color-text);}
+.notif-panel-head a{font-size:12px;color:var(--color-primary);text-decoration:none;font-weight:700;}
+.np-list{max-height:360px;overflow-y:auto;}
+.np-item{display:flex;gap:10px;padding:12px 16px;border-bottom:1px solid #f2eee2;text-decoration:none;
+         color:var(--color-text);cursor:pointer;background:#fff;}
+.np-item:last-child{border-bottom:none;}
+.np-item:hover{background:#faf7f0;}
+.np-item.unread{background:#FBF7EC;}
+.np-item .np-dot{flex:none;width:8px;height:8px;border-radius:50%;background:#C9A961;margin-top:7px;}
+.np-item.read .np-dot{background:#E3E8E3;}
+.np-item .np-title{font-size:13px;font-weight:800;}
+.np-item .np-body{font-size:12px;color:var(--color-text-muted);line-height:1.8;margin-top:2px;}
+.np-item .np-ago{font-size:10.5px;color:#9aa49d;margin-top:4px;}
+.np-empty{padding:26px 16px;text-align:center;color:var(--color-text-muted);font-size:13px;line-height:2;}
+.np-actions{padding:10px 16px;border-top:1px solid #efeade;text-align:center;}
+.np-actions button{width:100%;border:1.5px solid var(--color-border);background:#fff;border-radius:10px;
+                   padding:9px;font-size:12.5px;font-weight:700;font-family:inherit;cursor:pointer;color:var(--color-text);}
+.np-actions button:hover{border-color:var(--color-primary);color:var(--color-primary);}
 </style>
 </head>
 <body>
@@ -437,7 +472,29 @@
                     <a href="/contact/">تماس</a>
                     <a href="/order/lookup/">پیگیری سفارش</a>
                 </nav>
-                {% if user.is_authenticated %}<a href="{% url 'auth_pages:profile' %}" style="color:var(--color-text);font-weight:700;text-decoration:none;margin-left:18px;font-size:14px;">👤 حساب من</a>{% else %}<a href="{% url 'auth_pages:login' %}" style="color:var(--color-text);font-weight:700;text-decoration:none;margin-left:18px;font-size:14px;">ورود / ثبت‌نام</a>{% endif %}
+                {% if user.is_authenticated %}
+                <span class="notif-wrap">
+                  <button type="button" class="notif-bell" id="notif-bell" title="اعلان‌ها" aria-label="اعلان‌ها" aria-expanded="false">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                        <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+                    </svg>
+                    <span class="notif-badge" id="notif-count" {% if not notif_unread %}hidden{% endif %}>{{ notif_unread_fa }}</span>
+                  </button>
+                  <div class="notif-panel" id="notif-panel" hidden>
+                    <div class="notif-panel-head">
+                      <span>🔔 اعلان‌ها</span>
+                      <a href="/order/notifications/">مشاهده همه</a>
+                    </div>
+                    <div class="np-list" id="notif-list">
+                      <div class="np-empty">در حال بارگذاری…</div>
+                    </div>
+                    <div class="np-actions" id="notif-actions" hidden>
+                      <button type="button" id="notif-readall">علامت‌گذاری همه به‌عنوان خوانده‌شده</button>
+                    </div>
+                  </div>
+                </span>
+                {% endif %}
             <a href="{% url 'order_pages:cart_page' %}" class="cart-icon" title="سبد خرید">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <circle cx="9" cy="21" r="1"></circle>
@@ -504,5 +561,89 @@
     </footer>
     
     {% block extra_js %}{% endblock %}
+
+    {% if user.is_authenticated %}
+    <script>
+    (function(){
+      var bell=document.getElementById('notif-bell');
+      if(!bell) return;
+      var panel=document.getElementById('notif-panel'),
+          list=document.getElementById('notif-list'),
+          actions=document.getElementById('notif-actions'),
+          badge=document.getElementById('notif-count'),
+          loaded=false;
+      function csrf(){
+        var m=document.querySelector('meta[name="csrf"]');
+        if(m) return m.content;
+        var c=document.cookie.match(/(?:^|;\s*)csrftoken=([^;]+)/);
+        return c?decodeURIComponent(c[1]):'';
+      }
+      function esc(s){ var d=document.createElement('div'); d.textContent=s||''; return d.innerHTML; }
+      function ico(k){
+        return {PAYMENT_CONFIRMED:'✅',PROCESSING:'📦',SHIPPED:'🚚',DELIVERED:'🎉',CANCELLED:'🚫'}[k]||'🔔';
+      }
+      function render(data){
+        var items=data.items||[];
+        if(!items.length){
+          list.innerHTML='<div class="np-empty">🕊 هنوز اعلانی ندارید.<br>خبرهای سفارش‌تان اینجا می‌آید.</div>';
+          return;
+        }
+        var h='';
+        items.forEach(function(n){
+          h+='<a class="np-item '+(n.is_read?'read':'unread')+'" data-id="'+esc(n.id)+'" data-url="'+esc(n.url)+'">'
+            +'<span class="np-dot"></span>'
+            +'<span><span class="np-title">'+ico(n.kind)+' '+esc(n.title)+'</span>'
+            +(n.body?'<span class="np-body">'+esc(n.body)+'</span>':'')
+            +'<span class="np-ago">'+esc(n.ago)+'</span></span></a>';
+        });
+        list.innerHTML=h;
+        list.querySelectorAll('.np-item.unread').forEach(function(el){
+          el.addEventListener('click',function(e){
+            e.preventDefault();
+            var url=el.getAttribute('data-url');
+            fetch('/order/notifications/'+el.getAttribute('data-id')+'/read/',{
+              method:'POST',headers:{'X-CSRFToken':csrf(),'X-Requested-With':'XMLHttpRequest'}
+            }).catch(function(){}).finally(function(){
+              if(url&&url!=='#'){location.href=url;}else{hide();refresh();}
+            });
+          });
+        });
+      }
+      // اتصال data-id از JSON به المان (داخل render ساخته می‌شود)
+      function refresh(){
+        fetch('/order/notifications/recent/',{headers:{'X-Requested-With':'XMLHttpRequest'}})
+          .then(function(r){return r.json();})
+          .then(function(data){
+            loaded=true;
+            render(data);
+            setBadge(data.unread);
+          })
+          .catch(function(){ list.innerHTML='<div class="np-empty">بارگذاری ناموفق بود. دوباره تلاش کنید.</div>'; });
+      }
+      function setBadge(n){
+        if(!badge) return;
+        if(n>0){ badge.textContent=(n>9?'۹+':String(n).replace(/\d/g,function(d){return '۰۱۲۳۴۵۶۷۸۹'[+d];})); badge.hidden=false; }
+        else{ badge.hidden=true; }
+      }
+      function hide(){ panel.hidden=true; bell.setAttribute('aria-expanded','false'); }
+      bell.addEventListener('click',function(e){
+        e.stopPropagation();
+        if(panel.hidden){ panel.hidden=false; bell.setAttribute('aria-expanded','true'); if(!loaded) refresh(); }
+        else hide();
+      });
+      document.addEventListener('click',function(e){
+        if(!panel.hidden && !panel.contains(e.target) && e.target!==bell && !bell.contains(e.target)) hide();
+      });
+      var allBtn=document.getElementById('notif-readall');
+      if(allBtn) allBtn.addEventListener('click',function(){
+        fetch('/order/notifications/read-all/',{method:'POST',headers:{'X-CSRFToken':csrf(),'X-Requested-With':'XMLHttpRequest'}})
+          .then(function(r){return r.json();})
+          .then(function(){ setBadge(0); hide(); refresh(); });
+      });
+      // وقتی اعلان خوانده‌نشده هست، هر ۶۰ ثانیه یک‌بار تعداد را تازه کن (سبک است)
+      if(badge && !badge.hidden){ setInterval(function(){ if(panel.hidden) refresh(); }, 60000); }
+    })();
+    </script>
+    {% endif %}
 </body>
 </html>

@@ -53,6 +53,8 @@ def cart_badge(request):
     """🛒 تعداد اقلام سبد برای نشانِ قرمزِ آیکون سبد در هدر (D-115).
 
     فقط-خواندنی است و هرگز سبد نمی‌سازد (برخلاف get_or_create_cart) تا برای
+
+    فقط-خواندنی است و هرگز سبد نمی‌سازد (برخلاف get_or_create_cart) تا برای
     هر بازدیدکننده ناشناس رکورد DB ساخته نشود. تا قبل از نخستین افزودن به سبد،
     بج مخفی است؛ بعد از آن تعداد واقعی روی همه صفحات سرور-رندر می‌شود،
     پس بلافاصله بعد از «افزودن به سبد» عدد درست دیده می‌شود.
@@ -76,4 +78,23 @@ def cart_badge(request):
     return {
         'cart_item_count': count,
         'cart_item_count_fa': fa_digits(count),
+    }
+
+
+def notifications_badge(request):
+    """🔔 تعداد اعلان‌های نخوانده کاربر برای زنگولهٔ هدر (D-119).
+
+    فقط-خواندنی و فقط برای کاربرِ واردشده — صفر کوئری برای بازدیدکننده ناشناس.
+    """
+    count = 0
+    if request.user.is_authenticated:
+        try:
+            from src.modules.order.models import UserNotification
+            count = UserNotification.objects.filter(
+                recipient=request.user, is_read=False).count()
+        except Exception:
+            count = 0
+    return {
+        'notif_unread': count,
+        'notif_unread_fa': fa_digits(count) if count else '۰',
     }

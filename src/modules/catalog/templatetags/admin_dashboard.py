@@ -103,3 +103,66 @@ def rihan_dashboard_stats():
 @register.simple_tag
 def jalali_today():
     return fa_digits(jdatetime.datetime.fromgregorian(datetime=timezone.now()).strftime('%Y/%m/%d'))
+
+
+# ═══════════════════════════════════════════════════════════════
+# D-119 — صف کار روزانه ادمین: کارهای همیشگی به ترتیب انجام
+# ۱) تایید پرداخت  ۲) ارسال مرسوله‌های ریهان  ۳) پیگیری تامین‌کننده‌ها
+# ۴) مرسوله‌های در راه  ۵) نظرات در انتظار تایید  (+ آمار سفارش امروز)
+# ═══════════════════════════════════════════════════════════════
+
+@register.simple_tag
+def rihan_work_queue():
+    q = {'steps': [], 'urgent_total': 0, 'paid_without_shipment': 0}
+    try:
+        from src.modules.order.models import Order, Payment, Shipment
+        from src.modules.order.fulfillment import overdue_supplier_shipments, supplier_deadline_hours
+
+        now = timezone.now()
+        today_start = now.replace(hour=0, minute=0, second=0, microsecond=0)
+
+        # گام ۱ — تایید پرداخت‌ها
+        pending_payments = Payment.objects.filter(
+            status=Payment.PaymentStatus.PENDING_REVIEW).select_related('order')
+        q['pending_payments'] = pending_payments.count()
+
+        # گام ۲ — ارسال مرسوله‌های ریهان (بدون تامین‌کننده)
+        rihan_new = Shipment.objects.filter(
+            fulfiller=Shipment.FulfillerType.RIHAN,
+            status=Shipment.Status.NEW).select_related('order')
+        q['rihan_new'] = rihan_new.count()
+        # سفارش پرداخت‌شده‌ای که هنوز مرسوله ندارد (خطای نادر در تخصیص خودکار)
+        q['paid_without_shipment'] = Order.objects.filter(
+            status=Order.OrderStatus.PAID).count()
+
+        # گام ۳ — پیگیری تامین‌کننده‌ها (دیرکرد قرمز است)
+        q['supplier_new'] = Shipment.objects.filter(
+            fulfiller=Shipment.FulfillerType.SUPPLIER,
+            status=Shipment.Status.NEW,
+            supplier__isnull=False).count()
+        overdue = overdue_supplier_shipments()
+        q['supplier_overdue'] = overdue.count()
+        q['deadline_hours'] = supplier_deadline_hours()
+
+        # گام ۴ — مرسوله‌های در راه
+        q['in_transit'] = Shipment.objects.filter(
+            status=Shipment.Status.SHIPPED).count()
+
+        # گام ۵ — نظرات در انتظار تایید
+        try:
+            from src.modules.reviews.models import Review
+            q['pending_reviews'] = Review.objects.filter(is_approved=False).count()
+        except Exception:
+            q['pending_reviews'] = 0
+
+        # آمار کمکی
+        q['orders_today'] = Order.objects.filter(created_at__gte=today_start).count()
+
+        q['urgent_total'] = (
+            q['pending_payments'] + q['rihan_new']
+            + q['paid_without_shipment'] + q['supplier_overdue']
+        )
+    except Exception as e:
+        q['error'] = str(e)
+
+    return q

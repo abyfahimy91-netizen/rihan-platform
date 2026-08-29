@@ -1,5 +1,5 @@
 {% extends "admin/base_site.html" %}
-{% load static admin_sidebar %}
+{% load static admin_sidebar fa_tags %}
 
 {% block extrastyle %}
   {{ block.super }}
@@ -30,7 +30,7 @@
     {% for g in sb.groups %}
       <div class="rsb-group">{{ g.title }}</div>
       {% for it in g.items %}
-        <a class="rsb-item" href="{{ it.url }}">{{ it.title }}</a>
+        <a class="rsb-item" href="{{ it.url }}">{{ it.title }}{% if it.badge %} <span class="rsb-badge">{{ it.badge|fa }}</span>{% endif %}</a>
       {% endfor %}
     {% endfor %}
   </div>

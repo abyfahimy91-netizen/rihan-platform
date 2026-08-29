@@ -37,37 +37,96 @@
   .rd-table tr:last-child td{border-bottom:none}
   .rd-pill{display:inline-block;padding:2px 12px;border-radius:999px;font-size:11.5px;color:#fff;font-weight:600}
 
-  /* ── راهنمای گام‌به‌گام ادمین (D-095) ── */
-  .rd-guide{background:linear-gradient(135deg,#0D3B2E,#14523f);border-radius:14px;
-            padding:20px 22px;margin-bottom:20px;color:#fff;position:relative}
-  .rd-guide h2{color:#C9A961;font-size:15.5px;margin:0 0 12px}
-  .rd-guide ol{list-style:none;padding:0;margin:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:10px}
-  .rd-guide li{display:flex;gap:10px;align-items:flex-start;background:rgba(255,255,255,.08);
-               border-radius:11px;padding:11px 13px;font-size:12.5px;line-height:1.9}
-  .rd-guide li a{color:#fff;text-decoration:none}
-  .rd-guide li a:hover{text-decoration:underline;color:#C9A961}
-  .rd-guide .gnum{flex:none;width:24px;height:24px;border-radius:50%;background:#C9A961;color:#0D3B2E;
-                  font-weight:800;font-size:12px;display:flex;align-items:center;justify-content:center;margin-top:3px}
-  .rd-guide .gclose{position:absolute;top:12px;left:14px;background:none;border:none;color:#cfe0d6;
-                    cursor:pointer;font-size:17px;line-height:1;padding:4px}
-  .rd-guide .gclose:hover{color:#fff}
+  /* ── راهنمای گام‌به‌گام ادمین (D-095) → صف کار داینامیک (D-119) ── */
+  .rd-urgent{background:#b3261e;border-radius:14px;padding:14px 18px;margin-bottom:20px;color:#fff;
+             font-size:13.5px;line-height:2.2;box-shadow:0 4px 14px rgba(179,38,30,.25)}
+  .rd-urgent a{display:inline-block;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.35);
+               color:#fff;border-radius:999px;padding:3px 14px;margin:2px 4px;text-decoration:none;font-weight:700}
+  .rd-urgent a:hover{background:#fff;color:#b3261e;text-decoration:none}
+  .rd-queue{background:#fff;border:1px solid #e6e0d2;border-radius:14px;
+            padding:20px 22px;margin-bottom:20px;box-shadow:0 1px 4px rgba(13,59,46,.05)}
+  .rd-queue>h2{margin:0 0 4px;font-size:15.5px;color:#0D3B2E}
+  .rd-queue .rq-sub{margin:0 0 16px;font-size:12px;color:#837d6f;line-height:1.9}
+  .rq-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(215px,1fr));gap:14px}
+  .rq-step{position:relative;display:block;background:#FAF7F0;border:1px solid #e8e2d2;border-radius:13px;
+           padding:15px 16px 13px;text-decoration:none;transition:box-shadow .15s,transform .15s}
+  .rq-step:hover{box-shadow:0 8px 22px rgba(13,59,46,.12);transform:translateY(-2px);text-decoration:none}
+  .rq-step .rq-top{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+  .rq-step .rq-gnum{flex:none;width:23px;height:23px;border-radius:50%;background:#C9A961;color:#0D3B2E;
+                    font-weight:800;font-size:11.5px;display:flex;align-items:center;justify-content:center}
+  .rq-step .rq-title{font-size:13px;font-weight:800;color:#0D3B2E;line-height:1.5}
+  .rq-step .rq-num{font-size:26px;font-weight:800;color:#16241e;line-height:1.3;margin-bottom:4px}
+  .rq-step .rq-num small{font-size:12px;font-weight:600;color:#837d6f}
+  .rq-step .rq-help{font-size:11.5px;color:#6d6a60;line-height:1.9}
+  .rq-step.hot{background:#FDF1F0;border-color:#eccfca;border-top:4px solid #b3261e}
+  .rq-step.hot .rq-num{color:#b3261e}
+  .rq-step.hot .rq-gnum{background:#b3261e;color:#fff}
+  .rq-step.done{opacity:.62}
+  .rq-step.done .rq-num{color:#2D6A4F}
+  .rq-step .rq-cta{display:inline-block;margin-top:9px;font-size:11.5px;font-weight:800;color:#0D3B2E;
+                   border-bottom:1px dashed #C9A961}
+  .rq-step:hover .rq-cta{color:#b3261e}
+  .rq-extra{margin-top:8px;font-size:11.5px;color:#b3261e;font-weight:700;line-height:1.9}
 </style>
 
-<!-- 🧭 راهنمای گام‌به‌گام — سفر ادمین -->
-<div class="rd-guide" id="rihanGuide">
-  <button type="button" class="gclose" onclick="localStorage.setItem('rihan_guide_hidden','1');document.getElementById('rihanGuide').style.display='none'" title="بستن راهنما">✕</button>
-  <h2>🧭 شروع سریع — کارهای روزانه در ۵ گام</h2>
-  <ol>
-    <li><span class="gnum">۱</span><span><a href="{% url 'admin:catalog_product_changelist' %}">محصولات را ببینید</a> — موجودی و قیمت هر بسته از همین‌جا مدیریت می‌شود.</span></li>
-    <li><span class="gnum">۲</span><span>سفارش جدید رسید؟ از <a href="{% url 'admin:order_order_changelist' %}">لیست سفارش‌ها</a> وضعیت آن را «در حال آماده‌سازی» کنید.</span></li>
-    <li><span class="gnum">۳</span><span>پس از ارسال، وضعیت را «ارسال شد» و بعد از تحویل «تحویل شد» بزنید تا مشتری پیگیری کند.</span></li>
-    <li><span class="gnum">۴</span><span><a href="/admin/leads/lead/">سرنخ‌ها</a> و <a href="/admin/reviews/review/">نظرات مشتریان</a> را بررسی و پاسخ دهید.</span></li>
-    <li><span class="gnum">۵</span><span>ظاهر سایت (اعلان بالای صفحه، متن هیرو، تماس) از <a href="{% url 'admin:pages_sitesettings_change' 1 %}">تنظیمات سایت</a>.</span></li>
-  </ol>
+<!-- 🎯 صف کار روزانه — کارهای همیشگی ادمین به ترتیب انجام (D-119) -->
+{% rihan_work_queue as wq %}
+{% if wq.urgent_total %}
+<div class="rd-urgent" id="rihan-urgent">
+  🔴 <strong>{{ wq.urgent_total|fa }} کار فوری</strong> منتظر شماست:
+  {% if wq.pending_payments %}<a href="{% url 'admin:order_payment_changelist' %}?status__exact=PENDING_REVIEW">💳 تایید پرداخت ({{ wq.pending_payments|fa }})</a>{% endif %}
+  {% if wq.rihan_new %}<a href="{% url 'admin:order_shipment_changelist' %}?fulfiller__exact=RIHAN&amp;status__exact=NEW">📦 ارسال مرسوله ({{ wq.rihan_new|fa }})</a>{% endif %}
+  {% if wq.supplier_overdue %}<a href="{% url 'admin:order_shipment_changelist' %}?fulfiller__exact=SUPPLIER&amp;status__exact=NEW">⏰ تاخیر تامین‌کننده ({{ wq.supplier_overdue|fa }})</a>{% endif %}
+  {% if wq.paid_without_shipment %}<a href="{% url 'admin:order_order_changelist' %}?status__exact=PAID">🧩 سفارش بدون مرسوله ({{ wq.paid_without_shipment|fa }})</a>{% endif %}
 </div>
-<script>
-(function(){ try { if(localStorage.getItem('rihan_guide_hidden')==='1'){ var g=document.getElementById('rihanGuide'); if(g) g.style.display='none'; } } catch(e){} })();
-</script>
+{% endif %}
+
+<div class="rd-queue" id="rihan-queue">
+  <h2>🎯 کارهای امروز — به همین ترتیب پیش بروید</h2>
+  <p class="rq-sub">این صفحه همیشه بالای پنل است و خودش را با وضعیت فروشگاه به‌روز می‌کند. روی هر کار کلیک کنید تا مستقیم به لیست همان کار بروید.</p>
+  <div class="rq-grid">
+
+    <a class="rq-step {% if wq.pending_payments %}hot{% else %}done{% endif %}" href="{% url 'admin:order_payment_changelist' %}?status__exact=PENDING_REVIEW">
+      <span class="rq-top"><span class="rq-gnum">۱</span><span class="rq-title">💳 تایید پرداخت‌ها</span></span>
+      <span class="rq-num">{{ wq.pending_payments|default:0|fa }} <small>رسید منتظر بررسی</small></span>
+      <span class="rq-help">رسید تصویری را با واریز بانکی تطبیق دهید و «تایید پرداخت» را بزنید. تایید = شروع خودکار بسته‌بندی و اطلاع به تامین‌کننده.</span>
+      <span class="rq-cta">{% if wq.pending_payments %}بررسی کنید ←{% else %}همه بررسی شده ✓{% endif %}</span>
+    </a>
+
+    <a class="rq-step {% if wq.rihan_new or wq.paid_without_shipment %}hot{% else %}done{% endif %}" href="{% url 'admin:order_shipment_changelist' %}?fulfiller__exact=RIHAN&amp;status__exact=NEW">
+      <span class="rq-top"><span class="rq-gnum">۲</span><span class="rq-title">📦 ارسال سفارش‌های خودمان</span></span>
+      <span class="rq-num">{{ wq.rihan_new|default:0|fa }} <small>مرسوله آماده ارسال</small></span>
+      <span class="rq-help">محصول بدون تامین‌کننده = ارسال با خودِ ریهان. بسته را بفرستید و در صفحه مرسوله، شرکت حمل و کد رهگیری را ثبت کنید تا مشتری پیامک بگیرد.</span>
+      {% if wq.paid_without_shipment %}
+      <span class="rq-extra">⚠️ {{ wq.paid_without_shipment|fa }} سفارش پرداخت‌شده هنوز مرسوله ندارد — <a href="{% url 'admin:order_order_changelist' %}?status__exact=PAID">باز کنید</a></span>
+      {% endif %}
+      <span class="rq-cta">{% if wq.rihan_new %}ارسال کنید ←{% else %}کاری نیست ✓{% endif %}</span>
+    </a>
+
+    <a class="rq-step {% if wq.supplier_overdue %}hot{% elif wq.supplier_new %}{% else %}done{% endif %}" href="{% url 'admin:order_shipment_changelist' %}?fulfiller__exact=SUPPLIER&amp;status__exact=NEW">
+      <span class="rq-top"><span class="rq-gnum">۳</span><span class="rq-title">⏰ پیگیری تامین‌کننده‌ها</span></span>
+      <span class="rq-num">{{ wq.supplier_new|default:0|fa }} <small>نزد تامین‌کننده</small></span>
+      <span class="rq-help">مهلت ارسال هر مرسوله {{ wq.deadline_hours|fa }} ساعت است. اگر دیرکرد داشت، مرسوله را انتخاب و از «اکشن‌ها» گزینه اطلاع‌رسانی مجدد به تامین‌کننده را بزنید. یادآوری خودکار هم فعال است.</span>
+      {% if wq.supplier_overdue %}<span class="rq-extra">🔴 {{ wq.supplier_overdue|fa }} مرسوله دیرکرد دارد!</span>{% endif %}
+      <span class="rq-cta">{% if wq.supplier_overdue %}فوری: یادآوری ←{% elif wq.supplier_new %}پیگیری ←{% else %}همه به‌موقع ✓{% endif %}</span>
+    </a>
+
+    <a class="rq-step {% if wq.in_transit %}{% else %}done{% endif %}" href="{% url 'admin:order_shipment_changelist' %}?status__exact=SHIPPED">
+      <span class="rq-top"><span class="rq-gnum">۴</span><span class="rq-title">🚚 مرسوله‌های در راه</span></span>
+      <span class="rq-num">{{ wq.in_transit|default:0|fa }} <small>تحویل‌نشده</small></span>
+      <span class="rq-help">کد رهگیری را در سایت پست/باربری چک کنید. تحویل شد، در مرسوله «تحویل داده شد» را بزنید تا وضعیت مشتری هم تغییر کند.</span>
+      <span class="rq-cta">{% if wq.in_transit %}پیگیری ←{% else %}در راه کسی نیست ✓{% endif %}</span>
+    </a>
+
+    <a class="rq-step {% if wq.pending_reviews %}hot{% else %}done{% endif %}" href="{% url 'admin:reviews_review_changelist' %}?is_approved__exact=0">
+      <span class="rq-top"><span class="rq-gnum">۵</span><span class="rq-title">⭐ تایید نظرات مشتریان</span></span>
+      <span class="rq-num">{{ wq.pending_reviews|default:0|fa }} <small>نظر منتظر تایید</small></span>
+      <span class="rq-help">نظرها را بخوانید؛ نظر سالم را تایید کنید تا در صفحه محصول نمایش داده شود — اعتماد خریدار بعدی را می‌سازد.</span>
+      <span class="rq-cta">{% if wq.pending_reviews %}بازبینی ←{% else %}نظری در صف نیست ✓{% endif %}</span>
+    </a>
+
+  </div>
+</div>
 
 <div class="rd-panel">
   <h2>📊 وضعیت فروشگاه — امروز {% jalali_today %}</h2>

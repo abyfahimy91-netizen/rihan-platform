@@ -60,13 +60,19 @@ def supplier_dashboard(request):
     qs = _own_shipments(supplier)
     from src.modules.order import finance as _finance
     fin = _finance.supplier_financials(supplier)
+    # D-119: مرسوله‌های دیرکرد — قرمز برای تامین‌کننده هم
+    from src.modules.order.fulfillment import supplier_deadline_hours
+    new_list = list(qs.filter(status=Shipment.Status.NEW))
+    overdue_list = [s for s in new_list if s.hours_since_assignment > supplier_deadline_hours()]
     context = {
         'supplier': supplier,
-        'new_count': qs.filter(status=Shipment.Status.NEW).count(),
+        'new_count': len(new_list),
         'shipped_count': qs.filter(status=Shipment.Status.SHIPPED).count(),
         'delivered_count': qs.filter(status=Shipment.Status.DELIVERED).count(),
-        'recent_new': list(qs.filter(status=Shipment.Status.NEW)[:5]),
+        'recent_new': new_list[:5],
         'fin': fin,
+        'overdue_list': overdue_list,
+        'deadline_hours': supplier_deadline_hours(),
     }
     return render(request, 'supplier_panel/dashboard.html', context)
 

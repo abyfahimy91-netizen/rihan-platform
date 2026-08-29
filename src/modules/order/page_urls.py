@@ -2,7 +2,7 @@
 URLs صفحات HTML ماژول Order (UI سبد خرید)
 """
 from django.urls import path
-from . import cart_views, tracking_views
+from . import cart_views, tracking_views, notification_views
 
 app_name = 'order_pages'
 
@@ -20,4 +20,9 @@ urlpatterns = [
     path('payment/<str:order_number>/', tracking_views.payment_page_view, name='payment_page'),
     path('payment/<str:order_number>/success/', tracking_views.payment_success_view, name='payment_success'),
     path('payment/<str:order_number>/cancel/', tracking_views.cancel_order_view, name='cancel_order'),
+    # D-119: اعلان‌های درون‌سایتی
+    path('notifications/', notification_views.notifications_page, name='notifications_page'),
+    path('notifications/recent/', notification_views.notifications_recent, name='notifications_recent'),
+    path('notifications/read-all/', notification_views.notifications_read_all, name='notifications_read_all'),
+    path('notifications/<uuid:pk>/read/', notification_views.notifications_read_one, name='notifications_read_one'),
 ]

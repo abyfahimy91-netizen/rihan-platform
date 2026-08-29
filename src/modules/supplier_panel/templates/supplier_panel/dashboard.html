@@ -5,6 +5,20 @@
 {% block content %}
 <h1 class="mb-4">سلام، {{ supplier.title }} 👋</h1>
 
+<!-- ── D-119: هشدار قرمز دیرکرد ── -->
+{% if overdue_list %}
+<div style="background:#FDF1F0;border:2px solid #b3261e;border-radius:14px;padding:16px 18px;margin-bottom:18px;color:#7c2222;line-height:2.1;font-size:13.5px;">
+    <b style="font-size:14.5px;">🔴 {{ overdue_list|length|fa }} مرسوله از مهلت {{ deadline_hours|fa }} ساعته گذشته و هنوز ارسال نشده!</b><br>
+    لطفاً همین امروز بسته‌بندی و ارسال کنید و کد رهگیری را ثبت کنید:
+    {% for s in overdue_list %}
+        <a href="{% url 'supplier_panel:shipment_detail' s.pk %}" style="color:#b3261e;font-weight:800;">
+            {{ s.order.order_number }} ({{ s.hours_since_assignment|floatformat:"0"|fa }} ساعت)
+        </a>{% if not forloop.last %}، {% endif %}
+    {% endfor %}<br>
+    <span style="font-size:12px;color:#8a5048;">اگر بسته آماده نیست، با پشتیبانی ریهان هماهنگ کنید تا سفارش درست مدیریت شود.</span>
+</div>
+{% endif %}
+
 <!-- ── سفر کار: سه قدم ساده ── -->
 <div class="guide">
     <b>📦 سفر ارسال هر سفارش فقط ۳ قدم است:</b>

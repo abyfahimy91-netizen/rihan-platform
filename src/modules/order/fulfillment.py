@@ -544,6 +544,38 @@ def send_supplier_assignment_sms(shipment) -> bool:
     return ok
 
 
+# ────────────────────────────────────────────────
+# D-119 — مهلت ارسال تامین‌کننده + تشخیص دیرکرد
+# ────────────────────────────────────────────────
+
+DEFAULT_SUPPLIER_DEADLINE_HOURS = 48
+
+
+def supplier_deadline_hours() -> int:
+    """مهلت ارسال تامین‌کننده از تنظیمات سایت (ساعت) — پیش‌فرض ۴۸"""
+    s = _site_settings()
+    try:
+        hours = int(getattr(s, 'supplier_deadline_hours', 0) or 0)
+    except Exception:
+        hours = 0
+    return hours or DEFAULT_SUPPLIER_DEADLINE_HOURS
+
+
+def overdue_supplier_shipments(qs=None):
+    """مرسوله‌های نزد تامین‌کننده که از مهلت ارسال گذشته (هنوز NEW)"""
+    from datetime import timedelta
+    from .models import Shipment
+
+    base = qs or Shipment.objects.filter(
+        status=Shipment.Status.NEW,
+        fulfiller=Shipment.FulfillerType.SUPPLIER,
+        supplier__isnull=False,
+    )
+    return base.filter(
+        created_at__lt=timezone.now() - timedelta(hours=supplier_deadline_hours())
+    )
+
+
 def remind_pending_suppliers(sla_hours: int = 24, max_reminders: int = 3) -> int:
     """یادآوری تامین‌کننده‌های بی‌تحریک: اگر ظرف SLA اقدام نکرد، دوباره پیامک برو"""
     from datetime import timedelta

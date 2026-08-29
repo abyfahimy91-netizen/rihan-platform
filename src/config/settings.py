@@ -92,6 +92,7 @@ TEMPLATES = [
                 'django.contrib.messages.context_processors.messages',
             'src.modules.pages.context_processors.site_settings',  # ⚙️ تنظیمات سایت
             'src.modules.pages.context_processors.cart_badge',  # 🛒 تعداد سبد در هدر (D-115)
+            'src.modules.pages.context_processors.notifications_badge',  # 🔔 اعلان‌های نخوانده (D-119)
             ],
         },
     },

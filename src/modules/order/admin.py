@@ -593,7 +593,7 @@ class ShipmentAdmin(admin.ModelAdmin):
     form = ShipmentAdminForm  # D-111: اعتبارسنجی استاندارد کد رهگیری + الزامات «سایر»
 
     list_display = ['shipment_id_short', 'order_link', 'supplier_or_rihan', 'status_badge',
-                    'carrier_label', 'tracking_code_ltr', 'payable_display', 'settlement_badge',
+                    'sla_status', 'carrier_label', 'tracking_code_ltr', 'payable_display', 'settlement_badge',
                     'notified_summary', 'shipped_at_fa']
     list_filter = ['status', 'fulfiller', 'carrier', 'settlement_status']
     search_fields = ['tracking_code', 'order__order_number', 'supplier__title']
@@ -654,6 +654,19 @@ class ShipmentAdmin(admin.ModelAdmin):
         return format_html(
             '<span style="background:{};color:#fff;padding:2px 10px;border-radius:12px;font-size:11px;">{}</span>',
             colors.get(obj.status, '#666'), obj.get_status_display())
+
+    @admin.display(description='مهلت ارسال')
+    def sla_status(self, obj):
+        """D-119: دیرکرد مرسوله‌های نزد تامین‌کننده — قرمز اگر از مهلت گذشته باشد"""
+        if obj.status != Shipment.Status.NEW:
+            return '—'
+        hours = int(obj.hours_since_assignment)
+        if obj.is_overdue:
+            return format_html(
+                '<span style="background:#b3261e;color:#fff;padding:2px 10px;border-radius:12px;font-size:11px;">'
+                '🔴 دیرکرد {} ساعت</span>', fa_money(hours))
+        return format_html(
+            '<span style="color:#6d6a60;">⏳ {} ساعت</span>', fa_money(hours))
 
     @admin.display(description='شرکت حمل')
     def carrier_label(self, obj):

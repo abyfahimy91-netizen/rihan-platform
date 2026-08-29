@@ -55,6 +55,50 @@ def _apply_special_dates(instance, history_status):
     return ''
 
 
+def _notify_order_status(instance, history_status):
+    """D-119: اعلان درون‌سایتی برای خریدارِ عضو — فقط تغییرات مهم مشتری"""
+    from .models import UserNotification
+
+    try:
+        if not instance.user_id:
+            return  # مهمان → فقط پیامک دارد
+        order = instance
+        num = order.order_number
+        track_url = f'/order/tracking/{num}/'
+
+        K = UserNotification.Kind
+        mapping = {
+            'PAYMENT_CONFIRMED': (
+                K.PAYMENT_CONFIRMED,
+                f'پرداخت سفارش {num} تایید شد ✅',
+                'پرداخت شما با موفقیت تایید شد. سفارش شما وارد مرحله آماده‌سازی می‌شود و به‌محض ارسال خبر می‌دهیم.'),
+            'PROCESSING': (
+                K.PROCESSING,
+                f'سفارش {num} در حال آماده‌سازی است 📦',
+                'سفارش شما در حال بسته‌بندی و آماده‌سازی برای ارسال است.'),
+            'SHIPPED': (
+                K.SHIPPED,
+                f'سفارش {num} ارسال شد 🚚',
+                f'کد رهگیری: {order.tracking_code or "به‌زودی ثبت می‌شود"} — برای پیگیری کلیک کنید.'),
+            'DELIVERED': (
+                K.DELIVERED,
+                f'سفارش {num} تحویل شد 🎉',
+                'امیدواریم از خرید راضی بوده باشید؛ اگر دوست داشتید برای ما نظر بگذارید.'),
+            'CANCELLED': (
+                K.CANCELLED,
+                f'سفارش {num} لغو شد',
+                'در صورت واریز مبلغ، وجه حداکثر تا ۲۴ ساعت آینده به همان کارت بازگردانده می‌شود.'),
+        }
+        item = mapping.get(history_status)
+        if not item:
+            return
+        kind, title, body = item
+        UserNotification.notify(
+            order.user, kind, title, body=body, url=track_url, order=order)
+    except Exception as e:
+        logger.error(f'Order notification failed for {instance.order_number}: {e}')
+
+
 @receiver(post_save, sender='order.Order')
 def capture_order_status_change(sender, instance, created, **kwargs):
     """Capture every order status change in OrderStatusHistory."""
@@ -86,6 +130,7 @@ def capture_order_status_change(sender, instance, created, **kwargs):
                         description='وضعیت: ' + instance.get_status_display() + extra,
                         tracking_code=instance.tracking_code or '',
                     )
+                    _notify_order_status(instance, current_status)
             return
 
         # Update case: only record when the status actually changed.
@@ -116,6 +161,7 @@ def capture_order_status_change(sender, instance, created, **kwargs):
             description=description,
             tracking_code=instance.tracking_code or '',
         )
+        _notify_order_status(instance, history_status)
         logger.info(
             f"Order {instance.order_number}: status history recorded - {history_status}"
         )

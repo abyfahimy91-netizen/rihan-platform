@@ -1,3 +1,4 @@
+import logging
 import uuid
 import jdatetime
 from django.db import models
@@ -642,6 +643,22 @@ class Shipment(models.Model):
         who = self.supplier.title if self.supplier_id else self.get_fulfiller_display()
         return f'{self.order.order_number} ← {who}'
 
+    # ── D-119: دیرکرد تامین‌کننده ──
+    @property
+    def hours_since_assignment(self):
+        """ساعت‌های سپری‌شده از تخصیص مرسوله"""
+        if not self.created_at:
+            return 0
+        return max(0, (timezone.now() - self.created_at).total_seconds() / 3600)
+
+    @property
+    def is_overdue(self):
+        """مرسوله تامین‌کننده است، هنوز NEW است و از مهلت ارسال گذشته"""
+        if self.status != self.Status.NEW or self.fulfiller != self.FulfillerType.SUPPLIER:
+            return False
+        from .fulfillment import supplier_deadline_hours
+        return self.hours_since_assignment > supplier_deadline_hours()
+
     @property
     def tracking_url(self):
         """لینک مستقیم سامانه باربری که با باز شدن، جست‌وجو با کد انجام شده است"""
@@ -785,3 +802,63 @@ class NotificationLog(models.Model):
 
     def __str__(self):
         return f'{self.get_kind_display()} ← {self.recipient} ({"" if self.success else "ناموفق"})'
+
+
+class UserNotification(models.Model):
+    """اعلان درون‌سایتی برای کاربران (D-119).
+
+    هر تغییر وضعیت مهم سفارش (تایید پرداخت / آماده‌سازی / ارسال / تحویل / لغو)
+    برای خریدارِ عضوِ سایت یک اعلان می‌سازد؛ زنگولهٔ هدر + صفحه اعلان‌ها.
+    مهمان‌ها اعلان درون‌سایتی ندارند (فقط پیامک می‌گیرند).
+    """
+
+    class Kind(models.TextChoices):
+        PAYMENT_CONFIRMED = 'PAYMENT_CONFIRMED', 'پرداخت تایید شد'
+        PROCESSING = 'PROCESSING', 'در حال آماده‌سازی'
+        SHIPPED = 'SHIPPED', 'سفارش ارسال شد'
+        DELIVERED = 'DELIVERED', 'سفارش تحویل شد'
+        CANCELLED = 'CANCELLED', 'سفارش لغو شد'
+        SUPPLIER_DELAY = 'SUPPLIER_DELAY', 'هشدار تاخیر تامین‌کننده'
+        SYSTEM = 'SYSTEM', 'سیستمی'
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    recipient = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE,
+        related_name='notifications', verbose_name="گیرنده")
+    kind = models.CharField(
+        max_length=30, choices=Kind.choices, default=Kind.SYSTEM,
+        db_index=True, verbose_name="نوع")
+    title = models.CharField(max_length=150, verbose_name="عنوان")
+    body = models.CharField(max_length=300, blank=True, default='', verbose_name="متن")
+    url = models.CharField(max_length=200, blank=True, default='', verbose_name="لینک")
+    order = models.ForeignKey(
+        Order, on_delete=models.SET_NULL, null=True, blank=True,
+        related_name='user_notifications', verbose_name="سفارش")
+    is_read = models.BooleanField(default=False, db_index=True, verbose_name="خوانده‌شده")
+    created_at = models.DateTimeField(auto_now_add=True, db_index=True, verbose_name="زمان")
+
+    class Meta:
+        verbose_name = "اعلان کاربر"
+        verbose_name_plural = "اعلان‌های کاربران"
+        ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['recipient', 'is_read']),
+        ]
+
+    def __str__(self):
+        return f'{self.get_kind_display()} → {self.recipient}'
+
+    @classmethod
+    def notify(cls, recipient, kind, title, body='', url='', order=None):
+        """ساخت امن اعلان — هر خطا فقط لاگ می‌شود و جریان اصلی را نمی‌شکند"""
+        if not recipient:
+            return None
+        try:
+            return cls.objects.create(
+                recipient=recipient, kind=kind,
+                title=title[:150], body=(body or '')[:300],
+                url=(url or '')[:200], order=order)
+        except Exception:
+            logger = logging.getLogger(__name__)
+            logger.exception('UserNotification create failed')
+            return None

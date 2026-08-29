@@ -1,0 +1,88 @@
+{% extends "catalog/base.html" %}
+{% load fa_tags %}
+
+{% block title %}اعلان‌ها{% if site_settings.site_name %} — {{ site_settings.site_name }}{% endif %}{% endblock %}
+
+{% block content %}
+<style>
+  .nt-wrap{max-width:680px;margin:0 auto;}
+  .nt-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:26px 0 18px;}
+  .nt-head h1{font-size:20px;color:var(--color-text);margin:0;}
+  .nt-allread{border:1.5px solid var(--color-border);background:#fff;color:var(--color-text);
+              border-radius:10px;padding:8px 14px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;}
+  .nt-allread:hover{border-color:var(--color-primary);color:var(--color-primary);}
+  .nt-list{display:flex;flex-direction:column;gap:10px;}
+  .nt-item{display:flex;gap:12px;align-items:flex-start;background:#fff;border:1.5px solid var(--color-border);
+           border-radius:14px;padding:14px 16px;text-decoration:none;color:var(--color-text);transition:.15s;}
+  .nt-item:hover{border-color:var(--color-primary);}
+  .nt-item.unread{background:#FBF7EC;border-color:#E7D9B0;}
+  .nt-dot{flex:none;width:9px;height:9px;border-radius:50%;background:#C9A961;margin-top:8px;}
+  .nt-dot.read{background:#E3E8E3;}
+  .nt-ico{flex:none;font-size:20px;line-height:1.4;}
+  .nt-body{flex:1;min-width:0;}
+  .nt-title{font-weight:800;font-size:14.5px;margin-bottom:3px;}
+  .nt-text{font-size:13px;color:var(--color-text-muted);line-height:1.9;}
+  .nt-time{font-size:11.5px;color:#9aa49d;margin-top:6px;}
+  .nt-empty{background:#fff;border:1.5px dashed var(--color-border);border-radius:14px;
+            padding:44px 20px;text-align:center;color:var(--color-text-muted);font-size:14px;line-height:2.2;}
+</style>
+
+<div class="nt-wrap">
+  <div class="nt-head">
+    <h1>🔔 اعلان‌ها{% if unread %} <span style="color:#C9A961;">({{ unread|fa }} جدید)</span>{% endif %}</h1>
+    {% if unread %}
+    <button type="button" class="nt-allread" id="nt-allread">علامت‌گذاری همه به‌عنوان خوانده‌شده</button>
+    {% endif %}
+  </div>
+
+  {% if notifications %}
+  <div class="nt-list">
+    {% for n in notifications %}
+    <a class="nt-item {% if not n.is_read %}unread{% endif %}"
+       href="{% if n.url %}{{ n.url }}{% else %}#{% endif %}"
+       data-id="{{ n.pk }}" data-url="{{ n.url }}">
+      <span class="nt-dot {% if n.is_read %}read{% endif %}"></span>
+      <span class="nt-ico">
+        {% if n.kind == 'PAYMENT_CONFIRMED' %}✅{% elif n.kind == 'PROCESSING' %}📦{% elif n.kind == 'SHIPPED' %}🚚{% elif n.kind == 'DELIVERED' %}🎉{% elif n.kind == 'CANCELLED' %}🚫{% else %}🔔{% endif %}
+      </span>
+      <span class="nt-body">
+        <span class="nt-title">{{ n.title }}</span>
+        {% if n.body %}<span class="nt-text">{{ n.body }}</span>{% endif %}
+        <span class="nt-time">{{ n.created_at|jdate_human }}</span>
+      </span>
+    </a>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="nt-empty">
+    🕊 هنوز اعلانی ندارید.<br>
+    وقتی وضعیت سفارش‌های شما تغییر کند (تایید پرداخت، ارسال، تحویل و…) همین‌جا خبر می‌دهیم.
+  </div>
+  {% endif %}
+</div>
+
+<script>
+(function(){
+  function csrf(){ var m=document.querySelector('meta[name="csrf"]'); return m?m.content:''; }
+  function markAll(){
+    fetch('/order/notifications/read-all/',{method:'POST',headers:{'X-CSRFToken':csrf(),'X-Requested-With':'XMLHttpRequest'}})
+      .then(function(r){ return r.json(); })
+      .then(function(){ location.reload(); });
+  }
+  var btn=document.getElementById('nt-allread');
+  if(btn) btn.addEventListener('click', markAll);
+  // کلیک روی هر اعلان: اول خوانده شود، بعد ریدایرکت
+  document.querySelectorAll('.nt-item.unread').forEach(function(el){
+    el.addEventListener('click', function(e){
+      e.preventDefault();
+      var url=el.getAttribute('data-url')||el.getAttribute('href');
+      fetch('/order/notifications/'+el.getAttribute('data-id')+'/read/',{
+        method:'POST',headers:{'X-CSRFToken':csrf(),'X-Requested-With':'XMLHttpRequest'}
+      }).catch(function(){}).finally(function(){
+        if(url && url!=='#') location.href=url; else location.reload();
+      });
+    });
+  });
+})();
+</script>
+{% endblock %}

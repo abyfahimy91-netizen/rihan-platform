@@ -170,3 +170,10 @@ body.login #footer{padding:14px;text-align:center;color:#8b8574}
 /* دکمه ویرایش سریع در لیست محصولات */
 .rihan-edit-btn{display:inline-block;background:#0D3B2E;color:#fff !important;padding:5px 14px;border-radius:999px;font-size:12px;text-decoration:none;transition:background .15s}
 .rihan-edit-btn:hover{background:#C9A961;color:#0D3B2E !important}
+
+/* ── D-119: بج قرمز تعداد کارِ در انتظار کنار آیتم‌های منوی ادمین ── */
+.rsb-item{display:flex;align-items:center;gap:6px}
+.rsb-badge{margin-inline-start:auto;flex:none;background:#d93025;color:#fff;font-size:10.5px;font-weight:800;
+           min-width:19px;text-align:center;padding:2px 6px;border-radius:999px;line-height:1.4;
+           box-shadow:0 1px 3px rgba(0,0,0,.25)}
+.rsb-badge::before{content:'';display:none}

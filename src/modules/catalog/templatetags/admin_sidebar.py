@@ -24,6 +24,8 @@ GROUPS = [
     ("🧾 سفارش‌ها", [
         ("order.order", "سفارش‌ها"),
         ("order.payment", "پرداخت‌ها"),
+        ("order.shipment", "مرسوله‌ها"),
+        ("order.notificationlog", "لاگ اطلاع‌رسانی"),
         ("order.address", "آدرس‌ها"),
     ]),
     ("⭐ نظرات مشتریان", [
@@ -36,17 +38,35 @@ GROUPS = [
         ("pages.sitesettings", "⚙️ تنظیمات صفحه اصلی و سایت"),
         ("catalog.contentblock", "بلوک‌های محتوا"),
     ]),
-    ("💰 امور مالی", [
-        ("finance.supplierledger", "دفاتر تامین‌کننده"),
-        ("finance.suppliertransaction", "تراکنش‌های مالی"),
-        ("finance.settlement", "تسویه‌حساب‌ها"),
-    ]),
     ("👥 کاربران و نقش‌ها", [
         ("auth.user", "کاربران"),
         ("rbac.role", "نقش‌ها"),
         ("rbac.userrole", "نقش اختصاص‌یافته"),
     ]),
 ]
+
+
+def _badge_counts():
+    """D-119: تعداد کارهای در انتظار برای بج قرمز کنار منو — سبک و فقط-خواندنی"""
+    badges = {}
+    try:
+        from src.modules.order.models import Payment, Shipment
+        pp = Payment.objects.filter(status=Payment.PaymentStatus.PENDING_REVIEW).count()
+        if pp:
+            badges['order.payment'] = pp
+        ns = Shipment.objects.filter(status=Shipment.Status.NEW).count()
+        if ns:
+            badges['order.shipment'] = ns
+        try:
+            from src.modules.reviews.models import Review
+            pr = Review.objects.filter(is_approved=False).count()
+            if pr:
+                badges['reviews.review'] = pr
+        except Exception:
+            pass
+    except Exception:
+        pass
+    return badges
 
 
 @register.simple_tag(takes_context=True)
@@ -66,11 +86,17 @@ def rihan_sidebar(context):
         registry[label] = url
 
     groups, used = [], set()
+    badges = _badge_counts()
     for title, entries in GROUPS:
-        items = [{"title": t, "url": registry[k]} for k, t in entries if k in registry]
+        items = []
+        for k, t in entries:
+            if k in registry:
+                item = {"title": t, "url": registry[k], "badge": badges.get(k, 0)}
+                items.append(item)
+                used.add(k)
         if items:
             groups.append({"title": title, "items": items})
-            used.update(k for k, _t in entries if k in registry)
+        used.update(k for k, _t in entries if k in registry)
 
     leftovers = []
     for label, url in registry.items():

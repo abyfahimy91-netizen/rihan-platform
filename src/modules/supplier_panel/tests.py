@@ -1,10 +1,14 @@
 """
 تست‌های پنل تامین‌کننده — نسخه D-105 (مرسوله‌محور)
 تامین‌کننده فقط مرسوله‌های خودش را می‌بیند؛ بدون هیچ قیمتی.
+D-119: هشدار قرمز دیرکرد روی داشبورد تامین‌کننده.
 """
+from datetime import timedelta
+
 from django.test import TestCase, Client
 from django.contrib.auth import get_user_model
 from django.urls import reverse
+from django.utils import timezone
 from unittest.mock import patch
 
 from src.modules.catalog.models import Supplier, Product, Category
@@ -161,3 +165,36 @@ class SupplierPanelTestCase(TestCase):
         self.assertContains(response, 'بروشور')
         self.assertContains(response, 'Rihan')
         self.assertContains(response, 'فاکتور')
+
+    # ── D-119: هشدار قرمز دیرکرد روی داشبورد تامین‌کننده ──
+    def test_dashboard_no_overdue_warning_when_fresh(self):
+        """مرسوله تازه → بدون هشدار دیرکرد"""
+        self.client.login(username='supplier1', password='testpass123')
+        response = self.client.get(reverse('supplier_panel:dashboard'))
+        self.assertEqual(response.status_code, 200)
+        self.assertNotContains(response, 'از مهلت')
+
+    def test_dashboard_shows_red_overdue_warning(self):
+        """مرسولهٔ گذشته از مهلت ۴۸ ساعته → جعبه قرمز با لینک مرسوله"""
+        Shipment.objects.filter(pk=self.shipment.pk).update(
+            created_at=timezone.now() - timedelta(hours=50))
+        self.shipment.refresh_from_db()
+        self.assertTrue(self.shipment.is_overdue)
+
+        self.client.login(username='supplier1', password='testpass123')
+        response = self.client.get(reverse('supplier_panel:dashboard'))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'از مهلت')
+        self.assertContains(response, self.order.order_number)
+
+    def test_overdue_warning_hidden_after_shipped(self):
+        """بعد از ثبت کد رهگیری، هشدار دیرکرد می‌رود"""
+        Shipment.objects.filter(pk=self.shipment.pk).update(
+            created_at=timezone.now() - timedelta(hours=50))
+        with patch('src.modules.auth.services.sms_service.SmsService.send_sms') as mock_sms:
+            mock_sms.return_value = (False, 'test')
+            mark_shipped(self.shipment, carrier='POST',
+                         tracking_code='12345678901234567890', send_customer_sms=False)
+        self.client.login(username='supplier1', password='testpass123')
+        response = self.client.get(reverse('supplier_panel:dashboard'))
+        self.assertNotContains(response, 'از مهلت')
