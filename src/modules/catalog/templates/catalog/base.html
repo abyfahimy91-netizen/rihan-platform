@@ -176,29 +176,65 @@
             color: var(--color-primary);
         }
         
-        .cart-icon {
-            position: relative;
-            text-decoration: none;
-            color: var(--color-text);
-            font-size: 24px;
-            padding: 8px;
+        /* ── گروه اقدامات هدر: حساب من + زنگوله + سبد — یک‌جا و هم‌اندازه (D-119c) ── */
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 2px;
         }
-        
-        .cart-icon:hover {
+
+        .account-link {
+            display: inline-flex;
+            align-items: center;
+            color: var(--color-text);
+            font-weight: 700;
+            font-size: 14px;
+            text-decoration: none;
+            margin-inline-end: 10px;
+            white-space: nowrap;
+            transition: color 0.15s;
+        }
+
+        .account-link:hover {
             color: var(--color-primary);
         }
-        
-        .cart-badge {
+
+        .cart-icon,
+        .notif-bell {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            text-decoration: none;
+            color: var(--color-text);
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 0;
+            transition: background 0.15s, color 0.15s;
+        }
+
+        .cart-icon:hover,
+        .notif-bell:hover {
+            background: #F1EBDD;
+            color: var(--color-primary);
+        }
+
+        .cart-badge,
+        .notif-badge {
             position: absolute;
             top: 1px;
-            right: 0;
+            inset-inline-start: 1px;
             background: #d93025; /* قرمز واضح برای دیده‌شدن فوری */
             color: #fff;
             border-radius: 999px;
-            min-width: 19px;
-            height: 19px;
+            min-width: 17px;
+            height: 17px;
             padding: 0 4px;
-            font-size: 11.5px;
+            font-size: 10.5px;
             font-weight: 800;
             line-height: 1;
             display: flex;
@@ -207,11 +243,12 @@
             border: 1.5px solid #fff;
             box-shadow: 0 1px 4px rgba(0, 0, 0, .28);
         }
-        
-        .cart-badge[hidden] {
+
+        .cart-badge[hidden],
+        .notif-badge[hidden] {
             display: none;
         }
-        
+
         /* Main */
         main {
             padding: 40px 0;
@@ -346,6 +383,8 @@
         
         @media (max-width: 480px) {
             .footer-grid { grid-template-columns: 1fr; }
+            .account-link { font-size: 13px; margin-inline-end: 6px; }
+            .header-actions { gap: 0; }
         }
     </style>
     
@@ -423,15 +462,8 @@
     line-height: 2;
 }
 
-/* ── 🔔 اعلان‌های هدر (D-119) ── */
-.notif-wrap{position:relative;display:inline-flex;vertical-align:middle;}
-.notif-bell{position:relative;background:none;border:none;color:var(--color-text);cursor:pointer;
-            padding:6px;margin-inline-start:14px;line-height:0;border-radius:8px;transition:.15s;}
-.notif-bell:hover{color:var(--color-primary);}
-.notif-badge{position:absolute;top:-4px;left:-4px;background:#d93025;color:#fff;font-size:10.5px;
-             font-weight:800;line-height:1;min-width:17px;padding:3px 4px;border-radius:999px;
-             border:1.5px solid #fff;text-align:center;}
-.notif-badge[hidden]{display:none;}
+/* ── 🔔 اعلان‌های هدر (D-119) — ظاهر آیکون/بج مشترک با سبد در بلاک اصلی ── */
+.notif-wrap{position:relative;display:inline-flex;}
 .notif-panel{position:absolute;top:calc(100% + 10px);left:50%;transform:translateX(-50%);z-index:999;
              width:min(420px, calc(100vw - 24px));
              background:#fff;border:1.5px solid var(--color-border);border-radius:16px;
@@ -472,7 +504,8 @@
                     <a href="/contact/">تماس</a>
                     <a href="/order/lookup/">پیگیری سفارش</a>
                 </nav>
-                {% if user.is_authenticated %}<a href="{% url 'auth_pages:profile' %}" style="color:var(--color-text);font-weight:700;text-decoration:none;margin-left:18px;font-size:14px;">👤 حساب من</a>{% else %}<a href="{% url 'auth_pages:login' %}" style="color:var(--color-text);font-weight:700;text-decoration:none;margin-left:18px;font-size:14px;">ورود / ثبت‌نام</a>{% endif %}
+                <div class="header-actions">
+                {% if user.is_authenticated %}<a href="{% url 'auth_pages:profile' %}" class="account-link">👤 حساب من</a>{% else %}<a href="{% url 'auth_pages:login' %}" class="account-link">ورود / ثبت‌نام</a>{% endif %}
                 {% if user.is_authenticated %}
                 <span class="notif-wrap">
                   <button type="button" class="notif-bell" id="notif-bell" title="اعلان‌ها" aria-label="اعلان‌ها" aria-expanded="false">
@@ -497,13 +530,14 @@
                 </span>
                 {% endif %}
             <a href="{% url 'order_pages:cart_page' %}" class="cart-icon" title="سبد خرید">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <circle cx="9" cy="21" r="1"></circle>
                         <circle cx="20" cy="21" r="1"></circle>
                         <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
                     </svg>
                     <span class="cart-badge" id="cart-count" {% if not cart_item_count %}hidden{% endif %}>{{ cart_item_count_fa }}</span>
                 </a>
+                </div>
             </div>
         </div>
     </header>
