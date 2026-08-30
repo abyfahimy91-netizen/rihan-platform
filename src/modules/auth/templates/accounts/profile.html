@@ -7,47 +7,78 @@
 <style>
     /* ── اسکلت ── */
     .pf-wrap{max-width:880px;margin:0 auto 40px;}
+
+    /* ── هدر هویتی (D-122: بدون آواتار — فقط نام و شماره) ── */
     .pf-hero{position:relative;background:linear-gradient(135deg,#0D3B2E 0%,#155742 60%,#092A21 100%);
-        border-radius:22px;padding:30px 32px;color:#fff;overflow:hidden;margin-bottom:22px;
+        border-radius:22px;padding:28px 32px;color:#fff;overflow:hidden;margin-bottom:6px;
         box-shadow:0 14px 34px rgba(13,59,46,.25);display:flex;justify-content:space-between;align-items:center;gap:22px;flex-wrap:wrap;}
     .pf-hero::before{content:'';position:absolute;inset:0;
         background:radial-gradient(circle at 90% -20%,rgba(201,169,97,.35),transparent 55%);pointer-events:none;}
-    .pf-id{display:flex;align-items:center;gap:16px;position:relative;min-width:0;}
-    .pf-avatar{width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,#E8CE8C,#C9A961);
-        color:#12362a;font-size:28px;font-weight:900;display:flex;align-items:center;justify-content:center;flex-shrink:0;
-        border:3px solid rgba(255,255,255,.35);}
-    .pf-id h1{font-size:23px;font-weight:900;margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:320px;}
-    .pf-phone{font-size:13.5px;color:#DFEAE4;direction:ltr;text-align:right;font-family:monospace;letter-spacing:1px;}
+    .pf-id{position:relative;min-width:0;}
+    .pf-id h1{font-size:22px;font-weight:900;margin-bottom:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:360px;}
+    .pf-phone{font-size:16.5px;font-weight:700;color:#F2FAF5;letter-spacing:2px;direction:ltr;unicode-bidi:embed;display:inline-block;}
     .pf-stats{display:flex;gap:12px;position:relative;flex-wrap:wrap;}
     .pf-stat{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.18);border-radius:14px;
         padding:12px 20px;text-align:center;min-width:92px;}
     .pf-stat b{display:block;font-size:19px;font-weight:900;color:#F5EBD3;}
     .pf-stat span{font-size:11.5px;color:rgba(255,255,255,.75);}
 
-    /* ── تب‌ها ── */
-    .pf-tabs{display:flex;gap:8px;background:#fff;border:1px solid var(--color-border);border-radius:16px;
-        padding:8px;margin-bottom:22px;overflow-x:auto;scrollbar-width:none;}
-    .pf-tabs::-webkit-scrollbar{display:none;}
-    .pf-tab{flex:1;min-width:110px;border:none;background:none;font-family:inherit;font-size:13.5px;font-weight:700;
-        color:var(--color-text-muted);padding:11px 10px;border-radius:11px;cursor:pointer;white-space:nowrap;transition:.2s;}
-    .pf-tab:hover{background:#F6F3EC;color:var(--color-text);}
-    .pf-tab.is-active{background:var(--color-primary);color:#fff;box-shadow:0 4px 12px rgba(13,59,46,.25);}
-    .pf-exit{flex:0 0 auto;align-self:center;color:var(--color-error);font-size:13px;font-weight:700;
-        text-decoration:none;padding:10px 14px;border-radius:11px;white-space:nowrap;}
-    .pf-exit:hover{background:var(--color-error-bg);}
+    /* ── منوی حساب (D-122: منوی عمودی به‌جای تب‌های افقی اسکرولی) ── */
+    .pf-home{margin-top:18px;}
+    .pf-menu-card{background:#fff;border:1px solid var(--color-border);border-radius:18px;
+        box-shadow:0 4px 18px rgba(0,0,0,.05);padding:10px;overflow:hidden;}
+    .pf-menu-card + .pf-menu-card{margin-top:14px;}
+    .pf-menu-group{font-size:11.5px;font-weight:800;color:var(--color-text-muted);letter-spacing:.4px;padding:10px 14px 6px;}
+    .pf-row{display:flex;align-items:center;gap:13px;width:100%;background:none;border:none;font-family:inherit;
+        text-align:start;cursor:pointer;padding:11px 12px;border-radius:13px;transition:background .15s;min-height:58px;
+        text-decoration:none;}
+    .pf-row:hover{background:#F6F3EC;}
+    .pf-row:focus-visible{outline:2px solid var(--color-primary);outline-offset:-2px;}
+    .pf-row.is-active{background:#F1EBDD;}
+    .pf-row-ico{width:42px;height:42px;border-radius:12px;background:#F4F1E9;display:flex;align-items:center;
+        justify-content:center;font-size:20px;flex-shrink:0;}
+    .pf-row-txt{flex:1;min-width:0;}
+    .pf-row-txt b{display:block;font-size:14.5px;font-weight:800;color:var(--color-text);}
+    .pf-row-txt small{display:block;font-size:12px;color:var(--color-text-muted);margin-top:3px;
+        overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+    .pf-row-chev{color:#B8B0A0;font-size:21px;font-weight:800;flex-shrink:0;line-height:1;}
+    .pf-row-exit .pf-row-ico{background:#F9ECEA;}
+    .pf-row-exit .pf-row-txt b{color:var(--color-error);}
 
+    /* ── پنل‌ها ── */
+    .pf-panels{min-width:0;}
     .pf-panel{display:none;}
     .pf-panel.is-active{display:block;}
+    .pf-panel-head{display:flex;align-items:center;gap:12px;margin:20px 0 14px;min-height:40px;background:none;border:none;padding:0;box-shadow:none;}
+    .pf-panel-head h2{font-size:17.5px;font-weight:800;color:var(--color-text);margin:0;}
+    .pf-panel-head h2:focus{outline:none;}
+    .pf-back{display:none;align-items:center;gap:2px;background:#fff;border:1.5px solid var(--color-border);
+        border-radius:11px;padding:8px 16px 8px 20px;font-family:inherit;font-size:13px;font-weight:800;
+        color:var(--color-text);cursor:pointer;transition:.2s;}
+    .pf-back:hover{border-color:var(--color-primary);color:var(--color-primary);}
+    .pf-back .bchev{font-size:19px;font-weight:800;line-height:1;}
+
+    @media(max-width:879px){
+        /* ناوبری drill-in: هاب ↔ بخش (موبایل) */
+        .pf-wrap.pf-in .pf-home{display:none;}
+        .pf-wrap.pf-in .pf-hero{display:none;}
+        .pf-wrap:not(.pf-in) .pf-panel{display:none !important;}
+        .pf-back{display:inline-flex;}
+    }
+    @media(min-width:880px){
+        .pf-back{display:none !important;}
+        .pf-body{display:grid;grid-template-columns:272px 1fr;gap:20px;align-items:start;}
+        .pf-home{margin-top:20px;position:sticky;top:20px;}
+    }
 
     /* ── کارت عمومی ── */
     .pf-card{background:#fff;border-radius:18px;border:1px solid var(--color-border);
         box-shadow:0 4px 18px rgba(0,0,0,.05);padding:26px 28px;}
     .pf-card + .pf-card{margin-top:18px;}
-    .pf-card h2{font-size:17px;font-weight:800;color:var(--color-text);margin-bottom:18px;display:flex;align-items:center;gap:9px;}
     .pf-hint{font-size:12.5px;color:var(--color-text-muted);line-height:2;margin-bottom:16px;}
 
     /* ── پیام‌ها ── */
-    .pf-msg{border-radius:13px;padding:13px 17px;margin-bottom:14px;font-size:13.5px;line-height:1.9;
+    .pf-msg{border-radius:13px;padding:13px 17px;margin:14px 0 0;font-size:13.5px;line-height:1.9;
         background:var(--color-success-bg,#EAF3EE);color:var(--color-success,#2D6A4F);border:1px solid rgba(45,106,79,.2);}
     .pf-msg.error{background:var(--color-error-bg,#F9ECEA);color:var(--color-error,#9B2C2C);border-color:rgba(155,44,44,.18);}
 
@@ -143,14 +174,14 @@
     .pf-cta:hover{transform:translateY(-2px);box-shadow:0 10px 22px rgba(13,59,46,.3);}
 
     @media (max-width:640px){
-        .pf-hero{flex-direction:column;align-items:stretch;text-align:center;padding:26px 20px;}
-        .pf-id{flex-direction:column;text-align:center;}
+        .pf-hero{flex-direction:column;align-items:stretch;text-align:center;padding:24px 20px;}
         .pf-id h1{max-width:none;}
         .pf-stats{justify-content:center;}
         .pf-stat{flex:1;min-width:80px;padding:10px 8px;}
         .pf-card{padding:20px 18px;}
         .pf-grid2{grid-template-columns:1fr;}
         .ord-cancel{margin-right:0;}
+        .pf-menu-card{padding:8px;}
     }
 </style>
 {% endblock %}
@@ -162,32 +193,66 @@
     var FA = ['۰','۱','۲','۳','۴','۵','۶','۷','۸','۹'];
     function faNum(n){ var s = String(n), out=''; for (var i=0;i<s.length;i++){ out += FA[s.charAt(i)]; } return out; }
 
-    // ── تب‌ها ──
-    var tabs = document.querySelectorAll('.pf-tab');
-    var panels = document.querySelectorAll('.pf-panel');
-    var TAB_KEY = 'rihan_profile_tab';
-    function activate(name, save){
-        tabs.forEach(function(t){
+    // ── ناوبری منوی حساب (D-122: هاب عمودی + drill-in موبایل، به‌جای تب افقی اسکرولی) ──
+    var pfWrap = document.querySelector('.pf-wrap');
+    var pfRows = document.querySelectorAll('.pf-row[data-tab]');
+    var pfPanels = document.querySelectorAll('.pf-panel');
+
+    function pfActivate(name, push){
+        pfRows.forEach(function(t){
             var on = t.getAttribute('data-tab') === name;
             t.classList.toggle('is-active', on);
-            if (on && t.scrollIntoView) { try { t.scrollIntoView({block:'nearest', inline:'center'}); } catch(e){} }
+            if (on) t.setAttribute('aria-current','true'); else t.removeAttribute('aria-current');
         });
-        panels.forEach(function(p){ p.classList.toggle('is-active', p.id === 'tab-' + name); });
-        if (save) { try { localStorage.setItem(TAB_KEY, name); } catch(e){} }
+        pfPanels.forEach(function(p){ p.classList.toggle('is-active', p.id === 'tab-' + name); });
+        if (pfWrap) pfWrap.classList.add('pf-in');
+        if (push) { try { history.pushState({pf:1}, '', '#' + name); } catch(e){} }
+        try { window.scrollTo({top:0, behavior:'smooth'}); } catch(e){ window.scrollTo(0,0); }
+        var panel = document.getElementById('tab-' + name);
+        if (panel){
+            var h = panel.querySelector('.pf-panel-head h2');
+            if (h){ h.setAttribute('tabindex','-1'); try { h.focus({preventScroll:true}); } catch(e){ h.focus(); } }
+        }
     }
-    tabs.forEach(function(t){
-        t.addEventListener('click', function(){ activate(t.getAttribute('data-tab'), true); });
+    function pfHome(push){
+        if (pfWrap) pfWrap.classList.remove('pf-in');
+        pfRows.forEach(function(t){ t.classList.remove('is-active'); t.removeAttribute('aria-current'); });
+        pfPanels.forEach(function(p){ p.classList.remove('is-active'); });
+        if (push) { try { history.pushState(null, '', location.pathname + location.search); } catch(e){} }
+    }
+    pfRows.forEach(function(t){
+        t.addEventListener('click', function(){ pfActivate(t.getAttribute('data-tab'), true); });
     });
-    var saved = null;
-    try { saved = localStorage.getItem(TAB_KEY); } catch(e){}
-    if (saved && document.getElementById('tab-' + saved)) activate(saved, false);
-    // D-102: هنگام ویرایش آدرس، مستقیم تب آدرس‌ها باز شود
-    {% if edit_address %}activate('addresses', true);{% endif %}
+    document.querySelectorAll('.pf-back').forEach(function(b){
+        b.addEventListener('click', function(){
+            if (history.state && history.state.pf) { history.back(); }
+            else { pfHome(false); }
+        });
+    });
+    window.addEventListener('popstate', function(){
+        var h = (location.hash || '').replace('#','');
+        if (h && document.getElementById('tab-' + h)) pfActivate(h, false);
+        else if (window.matchMedia && window.matchMedia('(max-width:879px)').matches) pfHome(false);
+        else pfActivate('orders', false);
+    });
+    // ورود مستقیم: #hash یا ویرایش/خطای آدرس (D-102 / D-113c)
+    var pfInitial = (location.hash || '').replace('#','');
+    {% if edit_address or address_form_errors %}pfInitial = 'addresses';{% endif %}
+    if (pfInitial && document.getElementById('tab-' + pfInitial)) pfActivate(pfInitial, false);
+
+    // ── گروه‌بندی نمایشی شماره موبایل: ۰۹۱۲ ۳۴۵ ۶۷۸۹ ──
+    var pfPhone = document.getElementById('pfPhone');
+    if (pfPhone){
+        var raw = pfPhone.textContent.replace(/[^۰-۹]/g, '');
+        if (raw.length === 11){
+            var asc = raw.replace(/[۰-۹]/g, function(d){ return FA['۰۱۲۳۴۵۶۷۸۹'.indexOf(d)]; });
+            var g = asc.slice(0,4) + ' ' + asc.slice(4,7) + ' ' + asc.slice(7);
+            pfPhone.textContent = g.replace(/\d/g, function(d){ return FA[+d]; });
+        }
+    }
 
     // ── شمارش معکوس مهلت رزرو سفارش‌ها (D-099) ──
-    var anyTtl = false;
     document.querySelectorAll('.ord-ttl').forEach(function(el){
-        anyTtl = true;
         var remain = parseInt(el.getAttribute('data-remaining') || '0', 10);
         var b = el.querySelector('b');
         function render(){
@@ -304,14 +369,11 @@
 <div class="container">
     <div class="pf-wrap">
 
-        <!-- ═══ هدر خوش‌آمد ═══ -->
+        <!-- ═══ هدر هویتی (D-122: بدون دایرهٔ حرف اول — فقط نام + شماره واضح) ═══ -->
         <section class="pf-hero">
             <div class="pf-id">
-                <div class="pf-avatar">{% if user.first_name %}{{ user.first_name|slice:':1' }}{% else %}🌿{% endif %}</div>
-                <div>
-                    <h1>{{ user.get_full_name|default:"کاربر ریهان" }}</h1>
-                    <div class="pf-phone">{{ user.username }}</div>
-                </div>
+                <h1>{{ user.get_full_name|default:"کاربر ریهان" }}</h1>
+                <div class="pf-phone" id="pfPhone" aria-label="شماره موبایل حساب">{{ user.username|fa }}</div>
             </div>
             <div class="pf-stats">
                 <div class="pf-stat"><b>{{ stats.total_orders|fa }}</b><span>سفارش ثبت‌شده</span></div>
@@ -327,315 +389,387 @@
             {% endfor %}
         {% endif %}
 
-        <!-- ═══ تب‌ها ═══ -->
-        <nav class="pf-tabs" aria-label="بخش‌های حساب">
-            <button type="button" class="pf-tab is-active" data-tab="orders">📦 سفارش‌ها</button>
-            <button type="button" class="pf-tab" data-tab="addresses">📍 آدرس‌ها</button>
-            <button type="button" class="pf-tab" data-tab="account">👤 اطلاعات حساب</button>
-            <button type="button" class="pf-tab" data-tab="security">🔐 امنیت</button>
-            <button type="button" class="pf-tab" data-tab="devices">📱 دستگاه‌ها</button>
-            <a class="pf-exit" href="{% url 'auth_pages:logout' %}">🚪 خروج</a>
-        </nav>
+        <div class="pf-body">
 
-        <!-- ═══ پنل سفارش‌ها ═══ -->
-        <section class="pf-panel is-active" id="tab-orders">
-            {% if orders %}
-                {% for o in orders %}
-                <article class="ord-card">
-                    <div class="ord-top">
-                        <div>
-                            <div class="ord-num">{{ o.order_number }}</div>
-                            <div class="ord-date">{{ o.created_at|jdate_human }}</div>
-                        </div>
-                        <span class="badge {{ o.badge_code|default:o.status }}">{{ o.status_fa }}</span>
-                    </div>
-                    <div class="ord-mid">
-                        <span>{{ o.items_count|fa }} کالا</span>
-                        <b>{{ o.total_price|money }} تومان</b>
-                    </div>
-                    {% if o.shipments %}
-                    <div class="ord-ships">
-                        {% for s in o.shipments %}
-                        <div class="ord-ship">
-                            <span class="os-label">🚚 {{ s.carrier_label }} — {{ s.status_label }}</span>
-                            {% if s.tracking_code %}
-                            <span class="os-code">{{ s.tracking_code }}</span>
-                            <a class="os-btn" target="_blank" rel="noopener"
-                               {% if s.tracking_url %}href="{{ s.tracking_url }}"{% else %}href="/order/t/{{ s.tracking_code }}/"{% endif %}>🔍 رهگیری مرسوله</a>
-                            {% endif %}
-                            {% if s.other_details %}<span class="os-other">{{ s.other_details }}</span>{% endif %}
-                        </div>
-                        {% endfor %}
-                    </div>
-                    {% endif %}
-                    {% if o.status == 'PENDING' and o.remaining_seconds > 0 %}
-                    <div class="ord-ttl" data-remaining="{{ o.remaining_seconds }}">
-                        ⏳ مهلت رزرو موجودی: <b>{% widthratio o.remaining_seconds 60 1 %} دقیقه</b>
-                    </div>
-                    {% endif %}
-                    <div class="ord-actions">
-                        {% if o.can_pay %}
-                        <a class="ord-btn solid" href="{% url 'order_pages:payment_page' o.order_number %}">💳 تکمیل پرداخت</a>
-                        {% endif %}
-                        <a class="ord-btn ghost" href="{% url 'order_pages:tracking_page' o.order_number %}">مشاهده وضعیت</a>
-                        {% if o.can_cancel %}
-                        <form method="post" action="{% url 'order_pages:cancel_order' o.order_number %}" style="display:inline;"
-                              onsubmit="return confirm('سفارش لغو شود؟ موجودی رزرو‌شده بلافاصله آزاد می‌شود.');">
-                            {% csrf_token %}
-                            <input type="hidden" name="next" value="{% url 'auth_pages:profile' %}">
-                            <button type="submit" class="ord-cancel">لغو سفارش</button>
-                        </form>
-                        {% endif %}
-                    </div>
-                </article>
-                {% endfor %}
-            {% else %}
-                <div class="pf-card">
-                    <div class="pf-empty">
-                        <div class="ico">🌱</div>
-                        <h3>هنوز سفارشی ثبت نکرده‌اید</h3>
-                        <p>اولین خریدتان را تجربه کنید؛ محصولات منتخب ریهان منتظر شما هستند.</p>
-                        <a href="/" class="pf-cta">مشاهده محصولات</a>
-                    </div>
+            <!-- ═══ منوی اصلی حساب — همهٔ بخش‌ها همیشه پیدا (D-122) ═══ -->
+            <nav class="pf-home" aria-label="بخش‌های حساب">
+                <div class="pf-menu-card">
+                    <div class="pf-menu-group">خرید و ارسال</div>
+                    <button type="button" class="pf-row" data-tab="orders" aria-controls="tab-orders">
+                        <span class="pf-row-ico" aria-hidden="true">📦</span>
+                        <span class="pf-row-txt">
+                            <b>سفارش‌های من</b>
+                            <small>{% if stats.total_orders %}{{ stats.active_orders|fa }} سفارش فعال از {{ stats.total_orders|fa }} سفارش{% else %}هنوز سفارشی ثبت نشده{% endif %}</small>
+                        </span>
+                        <span class="pf-row-chev" aria-hidden="true">‹</span>
+                    </button>
+                    <button type="button" class="pf-row" data-tab="addresses" aria-controls="tab-addresses">
+                        <span class="pf-row-ico" aria-hidden="true">📍</span>
+                        <span class="pf-row-txt">
+                            <b>آدرس‌های من</b>
+                            <small>{% if addresses %}{{ addresses|length|fa }} آدرس ذخیره‌شده{% else %}برای ارسال سریع‌تر آدرس اضافه کنید{% endif %}</small>
+                        </span>
+                        <span class="pf-row-chev" aria-hidden="true">‹</span>
+                    </button>
+
+                    <div class="pf-menu-group">حساب و امنیت</div>
+                    <button type="button" class="pf-row" data-tab="account" aria-controls="tab-account">
+                        <span class="pf-row-ico" aria-hidden="true">👤</span>
+                        <span class="pf-row-txt">
+                            <b>اطلاعات حساب</b>
+                            <small>{% if user.get_full_name %}{{ user.get_full_name }}{% else %}تکمیل نام و ایمیل{% endif %}</small>
+                        </span>
+                        <span class="pf-row-chev" aria-hidden="true">‹</span>
+                    </button>
+                    <button type="button" class="pf-row" data-tab="security" aria-controls="tab-security">
+                        <span class="pf-row-ico" aria-hidden="true">🔐</span>
+                        <span class="pf-row-txt">
+                            <b>امنیت و رمز عبور</b>
+                            <small>{% if has_password %}رمز عبور فعال ✓{% else %}بدون رمز — برای ورود بدون پیامک بسازید{% endif %}</small>
+                        </span>
+                        <span class="pf-row-chev" aria-hidden="true">‹</span>
+                    </button>
+                    <button type="button" class="pf-row" data-tab="devices" aria-controls="tab-devices">
+                        <span class="pf-row-ico" aria-hidden="true">📱</span>
+                        <span class="pf-row-txt">
+                            <b>دستگاه‌های من</b>
+                            <small>{% if devices %}{{ devices|length|fa }} دستگاه متصل{% else %}دستگاه ذخیره‌شده‌ای ندارید{% endif %}</small>
+                        </span>
+                        <span class="pf-row-chev" aria-hidden="true">‹</span>
+                    </button>
                 </div>
-            {% endif %}
-        </section>
+                <div class="pf-menu-card">
+                    <a class="pf-row pf-row-exit" href="{% url 'auth_pages:logout' %}">
+                        <span class="pf-row-ico" aria-hidden="true">🚪</span>
+                        <span class="pf-row-txt">
+                            <b>خروج از حساب</b>
+                            <small>پایان نشست در این دستگاه</small>
+                        </span>
+                        <span class="pf-row-chev" aria-hidden="true">‹</span>
+                    </a>
+                </div>
+            </nav>
 
-        <!-- ═══ پنل اطلاعات حساب ═══ -->
-        <section class="pf-panel" id="tab-account">
-            <div class="pf-card">
-                <h2>👤 اطلاعات حساب</h2>
-                <form method="post" action="{% url 'auth_pages:profile' %}">
-                    {% csrf_token %}
-                    <div class="pf-grid2">
-                        <div class="pf-field">
-                            <label>نام</label>
-                            <input class="pf-input" name="first_name" autocomplete="given-name" value="{{ user.first_name }}" placeholder="مثلاً: مریم">
-                        </div>
-                        <div class="pf-field">
-                            <label>نام خانوادگی</label>
-                            <input class="pf-input" name="last_name" autocomplete="family-name" value="{{ user.last_name }}" placeholder="مثلاً: احمدی">
-                        </div>
-                    </div>
-                    <div class="pf-field">
-                        <label>شماره موبایل (نام کاربری — غیرقابل تغییر)</label>
-                        <input class="pf-input" dir="ltr" value="{{ user.username }}" readonly>
-                    </div>
-                    <div class="pf-field">
-                        <label>ایمیل (اختیاری)</label>
-                        <input class="pf-input" dir="ltr" name="email" autocomplete="email" value="{{ user.email }}" placeholder="you@example.com">
-                    </div>
-                    <button type="submit" class="pf-save">ذخیره تغییرات</button>
-                </form>
-            </div>
-        </section>
+            <div class="pf-panels">
 
-        <!-- ═══ پنل امنیت ═══ -->
-        <section class="pf-panel" id="tab-security">
-            <div class="pf-card">
-                <h2>🔐 رمز عبور</h2>
-                {% if has_password %}
-                    <p class="pf-hint">رمز عبور برای شما فعال است — حتی هنگام قطعی پیامک هم می‌توانید وارد شوید. (نام کاربری شما همان شماره موبایل است)</p>
+            <!-- ═══ پنل سفارش‌ها ═══ -->
+            <section class="pf-panel is-active" id="tab-orders" aria-label="سفارش‌های من">
+                <div class="pf-panel-head" role="group">
+                    <button type="button" class="pf-back" data-back aria-label="بازگشت به منوی حساب"><span class="bchev">‹</span> بازگشت</button>
+                    <h2>📦 سفارش‌های من</h2>
+                </div>
+                {% if orders %}
+                    {% for o in orders %}
+                    <article class="ord-card">
+                        <div class="ord-top">
+                            <div>
+                                <div class="ord-num">{{ o.order_number }}</div>
+                                <div class="ord-date">{{ o.created_at|jdate_human }}</div>
+                            </div>
+                            <span class="badge {{ o.badge_code|default:o.status }}">{{ o.status_fa }}</span>
+                        </div>
+                        <div class="ord-mid">
+                            <span>{{ o.items_count|fa }} کالا</span>
+                            <b>{{ o.total_price|money }} تومان</b>
+                        </div>
+                        {% if o.shipments %}
+                        <div class="ord-ships">
+                            {% for s in o.shipments %}
+                            <div class="ord-ship">
+                                <span class="os-label">🚚 {{ s.carrier_label }} — {{ s.status_label }}</span>
+                                {% if s.tracking_code %}
+                                <span class="os-code">{{ s.tracking_code }}</span>
+                                <a class="os-btn" target="_blank" rel="noopener"
+                                   {% if s.tracking_url %}href="{{ s.tracking_url }}"{% else %}href="/order/t/{{ s.tracking_code }}/"{% endif %}>🔍 رهگیری مرسوله</a>
+                                {% endif %}
+                                {% if s.other_details %}<span class="os-other">{{ s.other_details }}</span>{% endif %}
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                        {% if o.status == 'PENDING' and o.remaining_seconds > 0 %}
+                        <div class="ord-ttl" data-remaining="{{ o.remaining_seconds }}">
+                            ⏳ مهلت رزرو موجودی: <b>{% widthratio o.remaining_seconds 60 1 %} دقیقه</b>
+                        </div>
+                        {% endif %}
+                        <div class="ord-actions">
+                            {% if o.can_pay %}
+                            <a class="ord-btn solid" href="{% url 'order_pages:payment_page' o.order_number %}">💳 تکمیل پرداخت</a>
+                            {% endif %}
+                            <a class="ord-btn ghost" href="{% url 'order_pages:tracking_page' o.order_number %}">مشاهده وضعیت</a>
+                            {% if o.can_cancel %}
+                            <form method="post" action="{% url 'order_pages:cancel_order' o.order_number %}" style="display:inline;"
+                                  onsubmit="return confirm('سفارش لغو شود؟ موجودی رزرو‌شده بلافاصله آزاد می‌شود.');">
+                                {% csrf_token %}
+                                <input type="hidden" name="next" value="{% url 'auth_pages:profile' %}">
+                                <button type="submit" class="ord-cancel">لغو سفارش</button>
+                            </form>
+                            {% endif %}
+                        </div>
+                    </article>
+                    {% endfor %}
+                {% else %}
+                    <div class="pf-card">
+                        <div class="pf-empty">
+                            <div class="ico">🌱</div>
+                            <h3>هنوز سفارشی ثبت نکرده‌اید</h3>
+                            <p>اولین خریدتان را تجربه کنید؛ محصولات منتخب ریهان منتظر شما هستند.</p>
+                            <a href="/" class="pf-cta">مشاهده محصولات</a>
+                        </div>
+                    </div>
+                {% endif %}
+            </section>
+
+            <!-- ═══ پنل اطلاعات حساب ═══ -->
+            <section class="pf-panel" id="tab-account" aria-label="اطلاعات حساب">
+                <div class="pf-panel-head" role="group">
+                    <button type="button" class="pf-back" data-back aria-label="بازگشت به منوی حساب"><span class="bchev">‹</span> بازگشت</button>
+                    <h2>👤 اطلاعات حساب</h2>
+                </div>
+                <div class="pf-card">
                     <form method="post" action="{% url 'auth_pages:profile' %}">
                         {% csrf_token %}
-                        <input type="hidden" name="action" value="change_password">
+                        <div class="pf-grid2">
+                            <div class="pf-field">
+                                <label>نام</label>
+                                <input class="pf-input" name="first_name" autocomplete="given-name" value="{{ user.first_name }}" placeholder="مثلاً: مریم">
+                            </div>
+                            <div class="pf-field">
+                                <label>نام خانوادگی</label>
+                                <input class="pf-input" name="last_name" autocomplete="family-name" value="{{ user.last_name }}" placeholder="مثلاً: احمدی">
+                            </div>
+                        </div>
                         <div class="pf-field">
-                            <label>رمز عبور فعلی</label>
-                            <input class="pf-input js-pwd" dir="ltr" type="password" name="current_password" required autocomplete="current-password">
+                            <label>شماره موبایل (نام کاربری — غیرقابل تغییر)</label>
+                            <input class="pf-input" dir="ltr" value="{{ user.username }}" readonly>
                         </div>
-                        <div class="pf-grid2">
-                            <div class="pf-field pwd-wrap">
-                                <label>رمز جدید (حداقل ۸ کاراکتر، حرف + رقم)</label>
-                                <input class="pf-input js-pwd js-pwd1" dir="ltr" type="password" name="password1" required minlength="8" autocomplete="new-password">
-                                <button type="button" class="eye-btn" aria-label="نمایش رمز">👁</button>
-                                <div class="strength"><i></i><i></i><i></i></div>
-                                <div class="strength-lbl"></div>
-                            </div>
-                            <div class="pf-field pwd-wrap">
-                                <label>تکرار رمز جدید</label>
-                                <input class="pf-input js-pwd" dir="ltr" type="password" name="password2" required minlength="8" autocomplete="new-password">
-                                <button type="button" class="eye-btn" aria-label="نمایش رمز">👁</button>
-                            </div>
+                        <div class="pf-field">
+                            <label>ایمیل (اختیاری)</label>
+                            <input class="pf-input" dir="ltr" name="email" autocomplete="email" value="{{ user.email }}" placeholder="you@example.com">
                         </div>
-                        <div class="match-hint">رمزها یکسان نیستند ⚠️</div>
-                        <button type="submit" class="pf-save">تغییر رمز عبور</button>
+                        <button type="submit" class="pf-save">ذخیره تغییرات</button>
                     </form>
-                {% else %}
-                    <p class="pf-hint">هنوز رمز عبوری ندارید. با ساخت رمز، در مواقعی که پیامک نمی‌رسد هم می‌توانید وارد شوید.</p>
-                    <form method="post" action="{% url 'auth_pages:profile' %}" id="setpwd-form">
-                        {% csrf_token %}
-                        <input type="hidden" name="action" value="set_password">
-                        <div class="pf-grid2">
-                            <div class="pf-field pwd-wrap">
-                                <label>رمز عبور جدید (حداقل ۸ کاراکتر، حرف + رقم)</label>
-                                <input class="pf-input js-pwd js-pwd1" dir="ltr" type="password" name="password1" required minlength="8" autocomplete="new-password">
-                                <button type="button" class="eye-btn" aria-label="نمایش رمز">👁</button>
-                                <div class="strength"><i></i><i></i><i></i></div>
-                                <div class="strength-lbl"></div>
-                            </div>
-                            <div class="pf-field pwd-wrap">
-                                <label>تکرار رمز عبور</label>
-                                <input class="pf-input js-pwd" dir="ltr" type="password" name="password2" required minlength="8" autocomplete="new-password">
-                                <button type="button" class="eye-btn" aria-label="نمایش رمز">👁</button>
-                            </div>
-                        </div>
-                        <div class="match-hint">رمزها یکسان نیستند ⚠️</div>
-                        <button type="submit" class="pf-save">ساخت رمز عبور 🔑</button>
-                    </form>
-                {% endif %}
-            </div>
-        </section>
+                </div>
+            </section>
 
-        <!-- ═══ پنل دستگاه‌ها ═══ -->
-        <section class="pf-panel" id="tab-devices">
-            <div class="pf-card">
-                <h2>📱 دستگاه‌های من</h2>
-                <p class="pf-hint">دستگاه‌هایی که «مرا به خاطر بسپار» را زده‌اند و تا ۳۰ روز بدون ورود مجدد باز می‌شوند.</p>
-                {% if devices %}
-                    {% for d in devices %}
-                    <div class="dev-row">
-                        <div>
-                            <div class="dev-t">{{ d.device_type }}</div>
-                            <div class="dev-s">آخرین استفاده: {{ d.last_used_at|jtime }} · از {{ d.ip_address|default:'—' }}</div>
-                        </div>
+            <!-- ═══ پنل امنیت ═══ -->
+            <section class="pf-panel" id="tab-security" aria-label="امنیت و رمز عبور">
+                <div class="pf-panel-head" role="group">
+                    <button type="button" class="pf-back" data-back aria-label="بازگشت به منوی حساب"><span class="bchev">‹</span> بازگشت</button>
+                    <h2>🔐 امنیت و رمز عبور</h2>
+                </div>
+                <div class="pf-card">
+                    {% if has_password %}
+                        <p class="pf-hint">رمز عبور برای شما فعال است — حتی هنگام قطعی پیامک هم می‌توانید وارد شوید. (نام کاربری شما همان شماره موبایل است)</p>
                         <form method="post" action="{% url 'auth_pages:profile' %}">
                             {% csrf_token %}
-                            <input type="hidden" name="action" value="revoke_device">
-                            <input type="hidden" name="device_id" value="{{ d.id }}">
-                            <button type="submit" class="revoke-btn">خروج از این دستگاه</button>
+                            <input type="hidden" name="action" value="change_password">
+                            <div class="pf-field">
+                                <label>رمز عبور فعلی</label>
+                                <input class="pf-input js-pwd" dir="ltr" type="password" name="current_password" required autocomplete="current-password">
+                            </div>
+                            <div class="pf-grid2">
+                                <div class="pf-field pwd-wrap">
+                                    <label>رمز جدید (حداقل ۸ کاراکتر، حرف + رقم)</label>
+                                    <input class="pf-input js-pwd js-pwd1" dir="ltr" type="password" name="password1" required minlength="8" autocomplete="new-password">
+                                    <button type="button" class="eye-btn" aria-label="نمایش رمز">👁</button>
+                                    <div class="strength"><i></i><i></i><i></i></div>
+                                    <div class="strength-lbl"></div>
+                                </div>
+                                <div class="pf-field pwd-wrap">
+                                    <label>تکرار رمز جدید</label>
+                                    <input class="pf-input js-pwd" dir="ltr" type="password" name="password2" required minlength="8" autocomplete="new-password">
+                                    <button type="button" class="eye-btn" aria-label="نمایش رمز">👁</button>
+                                </div>
+                            </div>
+                            <div class="match-hint">رمزها یکسان نیستند ⚠️</div>
+                            <button type="submit" class="pf-save">تغییر رمز عبور</button>
                         </form>
-                    </div>
-                    {% endfor %}
-                    <form method="post" action="{% url 'auth_pages:profile' %}" onsubmit="return confirm('همه دستگاه‌ها خارج شوند؟');">
-                        {% csrf_token %}
-                        <input type="hidden" name="action" value="revoke_all_devices">
-                        <button type="submit" class="revoke-all-btn">🚪 خروج از همه دستگاه‌ها</button>
-                    </form>
-                {% else %}
-                    <div class="pf-hint" style="margin-bottom:0;">دستگاه فعلی به‌عنوان دستگاه معتبر ذخیره نشده است.</div>
-                {% endif %}
-            </div>
-        </section>
-
-        <!-- ═══ پنل آدرس‌ها (D-102) ═══ -->
-        <section class="pf-panel" id="tab-addresses">
-            <style>
-                .adr-card{border:1.5px solid var(--color-border);border-radius:14px;padding:16px 18px;margin-bottom:12px;background:#fff;}
-                .adr-card.is-def{border-color:var(--color-primary);background:#F4F8F2;}
-                .adr-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:8px;flex-wrap:wrap;}
-                .adr-name{font-weight:800;font-size:15px;color:var(--color-text);}
-                .adr-name small{font-weight:600;color:var(--color-text-muted);direction:ltr;}
-                .adr-badge{font-size:11.5px;font-weight:700;border-radius:999px;padding:3px 12px;background:var(--color-primary);color:#fff;}
-                .adr-badge.soft{background:#E8F0E5;color:var(--color-primary);}
-                .adr-body{font-size:13.5px;color:var(--color-text-muted);line-height:1.9;margin-bottom:12px;}
-                .adr-actions{display:flex;gap:8px;flex-wrap:wrap;}
-                .adr-btn{font-family:inherit;font-size:12.5px;font-weight:700;border-radius:9px;padding:7px 14px;cursor:pointer;border:1.5px solid var(--color-border);background:#fff;color:var(--color-text);text-decoration:none;display:inline-block;}
-                .adr-btn:hover{border-color:var(--color-primary);color:var(--color-primary);}
-                .adr-btn.danger{color:#b3402f;}
-                .adr-btn.danger:hover{border-color:#b3402f;color:#b3402f;}
-                .adr-btn.primary{background:var(--color-primary);color:#fff;border-color:var(--color-primary);}
-                .adr-form-box{border:1.5px dashed var(--color-border);border-radius:14px;padding:14px 18px;margin-bottom:18px;background:#FBFAF6;}
-                .adr-form-box summary{cursor:pointer;font-weight:800;font-size:14px;color:var(--color-primary);list-style:none;display:flex;align-items:center;gap:8px;}
-                .adr-form-box summary::-webkit-details-marker{display:none;}
-                .adr-def-row{display:flex;align-items:center;gap:9px;margin:14px 0;cursor:pointer;}
-                .adr-def-row input{width:17px;height:17px;accent-color:var(--color-primary);}
-                .adr-def-row span{font-size:13.5px;font-weight:600;color:var(--color-text);}
-                .req-star{color:#b3402f;font-weight:800;}
-                .adr-errors{background:#FDECEA;border:1.5px solid #E8A9A0;border-radius:10px;padding:10px 14px;margin-bottom:14px;}
-                .adr-errors p{margin:3px 0;font-size:13px;color:#8f2c1e;font-weight:600;}
-                .pf-hint-why{font-size:12px;line-height:1.9;color:#6b6b6b;margin-top:6px;}
-                .pf-hint-why a{color:var(--color-primary);font-weight:700;}
-                .pc-live{font-size:12px;color:#8a8a8a;margin-top:6px;min-height:18px;}
-                .pc-live.ok{color:#2e7d32;font-weight:800;}
-                .pc-live.warn{color:#b3402f;font-weight:700;}
-                .pf-input.is-ok{border-color:#2e7d32;}
-            </style>
-            <div class="pf-card">
-                <h2>📍 آدرس‌های من</h2>
-                <p class="pf-hint">آدرس‌های ذخیره‌شده در تسویه‌حساب با یک کلیک انتخاب می‌شوند؛ آدرس پیش‌فرض خودکار انتخاب می‌شود.</p>
-
-                <details class="adr-form-box"{% if edit_address or address_form_errors %} open{% endif %}>
-                    <summary>{% if edit_address %}✏️ ویرایش آدرس{% else %}➕ افزودن آدرس جدید{% endif %}</summary>
-                    <form method="post" action="{% url 'auth_pages:profile' %}" style="margin-top:16px;">
-                        {% csrf_token %}
-                        <input type="hidden" name="action" value="address_save">
-                        {% if edit_address %}<input type="hidden" name="address_id" value="{{ edit_address.pk }}">{% endif %}
-                        {% if address_form_errors %}
-                        <div class="adr-errors" role="alert">
-                            {% for e in address_form_errors %}<p>⚠️ {{ e }}</p>{% endfor %}
-                        </div>
-                        {% endif %}
-                        <div class="pf-field">
-                            <label>عنوان آدرس (اختیاری)</label>
-                            <input class="pf-input" name="title" maxlength="60" autocomplete="off" value="{% if address_form_data %}{{ address_form_data.title }}{% else %}{{ edit_address.title|default:'' }}{% endif %}" placeholder="مثلاً: خانه، محل کار">
-                        </div>
-                        <div class="pf-grid2">
-                            <div class="pf-field">
-                                <label>نام و نام خانوادگی گیرنده</label>
-                                <input class="pf-input" name="full_name" autocomplete="name" autocapitalize="words" value="{% if address_form_data %}{{ address_form_data.full_name }}{% else %}{{ edit_address.full_name|default:user.first_name|default:'' }}{% endif %}" placeholder="مثلاً: مریم احمدی" required>
+                    {% else %}
+                        <p class="pf-hint">هنوز رمز عبوری ندارید. با ساخت رمز، در مواقعی که پیامک نمی‌رسد هم می‌توانید وارد شوید.</p>
+                        <form method="post" action="{% url 'auth_pages:profile' %}" id="setpwd-form">
+                            {% csrf_token %}
+                            <input type="hidden" name="action" value="set_password">
+                            <div class="pf-grid2">
+                                <div class="pf-field pwd-wrap">
+                                    <label>رمز عبور جدید (حداقل ۸ کاراکتر، حرف + رقم)</label>
+                                    <input class="pf-input js-pwd js-pwd1" dir="ltr" type="password" name="password1" required minlength="8" autocomplete="new-password">
+                                    <button type="button" class="eye-btn" aria-label="نمایش رمز">👁</button>
+                                    <div class="strength"><i></i><i></i><i></i></div>
+                                    <div class="strength-lbl"></div>
+                                </div>
+                                <div class="pf-field pwd-wrap">
+                                    <label>تکرار رمز عبور</label>
+                                    <input class="pf-input js-pwd" dir="ltr" type="password" name="password2" required minlength="8" autocomplete="new-password">
+                                    <button type="button" class="eye-btn" aria-label="نمایش رمز">👁</button>
+                                </div>
                             </div>
-                            <div class="pf-field">
-                                <label>شماره موبایل گیرنده</label>
-                                <input class="pf-input" dir="ltr" name="phone" autocomplete="tel" inputmode="tel" autocapitalize="off" spellcheck="false" enterkeyhint="next" value="{% if address_form_data %}{{ address_form_data.phone }}{% else %}{{ edit_address.phone|default:user.username|default:'' }}{% endif %}" placeholder="09123456789" required>
-                            </div>
-                        </div>
-                        <div class="pf-field">
-                            <label>آدرس کامل</label>
-                            <textarea class="pf-input" name="address" rows="3" autocomplete="street-address" enterkeyhint="next" placeholder="استان، شهر، خیابان، پلاک و واحد..." required>{% if address_form_data %}{{ address_form_data.address }}{% else %}{{ edit_address.detailed_address|default:'' }}{% endif %}</textarea>
-                        </div>
-                        <div class="pf-field">
-                            <label>کد پستی ۱۰ رقمی <span class="req-star">*</span></label>
-                            <input class="pf-input" dir="ltr" name="postal_code" maxlength="10" inputmode="numeric" pattern="\d{10}"
-                                   autocomplete="postal-code" autocapitalize="off" spellcheck="false" enterkeyhint="done"
-                                   title="کد پستی ۱۰ رقمی، بدون خط تیره" required aria-required="true"
-                                   value="{% if address_form_data %}{{ address_form_data.postal_code }}{% else %}{{ edit_address.postal_code|default:'' }}{% endif %}"
-                                   placeholder="مثلاً 5151411111">
-                            <div class="pc-live" id="pfPcLive" aria-live="polite"></div>
-                            <p class="pf-hint-why">اداره پست بدون کدپستی مرسوله را ثبت نمی‌کند؛ با کدپستی بسته سریع‌تر و بدون خطا به همان پلاک و واحد تحویل داده می‌شود. کد را نمی‌دانید؟ از <a href="https://www.post.ir" target="_blank" rel="noopener">سایت پست</a> یا اپلیکیشن «پیشخوان دولت» استعلام بگیرید.</p>
-                        </div>
-                        <label class="adr-def-row">
-                            <input type="checkbox" name="is_default" {% if address_form_data %}{% if address_form_data.is_default %}checked{% endif %}{% elif edit_address.is_default or not edit_address and not addresses %}checked{% endif %}>
-                            <span>⭐ این آدرس پیش‌فرض من باشد</span>
-                        </label>
-                        <div style="display:flex;gap:10px;flex-wrap:wrap;">
-                            <button type="submit" class="pf-save">{% if edit_address %}ذخیره تغییرات{% else %}ذخیره آدرس{% endif %}</button>
-                            {% if edit_address %}<a href="{% url 'auth_pages:profile' %}" class="adr-btn">لغو</a>{% endif %}
-                        </div>
-                    </form>
-                </details>
+                            <div class="match-hint">رمزها یکسان نیستند ⚠️</div>
+                            <button type="submit" class="pf-save">ساخت رمز عبور 🔑</button>
+                        </form>
+                    {% endif %}
+                </div>
+            </section>
 
-                {% if addresses %}
-                    {% for addr in addresses %}
-                    <div class="adr-card {% if addr.is_default %}is-def{% endif %}">
-                        <div class="adr-head">
-                            <span class="adr-name">{{ addr.full_name }} <small>{{ addr.phone }}</small></span>
-                            {% if addr.is_default %}<span class="adr-badge">⭐ پیش‌فرض</span>{% elif addr.title %}<span class="adr-badge soft">{{ addr.title }}</span>{% endif %}
-                        </div>
-                        <div class="adr-body">{{ addr.detailed_address }}{% if addr.postal_code %} — کدپستی {{ addr.postal_code|fa }}{% endif %}</div>
-                        <div class="adr-actions">
-                            {% if not addr.is_default %}
+            <!-- ═══ پنل دستگاه‌ها ═══ -->
+            <section class="pf-panel" id="tab-devices" aria-label="دستگاه‌های من">
+                <div class="pf-panel-head" role="group">
+                    <button type="button" class="pf-back" data-back aria-label="بازگشت به منوی حساب"><span class="bchev">‹</span> بازگشت</button>
+                    <h2>📱 دستگاه‌های من</h2>
+                </div>
+                <div class="pf-card">
+                    <p class="pf-hint">دستگاه‌هایی که «مرا به خاطر بسپار» را زده‌اند و تا ۳۰ روز بدون ورود مجدد باز می‌شوند.</p>
+                    {% if devices %}
+                        {% for d in devices %}
+                        <div class="dev-row">
+                            <div>
+                                <div class="dev-t">{{ d.device_type }}</div>
+                                <div class="dev-s">آخرین استفاده: {{ d.last_used_at|jtime }} · از {{ d.ip_address|default:'—' }}</div>
+                            </div>
                             <form method="post" action="{% url 'auth_pages:profile' %}">
                                 {% csrf_token %}
-                                <input type="hidden" name="action" value="address_default">
-                                <input type="hidden" name="address_id" value="{{ addr.pk }}">
-                                <button type="submit" class="adr-btn">⭐ پیش‌فرض کن</button>
-                            </form>
-                            {% endif %}
-                            <a class="adr-btn" href="?edit={{ addr.pk }}">✏️ ویرایش</a>
-                            <form method="post" action="{% url 'auth_pages:profile' %}" onsubmit="return confirm('این آدرس حذف شود؟');">
-                                {% csrf_token %}
-                                <input type="hidden" name="action" value="address_delete">
-                                <input type="hidden" name="address_id" value="{{ addr.pk }}">
-                                <button type="submit" class="adr-btn danger">🗑 حذف</button>
+                                <input type="hidden" name="action" value="revoke_device">
+                                <input type="hidden" name="device_id" value="{{ d.id }}">
+                                <button type="submit" class="revoke-btn">خروج از این دستگاه</button>
                             </form>
                         </div>
-                    </div>
-                    {% endfor %}
-                {% else %}
-                    <div class="pf-hint" style="margin-bottom:0;">هنوز آدرسی ذخیره نکرده‌اید. اولین آدرس را از فرم بالای همین بخش اضافه کنید.</div>
-                {% endif %}
+                        {% endfor %}
+                        <form method="post" action="{% url 'auth_pages:profile' %}" onsubmit="return confirm('همه دستگاه‌ها خارج شوند؟');">
+                            {% csrf_token %}
+                            <input type="hidden" name="action" value="revoke_all_devices">
+                            <button type="submit" class="revoke-all-btn">🚪 خروج از همه دستگاه‌ها</button>
+                        </form>
+                    {% else %}
+                        <div class="pf-hint" style="margin-bottom:0;">دستگاه فعلی به‌عنوان دستگاه معتبر ذخیره نشده است.</div>
+                    {% endif %}
+                </div>
+            </section>
+
+            <!-- ═══ پنل آدرس‌ها (D-102) ═══ -->
+            <section class="pf-panel" id="tab-addresses" aria-label="آدرس‌های من">
+                <div class="pf-panel-head" role="group">
+                    <button type="button" class="pf-back" data-back aria-label="بازگشت به منوی حساب"><span class="bchev">‹</span> بازگشت</button>
+                    <h2>📍 آدرس‌های من</h2>
+                </div>
+                <style>
+                    .adr-card{border:1.5px solid var(--color-border);border-radius:14px;padding:16px 18px;margin-bottom:12px;background:#fff;}
+                    .adr-card.is-def{border-color:var(--color-primary);background:#F4F8F2;}
+                    .adr-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:8px;flex-wrap:wrap;}
+                    .adr-name{font-weight:800;font-size:15px;color:var(--color-text);}
+                    .adr-name small{font-weight:600;color:var(--color-text-muted);direction:ltr;}
+                    .adr-badge{font-size:11.5px;font-weight:700;border-radius:999px;padding:3px 12px;background:var(--color-primary);color:#fff;}
+                    .adr-badge.soft{background:#E8F0E5;color:var(--color-primary);}
+                    .adr-body{font-size:13.5px;color:var(--color-text-muted);line-height:1.9;margin-bottom:12px;}
+                    .adr-actions{display:flex;gap:8px;flex-wrap:wrap;}
+                    .adr-btn{font-family:inherit;font-size:12.5px;font-weight:700;border-radius:9px;padding:7px 14px;cursor:pointer;border:1.5px solid var(--color-border);background:#fff;color:var(--color-text);text-decoration:none;display:inline-block;}
+                    .adr-btn:hover{border-color:var(--color-primary);color:var(--color-primary);}
+                    .adr-btn.danger{color:#b3402f;}
+                    .adr-btn.danger:hover{border-color:#b3402f;color:#b3402f;}
+                    .adr-btn.primary{background:var(--color-primary);color:#fff;border-color:var(--color-primary);}
+                    .adr-form-box{border:1.5px dashed var(--color-border);border-radius:14px;padding:14px 18px;margin-bottom:18px;background:#FBFAF6;}
+                    .adr-form-box summary{cursor:pointer;font-weight:800;font-size:14px;color:var(--color-primary);list-style:none;display:flex;align-items:center;gap:8px;}
+                    .adr-form-box summary::-webkit-details-marker{display:none;}
+                    .adr-def-row{display:flex;align-items:center;gap:9px;margin:14px 0;cursor:pointer;}
+                    .adr-def-row input{width:17px;height:17px;accent-color:var(--color-primary);}
+                    .adr-def-row span{font-size:13.5px;font-weight:600;color:var(--color-text);}
+                    .req-star{color:#b3402f;font-weight:800;}
+                    .adr-errors{background:#FDECEA;border:1.5px solid #E8A9A0;border-radius:10px;padding:10px 14px;margin-bottom:14px;}
+                    .adr-errors p{margin:3px 0;font-size:13px;color:#8f2c1e;font-weight:600;}
+                    .pf-hint-why{font-size:12px;line-height:1.9;color:#6b6b6b;margin-top:6px;}
+                    .pf-hint-why a{color:var(--color-primary);font-weight:700;}
+                    .pc-live{font-size:12px;color:#8a8a8a;margin-top:6px;min-height:18px;}
+                    .pc-live.ok{color:#2e7d32;font-weight:800;}
+                    .pc-live.warn{color:#b3402f;font-weight:700;}
+                    .pf-input.is-ok{border-color:#2e7d32;}
+                </style>
+                <div class="pf-card">
+                    <p class="pf-hint">آدرس‌های ذخیره‌شده در تسویه‌حساب با یک کلیک انتخاب می‌شوند؛ آدرس پیش‌فرض خودکار انتخاب می‌شود.</p>
+
+                    <details class="adr-form-box"{% if edit_address or address_form_errors %} open{% endif %}>
+                        <summary>{% if edit_address %}✏️ ویرایش آدرس{% else %}➕ افزودن آدرس جدید{% endif %}</summary>
+                        <form method="post" action="{% url 'auth_pages:profile' %}" style="margin-top:16px;">
+                            {% csrf_token %}
+                            <input type="hidden" name="action" value="address_save">
+                            {% if edit_address %}<input type="hidden" name="address_id" value="{{ edit_address.pk }}">{% endif %}
+                            {% if address_form_errors %}
+                            <div class="adr-errors" role="alert">
+                                {% for e in address_form_errors %}<p>⚠️ {{ e }}</p>{% endfor %}
+                            </div>
+                            {% endif %}
+                            <div class="pf-field">
+                                <label>عنوان آدرس (اختیاری)</label>
+                                <input class="pf-input" name="title" maxlength="60" autocomplete="off" value="{% if address_form_data %}{{ address_form_data.title }}{% else %}{{ edit_address.title|default:'' }}{% endif %}" placeholder="مثلاً: خانه، محل کار">
+                            </div>
+                            <div class="pf-grid2">
+                                <div class="pf-field">
+                                    <label>نام و نام خانوادگی گیرنده</label>
+                                    <input class="pf-input" name="full_name" autocomplete="name" autocapitalize="words" value="{% if address_form_data %}{{ address_form_data.full_name }}{% else %}{{ edit_address.full_name|default:user.first_name|default:'' }}{% endif %}" placeholder="مثلاً: مریم احمدی" required>
+                                </div>
+                                <div class="pf-field">
+                                    <label>شماره موبایل گیرنده</label>
+                                    <input class="pf-input" dir="ltr" name="phone" autocomplete="tel" inputmode="tel" autocapitalize="off" spellcheck="false" enterkeyhint="next" value="{% if address_form_data %}{{ address_form_data.phone }}{% else %}{{ edit_address.phone|default:user.username|default:'' }}{% endif %}" placeholder="09123456789" required>
+                                </div>
+                            </div>
+                            <div class="pf-field">
+                                <label>آدرس کامل</label>
+                                <textarea class="pf-input" name="address" rows="3" autocomplete="street-address" enterkeyhint="next" placeholder="استان، شهر، خیابان، پلاک و واحد..." required>{% if address_form_data %}{{ address_form_data.address }}{% else %}{{ edit_address.detailed_address|default:'' }}{% endif %}</textarea>
+                            </div>
+                            <div class="pf-field">
+                                <label>کد پستی ۱۰ رقمی <span class="req-star">*</span></label>
+                                <input class="pf-input" dir="ltr" name="postal_code" maxlength="10" inputmode="numeric" pattern="\d{10}"
+                                       autocomplete="postal-code" autocapitalize="off" spellcheck="false" enterkeyhint="done"
+                                       title="کد پستی ۱۰ رقمی، بدون خط تیره" required aria-required="true"
+                                       value="{% if address_form_data %}{{ address_form_data.postal_code }}{% else %}{{ edit_address.postal_code|default:'' }}{% endif %}"
+                                       placeholder="مثلاً 5151411111">
+                                <div class="pc-live" id="pfPcLive" aria-live="polite"></div>
+                                <p class="pf-hint-why">اداره پست بدون کدپستی مرسوله را ثبت نمی‌کند؛ با کدپستی بسته سریع‌تر و بدون خطا به همان پلاک و واحد تحویل داده می‌شود. کد را نمی‌دانید؟ از <a href="https://www.post.ir" target="_blank" rel="noopener">سایت پست</a> یا اپلیکیشن «پیشخوان دولت» استعلام بگیرید.</p>
+                            </div>
+                            <label class="adr-def-row">
+                                <input type="checkbox" name="is_default" {% if address_form_data %}{% if address_form_data.is_default %}checked{% endif %}{% elif edit_address.is_default or not edit_address and not addresses %}checked{% endif %}>
+                                <span>⭐ این آدرس پیش‌فرض من باشد</span>
+                            </label>
+                            <div style="display:flex;gap:10px;flex-wrap:wrap;">
+                                <button type="submit" class="pf-save">{% if edit_address %}ذخیره تغییرات{% else %}ذخیره آدرس{% endif %}</button>
+                                {% if edit_address %}<a href="{% url 'auth_pages:profile' %}" class="adr-btn">لغو</a>{% endif %}
+                            </div>
+                        </form>
+                    </details>
+
+                    {% if addresses %}
+                        {% for addr in addresses %}
+                        <div class="adr-card {% if addr.is_default %}is-def{% endif %}">
+                            <div class="adr-head">
+                                <span class="adr-name">{{ addr.full_name }} <small>{{ addr.phone }}</small></span>
+                                {% if addr.is_default %}<span class="adr-badge">⭐ پیش‌فرض</span>{% elif addr.title %}<span class="adr-badge soft">{{ addr.title }}</span>{% endif %}
+                            </div>
+                            <div class="adr-body">{{ addr.detailed_address }}{% if addr.postal_code %} — کدپستی {{ addr.postal_code|fa }}{% endif %}</div>
+                            <div class="adr-actions">
+                                {% if not addr.is_default %}
+                                <form method="post" action="{% url 'auth_pages:profile' %}">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="action" value="address_default">
+                                    <input type="hidden" name="address_id" value="{{ addr.pk }}">
+                                    <button type="submit" class="adr-btn">⭐ پیش‌فرض کن</button>
+                                </form>
+                                {% endif %}
+                                <a class="adr-btn" href="?edit={{ addr.pk }}">✏️ ویرایش</a>
+                                <form method="post" action="{% url 'auth_pages:profile' %}" onsubmit="return confirm('این آدرس حذف شود؟');">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="action" value="address_delete">
+                                    <input type="hidden" name="address_id" value="{{ addr.pk }}">
+                                    <button type="submit" class="adr-btn danger">🗑 حذف</button>
+                                </form>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="pf-hint" style="margin-bottom:0;">هنوز آدرسی ذخیره نکرده‌اید. اولین آدرس را از فرم بالای همین بخش اضافه کنید.</div>
+                    {% endif %}
+                </div>
+            </section>
+
             </div>
-        </section>
+        </div>
 
     </div>
 </div>
