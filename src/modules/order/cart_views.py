@@ -14,6 +14,8 @@ from .services import get_or_create_cart, add_to_cart, update_cart_item, remove_
 from .address_service import normalize_phone, normalize_postal_code  # D-120: ورودی آدرسِ بخشنده
 from src.modules.catalog.models import Product
 from src.modules.catalog.services.exceptions import InsufficientStockError
+from src.modules.catalog.services.inventory_service import InventoryService
+from src.modules.catalog.services.variant_stock_service import VariantStockService
 
 # D-111: نرمال‌سازی ارقام فارسی/عربی کد پستی به لاتین
 _FA_EN_DIGITS = str.maketrans('۰۱۲۳۴۵۶۷۸۹٠١٢٣٤٥٦٧٨٩', '01234567890123456789')
@@ -47,31 +49,85 @@ def cart_page_view(request):
 
 @require_POST
 def add_to_cart_view(request):
-    """افزودن محصول به سبد"""
+    """افزودن محصول به سبد
+
+    D-121: درخواست AJAX (X-Requested-With) پاسخ JSON با وضعیت کامل سبد می‌دهد
+    تا سبد کناری (mini-cart) بدون ترک صفحه محصول بازشود و کاربر بتواند
+    بسته‌های دیگر را هم اضافه کند. بدون AJAX همان رفتار قبلی (ریدایرکت).
+    """
     product_slug = request.POST.get('product_slug')
     variant_id = request.POST.get("variant_id") or None
-    quantity = int(request.POST.get('quantity', 1))
-    
+    # D-121: تعداد امن — ارقام فارسی/حرف هم به ۱ برمی‌گردد نه خطای ۵۰۰
+    try:
+        quantity = max(1, int(_to_en(request.POST.get('quantity', '1')) or '1'))
+    except (TypeError, ValueError):
+        quantity = 1
+    wants_json = request.headers.get('X-Requested-With') == 'XMLHttpRequest'
+
     try:
         product = Product.objects.get(slug=product_slug)
         cart = get_or_create_cart(request)
-        add_to_cart(cart, str(product.id), quantity, variant_id)
+        item = add_to_cart(cart, str(product.id), quantity, variant_id)
+        if wants_json:
+            payload = _cart_totals_payload(cart)
+            payload["added_id"] = str(item.id)
+            payload["message"] = f'{product.name} به سبد خرید اضافه شد.'
+            return JsonResponse(payload)
         # D-104: خرید سریع — مستقیم به تسویه‌حساب
         if request.POST.get('fast_buy'):
             return redirect('order_pages:checkout_page')
         messages.success(request, f'{product.name} به سبد خرید اضافه شد.')
     except Product.DoesNotExist:
+        if wants_json:
+            return JsonResponse({"ok": False, "message": 'محصول مورد نظر یافت نشد.'}, status=400)
         messages.error(request, 'محصول مورد نظر یافت نشد.')
     except ValidationError as e:
-        messages.error(request, e.messages[0] if getattr(e, 'messages', None) else str(e))
+        msg = e.messages[0] if getattr(e, 'messages', None) else str(e)
+        if wants_json:
+            return JsonResponse({"ok": False, "message": msg}, status=400)
+        messages.error(request, msg)
     except Exception:
-        messages.error(request, 'متأسفانه در افزودن به سبد خرید خطایی رخ داد. لطفاً دوباره تلاش بفرمایید.')
-    
+        import logging
+        logging.getLogger(__name__).exception("cart add failed")
+        msg = 'متأسفانه در افزودن به سبد خرید خطایی رخ داد. لطفاً دوباره تلاش بفرمایید.'
+        if wants_json:
+            return JsonResponse({"ok": False, "message": msg}, status=400)
+        messages.error(request, msg)
+
     return redirect('order_pages:cart_page')
 
 
+def _cart_items_payload(cart):
+    """اقلام سبد برای سبد کناری (D-121) — همه اعداد از پیش قالب‌بندی فارسی"""
+    items = []
+    for i in cart.items.select_related("product", "variant").all():
+        try:
+            if i.variant_id:
+                available = int(VariantStockService.get_available_stock(i.variant))
+            else:
+                available = int(InventoryService.get_available_stock(i.product))
+        except Exception:
+            available = 0
+        items.append({
+            "id": str(i.id),
+            "name": str(i.product.name),
+            "variant_title": (i.variant.title if i.variant_id else ""),
+            "quantity": i.quantity,
+            "quantity_fa": fa_digits(i.quantity),
+            "unit_price": money(i.unit_price_at_add),
+            "subtotal": money(i.subtotal),
+            "image": i.product.main_image_url or "",
+            "max_available": max(0, available),
+        })
+    return items
+
+
 def _cart_totals_payload(cart):
-    """خلاصه سبد برای پاسخ JSON — به‌روزرسانی بی‌وقفه بدون بارگذاری مجدد صفحه"""
+    """خلاصه سبد برای پاسخ JSON — به‌روزرسانی بی‌وقفه بدون بارگذاری مجدد صفحه
+
+    D-121: آرایه items اضافه شد تا سبد کناریِ صفحه محصول بتواند محتوا را
+    رندر کند؛ per_item برای سازگاری با صفحه سبد حفظ شده است.
+    """
     items = list(cart.items.select_related("product").all())
     subtotal = sum(i.subtotal for i in items)
     item_count = sum(i.quantity for i in items)
@@ -82,6 +138,8 @@ def _cart_totals_payload(cart):
         "subtotal": money(subtotal),
         "total": money(subtotal),
         "per_item": {str(i.id): money(i.subtotal) for i in items},
+        "items": _cart_items_payload(cart),
+        "shipping_free": True,
     }
 
 

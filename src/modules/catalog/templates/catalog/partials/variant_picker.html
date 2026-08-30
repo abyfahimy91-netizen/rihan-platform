@@ -1,5 +1,5 @@
 {% load fa_tags %}
-{% comment %} انتخاب واریانت محصول (بسته وزنی/سایز/رنگ) {% endcomment %}
+{% comment %} انتخاب واریانت محصول (بسته وزنی/سایز/رنگ) — D-121: استپر تعداد + سینک قیمت با نوار چسبان {% endcomment %}
 <div class="variant-picker" id="variant-picker">
     <div class="variant-picker-label">انتخاب کنید:</div>
     <div class="variant-options" role="radiogroup" aria-label="انتخاب بسته یا سایز">
@@ -9,6 +9,7 @@
                     class="variant-chip{% if not v.is_in_stock %} out-of-stock{% endif %}"
                     data-variant-id="{{ v.id }}"
                     data-price="{{ v.price|floatformat:0 }}"
+                    data-title="{{ v.title }}"
                     {% if v.is_default %}data-default="1"{% endif %}
                     data-stock="{{ v.available_quantity }}"
                     data-threshold="{{ v.low_stock_threshold }}"
@@ -23,22 +24,23 @@
     </div>
 
     <div class="variant-buybox">
-        <form method="post" action="{% url 'order_pages:add_to_cart_page' %}" style="flex:1;">
+        <form method="post" action="{% url 'order_pages:add_to_cart_page' %}" class="buy-form" data-max-stock="">
             {% csrf_token %}
             <input type="hidden" name="product_slug" value="{{ product.slug }}">
             <input type="hidden" name="quantity" value="1">
             <input type="hidden" name="variant_id" id="variant-input" value="">
-            <input type="hidden" name="fast_buy" value="1">
-            <button type="submit" class="btn-add-cart btn-fast-buy" id="variant-add-btn" disabled>
+            <input type="hidden" name="fast_buy" value="">
+            <div class="qty-stepper" aria-label="تعداد">
+                <button type="button" class="qty-btn" data-step="-1" aria-label="کاهش تعداد">−</button>
+                <span class="qty-val" data-qty-display aria-live="polite">۱</span>
+                <button type="button" class="qty-btn" data-step="1" aria-label="افزایش تعداد">+</button>
+            </div>
+            <button type="submit" class="btn-add-cart btn-fast-buy" id="variant-add-btn" data-fast-buy disabled>
                 🛒 خرید سریع — ثبت سفارش در ۳۰ ثانیه
             </button>
-        </form>
-        <form method="post" action="{% url 'order_pages:add_to_cart_page' %}">
-            {% csrf_token %}
-            <input type="hidden" name="product_slug" value="{{ product.slug }}">
-            <input type="hidden" name="quantity" value="1">
-            <input type="hidden" name="variant_id" id="variant-input" value="">
-            <button type="submit" class="btn-view-cart">افزودن به سبد</button>
+            <button type="submit" class="btn-view-cart" data-add-cart>
+                افزودن به سبد
+            </button>
         </form>
     </div>
     {% if buy_commitments %}
@@ -58,18 +60,33 @@
 <script>
 (function () {
     var chips = document.querySelectorAll('#variant-picker .variant-chip');
-    var priceEl = document.getElementById('product-price-display');
     var input = document.getElementById('variant-input');
     var btn = document.getElementById('variant-add-btn');
     var note = document.getElementById('variant-stock-note');
+    var buyForm = document.querySelector('#variant-picker .buy-form');
     var fmt = function (n) { return Number(n).toLocaleString('fa-IR'); };
+
     function select(chip) {
         chips.forEach(function (c) { c.classList.remove('selected'); c.setAttribute('aria-checked', 'false'); });
         chip.classList.add('selected');
         chip.setAttribute('aria-checked', 'true');
-        input.value = chip.dataset.variantId;
-        btn.disabled = false;
+        // D-121: همهٔ فرم‌های افزودن به سبدِ همین صفحه یک واریانت انتخاب‌شده دارند
+        document.querySelectorAll('input[name="variant_id"]').forEach(function (i) { i.value = chip.dataset.variantId; });
+        if (btn) btn.disabled = false;
+        // D-121: جستجوی تنبل — اسکریپت هنگام parse اجرا می‌شود و نوار چسبان (پایین صفحه)
+        // و جعبه قیمت هنوز در DOM نیستند؛ هر بار داخل select می‌گیریم.
+        var priceEl = document.getElementById('product-price-display');
+        var sbbPrice = document.getElementById('sbbPrice');
+        var oldPrice = document.querySelector('.product-price-row .price-old');
+        var discountBadge = document.querySelector('.product-price-label .discount-badge');
         if (priceEl) { priceEl.innerHTML = fmt(chip.dataset.price) + ' <small>تومان</small>'; }
+        // نوار چسبان هم همان بستهٔ انتخابی را نشان دهد (باگ قیمت ۱کیلویی)
+        if (sbbPrice) { sbbPrice.innerHTML = fmt(chip.dataset.price) + ' <small>تومان</small>'; }
+        // لنگر تخفیف محصول-سطح فقط برای بستهٔ استاندارد معنا دارد
+        var sameAsDisplay = String(chip.dataset.price) === (priceEl ? priceEl.getAttribute('data-base') : '');
+        if (oldPrice) oldPrice.hidden = !sameAsDisplay;
+        if (discountBadge) discountBadge.hidden = !sameAsDisplay;
+        if (buyForm) buyForm.setAttribute('data-max-stock', chip.dataset.stock || '0');
         var s = parseInt(chip.dataset.stock, 10);
         var th = parseInt(chip.dataset.threshold || '5', 10);
         if (note) {
@@ -77,6 +94,7 @@
             else if (s <= th) { note.textContent = '⚠️ فقط ' + fmt(s) + ' عدد باقی مانده — عجله کنید!'; }
             else { note.textContent = '✓ موجود در انبار (' + fmt(s) + ' عدد آماده ارسال)'; }
         }
+        document.dispatchEvent(new CustomEvent('variant:change', { detail: { id: chip.dataset.variantId, stock: s, title: chip.dataset.title || '' } }));
     }
     chips.forEach(function (chip) {
         if (!chip.disabled) { chip.addEventListener('click', function () { select(chip); }); }
@@ -108,6 +126,24 @@
 .variant-chip-price { font-size: 12px; color: #8a8477; }
 .variant-chip.selected .variant-chip-price { color: #0D3B2E; font-weight: 700; }
 .variant-buybox { display: flex; gap: 10px; margin-top: 16px; flex-wrap: wrap; align-items: center; }
-.variant-buybox form { flex: 1; min-width: 220px; }
+.variant-buybox .buy-form { flex: 1; min-width: 220px; display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
 .variant-stock-note { margin-top: 10px; font-size: 13px; color: #57524a; min-height: 20px; }
+
+/* ── D-121: استپر تعداد ── */
+.qty-stepper {
+  display: inline-flex; align-items: center; gap: 2px;
+  border: 2px solid var(--color-border, #e2dccd); border-radius: 12px;
+  background: #fff; padding: 3px; flex: none;
+}
+.qty-btn {
+  width: 38px; height: 38px; border: none; border-radius: 9px;
+  background: #F1EBDD; color: #0D3B2E; font-size: 19px; font-weight: 800;
+  font-family: inherit; cursor: pointer; line-height: 1; transition: background .15s;
+}
+.qty-btn:hover:not(:disabled) { background: #e5d9c3; }
+.qty-btn:disabled { opacity: .35; cursor: not-allowed; }
+.qty-val {
+  min-width: 34px; text-align: center; font-size: 15.5px; font-weight: 800; color: #0D3B2E;
+  padding: 0 4px;
+}
 </style>
