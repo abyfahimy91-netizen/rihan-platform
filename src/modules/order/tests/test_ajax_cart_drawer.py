@@ -154,6 +154,8 @@ class ProductPageDrawerMarkupTests(AjaxCartDrawerBase):
         self.assertIn('qty-stepper', c)
         self.assertIn('data-base=', c)
         self.assertIn('/order/checkout/', c)
+        # D-121b: دستگیرهٔ کشیدن کشو
+        self.assertIn('class="cd-grabber"', c)
 
     def test_sticky_price_initially_shows_default_variant(self):
         resp = self.client.get('/products/sumac-d121/')

@@ -1759,6 +1759,7 @@
     background: #FBF9F3; display: flex; flex-direction: column;
     box-shadow: 8px 0 40px rgba(0,0,0,.22);
     transform: translateX(-105%); transition: transform .3s cubic-bezier(.32,.72,.35,1);
+    touch-action: pan-y; /* عمودی = اسکرول طبیعی، افقی = درگِ بستن */
 }
 .cart-drawer.open { transform: translateX(0); }
 body.drawer-open { overflow: hidden; }
@@ -1768,6 +1769,11 @@ body.drawer-open { overflow: hidden; }
     color: #fff; padding: 16px 20px;
 }
 .cd-title { font-size: 15.5px; font-weight: 800; }
+.cd-grabber {
+    position: absolute; top: 7px; inset-inline-start: 0; inset-inline-end: 0;
+    margin-inline: auto; width: 52px; height: 4px; border-radius: 999px;
+    background: rgba(255,255,255,.45); cursor: grab;
+}
 .cd-close {
     width: 34px; height: 34px; border: none; border-radius: 10px;
     background: rgba(255,255,255,.14); color: #fff; font-size: 16px;
@@ -1858,6 +1864,7 @@ body.drawer-open { overflow: hidden; }
        data-update-url="{% url 'order_pages:update_cart_page' %}"
        data-remove-url="{% url 'order_pages:remove_cart_page' %}">
     <div class="cd-head">
+        <span class="cd-grabber" aria-hidden="true"></span>
         <span class="cd-title" id="cdTitle">به سبد خرید اضافه شد ✓</span>
         <button type="button" class="cd-close" id="cdClose" aria-label="بستن">✕</button>
     </div>
@@ -1993,9 +2000,9 @@ body.drawer-open { overflow: hidden; }
         lastFocus = document.activeElement;
         titleEl.textContent = fresh ? 'به سبد خرید اضافه شد ✓' : 'سبد خرید شما';
         drawer.hidden = false; overlay.hidden = false;
-        requestAnimationFrame(function () {
-            drawer.classList.add('open'); overlay.classList.add('open');
-        });
+        // force reflow — قفل‌کردن وضعیت اولیه قبل از کلاس open تا transition همیشه اجرا شود
+        void drawer.offsetWidth;
+        drawer.classList.add('open'); overlay.classList.add('open');
         document.body.classList.add('drawer-open');
         closeBtn.focus();
     }
@@ -2012,6 +2019,109 @@ body.drawer-open { overflow: hidden; }
     document.addEventListener('keydown', function (e) {
         if (e.key === 'Escape' && !drawer.hidden) closeDrawer();
     });
+
+    // ── هل‌دادن کشو با انگشت (swipe-to-close) — D-121b ──
+    // کشو ۱:۱ دنبال انگشت می‌آید؛ رهاکردن با سرعت کافی یا عبور از آستانه = بستن.
+    // اسکرول عمودی لیست دست‌نخورده می‌ماند (فقط کشش افقیِ واضح درگ می‌شود).
+    (function(){
+        var W = function () { return drawer.getBoundingClientRect().width; };
+        var startX = 0, startY = 0;
+        var samples = [];      // {x, t} — پنجرهٔ ۱۰۰ms برای سرعت واقعیِ انگشت
+        var dragging = false, decided = false;
+
+        function drawerOpenX() { return drawer.classList.contains('open') && !drawer.hidden; }
+        function setX(px) {
+            drawer.style.transition = 'none';
+            drawer.style.transform = 'translateX(' + px + 'px)';
+        }
+        function clearInline() {
+            drawer.style.transition = '';
+            drawer.style.transform = '';
+        }
+        function pushSample(x) {
+            var now = Date.now();
+            samples.push({ x: x, t: now });
+            while (samples.length > 2 && now - samples[0].t > 100) samples.shift();
+        }
+        function velocity() {
+            // px/s؛ منفی = حرکت به چپ (بستن). اگر پنجرهٔ زمانی معتبر نباشد صفر —
+            // وگرنه دو رویداد هم‌زمان سرعت غیرواقعی می‌سازند
+            if (samples.length < 2) return 0;
+            var a = samples[0], b = samples[samples.length - 1];
+            var dt = b.t - a.t;
+            if (dt < 30) return 0;
+            return (b.x - a.x) / dt * 1000;
+        }
+        function release() {
+            if (!dragging) return;
+            dragging = false;
+            if (!decided) return;
+            var m = /translateX\((-?[\d.]+)px\)/.exec(drawer.style.transform || '');
+            var x = m ? parseFloat(m[1]) : 0;
+            var w = W();
+            var flick = velocity() < -450 && x < -30;  // هل‌دادن واقعی و سریع
+            var passed = x < -w * 0.38;                // یا عبور از ~۴۰٪ مسیر
+            clearInline();
+            settle(flick || passed);
+        }
+        function settle(closeIt) {
+            clearInline();
+            if (closeIt) closeDrawer();
+        }
+
+        // ── لمس ──
+        drawer.addEventListener('touchstart', function (e) {
+            if (!drawerOpenX() || e.touches.length !== 1) { dragging = false; return; }
+            var t = e.touches[0];
+            startX = t.clientX; startY = t.clientY;
+            samples = []; pushSample(t.clientX);
+            decided = false;
+            dragging = true;
+        }, { passive: true });
+
+        drawer.addEventListener('touchmove', function (e) {
+            if (!dragging || !drawerOpenX()) return;
+            var t = e.touches[0];
+            var dx = t.clientX - startX, dy = t.clientY - startY;
+            if (!decided) {
+                if (Math.abs(dx) < 8 && Math.abs(dy) < 8) return;
+                if (Math.abs(dy) > Math.abs(dx)) { dragging = false; return; } // اسکرول عمودی لیست
+                decided = true;
+            }
+            var x = Math.min(0, Math.max(-W(), dx > 0 ? dx * 0.18 : dx));
+            setX(x);
+            pushSample(t.clientX);
+        }, { passive: true });
+
+        drawer.addEventListener('touchend', release, { passive: true });
+        drawer.addEventListener('touchcancel', function () {
+            if (dragging) { dragging = false; decided = false; clearInline(); }
+        }, { passive: true });
+
+        // ── دسکتاپ: درگ با ماوس روی دستگیره ──
+        var grab = drawer.querySelector('.cd-grabber');
+        if (grab) {
+            grab.addEventListener('mousedown', function (e) {
+                if (!drawerOpenX()) return;
+                e.preventDefault();
+                startX = e.clientX;
+                samples = []; pushSample(e.clientX);
+                decided = true; dragging = true;
+                function mm(ev) {
+                    var dx = ev.clientX - startX;
+                    setX(Math.min(0, Math.max(-W(), dx > 0 ? dx * 0.18 : dx)));
+                    pushSample(ev.clientX);
+                }
+                function mu() {
+                    document.removeEventListener('mousemove', mm);
+                    document.removeEventListener('mouseup', mu);
+                    release();
+                }
+                document.addEventListener('mousemove', mm);
+                document.addEventListener('mouseup', mu);
+            });
+        }
+    })();
 
     // ── کنترل تعداد/حذف داخل سبد کناری ──
     itemsEl.addEventListener('click', function (e) {
