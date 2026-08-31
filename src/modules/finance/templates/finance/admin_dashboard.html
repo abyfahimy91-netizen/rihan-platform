@@ -1,33 +1,38 @@
-{% extends "finance/base.html" %}
+{% extends "finance/base.html" %}{% load fa_tags %}
 {% block title %}داشبورد مالی ادمین | Rihan{% endblock %}
 {% block topbar_actions %}
+    <a href="/admin/">🏠 داشبورد ادمین</a>
     <a href="/admin/order/shipment/">مرسوله‌ها</a>
     <a href="/admin/order/order/">سفارش‌ها</a>
     <a href="{% url 'finance:export_csv' %}">⬇️ خروجی CSV</a>
 {% endblock %}
 {% block content %}
     <div class="card">
-        <h3>📊 نمای کلی (سفارش‌های معتبر — بدون پیش‌نویس و لغوشده)</h3>
+        <h3>📊 نمای کلی <small class="muted">(سفارش‌های معتبر — بدون پیش‌نویس و لغوشده)</small></h3>
         <div class="stats">
-            <div class="stat"><b class="num">{{ overview.order_count }}</b><span>سفارش</span></div>
-            <div class="stat hl"><b class="num">{{ overview.revenue }}</b><span>فروش کل (تومان)</span></div>
-            <div class="stat"><b class="num">{{ overview.items_cost }}</b><span>بهای خرید کالاها</span></div>
-            <div class="stat"><b class="num">{{ overview.post_rihan }}</b><span>پست پرداختی ریهان</span></div>
-            <div class="stat"><b class="num">{{ overview.post_supplier }}</b><span>پست پرداختی تامین‌کننده</span></div>
-            <div class="stat"><b class="num">{{ overview.other_rihan }}</b><span>سایر هزینه ریهان</span></div>
-            <div class="stat"><b class="num">{{ overview.other_supplier }}</b><span>سایر هزینه تامین‌کننده</span></div>
-            <div class="stat"><b class="num">{{ overview.landed_cost }}</b><span>بهای تمام‌شده کل</span></div>
-            <div class="stat hl"><b class="num">{{ overview.profit }}</b><span>سود ناخالص (تومان)</span></div>
-            <div class="stat"><b class="num">{% widthratio overview.margin_percent 1 1 %}٪</b><span>حاشیه ناخالص</span></div>
-            <div class="stat"><b class="num">{{ overview.settled_total }}</b><span>تسویه‌شده با تامین‌کنندگان</span></div>
-            <div class="stat"><b class="num">{{ overview.unsettled_total }}</b><span>مانده بدهی به تامین‌کنندگان</span></div>
+            <div class="stat"><b class="num">{{ overview.order_count|fa }}</b><span>سفارش</span></div>
+            <div class="stat hl"><b class="num">{{ overview.revenue|money }}</b><span>فروش کل (تومان)</span></div>
+            <div class="stat"><b class="num">{{ overview.items_cost|money }}</b><span>بهای خرید کالاها</span></div>
+            <div class="stat"><b class="num">{{ overview.post_rihan|money }}</b><span>پست پرداختی ریهان</span></div>
+            <div class="stat"><b class="num">{{ overview.post_supplier|money }}</b><span>پست پرداختی تامین‌کننده</span></div>
+            <div class="stat"><b class="num">{{ overview.other_rihan|money }}</b><span>سایر هزینه ریهان</span></div>
+            <div class="stat"><b class="num">{{ overview.other_supplier|money }}</b><span>سایر هزینه تامین‌کننده</span></div>
+            <div class="stat"><b class="num">{{ overview.landed_cost|money }}</b><span>بهای تمام‌شده کل</span></div>
+            <div class="stat hl{% if overview.profit < 0 %} neg{% endif %}"><b class="num">{{ overview.profit|money }}</b><span>سود ناخالص (تومان)</span></div>
+            <div class="stat"><b class="num">{{ overview.margin_percent|floatformat:"0"|fa }}٪</b><span>حاشیه ناخالص</span></div>
+            <div class="stat"><b class="num">{{ overview.settled_total|money }}</b><span>تسویه‌شده با تامین‌کنندگان</span></div>
+            <div class="stat{% if overview.unsettled_total %} warn{% endif %}"><b class="num">{{ overview.unsettled_total|money }}</b><span>مانده بدهی به تامین‌کنندگان</span></div>
         </div>
+        {% if overview.unsettled_total %}
+        <p class="unsettled-note">💰 مانده بدهی به تامین‌کننده‌ها {{ overview.unsettled_total|money }} تومان است — جدول زیر را ببینید یا از <a href="/admin/order/shipment/?settlement_status__exact=UNSETTLED">مرسوله‌های تسویه‌نشده</a> تسویه کنید.</p>
+        {% endif %}
     </div>
 
     <div class="card">
         <h3>🤝 حساب تامین‌کننده‌ها</h3>
         {% if overview.supplier_rows %}
-        <table class="table">
+        <div class="table-wrap">
+        <table class="table rwd-table">
             <thead>
                 <tr>
                     <th>تامین‌کننده</th>
@@ -42,15 +47,15 @@
             <tbody>
                 {% for row in overview.supplier_rows %}
                 <tr>
-                    <td><strong>{{ row.supplier.title }}</strong></td>
-                    <td class="num">{{ row.shipment_count }}</td>
-                    <td class="num">{{ row.sold_total }}</td>
-                    <td class="num">{{ row.payable_total }}</td>
-                    <td class="num">{{ row.settled_total }}</td>
-                    <td class="num"><strong style="color:#b3261e;">{{ row.balance }}</strong></td>
-                    <td>
+                    <td data-label="تامین‌کننده"><strong>{{ row.supplier.title }}</strong></td>
+                    <td data-label="مرسوله‌ها" class="num">{{ row.shipment_count|fa }}</td>
+                    <td data-label="فروش اقلام او" class="num">{{ row.sold_total|money }}</td>
+                    <td data-label="قابل پرداخت کل" class="num">{{ row.payable_total|money }}</td>
+                    <td data-label="تسویه‌شده" class="num">{{ row.settled_total|money }}</td>
+                    <td data-label="مانده طلب" class="num"><strong{% if row.balance %} style="color:#b3261e;"{% endif %}>{{ row.balance|money }}</strong></td>
+                    <td data-label="وضعیت">
                         {% if row.unsettled_count %}
-                            <a class="badge b-unsettled" href="/admin/order/shipment/?supplier__id__exact={{ row.supplier.pk }}">{{ row.unsettled_count }} تسویه‌نشده</a>
+                            <a class="badge b-unsettled" href="/admin/order/shipment/?supplier__id__exact={{ row.supplier.pk }}">{{ row.unsettled_count|fa }} تسویه‌نشده</a>
                         {% else %}
                             <span class="badge b-settled">تسویه کامل</span>
                         {% endif %}
@@ -59,6 +64,8 @@
                 {% endfor %}
             </tbody>
         </table>
+        </div>
+        <p class="muted" style="margin-top:10px;">تسویه هر تامین‌کننده = انتخاب مرسوله‌های او در <a href="/admin/order/shipment/">لیست مرسوله‌ها</a> و زدن اکشن «💰 تسویه شد».</p>
         {% else %}
             <p class="muted">هنوز مرسوله‌ای برای تامین‌کننده‌ها ثبت نشده است.</p>
         {% endif %}

@@ -64,7 +64,7 @@
                             <span class="badge b-unsettled">در انتظار تسویه</span>
                         {% endif %}
                     </td>
-                    <td data-label="تاریخ تسویه" class="muted">{% if row.settled %}{{ row.shipment.settled_at|jdate }}{% endif %}</td>
+                    <td data-label="تاریخ تسویه" class="muted">{% if row.settled %}{{ row.shipment.settled_at|jdate }}{% else %}—{% endif %}</td>
                 </tr>
                 {% endfor %}
             </tbody>

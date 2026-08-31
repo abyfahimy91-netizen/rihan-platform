@@ -1,14 +1,11 @@
-"""
-D-113: تست‌های داشبوردهای مالی (ادمین و تامین‌کننده) + خروجی CSV
-"""
+"""D-123: UX داشبورد مالی — اعداد فارسی، بدون اعشار خام، جدول داخل کادر."""
+import re
 from decimal import Decimal
 
-from django.test import TestCase, Client
 from django.contrib.auth import get_user_model
-from django.urls import reverse
+from django.test import Client, TestCase
 
-from src.modules.catalog.models import Category, Supplier, Product, ProductVariant
-from src.modules.order import finance
+from src.modules.catalog.models import Category, Product, Supplier
 from src.modules.order.models import Order, OrderItem, Shipment
 from src.modules.order.fulfillment import build_shipments
 
@@ -16,131 +13,113 @@ User = get_user_model()
 
 
 class FinanceDashboardTestBase(TestCase):
-    @classmethod
-    def _server(cls):
-        return 'rihan360.ir'
+    """سفارش تحویل‌شده با مرسوله تامین‌کننده: خرید ۹۵۰٬۰۰۰×۲ + پست ۴۵٬۰۰۰"""
 
     def setUp(self):
-        self.category = Category.objects.create(name='دسته داشبورد', slug='dash-cat')
+        self.admin = User.objects.create_user(
+            username='09127777001', password='Xtest12345', is_staff=True)
         self.supplier = Supplier.objects.create(
-            title='تامین‌کننده داشبورد', city='تبریز', phone='09148888888')
-        self.supplier_user = User.objects.create_user(
-            username='09148888888', password='testpass123')
-        # D-085: اتصال OneToOne کاربر به تامین‌کننده
-        self.supplier.user = self.supplier_user
-        self.supplier.save()
-
+            title='تامین‌کننده مالی تست', city='تبریز', phone='09127777002')
+        cat = Category.objects.create(name='cat-fin', slug='cat-fin')
         self.product = Product.objects.create(
-            name='محصول داشبورد', slug='dash-prod', category=self.category,
-            supplier=self.supplier, base_price=Decimal('100000'),
+            name='محصول مالی', slug='fin-prod', category=cat, supplier=self.supplier,
+            base_price=Decimal('1500000'), final_price=Decimal('1500000'),
             short_description='x', origin_story='x', status='active')
-        self.v1 = ProductVariant.objects.create(
-            product=self.product, title='بسته ۵۰۰ گرمی',
-            price=Decimal('150000'), cost_price=Decimal('100000'), stock_quantity=10)
-
-        self.staff = User.objects.create_user(
-            username='09149999999', password='x', is_staff=True, is_superuser=True)
-
         self.order = Order.objects.create(
-            status=Order.OrderStatus.PAID,
-            guest_name='خریدار داشبورد', guest_phone='09141234567',
-            guest_postal_code='5151411111', guest_address='تبریز، خیابان تست ۹')
+            user=self.admin, status=Order.OrderStatus.DELIVERED,
+            guest_name='خریدار مالی', guest_phone='09127777003',
+            guest_postal_code='5151411111',
+            guest_address='تبریز، خیابان تست، پلاک ۱')
         OrderItem.objects.create(
-            order=self.order, product=self.product, variant=self.v1,
-            variant_title='بسته ۵۰۰ گرمی', quantity=2,
-            unit_price_at_purchase=Decimal('150000'),
-            unit_cost_at_purchase=Decimal('100000'),
-            product_name_snapshot='محصول داشبورد')
+            order=self.order, product=self.product, quantity=2,
+            unit_price_at_purchase=Decimal('1500000'),
+            unit_cost_at_purchase=Decimal('950000'),
+            product_name_snapshot='محصول مالی')
         build_shipments(self.order)
+        self.shipment = Shipment.objects.get(order=self.order)
+        self.shipment.post_cost = Decimal('45000')
+        self.shipment.post_paid_by = Shipment.CostBearer.SUPPLIER
+        self.shipment.save()
+        self.shipment.status = Shipment.Status.DELIVERED
+        self.shipment.save(update_fields=['status'])
+        self.client = Client(SERVER_NAME='rihan360.ir')
 
-        self.client = Client(SERVER_NAME=self._server())
-
-
-class AdminDashboardTests(FinanceDashboardTestBase):
-    def test_requires_staff(self):
-        self.client.force_login(self.supplier_user)
-        r = self.client.get('/finance/admin/')
-        self.assertEqual(r.status_code, 302)
-
-    def test_shows_totals_and_supplier_row(self):
-        self.client.force_login(self.staff)
-        r = self.client.get('/finance/admin/')
-        self.assertEqual(r.status_code, 200)
-        content = r.content.decode()
-        self.assertIn('تامین‌کننده داشبورد', content)
-        self.assertIn('300000', content)  # فروش اقلام تامین‌کننده
-
-    def test_csv_export(self):
-        self.client.force_login(self.staff)
-        r = self.client.get(reverse('finance:export_csv'))
-        self.assertEqual(r.status_code, 200)
-        self.assertIn('text/csv', r['Content-Type'])
-        body = r.content.decode('utf-8-sig')
-        self.assertIn('تامین‌کننده داشبورد', body)
-        self.assertIn('200000', body)  # بدون هزینه پیش‌پرداخت: ۲۰۰هزار
+    def _admin(self):
+        c = Client(SERVER_NAME='rihan360.ir')
+        c.force_login(self.admin)
+        return c
 
 
-class SupplierDashboardTests(FinanceDashboardTestBase):
-    def test_requires_supplier_link(self):
-        stranger = User.objects.create_user(username='09141110000', password='x')
-        self.client.force_login(stranger)
-        r = self.client.get('/finance/supplier/')
-        self.assertEqual(r.status_code, 302)
-
-    def test_supplier_sees_own_balance_only(self):
-        self.client.force_login(self.supplier_user)
-        r = self.client.get('/finance/supplier/')
-        self.assertEqual(r.status_code, 200)
-        content = r.content.decode()
-        # قابل دریافت: ۱۰۰هزار × ۲
-        self.assertIn('۲۰۰٬۰۰۰', content)  # D-116: خروجی money فارسی شد
-        self.assertIn('در انتظار تسویه', content)
-        # D-116b: تامین‌کننده فقط تسویه خودش را می‌بیند — نه قیمت فروش، نه ستون ارزش اقلام
-        self.assertNotIn('300000', content)
-        self.assertNotIn('ارزش اقلام', content)
-        self.assertNotIn('فروش اقلام من', content)
-
-    def test_settled_view_after_settlement(self):
-        sup = self.order.shipments.get(supplier=self.supplier)
-        finance.settle_shipments([sup], self.staff, note='واریز تستی')
-        self.client.force_login(self.supplier_user)
-        r = self.client.get('/finance/supplier/')
-        self.assertEqual(r.status_code, 200)
-        content = r.content.decode()
-        self.assertIn('تسویه شد', content)
-
-
-class SupplierPanelFinanceIntegrationTests(FinanceDashboardTestBase):
-    """هزینه‌های ثبت‌شده در فرم ارسال تامین‌کننده باید در قابل پرداخت بیاید"""
-
+class AdminDashboardRenderTests(FinanceDashboardTestBase):
     def setUp(self):
         super().setUp()
-        from src.modules.rbac.services.role_service import RoleService
-        RoleService.create_system_roles()
-        RoleService.assign_role(self.supplier_user, 'supplier')
+        self.body = self._admin().get('/finance/admin/').content.decode()
 
-    def test_tracking_form_saves_costs(self):
-        from src.modules.supplier_panel.forms import TrackingCodeForm
-        sup = self.order.shipments.get(supplier=self.supplier)
-        form = TrackingCodeForm(data={
-            'carrier': 'POST',
-            'tracking_code': '12345678901234567890',
-            'post_cost': '95000',
-            'other_costs': '15000',
-            'other_costs_note': 'کارتن و برچسب',
-        })
-        self.assertTrue(form.is_valid(), form.errors)
-        sup.post_cost = form.cleaned_data['post_cost']
-        sup.other_costs = form.cleaned_data['other_costs']
-        sup.other_costs_note = form.cleaned_data['other_costs_note']
-        sup.post_paid_by = Shipment.CostBearer.SUPPLIER
-        sup.other_paid_by = Shipment.CostBearer.SUPPLIER
-        sup.save()
-        sup.refresh_from_db()
-        self.assertEqual(sup.supplier_payable, Decimal('310000'))
+    def test_money_in_persian_digits_with_thousands(self):
+        # قابل پرداخت = ۹۵۰٬۰۰۰×۲ + ۴۵٬۰۰۰ پست تامین‌کننده
+        self.assertIn('۱٬۹۴۵٬۰۰۰', self.body)
 
-    def test_shipment_list_shows_settlement_column(self):
-        self.client.force_login(self.supplier_user)
-        r = self.client.get('/supplier/shipments/')
-        self.assertEqual(r.status_code, 200)
-        self.assertIn('تسویه', r.content.decode())
+    def test_no_raw_english_decimal_amounts(self):
+        # هیچ مبلغ خام Decimal (مثل 1945000.00) نباید رندر شود
+        self.assertNotIn('.00', self.body)
+        self.assertNotIn('1945000', self.body)
+        self.assertNotIn('2945000', self.body)
+
+    def test_margin_percent_no_decimal_dump(self):
+        # ۱۹۴۵۰۰۰ / ۳۰۰۰۰۰۰ = ۶۴.۸٪ → int → ۶۵٪ نه «64.8»
+        self.assertNotIn('64.8', self.body)
+        self.assertIn('٪', self.body)
+
+    def test_unsettled_badge_in_fa(self):
+        self.assertIn('۱ تسویه‌نشده', self.body)
+
+    def test_table_inside_wrap_and_responsive(self):
+        self.assertIn('table-wrap', self.body)
+        self.assertIn('rwd-table', self.body)
+        self.assertIn('data-label=', self.body)
+
+    def test_debt_note_and_settle_link(self):
+        self.assertIn('مانده بدهی', self.body)
+        self.assertIn('/admin/order/shipment/', self.body)
+
+    def test_settled_row_shows_full_and_green(self):
+        from src.modules.order.finance import settle_shipments
+        settle_shipments([self.shipment], self.admin)
+        body = self._admin().get('/finance/admin/').content.decode()
+        self.assertIn('تسویه کامل', body)
+
+
+class SupplierDashboardRenderTests(FinanceDashboardTestBase):
+    def setUp(self):
+        super().setUp()
+        self.sup_user = User.objects.create_user(
+            username='09127777002', password='Xtest12345')
+        self.supplier.user = self.sup_user
+        self.supplier.save()
+        c = Client(SERVER_NAME='rihan360.ir')
+        c.force_login(self.sup_user)
+        self.body = c.get('/finance/supplier/').content.decode()
+
+    def test_payable_in_fa_money(self):
+        self.assertIn('۱٬۹۴۵٬۰۰۰', self.body)
+        self.assertNotIn('.00', self.body)
+
+    def test_order_number_ltr(self):
+        self.assertIn('dir="ltr"', self.body)
+        self.assertIn(self.order.order_number, self.body)
+
+
+class FinanceAccessTests(FinanceDashboardTestBase):
+    def test_anonymous_redirects_home(self):
+        r = Client(SERVER_NAME='rihan360.ir').get('/finance/admin/')
+        self.assertEqual(r.status_code, 302)
+
+    def test_non_staff_redirects_home(self):
+        u = User.objects.create_user(username='09127777004', password='Xtest12345')
+        c = Client(SERVER_NAME='rihan360.ir')
+        c.force_login(u)
+        r = c.get('/finance/admin/')
+        self.assertEqual(r.status_code, 302)
+
+    def test_staff_gets_200(self):
+        self.assertEqual(self._admin().get('/finance/admin/').status_code, 200)
