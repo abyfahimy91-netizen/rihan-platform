@@ -198,3 +198,99 @@ class LeadAdmin(admin.ModelAdmin):
         )
         self.message_user(request, f'{count} سرنخ به‌عنوان تبدیل‌شده علامت‌گذاری شد')
     mark_as_converted.short_description = 'علامت‌گذاری به‌عنوان تبدیل‌شده'
+
+
+# ══════════════════════════════════════════════════════════════════
+# D-125: پنل مدیریت سرنخ‌های بازدید (VisitorLead)
+# ══════════════════════════════════════════════════════════════════
+from .models import VisitorLead
+
+
+@admin.register(VisitorLead)
+class VisitorLeadAdmin(admin.ModelAdmin):
+    """مدیریت سرنخ‌های بازدید: فیلتر بر اساس مرحلهٔ قیف/وضعیت/دستگاه + جستجو."""
+
+    list_display = (
+        'ip',
+        'location_display',
+        'device',
+        'channel_first',
+        'stage_display',
+        'page_views',
+        'sessions_count',
+        'last_seen_jalali',
+        'status_display',
+    )
+    list_filter = ('stage', 'status', 'device', 'is_vpn', 'country')
+    search_fields = ('ip', 'city', 'isp', 'order_refs', 'admin_notes')
+    ordering = ('-last_seen',)
+    list_per_page = 50
+    actions = ['mark_contacted', 'mark_lost', 'mark_buyer', 'mark_junk']
+
+    readonly_fields = (
+        'ip', 'country', 'city', 'isp', 'is_vpn', 'device', 'channel_first',
+        'channels', 'first_seen', 'last_seen', 'sessions_count', 'page_views',
+        'stage', 'stage_rank', 'is_hot', 'actions', 'order_refs',
+        'orders_matched', 'sessions', 'created_at', 'updated_at',
+    )
+
+    fieldsets = (
+        ('اطلاعات بازدیدکننده', {'fields': ('ip', 'country', 'city', 'isp', 'is_vpn',
+                                            'device', 'channel_first', 'channels')}),
+        ('قیف خرید', {'fields': ('stage', 'is_hot', 'page_views', 'sessions_count',
+                                 'first_seen', 'last_seen', 'actions', 'order_refs',
+                                 'orders_matched')}),
+        ('وضعیت پیگیری (قابل ویرایش)', {'fields': ('status', 'admin_notes')}),
+        ('جزئیات فنی', {'fields': ('sessions', 'stage_rank', 'created_at', 'updated_at'),
+                        'classes': ('collapse',)}),
+    )
+
+    def has_add_permission(self, request):
+        return False
+
+    def location_display(self, obj):
+        return f"{obj.city or '؟'} / {obj.isp or '؟'}"
+    location_display.short_description = 'موقعیت'
+
+    def stage_display(self, obj):
+        colors = {'HOME': 'gray', 'PRODUCT': '#1F6F9C', 'CART': 'orange',
+                  'CHECKOUT': '#d95f02', 'PAYMENT': 'red', 'CONVERTED': 'green'}
+        mark = '🔥 ' if obj.hot_active else ''
+        return format_html(
+            '<span style="color: {}; font-weight: bold;">{}{}</span>',
+            colors.get(obj.stage, 'gray'), mark, obj.get_stage_display())
+    stage_display.short_description = 'مرحله'
+
+    def status_display(self, obj):
+        colors = {'NEW': 'red', 'CONTACTED': 'orange', 'NOANSWER': 'gray',
+                  'LOST': 'gray', 'BUYER': 'green', 'JUNK': 'gray'}
+        return format_html('<span style="color: {}; font-weight: bold;">{}</span>',
+                           colors.get(obj.status, 'gray'), obj.get_status_display())
+    status_display.short_description = 'وضعیت CRM'
+
+    def last_seen_jalali(self, obj):
+        if obj.last_seen:
+            j = jdatetime.datetime.fromgregorian(datetime=obj.last_seen)
+            return j.strftime('%Y/%m/%d %H:%M')
+        return '-'
+    last_seen_jalali.short_description = 'آخرین بازدید'
+
+    def mark_contacted(self, request, queryset):
+        n = queryset.update(status=VisitorLead.LeadStatus.CONTACTED)
+        self.message_user(request, f'{n} سرنخ «تماس گرفته شد» شد.')
+    mark_contacted.short_description = 'علامت‌گذاری: تماس گرفته شد'
+
+    def mark_lost(self, request, queryset):
+        n = queryset.update(status=VisitorLead.LeadStatus.LOST)
+        self.message_user(request, f'{n} سرنخ «از دست رفته» شد.')
+    mark_lost.short_description = 'علامت‌گذاری: از دست رفته'
+
+    def mark_buyer(self, request, queryset):
+        n = queryset.update(status=VisitorLead.LeadStatus.BUYER)
+        self.message_user(request, f'{n} سرنخ «خریدار» شد.')
+    mark_buyer.short_description = 'علامت‌گذاری: خریدار'
+
+    def mark_junk(self, request, queryset):
+        n = queryset.update(status=VisitorLead.LeadStatus.JUNK)
+        self.message_user(request, f'{n} سرنخ «تست/نامعتبر» شد.')
+    mark_junk.short_description = 'علامت‌گذاری: تست/نامعتبر'

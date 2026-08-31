@@ -1,0 +1,181 @@
+{% extends "finance/base.html" %}{% load static %}{% load fa_tags %}
+{% block title %}ردیابی سرنخ‌های بازدید | Rihan{% endblock %}
+{% block topbar_actions %}
+    <a href="/admin/">🏠 داشبورد ادمین</a>
+    <form method="post" action="{% url 'leads:panel_refresh' %}" style="display:inline">{% csrf_token %}
+        <button type="submit" class="refresh-btn">🔄 به‌روزرسانی از لاگ</button>
+    </form>
+        <a href="{% url 'leads:panel_csv' %}?{{ filters_qs }}">⬇️ خروجی CSV</a>
+{% endblock %}
+{% block content %}
+<style>
+    .refresh-btn { background: #C9A961; color: #0D3B2E; border: none; border-radius: 6px;
+        padding: 5px 12px; font-family: inherit; font-size: 13px; font-weight: 700; cursor: pointer; }
+    .flt-form { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+    .flt-form input[type=text], .flt-form select { border: 1.5px solid #ddd; border-radius: 8px;
+        padding: 8px 10px; font-family: inherit; font-size: 13.5px; background: #fff; min-width: 130px; flex: 1 1 130px; }
+    .flt-form input[type=text] { flex: 2 1 200px; }
+    .flt-form button { background: #0D3B2E; color: #EAD9A7; border: none; border-radius: 8px;
+        padding: 9px 18px; font-family: inherit; font-size: 13.5px; font-weight: 700; cursor: pointer; }
+    .muted-link { color: #888; font-size: 13px; }
+    .quick-chips { margin-top: 12px; display: flex; flex-wrap: wrap; gap: 8px; }
+    .chip { background: #FAF7F0; border: 1px solid #e5ddcb; color: #0D3B2E; border-radius: 14px;
+        padding: 5px 14px; font-size: 13px; text-decoration: none; }
+    .chip:hover { background: #efe8d6; }
+    .chip-hot { background: #FDF1F0; border-color: #eccfca; color: #b3261e; font-weight: 700; }
+    .funnel { display: flex; flex-direction: column; gap: 8px; }
+    .fun-row { display: flex; align-items: center; gap: 10px; }
+    .fun-label { width: 110px; font-size: 13.5px; flex-shrink: 0; }
+    .fun-bar-wrap { flex: 1; background: #F1EFE9; border-radius: 8px; height: 22px; overflow: hidden; }
+    .fun-bar { height: 100%; background: #0D3B2E; border-radius: 8px; min-width: 3px; }
+    .fun-conv .fun-bar { background: #C9A961; }
+    .fun-n { width: 40px; text-align: left; }
+    .fun-link { font-size: 12px; color: #14523f; }
+    .badge.stage-home { background: #999; }
+    .badge.stage-product { background: #1F6F9C; }
+    .badge.stage-cart { background: #c8a24b; }
+    .badge.stage-checkout { background: #d95f02; }
+    .badge.stage-payment { background: #b3261e; }
+    .badge.b-conv { background: #0D3B2E; }
+    .badge.stage-hot { box-shadow: 0 0 0 2px #ffd8a8; }
+    .hot-row { background: #FFF9F2; }
+    .hot-row td:first-child { border-inline-start: 3px solid #d95f02; }
+    .mini-badge { background: #EFEAFB; color: #5b3fa8; border-radius: 8px; font-size: 10.5px; padding: 1px 7px; }
+    .st-form select { border: 1px solid #ddd; border-radius: 7px; padding: 4px 6px; font-family: inherit; font-size: 12px; }
+    .pager { margin-top: 14px; display: flex; gap: 14px; align-items: center; justify-content: center; font-size: 13.5px; }
+    .pager a { color: #0D3B2E; font-weight: 700; }
+    .help-list { padding-inline-start: 20px; font-size: 13.5px; }
+    .help-list li { margin-bottom: 6px; }
+</style>
+    <div class="card">
+        <h3>📈 نمای کلی بازدید انسانی
+            <small class="muted">({{ summary.meta.generated|default:"بدون snapshot" }} — فایل: <code>{{ snapshot_path }}</code>)</small>
+        </h3>
+        <div class="stats">
+            <div class="stat hl"><b class="num">{{ summary.visitors|fa }}</b><span>بازدیدکننده یکتا</span></div>
+            <div class="stat"><b class="num">{{ summary.views|fa }}</b><span>ویوی صفحه</span></div>
+            <div class="stat"><b class="num">{{ summary.sessions|fa }}</b><span>سشن</span></div>
+            <div class="stat{% if summary.hot_count %} warn{% endif %}"><b class="num">{{ summary.hot_count|fa }}</b><span>سرنخ داغ فعال</span></div>
+            <div class="stat"><b class="num">{{ summary.converted_count|fa }}</b><span>خرید موفق</span></div>
+        </div>
+    </div>
+
+    <div class="card">
+        <h3>🛒 قیف تبدیل (چند نفر تا کجا رفتند)</h3>
+        <div class="funnel">
+            {% for f in summary.funnel %}
+            <div class="fun-row{% if f.stage == 'CONVERTED' %} fun-conv{% endif %}">
+                <span class="fun-label">{{ f.label }}</span>
+                <div class="fun-bar-wrap"><div class="fun-bar" style="width: {% widthratio f.count summary.funnel.0.count 100 %}%"></div></div>
+                <b class="fun-n num">{{ f.count|fa }}</b>
+                <a class="fun-link" href="?reach={{ f.rank }}">فیلتر ↗</a>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="card">
+        <h3>🔎 فیلتر و جستجو</h3>
+        <form method="get" class="flt-form">
+            <input type="text" name="q" value="{{ filters.q|default:'' }}" placeholder="IP، شهر، ISP، شماره سفارش RH-… یا یادداشت">
+            <select name="stage">
+                <option value="">همهٔ مراحل قیف</option>
+                {% for s in stages %}<option value="{{ s.0 }}" {% if filters.stage == s.0 %}selected{% endif %}>{{ s.1 }}</option>{% endfor %}
+            </select>
+            <select name="status">
+                <option value="">همهٔ وضعیت‌های CRM</option>
+                {% for s in statuses %}<option value="{{ s.0 }}" {% if filters.status == s.0 %}selected{% endif %}>{{ s.1 }}</option>{% endfor %}
+            </select>
+            <input type="text" name="device" value="{{ filters.device|default:'' }}" placeholder="دستگاه (iOS, Android, …)" style="max-width:150px">
+            <input type="text" name="channel" value="{{ filters.channel|default:'' }}" placeholder="کانال" style="max-width:120px">
+            <select name="vpn">
+                <option value="">VPN: همه</option>
+                <option value="1" {% if filters.vpn == '1' %}selected{% endif %}>فقط مشکوک به VPN</option>
+                <option value="0" {% if filters.vpn == '0' %}selected{% endif %}>فقط IP مستقیم</option>
+            </select>
+            <select name="hot">
+                <option value="">همه</option>
+                <option value="1" {% if filters.hot == '1' %}selected{% endif %}>🔥 فقط سرنخ داغ فعال</option>
+            </select>
+            <select name="o">
+                <option value="-last_seen" {% if filters.o == '-last_seen' %}selected{% endif %}>جدیدترین بازدید</option>
+                <option value="-page_views" {% if filters.o == '-page_views' %}selected{% endif %}>بیشترین ویو</option>
+                <option value="-stage_rank" {% if filters.o == '-stage_rank' %}selected{% endif %}>عمیق‌ترین قیف</option>
+                <option value="-sessions_count" {% if filters.o == '-sessions_count' %}selected{% endif %}>بیشترین سشن</option>
+            </select>
+            <button type="submit">اعمال فیلتر</button>
+            <a href="{% url 'leads:panel' %}" class="muted-link">حذف فیلترها</a>
+        </form>
+        <div class="quick-chips">
+            <a class="chip chip-hot" href="?hot=1">🔥 داغ‌های فعال ({{ summary.hot_count|fa }})</a>
+            <a class="chip" href="?reach=3">سبد و بالاتر</a>
+            <a class="chip" href="?reach=4">تسویه و بالاتر</a>
+            <a class="chip" href="?reach=5">پرداخت و بالاتر</a>
+            <a class="chip" href="?status=NEW">🆕 نیازمند پیگیری</a>
+            <a class="chip" href="?vpn=1">مشکوک به VPN</a>
+        </div>
+    </div>
+
+    <div class="card">
+        <h3>👥 سرنخ‌ها <small class="muted">({{ page.paginator.count|fa }} نتیجه — صفحهٔ {{ page.number|fa }} از {{ page.paginator.num_pages|fa }})</small></h3>
+        <div class="table-wrap">
+        <table class="table rwd-table">
+            <thead><tr>
+                <th>IP / موقعیت</th><th>دستگاه / کانال</th><th>مرحله</th>
+                <th>ویو / سشن</th><th>بازدید</th><th>اقدام / سفارش</th><th>وضعیت CRM</th>
+            </tr></thead>
+            <tbody>
+            {% for v in page.object_list %}
+            <tr{% if v.is_hot %} class="hot-row"{% endif %}>
+                <td data-label="IP / موقعیت">
+                    <code>{{ v.ip }}</code>
+                    {% if v.is_vpn %}<span class="mini-badge">VPN؟</span>{% endif %}<br>
+                    <small>{{ v.city|default:'؟' }} — {{ v.isp|default:'؟' }}</small>
+                </td>
+                <td data-label="دستگاه / کانال">
+                    {{ v.device|default:'—' }}<br>
+                    <small class="muted">{{ v.channel_first|default:'direct' }}</small>
+                </td>
+                <td data-label="مرحله"><span class="badge stage-{{ v.stage|lower }}{% if v.stage == 'CONVERTED' %} b-conv{% endif %}{% if v.is_hot %} stage-hot{% endif %}">{{ v.get_stage_display }}</span></td>
+                <td data-label="ویو / سشن" class="num">{{ v.page_views|fa }} / {{ v.sessions_count|fa }}</td>
+                <td data-label="بازدید">
+                    <small>اول: {{ v.first_seen_j }}<br>آخر: {{ v.last_seen_j }}</small>
+                </td>
+                <td data-label="اقدام / سفارش">
+                    {% if v.actions.posts %}<small>POST × {{ v.actions.posts|fa }}</small>{% endif %}
+                    {% if v.order_refs %}<br><small>سفارش: <code>{{ v.order_refs }}</code></small>{% endif %}
+                    {% for m in v.orders_matched %}<br><small>{{ m.number }} = {{ m.status }}</small>{% endfor %}
+                </td>
+                <td data-label="وضعیت CRM">
+                    <form method="post" action="{% url 'leads:panel_status' v.id %}" class="st-form">{% csrf_token %}
+                        <select name="status" onchange="this.form.submit()">
+                            {% for s in statuses %}<option value="{{ s.0 }}" {% if v.status == s.0 %}selected{% endif %}>{{ s.1 }}</option>{% endfor %}
+                        </select>
+                    </form>
+                </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="7">هنوز سرنخی وارد نشده — دکمهٔ «به‌روزرسانی از لاگ» را بزنید یا cron را نصب کنید.</td></tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        </div>
+        {% if page.has_other_pages %}
+        <div class="pager">
+            {% if page.has_previous %}<a href="?{{ filters_qs }}&page={{ page.previous_page_number }}">‹ قبلی</a>{% endif %}
+            <span>صفحهٔ {{ page.number|fa }} از {{ page.paginator.num_pages|fa }}</span>
+            {% if page.has_next %}<a href="?{{ filters_qs }}&page={{ page.next_page_number }}">بعدی ›</a>{% endif %}
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="card">
+        <h3>💡 راهنما</h3>
+        <ul class="help-list">
+            <li><b>سرنخ داغ</b> = تا تسویه/پرداخت رفته و هنوز نخریده — اول از همه پیگیری شود (تماس/پیام همان روز بیشترین اثر را دارد).</li>
+            <li><b>VPN؟</b> = بازدیدکننده از IP دیتاسنتر (احتمالاً VPN ایرانی) — انسان است نه ربات؛ فیلتر خودکار آنها را گرفته ولی ما نگهشان داشتیم.</li>
+            <li>وضعیت CRM هر سرنخ را همین‌جا عوض کنید (جدید ← تماس گرفته شد ← خریدار/از دست رفته) تا پیگیری‌ها گم نشود.</li>
+            <li>برای جزئیات کامل هر سشن، روی فایل snapshot یا خروجی CSV نگاه کنید.</li>
+        </ul>
+    </div>
+{% endblock %}

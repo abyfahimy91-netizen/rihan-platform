@@ -2,6 +2,7 @@
 تگ تمپلیت سایدبار اختصاصی پنل ادمین ریحان.
 مدل‌ها را گروه‌بندی کرده و لینک هرکدام را فقط برای کاربران دارای دسترسی می‌سازد.
 هر مدلی که در آینده ثبت شود، خودکار زیر گروه «سایر» ظاهر می‌شود.
+D-125: گروه «📈 ردیابی بازدید» با لینک اختصاصی پنل سرنخ‌ها + بج سرنخ داغ.
 """
 from django import template
 from django.urls import NoReverseMatch, reverse
@@ -34,6 +35,10 @@ GROUPS = [
     ("📞 سرنخ‌های فروش", [
         ("leads.lead", "سرنخ‌ها"),
     ]),
+    ("📈 ردیابی بازدید", [
+        ("__visitor_panel__", "داشبورد سرنخ‌های بازدید"),
+        ("leads.visitorlead", "مدیریت سرنخ‌های بازدید"),
+    ]),
     ("🧩 محتوای سایت", [
         ("pages.sitesettings", "⚙️ تنظیمات صفحه اصلی و سایت"),
         ("catalog.contentblock", "بلوک‌های محتوا"),
@@ -51,7 +56,7 @@ GROUPS = [
 
 
 def _badge_counts():
-    """D-119/D-120: تعداد کارهای در انتظار برای بج قرمز کنار منو — سبک و فقط-خواندنی"""
+    """D-119/D-120/D-125: تعداد کارهای در انتظار برای بج قرمز کنار منو — سبک و فقط-خواندنی"""
     badges = {}
     try:
         from src.modules.order.models import Payment, Shipment
@@ -74,6 +79,15 @@ def _badge_counts():
             pr = Review.objects.filter(is_approved=False).count()
             if pr:
                 badges['reviews.review'] = pr
+        except Exception:
+            pass
+        # D-125: سرنخ‌های داغِ هنوز پیگیری‌نشده → بج روی داشبورد سرنخ‌ها
+        try:
+            from src.modules.leads.models import VisitorLead
+            hot = VisitorLead.objects.filter(is_hot=True).exclude(
+                status__in=[VisitorLead.LeadStatus.BUYER, VisitorLead.LeadStatus.JUNK]).count()
+            if hot:
+                badges['__visitor_panel__'] = hot
         except Exception:
             pass
     except Exception:
@@ -99,7 +113,8 @@ def rihan_sidebar(context):
 
     groups, used = [], set()
     badges = _badge_counts()
-    SPECIAL_URLS = {'__finance_dashboard__': '/finance/admin/'}
+    SPECIAL_URLS = {'__finance_dashboard__': '/finance/admin/',
+                    '__visitor_panel__': '/leads/panel/'}
     for title, entries in GROUPS:
         items = []
         for k, t in entries:

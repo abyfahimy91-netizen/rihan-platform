@@ -28,3 +28,11 @@ urlpatterns = [
         name='submit_lead_api'
     ),
 ]
+
+# D-125: پنل ردیابی سرنخ‌های بازدید (staff-only)
+urlpatterns += [
+    path('panel/', views.lead_panel, name='panel'),
+    path('panel/refresh/', views.lead_panel_refresh, name='panel_refresh'),
+    path('panel/status/<uuid:pk>/', views.lead_panel_status, name='panel_status'),
+    path('panel/export/csv/', views.lead_panel_csv, name='panel_csv'),
+]
