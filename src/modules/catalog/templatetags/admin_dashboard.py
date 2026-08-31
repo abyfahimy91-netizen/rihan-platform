@@ -155,12 +155,26 @@ def rihan_work_queue():
         except Exception:
             q['pending_reviews'] = 0
 
+        # گام ۶ — تسویه تامین‌کننده‌ها (D-120): پولی که باید بدهیم
+        base_unsettled = Shipment.objects.filter(
+            fulfiller=Shipment.FulfillerType.SUPPLIER,
+            supplier__isnull=False,
+            settlement_status=Shipment.SettlementStatus.UNSETTLED,
+        ).exclude(status=Shipment.Status.CANCELED)
+        # «سررسید» = تحویل‌شده و هنوز پولش نرفته — فوری‌ترین بدهی
+        # (supplier_payable پراپرتی مدل است؛ جمع باید در پایتون انجام شود)
+        due = list(base_unsettled.filter(status=Shipment.Status.DELIVERED))
+        q['unsettled_due'] = len(due)
+        q['unsettled_due_amount'] = sum(sh.supplier_payable for sh in due)
+        q['unsettled_all'] = base_unsettled.count()
+
         # آمار کمکی
         q['orders_today'] = Order.objects.filter(created_at__gte=today_start).count()
 
         q['urgent_total'] = (
             q['pending_payments'] + q['rihan_new']
             + q['paid_without_shipment'] + q['supplier_overdue']
+            + q['unsettled_due']
         )
     except Exception as e:
         q['error'] = str(e)

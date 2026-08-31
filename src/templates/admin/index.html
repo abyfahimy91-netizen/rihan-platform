@@ -77,6 +77,7 @@
   {% if wq.pending_payments %}<a href="{% url 'admin:order_payment_changelist' %}?status__exact=PENDING_REVIEW">💳 تایید پرداخت ({{ wq.pending_payments|fa }})</a>{% endif %}
   {% if wq.rihan_new %}<a href="{% url 'admin:order_shipment_changelist' %}?fulfiller__exact=RIHAN&amp;status__exact=NEW">📦 ارسال مرسوله ({{ wq.rihan_new|fa }})</a>{% endif %}
   {% if wq.supplier_overdue %}<a href="{% url 'admin:order_shipment_changelist' %}?fulfiller__exact=SUPPLIER&amp;status__exact=NEW">⏰ تاخیر تامین‌کننده ({{ wq.supplier_overdue|fa }})</a>{% endif %}
+  {% if wq.unsettled_due %}<a href="/finance/admin/">💰 تسویه معوق ({{ wq.unsettled_due|fa }})</a>{% endif %}
   {% if wq.paid_without_shipment %}<a href="{% url 'admin:order_order_changelist' %}?status__exact=PAID">🧩 سفارش بدون مرسوله ({{ wq.paid_without_shipment|fa }})</a>{% endif %}
 </div>
 {% endif %}
@@ -118,14 +119,23 @@
       <span class="rq-cta">{% if wq.in_transit %}پیگیری ←{% else %}در راه کسی نیست ✓{% endif %}</span>
     </a>
 
+    <a class="rq-step {% if wq.unsettled_due %}hot{% elif wq.unsettled_all %}{% else %}done{% endif %}" href="/finance/admin/">
+      <span class="rq-top"><span class="rq-gnum">۶</span><span class="rq-title">💰 تسویه تامین‌کننده‌ها</span></span>
+      <span class="rq-num">{{ wq.unsettled_due|default:0|fa }} <small>تحویل‌شده بی تسویه</small></span>
+      <span class="rq-help">هر مرسولهٔ تحویل‌شده یعنی کار تامین‌کننده تمام شده و پولش باید برسد. جدول «چقدر به هر تامین‌کننده بدهیم» + دکمه تسویه همین‌جاست.</span>
+      {% if wq.unsettled_due %}<span class="rq-extra">🔴 معوق: {{ wq.unsettled_due_amount|money }} تومان</span>{% endif %}
+      <span class="rq-cta">{% if wq.unsettled_due %}تسویه کنید ←{% elif wq.unsettled_all %}در جریان ←{% else %}همه تسویه‌اند ✓{% endif %}</span>
+    </a>
+
     <a class="rq-step {% if wq.pending_reviews %}hot{% else %}done{% endif %}" href="{% url 'admin:reviews_review_changelist' %}?is_approved__exact=0">
-      <span class="rq-top"><span class="rq-gnum">۵</span><span class="rq-title">⭐ تایید نظرات مشتریان</span></span>
+      <span class="rq-top"><span class="rq-gnum">۷</span><span class="rq-title">⭐ تایید نظرات مشتریان</span></span>
       <span class="rq-num">{{ wq.pending_reviews|default:0|fa }} <small>نظر منتظر تایید</small></span>
       <span class="rq-help">نظرها را بخوانید؛ نظر سالم را تایید کنید تا در صفحه محصول نمایش داده شود — اعتماد خریدار بعدی را می‌سازد.</span>
       <span class="rq-cta">{% if wq.pending_reviews %}بازبینی ←{% else %}نظری در صف نیست ✓{% endif %}</span>
     </a>
 
   </div>
+  <p class="rq-sub" style="margin-top:14px;margin-bottom:0;">💡 دو خطای نادر را هم چک کنید: سفارش پرداخت‌شده بدون مرسوله (گام ۲) و مرسولهٔ تامین‌کننده‌ای که هفته‌ها در راه مانده (گام ۴).</p>
 </div>
 
 <div class="rd-panel">

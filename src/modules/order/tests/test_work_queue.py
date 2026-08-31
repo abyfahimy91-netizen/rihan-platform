@@ -149,3 +149,44 @@ class AdminDashboardRenderTests(WorkQueueTestBase):
         body = self._admin_client().get('/admin/').content.decode()
         self.assertIn('مرسوله‌ها', body)
         self.assertIn('لاگ اطلاع‌رسانی', body)
+
+    # ── D-120: تسویه تامین‌کننده — گام ۶ صف کار + منوی مالی ──
+    def test_settlement_step_rendered_with_link(self):
+        body = self._admin_client().get('/admin/').content.decode()
+        self.assertIn('تسویه تامین‌کننده‌ها', body)
+        self.assertIn('href="/finance/admin/"', body)
+
+    def test_settlement_step_hot_on_delivered_unsettled(self):
+        o = self._order(Order.OrderStatus.PROCESSING)
+        sh = Shipment.objects.create(
+            order=o, fulfiller=Shipment.FulfillerType.SUPPLIER, supplier=self.supplier)
+        sh.status = Shipment.Status.DELIVERED
+        sh.save(update_fields=['status'])
+        body = self._admin_client().get('/admin/').content.decode()
+        self.assertIn('<div class="rd-urgent"', body)  # جزو فوری‌ها
+        self.assertIn('معوق', body)
+
+    def test_settlement_not_hot_when_settled(self):
+        o = self._order(Order.OrderStatus.PROCESSING)
+        sh = Shipment.objects.create(
+            order=o, fulfiller=Shipment.FulfillerType.SUPPLIER, supplier=self.supplier)
+        sh.status = Shipment.Status.DELIVERED
+        sh.settlement_status = Shipment.SettlementStatus.SETTLED
+        sh.save(update_fields=['status', 'settlement_status'])
+        q = rihan_work_queue()
+        self.assertEqual(q['unsettled_due'], 0)
+        self.assertEqual(q['unsettled_due_amount'], 0)
+
+    def test_sidebar_has_finance_group_with_badge(self):
+        o = self._order(Order.OrderStatus.PROCESSING)
+        sh = Shipment.objects.create(
+            order=o, fulfiller=Shipment.FulfillerType.SUPPLIER, supplier=self.supplier)
+        sh.status = Shipment.Status.DELIVERED
+        sh.save(update_fields=['status'])
+        body = self._admin_client().get('/admin/').content.decode()
+        self.assertIn('💰 امور مالی', body)
+        self.assertIn('داشبورد مالی و تسویه', body)
+
+    def test_admin_finance_dashboard_live(self):
+        r = self._admin_client().get('/finance/admin/')
+        self.assertEqual(r.status_code, 200)

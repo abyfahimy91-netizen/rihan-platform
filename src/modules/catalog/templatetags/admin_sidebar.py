@@ -38,6 +38,10 @@ GROUPS = [
         ("pages.sitesettings", "⚙️ تنظیمات صفحه اصلی و سایت"),
         ("catalog.contentblock", "بلوک‌های محتوا"),
     ]),
+    ("💰 امور مالی", [
+        ("__finance_dashboard__", "داشبورد مالی و تسویه"),
+        ("order.shipment", None),  # تسویه مرسوله‌ای از داخل خود مرسوله‌ها
+    ]),
     ("👥 کاربران و نقش‌ها", [
         ("auth.user", "کاربران"),
         ("rbac.role", "نقش‌ها"),
@@ -47,7 +51,7 @@ GROUPS = [
 
 
 def _badge_counts():
-    """D-119: تعداد کارهای در انتظار برای بج قرمز کنار منو — سبک و فقط-خواندنی"""
+    """D-119/D-120: تعداد کارهای در انتظار برای بج قرمز کنار منو — سبک و فقط-خواندنی"""
     badges = {}
     try:
         from src.modules.order.models import Payment, Shipment
@@ -57,6 +61,14 @@ def _badge_counts():
         ns = Shipment.objects.filter(status=Shipment.Status.NEW).count()
         if ns:
             badges['order.shipment'] = ns
+        # طلب معوق تامین‌کننده‌ها (تحویل‌شده ولی تسویه‌نشده) → بج روی داشبورد مالی
+        due = Shipment.objects.filter(
+            fulfiller=Shipment.FulfillerType.SUPPLIER,
+            supplier__isnull=False,
+            settlement_status=Shipment.SettlementStatus.UNSETTLED,
+            status=Shipment.Status.DELIVERED).count()
+        if due:
+            badges['__finance_dashboard__'] = due
         try:
             from src.modules.reviews.models import Review
             pr = Review.objects.filter(is_approved=False).count()
@@ -87,16 +99,19 @@ def rihan_sidebar(context):
 
     groups, used = [], set()
     badges = _badge_counts()
+    SPECIAL_URLS = {'__finance_dashboard__': '/finance/admin/'}
     for title, entries in GROUPS:
         items = []
         for k, t in entries:
-            if k in registry:
-                item = {"title": t, "url": registry[k], "badge": badges.get(k, 0)}
+            if t is None:      # آیتم بدون برچسب = لینک تکراری، نمایش نده
+                continue
+            if k in registry or k in SPECIAL_URLS:
+                item = {"title": t, "url": registry.get(k, SPECIAL_URLS.get(k, '')), "badge": badges.get(k, 0)}
                 items.append(item)
+            if k in registry:
                 used.add(k)
         if items:
             groups.append({"title": title, "items": items})
-        used.update(k for k, _t in entries if k in registry)
 
     leftovers = []
     for label, url in registry.items():
