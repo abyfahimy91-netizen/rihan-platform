@@ -477,6 +477,64 @@ def mark_delivered(shipment, user=None):
 
 
 # ────────────────────────────────────────────────
+# D-124 — متن پیامک دستی برای مشتری:
+# تا وقتی پنل پیامکی فعال نشده، ادمین متن را از صفحه مرسوله کپی و با گوشی خودش می‌فرستد.
+# شامل: تشکر + اقلام + کد رهگیری + لینک یک‌کلیکی (سامانه باربری با کدِ پرشده باز می‌شود)
+# قانون امنیتی: هرگز قیمت ندارد.
+# ────────────────────────────────────────────────
+
+DEFAULT_CUSTOMER_MANUAL_SMS = (
+    '{brand} 🌿 سپاس از خرید شما!\n'
+    'سفارش {order_number}\n'
+    '{items}\n'
+    'کد رهگیری: {tracking_code}\n'
+    'پیگیری با یک کلیک (کد خودکار وارد می‌شود):\n{link}'
+)
+
+DEFAULT_CUSTOMER_MANUAL_SMS_OTHER = (
+    '{brand} 🌿 سپاس از خرید شما!\n'
+    'سفارش {order_number}\n'
+    '{items}\n'
+    'ارسال با {carrier} — {other_details}'
+)
+
+
+def sms_auto_send_available() -> bool:
+    """آیا ارسال خودکار پیامک الان ممکن است؟ (سرویس‌دهنده فعال با کلید، یا کلید env)"""
+    try:
+        from src.modules.auth.models import SmsProvider
+        if SmsProvider.objects.filter(is_active=True).exclude(api_key='').exists():
+            return True
+        from src.modules.auth.sms_providers import KavenegarProvider
+        return KavenegarProvider().is_available()
+    except Exception:
+        return False
+
+
+def manual_customer_sms_text(shipment) -> str:
+    """متن پیامک دستی برای مشتری — بدون هیچ قیمتی"""
+    order = shipment.order
+    items = '\n'.join(
+        item_line(si.order_item)
+        for si in shipment.items.select_related('order_item')
+    ) or '-'
+    base = {
+        'brand': _sms_brand(),
+        'order_number': order.order_number,
+        'items': items,
+    }
+    if shipment.tracking_code:
+        ctx = {**base,
+               'tracking_code': shipment.tracking_code,
+               'link': short_tracking_link(shipment.tracking_code)}
+        return render_sms_template('', DEFAULT_CUSTOMER_MANUAL_SMS, ctx)
+    ctx = {**base,
+           'carrier': shipment.carrier_full_label,
+           'other_details': shipment.other_details_text or shipment.carrier_full_label}
+    return render_sms_template('', DEFAULT_CUSTOMER_MANUAL_SMS_OTHER, ctx)
+
+
+# ────────────────────────────────────────────────
 # متن پیامک‌ها
 # ────────────────────────────────────────────────
 

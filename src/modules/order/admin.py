@@ -601,6 +601,7 @@ class ShipmentAdmin(admin.ModelAdmin):
     autocomplete_fields = []
     readonly_fields = ['order', 'fulfiller', 'supplier', 'sent_to_supplier_at', 'last_notified_at',
                        'supplier_notified_count', 'created_at', 'updated_at', 'dispatch_preview',
+                       'customer_sms_preview',
                        'settlement_status', 'settled_amount', 'settled_at', 'settled_by',
                        'payable_preview']
     fieldsets = [
@@ -624,6 +625,9 @@ class ShipmentAdmin(admin.ModelAdmin):
             'classes': ['collapse']}),
         ('اطلاع‌رسانی به تامین‌کننده', {'fields': ['sent_to_supplier_at', 'last_notified_at', 'supplier_notified_count']}),
         ('📋 متن دستور ارسال محوله (کپی برای تامین‌کننده)', {'fields': ['dispatch_preview']}),
+        ('📱 متن پیامک مشتری (کپی و ارسال دستی)', {'fields': ['customer_sms_preview'],
+            'description': 'تا وقتی پنل پیامکی فعال نشده، این متن را کپی کنید و با گوشی خودتان به مشتری بفرستید. '
+                           'پس از فعال‌شدن پنل پیامکی، همین پیام به‌صورت خودکار ارسال می‌شود.'}),
         ('زمان‌ها', {'classes': ['collapse'], 'fields': ['created_at', 'updated_at']}),
     ]
     actions = ['action_mark_delivered', 'action_resend_supplier_sms', 'action_resend_customer_sms',
@@ -772,6 +776,55 @@ class ShipmentAdmin(admin.ModelAdmin):
             'style="white-space:pre-wrap;background:#FAF7F0;padding:14px;border-radius:10px;'
             'border:1px solid #ddd;line-height:1.9;font-size:13px;">{}</pre>', text)
         return format_html('{}{}{}', mark_safe(button), pre, mark_safe(copy_js))
+
+    # ── D-124: متن پیامک دستی مشتری — کپی و ارسال با گوشی ادمین ──
+    @admin.display(description='متن آماده پیامک به مشتری')
+    def customer_sms_preview(self, obj):
+        if not obj or not obj.pk:
+            return '-'
+        has_code = bool(obj.tracking_code)
+        is_other = obj.carrier == Shipment.Carrier.OTHER
+        if not has_code and not is_other:
+            return format_html(
+                '<span style="color:#b3261e;">هنوز کد رهگیری ثبت نشده — پس از ذخیره کد (یا کامل‌کردن '
+                'جزئیات شرکت حمل «سایر»)، متن پیامک اینجا ساخته می‌شود.</span>')
+
+        text = _fulfillment.manual_customer_sms_text(obj)
+        auto = _fulfillment.sms_auto_send_available()
+        if auto:
+            note = ('✅ سرویس پیامک فعال است؛ پیامک به‌صورت خودکار ارسال شده/می‌شود — '
+                    'این متن فقط برای ارسال مجدد دستی است.')
+        else:
+            note = ('⚠️ پنل پیامکی هنوز فعال نیست — دکمه کپی را بزنید و متن را با گوشی خودتان '
+                    'به شماره مشتری پیامک کنید.')
+
+        copy_js = (
+            '<script>'
+            'document.addEventListener("click",function(e){'
+            'var b=e.target.closest(".rihan-copy-sms");if(!b)return;'
+            'var t=document.getElementById("rihan-sms-text");if(!t)return;'
+            'var txt=t.textContent.trim();'
+            'var done=function(){var o=b.textContent;b.textContent="\u2705 \u06a9\u067e\u06cc \u0634\u062f";'
+            'setTimeout(function(){b.textContent=o},1800)};'
+            'if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(txt).then(done);}else{'
+            'var r=document.createRange();r.selectNodeContents(t);var s=window.getSelection();s.removeAllRanges();s.addRange(r);'
+            'try{document.execCommand("copy");done();}catch(err){}}});'
+            '</script>'
+        )
+        button = '<button type="button" class="button rihan-copy-sms">\U0001f4cb \u06a9\u067e\u06cc \u0645\u062a\u0646 \u067e\u06cc\u0627\u0645\u06a9</button>'
+        test_link = ''
+        if has_code:
+            test_link = format_html(
+                ' · <a href="{}" target="_blank">👁 تست لینک پیگیری (سامانه با کد پرشده باز می‌شود)</a>',
+                _fulfillment.short_tracking_link(obj.tracking_code))
+        pre = format_html(
+            '<pre dir="rtl" id="rihan-sms-text" '
+            'style="white-space:pre-wrap;background:#FAF7F0;padding:14px;border-radius:10px;'
+            'border:1px solid #ddd;line-height:2;font-size:13px;">{}</pre>', text)
+        return format_html(
+            '<div dir="rtl" style="line-height:2.1;font-size:13px;margin-bottom:8px;">{}</div>'
+            '<div>{} <span style="color:#888;">({} کاراکتر)</span>{}</div>{}{}',
+            note, mark_safe(button), fa_money(len(text)), test_link, pre, mark_safe(copy_js))
 
     # ── اکشن‌ها ──
     @admin.action(description='✅ علامت‌گذاری «تحویل داده شد»')
