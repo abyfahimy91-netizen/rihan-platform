@@ -9,7 +9,7 @@
     
     <!-- SEO -->
     <meta name="keywords" content="{% block meta_keywords %}ریهان, فروشگاه اینترنتی ریهان, خرید آنلاین مطمئن, انتخاب با اعتماد, محصولات باکیفیت{% endblock %}">
-    <meta name="robots" content="index, follow">
+    <meta name="robots" content="{% block meta_robots %}index, follow{% endblock %}">
     <link rel="canonical" href="{{ request.build_absolute_uri }}">
     <meta name="google-site-verification" content="VLKW8JHPQVsqTqU9ERNmJinefXRe8LyLZizxbv8rJig">
     <link rel="icon" type="image/png" href="/static/favicon.png">

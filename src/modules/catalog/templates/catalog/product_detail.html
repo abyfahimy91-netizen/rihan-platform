@@ -1101,7 +1101,7 @@
         
         {% elif block.block_type == 'image' %}
         <figure class="block-image">
-            <img src="{{ block.content.image_url }}" alt="{{ block.content.alt_text|default:product.name }}">
+            <img src="{{ block.content.image_url }}" alt="{{ block.content.alt_text|default:product.name }}" loading="lazy" decoding="async">
             {% if block.content.caption %}
             <figcaption>{{ block.content.caption }}</figcaption>
             {% endif %}
@@ -1110,7 +1110,7 @@
         {% elif block.block_type == 'gallery' %}
         <div class="block-gallery">
             {% for img in block.content.images %}
-            <img src="{{ img.url }}" alt="{{ img.alt|default:product.name }}">
+            <img src="{{ img.url }}" alt="{{ img.alt|default:product.name }}" loading="lazy" decoding="async">
             {% endfor %}
         </div>
         
