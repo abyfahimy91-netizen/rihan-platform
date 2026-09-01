@@ -36,7 +36,7 @@ class SiteSettingsAdmin(admin.ModelAdmin):
             'description': 'این اطلاعات در صفحه «تماس با ما»، صفحه «درباره ما» و فوتر استفاده می‌شود.',
         }),
         ('🌐 شبکه‌های اجتماعی', {
-            'fields': ('instagram_url', 'telegram_url', 'whatsapp_number'),
+            'fields': ('instagram_url', 'telegram_url', 'whatsapp_number', 'wa_fab_enabled'),
             'classes': ('collapse',),
         }),
         ('📄 محتوای صفحه درباره ما', {

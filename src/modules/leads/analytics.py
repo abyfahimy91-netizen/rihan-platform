@@ -141,8 +141,15 @@ def import_from_snapshot(path):
             json.dump(meta, f)
     except Exception:
         pass
+    # D-126: اتصال خودکار اعضا بعد از هر import
+    linked = 0
+    try:
+        from .support import link_registered_users
+        linked = link_registered_users()
+    except Exception:
+        pass
     return {'created': created, 'updated': updated, 'converted': converted,
-            'hot': hot, 'visitors': len(data.get('visitors', [])),
+            'hot': hot, 'visitors': len(data.get('visitors', [])), 'linked': linked,
             'meta': meta}
 
 

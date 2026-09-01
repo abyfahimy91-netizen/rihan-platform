@@ -1,21 +1,33 @@
 # -*- coding: utf-8 -*-
-"""D-126: اتصال هویت به سرنخ‌ها بدون اصطکاک.
+"""D-126/D-127: اتصال هویت به سرنخ‌ها بدون اصطکاک + سخت‌سازی امنیتی.
 
 لایه ۱: دکمهٔ شناور «پاسخ سریع در واتساپ» — مشتری خودش پیام می‌دهد؛ پیام
 شامل یک کد یکتاست که سرنخِ همان IP را پیدا می‌کند. وقتی ادمین پیام را در
 واتساپ دید، در پنل شماره/نام را با همان کد ثبت می‌کند → هویت وصل می‌شود.
 لایه ۲: link_registered_users — اعضای سایت که DeviceToken از یک IP دارند
 به‌طور خودکار با سرنخ همان IP وصل می‌شوند (فقط پرکردن جاهای خالی).
+
+سخت‌سازی (D-127):
+- IP واقعی از X-Real-IP (nginx، جعل‌ناپذیر) — کلاینت با XFF جعلی نمی‌تواند
+  سرنخ‌های تقلبی بسازد یا کد سرنخ دیگران را بگیرد.
+- throttle دو لایه: هر IP حداکثر 30 درخواست/ساعت + سراسری 600/ساعت.
+- سقف کل سرنخ‌ها برای جلوگیری از پرشدن دیتابیس.
+- کلید خاموش‌کننده: SiteSettings.wa_fab_enabled (پنل ادمین).
 """
 import secrets
+import urllib.parse
 
+from django.contrib import messages
+from django.core.cache import cache
 from django.http import JsonResponse
 from django.shortcuts import redirect
-from django.contrib import messages
 
 from .models import VisitorLead
 
 _CODE_ALPHABET = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789'  # بدون 0/O و 1/I
+RL_PER_IP = 30        # درخواست کد در ساعت برای هر IP واقعی
+RL_GLOBAL = 600       # درخواست کد در ساعت کل
+MAX_LEADS = 5000      # سقف کل سرنخ‌ها (ضد سیل دیتابیس)
 
 
 def generate_code():
@@ -23,11 +35,30 @@ def generate_code():
 
 
 def get_client_ip(request):
-    """همان منطق core.middleware._get_client_ip: X-Forwarded-For اول."""
+    """IP واقعی: X-Real-IP (جعل‌ناپذیر، ست‌شده توسط nginx خودمان) →
+    آخرین عنصر XFF (افزودهٔ nginx خودمان) → REMOTE_ADDR.
+    ⚠️ هرگز اولین عنصر XFF را باور نکن — توسط کلاینت جعل‌پذیر است."""
+    ip = request.META.get('HTTP_X_REAL_IP')
+    if ip:
+        return ip.strip()
     xff = request.META.get('HTTP_X_FORWARDED_FOR')
     if xff:
-        return xff.split(',')[0].strip()
+        return xff.split(',')[-1].strip()
     return request.META.get('REMOTE_ADDR', '')
+
+
+def _throttle(request):
+    """دو شمارندهٔ ساعتی؛ False یعنی درخواست رد شود."""
+    ip = get_client_ip(request)
+    k_ip = f'wa_code_rl:{ip}'
+    k_all = 'wa_code_rl:__global__'
+    n_ip = cache.get(k_ip) or 0
+    n_all = cache.get(k_all) or 0
+    if n_ip >= RL_PER_IP or n_all >= RL_GLOBAL:
+        return False
+    cache.set(k_ip, n_ip + 1, 3600)
+    cache.set(k_all, n_all + 1, 3600)
+    return True
 
 
 def support_code_view(request):
@@ -35,24 +66,31 @@ def support_code_view(request):
     if not request.headers.get('X-Requested-With') == 'XMLHttpRequest':
         return JsonResponse({'ok': False, 'error': 'bad-request'}, status=400)
     from src.modules.pages.models import SiteSettings
-    s = SiteSettings.objects.first()
-    intl = (s and getattr(s, 'whatsapp_number', '') or '').strip()
+    s = SiteSettings.load()
+    if not getattr(s, 'wa_fab_enabled', False):
+        # مثل «پیکربندی نشده» جواب بده — وجود قابلیت لو نرود
+        return JsonResponse({'ok': False, 'error': 'not-configured'}, status=404)
+    intl = (getattr(s, 'whatsapp_number', '') or '').strip()
     if not intl:
-        return JsonResponse({'ok': False, 'error': 'whatsapp-not-configured'}, status=404)
+        return JsonResponse({'ok': False, 'error': 'not-configured'}, status=404)
+    if not _throttle(request):
+        return JsonResponse({'ok': False, 'error': 'too-many-requests'}, status=429)
     ip = get_client_ip(request)
     if not ip or ip == 'testserver':
         return JsonResponse({'ok': False, 'error': 'no-ip'}, status=400)
     lead = VisitorLead.objects.filter(ip=ip).first()
     created = False
     if lead is None:
-        lead = VisitorLead.objects.create(ip=ip, stage=VisitorLead.Stage.CART,
-                                          stage_rank=3, is_hot=True,
+        # ضد سیل: سقف کل ردیف‌ها
+        if VisitorLead.objects.count() >= MAX_LEADS:
+            return JsonResponse({'ok': False, 'error': 'limit-reached'}, status=429)
+        lead = VisitorLead.objects.create(ip=ip, stage=VisitorLead.Stage.PRODUCT,
+                                          stage_rank=2, is_hot=False,
                                           city='واتساپ', isp='—')
         created = True
     if not lead.link_code:
         lead.link_code = generate_code()
         lead.save(update_fields=['link_code'])
-    import urllib.parse
     msg = f'سلام 👋 (کد {lead.link_code})'
     return JsonResponse({'ok': True, 'created': created, 'code': lead.link_code,
                          'wa_url': f'https://wa.me/{intl}?text={urllib.parse.quote(msg)}'})

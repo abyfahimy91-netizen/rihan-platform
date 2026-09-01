@@ -328,12 +328,12 @@ def lead_panel_csv(request):
     response['Content-Disposition'] = 'attachment; filename="visitor-leads.csv"'
     response.write('\ufeff')  # BOM برای اکسل فارسی
     w = csv_mod.writer(response)
-    w.writerow(['IP', 'کشور', 'شهر', 'ISP', 'دستگاه', 'کانال ورود', 'همهٔ کانال‌ها',
+    w.writerow(['IP', 'هویت (شماره)', 'نام', 'کشور', 'شهر', 'ISP', 'دستگاه', 'کانال ورود', 'همهٔ کانال‌ها',
                 'مرحله', 'ویو', 'سشن', 'اولین بازدید', 'آخرین بازدید',
                 'سفارش‌ها در لاگ', 'وضعیت سفارش‌های DB', 'داغ', 'وضعیت CRM', 'یادداشت'])
     for v in qs:
         w.writerow([
-            v.ip, v.country, v.city, v.isp, v.device, v.channel_first,
+            v.ip, v.phone or '—', v.name or '—', v.country, v.city, v.isp, v.device, v.channel_first,
             '، '.join(v.channels or []),
             v.get_stage_display(), v.page_views, v.sessions_count,
             _jdate(v.first_seen), _jdate(v.last_seen),

@@ -101,6 +101,13 @@ class SiteSettings(models.Model):
         help_text='فقط شماره با کد کشور، مثال: 989123456789',
     )
 
+    # ── D-127: کنترل قابلیت واتساپ ──
+    wa_fab_enabled = models.BooleanField(
+        'دکمهٔ «پاسخ سریع در واتساپ»',
+        default=True,
+        help_text='با روشن بودن، دکمهٔ شناور واتساپ با کد اتصال در صفحهٔ سبد و تسویه نمایش داده می‌شود.',
+    )
+
     # ── صفحه درباره ما (D-100) ──
     about_title = models.CharField(
         'عنوان صفحه درباره ما', max_length=120, default='درباره ریهان',

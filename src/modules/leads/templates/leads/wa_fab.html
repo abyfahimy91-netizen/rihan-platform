@@ -1,4 +1,5 @@
-<!-- D-126: دکمهٔ شناور پاسخ سریع واتساپ با کد اتصال -->
+<!-- D-126: دکمهٔ شناور پاسخ سریع واتساپ با کد اتصال — D-127: کلید پنل -->
+{% if site_settings.wa_fab_enabled %}
 <div id="waFab" style="display:none"></div>
 <script>
 (function () {
@@ -24,3 +25,4 @@
         .catch(function () {});
 })();
 </script>
+{% endif %}
