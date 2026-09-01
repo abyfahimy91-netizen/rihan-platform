@@ -117,6 +117,27 @@
     </div>
 
     <div class="card">
+        <h3>🔗 اتصال پیام واتساپ به سرنخ
+            <small class="muted">(وقتی مشتری دکمهٔ «پاسخ سریع» را زد، پیامش با کد می‌رسد؛ کد را این‌جا بزن و شماره‌اش را از واتساپ بردار و ثبت کن)</small>
+        </h3>
+        {% if link_target %}
+        <form method="post" action="{% url 'leads:panel_link' link_target.id %}" class="flt-form">
+            {% csrf_token %}
+            <span>سرنخ <code>{{ link_target.ip }}</code> — کد <b>{{ link_target.link_code }}</b></span>
+            <input type="tel" name="phone" placeholder="09xxxxxxxxx" dir="ltr" required>
+            <input type="text" name="name" placeholder="نام مشتری">
+            <button type="submit">وصل کن 📎</button>
+            <a href="{% url 'leads:panel' %}" class="muted-link">انصراف</a>
+        </form>
+        {% else %}
+        <form method="get" class="flt-form">
+            <input type="text" name="code" value="{{ filters.code|default:'' }}" placeholder="کد داخل پیام واتساپ (مثل AB23CD)" dir="ltr" style="max-width:260px">
+            <button type="submit">یافتن سرنخ</button>
+        </form>
+        {% endif %}
+    </div>
+
+    <div class="card">
         <h3>👥 سرنخ‌ها <small class="muted">({{ page.paginator.count|fa }} نتیجه — صفحهٔ {{ page.number|fa }} از {{ page.paginator.num_pages|fa }})</small></h3>
         <div class="table-wrap">
         <table class="table rwd-table">
@@ -129,7 +150,9 @@
             <tr{% if v.is_hot %} class="hot-row"{% endif %}>
                 <td data-label="IP / موقعیت">
                     <code>{{ v.ip }}</code>
-                    {% if v.is_vpn %}<span class="mini-badge">VPN؟</span>{% endif %}<br>
+                    {% if v.is_vpn %}<span class="mini-badge">VPN؟</span>{% endif %}
+                    {% if v.link_code %}<span class="mini-badge">کد {{ v.link_code }}</span>{% endif %}<br>
+                    {% if v.phone %}<small>📞 <span dir="ltr">{{ v.phone }}</span>{% if v.name %} — {{ v.name }}{% endif %}</small><br>{% endif %}
                     <small>{{ v.city|default:'؟' }} — {{ v.isp|default:'؟' }}</small>
                 </td>
                 <td data-label="دستگاه / کانال">

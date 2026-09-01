@@ -189,7 +189,8 @@ def _panel_queryset(request):
     q = (g.get('q') or '').strip()
     if q:
         qs = qs.filter(Q(ip__icontains=q) | Q(city__icontains=q) | Q(isp__icontains=q) |
-                       Q(order_refs__icontains=q) | Q(admin_notes__icontains=q))
+                       Q(order_refs__icontains=q) | Q(admin_notes__icontains=q) |
+                       Q(phone__icontains=q) | Q(name__icontains=q) | Q(link_code__icontains=q))
     stage = g.get('stage') or ''
     if stage in VisitorLead.Stage.values:
         qs = qs.filter(stage=stage)
@@ -261,6 +262,8 @@ def lead_panel(request):
     for lead in page.object_list:
         lead.last_seen_j = _jdate(lead.last_seen)
         lead.first_seen_j = _jdate(lead.first_seen)
+    code_q = (request.GET.get('code') or '').strip().upper()
+    code_q = (request.GET.get('code') or '').strip().upper()
     context = {
         'title': 'ردیابی سرنخ‌های بازدید',
         'page': page,
@@ -270,6 +273,8 @@ def lead_panel(request):
         'statuses': VisitorLead.LeadStatus.choices,
         'summary': _panel_summary(),
         'snapshot_path': _snapshot_path(),
+        'link_target': (VisitorLead.objects.filter(
+            link_code=code_q).first() if code_q else None),
     }
     return render(request, 'leads/panel.html', context)
 

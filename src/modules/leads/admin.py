@@ -212,6 +212,7 @@ class VisitorLeadAdmin(admin.ModelAdmin):
 
     list_display = (
         'ip',
+        'identity_display',
         'location_display',
         'device',
         'channel_first',
@@ -222,7 +223,7 @@ class VisitorLeadAdmin(admin.ModelAdmin):
         'status_display',
     )
     list_filter = ('stage', 'status', 'device', 'is_vpn', 'country')
-    search_fields = ('ip', 'city', 'isp', 'order_refs', 'admin_notes')
+    search_fields = ('ip', 'city', 'isp', 'order_refs', 'admin_notes', 'phone', 'name', 'link_code')
     ordering = ('-last_seen',)
     list_per_page = 50
     actions = ['mark_contacted', 'mark_lost', 'mark_buyer', 'mark_junk']
@@ -240,13 +241,23 @@ class VisitorLeadAdmin(admin.ModelAdmin):
         ('قیف خرید', {'fields': ('stage', 'is_hot', 'page_views', 'sessions_count',
                                  'first_seen', 'last_seen', 'actions', 'order_refs',
                                  'orders_matched')}),
-        ('وضعیت پیگیری (قابل ویرایش)', {'fields': ('status', 'admin_notes')}),
+        ('وضعیت پیگیری (قابل ویرایش)', {'fields': ('status', 'phone', 'name', 'admin_notes')}),
         ('جزئیات فنی', {'fields': ('sessions', 'stage_rank', 'created_at', 'updated_at'),
                         'classes': ('collapse',)}),
     )
 
     def has_add_permission(self, request):
         return False
+
+    def identity_display(self, obj):
+        if obj.phone:
+            return format_html('<span dir="ltr">📞 {}</span>{}',
+                               obj.phone,
+                               format_html(' — {}', obj.name) if obj.name else '')
+        if obj.link_code:
+            return format_html('<span style="color:#5b3fa8">کد {}</span>', obj.link_code)
+        return '—'
+    identity_display.short_description = 'هویت'
 
     def location_display(self, obj):
         return f"{obj.city or '؟'} / {obj.isp or '؟'}"

@@ -36,3 +36,11 @@ urlpatterns += [
     path('panel/status/<uuid:pk>/', views.lead_panel_status, name='panel_status'),
     path('panel/export/csv/', views.lead_panel_csv, name='panel_csv'),
 ]
+
+# ── D-126: کد اتصال واتساپ + اتصال سریع در پنل ──
+from . import support
+
+urlpatterns += [
+    path('support-code/', support.support_code_view, name='support_code'),
+    path('panel/link/<uuid:pk>/', support.panel_link_lead, name='panel_link'),
+]
