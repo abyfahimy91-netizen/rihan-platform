@@ -93,6 +93,19 @@ class SiteSettings(models.Model):
         help_text='با فاصله جدا شود؛ در کپشن استوری و پیام اشتراک‌گذاری می‌آید',
     )
 
+    # ── D-128: پیام کنار قیمت (توجیه قیمت / پیشنهاد فروش) ──
+    price_note_enabled = models.BooleanField(
+        'فعال‌سازی پیام کنار قیمت',
+        default=True,
+        help_text='با روشن بودن، «پیام کنار قیمت» روی کارت محصول در صفحه اصلی و زیر قیمت در صفحه محصول نمایش داده می‌شود.',
+    )
+    price_note_text = models.TextField(
+        'متن پیام کنار قیمت',
+        blank=True, default='',
+        help_text='کوتاه و توجیه‌کنندهٔ قیمت بنویسید؛ مثال: «برداشت دستی از دامنه‌های وحشی هوراند؛ بدون هیچ افزودنی — به همین قیمت نیست.» '
+                  'اگر خالی بماند هیچ‌چیز نمایش داده نمی‌شود، حتی با فعال بودن کلید.',
+    )
+
     # ── شبکه‌های اجتماعی ──
     instagram_url = models.URLField('آدرس اینستاگرام', blank=True, default='')
     telegram_url = models.URLField('آدرس تلگرام', blank=True, default='')

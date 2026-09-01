@@ -31,6 +31,14 @@ class SiteSettingsAdmin(admin.ModelAdmin):
             'fields': ('announcement_active', 'announcement_text'),
             'description': 'نوار رنگی بالای همه صفحات سایت برای خبرهای مهم (مثل ارسال رایگان).',
         }),
+        ('🏷 پیام کنار قیمت (توجیه قیمت و پیشنهاد فروش)', {
+            'fields': ('price_note_enabled', 'price_note_text'),
+            'description': (
+                'پیامی کوتاه که دقیقاً کنار قیمتِ محصول نمایش داده می‌شود — هم در کارت محصول صفحه اصلی، '
+                'هم زیر قیمت در صفحه محصول. برای توجیه قیمت و پررنگ‌کردن ارزش کالا.'
+                'نمونه: «برداشت دستی از کوه‌های هوراند؛ ۱۰۰٪ دانهٔ خالص بدون نمک.»'
+            ),
+        }),
         ('📞 اطلاعات تماس', {
             'fields': ('contact_phone', 'contact_email', 'contact_address', 'contact_hours'),
             'description': 'این اطلاعات در صفحه «تماس با ما»، صفحه «درباره ما» و فوتر استفاده می‌شود.',
