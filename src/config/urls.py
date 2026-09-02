@@ -18,6 +18,24 @@ sitemaps = {
 
 # 🌿 برندینگ پنل مدیریت ریحان
 admin.site.site_header = "🌿 پنل مدیریت ریحان"
+
+# SALES-14050610: ماژول‌های قدیمی/خالی از داشبورد ادمین حذف شوند تا پنل مرتب بماند
+# (داده‌ها حفظ می‌شوند؛ فقط از رابط ادمین برداشته می‌شوند — ملاک: pages.SiteSettings، core.AuditLog، VisitorLead)
+from django.contrib import admin as _admin
+from django.apps import apps as _apps
+for _label in (
+    "family_panel.ProductDraft",
+    "family_panel.SensitiveOperation",
+    "family_panel.ProductContent",
+    "family_panel.ActivityLog",
+    "family_panel.SiteSettings",
+    "audit.AuditLog",
+    "leads.Lead",
+):
+    try:
+        _admin.site.unregister(_apps.get_model(_label))
+    except Exception:
+        pass
 admin.site.site_title = "مدیریت ریحان"
 admin.site.index_title = "کنترل کامل فروشگاه — همه‌چیز از اینجا قابل مدیریت است"
 

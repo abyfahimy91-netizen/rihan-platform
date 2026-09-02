@@ -3,6 +3,7 @@
 مدل‌ها را گروه‌بندی کرده و لینک هرکدام را فقط برای کاربران دارای دسترسی می‌سازد.
 هر مدلی که در آینده ثبت شود، خودکار زیر گروه «سایر» ظاهر می‌شود.
 D-125: گروه «📈 ردیابی بازدید» با لینک اختصاصی پنل سرنخ‌ها + بج سرنخ داغ.
+SALES-14050610: بازآرایی کامل گروه‌ها بر اساس جریان کار روزانهٔ اپراتور + مخفی‌سازی ماژول‌های قدیمی/فنی.
 """
 from django import template
 from django.urls import NoReverseMatch, reverse
@@ -10,48 +11,73 @@ from django.contrib.admin import site as admin_site
 
 register = template.Library()
 
+# ماژول‌های قدیمی/تکراری/فنی که نباید در سایدبار دیده شوند
+HIDDEN_LABELS = {
+    # family_panel قدیمی است و هیچ داده‌ای ندارد — تنظیمات اصلی: pages.sitesettings
+    'family_panel.productdraft',
+    'family_panel.sensitiveoperation',
+    'family_panel.productcontent',
+    'family_panel.activitylog',
+    'family_panel.sitesettings',
+    # دو لاگ ممیزی موازی — core.auditlog ملاک است (audit.AuditLog خالی)
+    'audit.auditlog',
+    # پنل سرنخ قدیمی (۰ رکورد) — VisitorLead و پنل /leads/panel/ ملاک‌اند
+    'leads.lead',
+    # فنی — برای اپراتور روزمره وسیلهٔ کار نیست
+    'order.cart',
+    'rihan_auth.adminloginattempt',
+}
+
 # (عنوان گروه، [(app_label.model_name, عنوان فارسی), ...])
+# ترتیب گروه‌ها = ترتیب جریان کار روزانه: محصول → سفارش → کمپین → مشتری → محتوا → مالی → دسترسی → فنی
 GROUPS = [
-    ("🛍 فروشگاه", [
+    ("🛍 محصولات و انبار", [
         ("catalog.product", "محصولات"),
         ("catalog.category", "دسته‌بندی‌ها"),
-        ("catalog.supplier", "تامین‌کنندگان"),
         ("catalog.productimage", "تصاویر محصولات"),
+        ("catalog.inventory", "موجودی انبار"),
+        ("catalog.inventorytransaction", "تاریخچه موجودی"),
+        ("catalog.supplier", "تامین‌کنندگان"),
     ]),
-    ("📦 موجودی انبار", [
-        ("catalog.inventory", "موجودی کالاها"),
-        ("catalog.inventorytransaction", "تراکنش‌های موجودی"),
-    ]),
-    ("🧾 سفارش‌ها", [
+    ("🧾 سفارش‌ها و ارسال", [
         ("order.order", "سفارش‌ها"),
-        ("order.payment", "پرداخت‌ها"),
+        ("order.payment", "پرداخت‌های در انتظار تایید"),
         ("order.shipment", "مرسوله‌ها"),
-        ("order.coupon", "کدهای تخفیف"),
-        ("order.notificationlog", "لاگ اطلاع‌رسانی"),
         ("order.address", "آدرس‌ها"),
     ]),
-    ("⭐ نظرات مشتریان", [
-        ("reviews.review", "نظرات"),
+    ("🎟 کمپین و تخفیف", [
+        ("order.coupon", "کدهای تخفیف"),
     ]),
-    ("📞 سرنخ‌های فروش", [
-        ("leads.lead", "سرنخ‌ها"),
-    ]),
-    ("📈 ردیابی بازدید", [
+    ("📞 مشتریان و سرنخ‌ها", [
         ("__visitor_panel__", "داشبورد سرنخ‌های بازدید"),
-        ("leads.visitorlead", "مدیریت سرنخ‌های بازدید"),
+        ("leads.visitorlead", "مدیریت سرنخ‌ها"),
+        ("auth.user", "کاربران ثبت‌نامی"),
+        ("reviews.review", "نظرات مشتریان"),
     ]),
     ("🧩 محتوای سایت", [
         ("pages.sitesettings", "⚙️ تنظیمات صفحه اصلی و سایت"),
+        ("pages.faqitem", "❓ سوالات متداول"),
         ("catalog.contentblock", "بلوک‌های محتوا"),
     ]),
     ("💰 امور مالی", [
         ("__finance_dashboard__", "داشبورد مالی و تسویه"),
         ("order.shipment", None),  # تسویه مرسوله‌ای از داخل خود مرسوله‌ها
     ]),
-    ("👥 کاربران و نقش‌ها", [
-        ("auth.user", "کاربران"),
+    ("👥 دسترسی و نقش‌ها", [
+        ("auth.group", "گروه‌های دسترسی"),
         ("rbac.role", "نقش‌ها"),
         ("rbac.userrole", "نقش اختصاص‌یافته"),
+    ]),
+    ("⚙️ فنی و امنیت (پیشرفته)", [
+        ("order.bankaccount", "حساب‌های بانکی مقصد"),
+        ("order.notificationlog", "لاگ اطلاع‌رسانی"),
+        ("rihan_auth.authsettings", "تنظیمات ورود و پیامک"),
+        ("rihan_auth.smsprovider", "سرویس‌دهنده‌های پیامک"),
+        ("rihan_auth.loginattempt", "تلاش‌های ورود"),
+        ("rihan_auth.phoneotp", "کدهای یکبارمصرف"),
+        ("rihan_auth.devicetoken", "توکن‌های دستگاه"),
+        ("core.featureflag", "پرچم‌های قابلیت"),
+        ("core.auditlog", "لاگ‌های ممیزی"),
     ]),
 ]
 
@@ -102,6 +128,8 @@ def rihan_sidebar(context):
     registry = {}
     for model, model_admin in admin_site._registry.items():
         label = "{}.{}".format(model._meta.app_label, model._meta.model_name)
+        if label in HIDDEN_LABELS:
+            continue
         try:
             if request is None or not model_admin.has_view_or_change_permission(request, None):
                 continue

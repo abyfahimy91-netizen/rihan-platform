@@ -9,7 +9,7 @@ from django.utils.html import format_html
 from django.utils import timezone
 from django.db.models import Count, Sum, Q
 from django.urls import reverse
-from .models import Cart, CartItem, Order, OrderItem, Payment, Address, BankAccount, Coupon
+from .models import Cart, CartItem, Order, OrderItem, Payment, Address, BankAccount, Coupon, CouponUse
 from . import finance as _finance
 from src.core.fa import money as fa_money, jalali_datetime_str
 
@@ -89,7 +89,39 @@ class OrderAdmin(admin.ModelAdmin):
     ]
     inlines = [OrderItemInline]
     date_hierarchy = 'created_at'
-    actions = ['action_settle_suppliers']
+    actions = ['action_settle_suppliers', 'export_orders_csv']
+
+    @admin.action(description='⬇️ خروجی CSV سفارش‌های انتخاب‌شده (اکسل)')
+    def export_orders_csv(self, request, queryset):
+        import csv as _csv
+        from django.http import HttpResponse
+        resp = HttpResponse(content_type='text/csv; charset=utf-8')
+        resp['Content-Disposition'] = 'attachment; filename=rihan-orders.csv'
+        resp.write('\ufeff')  # BOM برای اکسل فارسی
+        w = _csv.writer(resp)
+        w.writerow(['شماره سفارش', 'تاریخ ثبت', 'وضعیت', 'مشتری', 'تلفن', 'اقلام',
+                    'جمع کالاها (تومان)', 'تخفیف (تومان)', 'مبلغ نهایی (تومان)'])
+        for o in queryset.prefetch_related('items', 'user'):
+            try:
+                items = ' | '.join(
+                    f'{i.product_name_snapshot} x{int(i.quantity)}' for i in o.items.all())
+            except Exception:
+                items = ''
+            uname = ''
+            if o.user:
+                uname = (o.user.get_full_name() or '').strip() or o.user.username
+            w.writerow([
+                o.order_number,
+                o.created_at.strftime('%Y-%m-%d %H:%M'),
+                o.get_status_display(),
+                o.guest_name or uname,
+                o.guest_phone or (o.user.username if o.user else ''),
+                items,
+                int(o.subtotal or 0),
+                int(o.discount_amount or 0),
+                int(o.total_price or 0),
+            ])
+        return resp
 
     def has_delete_permission(self, request, obj=None):
         # D-112: حذف سفارش ممنوع است — رزرو موجودی آزاد نمی‌شود (قفل همیشگی کالا)
@@ -882,9 +914,23 @@ class NotificationLogAdmin(admin.ModelAdmin):
         return obj.order.order_number if obj.order_id else '-'
 
 
+class CouponUseInline(admin.TabularInline):
+    model = CouponUse
+    extra = 0
+    can_delete = False
+    fields = ('order', 'phone', 'amount', 'created_at')
+    readonly_fields = fields
+    verbose_name = 'استفاده'
+    verbose_name_plural = 'استفاده‌های این کد (گزارش کمپین)'
+
+    def has_add_permission(self, request, obj=None):
+        return False
+
+
 @admin.register(Coupon)
 class CouponAdmin(admin.ModelAdmin):
     list_display = ('code', 'kind', 'value', 'min_cart', 'used_count', 'max_uses_total', 'max_uses_per_user', 'active', 'expires_at')
     list_filter = ('active', 'kind')
     search_fields = ('code', 'note')
     readonly_fields = ('used_count',)
+    inlines = [CouponUseInline]
