@@ -17,7 +17,7 @@ class FinanceDashboardTestBase(TestCase):
 
     def setUp(self):
         self.admin = User.objects.create_user(
-            username='09127777001', password='Xtest12345', is_staff=True)
+            username='09127777001', password='Xtest12345', is_staff=True, is_superuser=True)
         self.supplier = Supplier.objects.create(
             title='تامین‌کننده مالی تست', city='تبریز', phone='09127777002')
         cat = Category.objects.create(name='cat-fin', slug='cat-fin')

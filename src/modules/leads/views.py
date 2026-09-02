@@ -168,7 +168,9 @@ def _snapshot_path():
 def _visitor_staff(view_func):
     @wraps(view_func)
     def wrapper(request, *args, **kwargs):
-        if not request.user.is_authenticated or not request.user.is_staff:
+        # RBAC-GROUPS: staff بودن + مجوز view_visitorlead (گروه «فروش»)
+        if (not request.user.is_authenticated or not request.user.is_staff
+                or not request.user.has_perm('leads.view_visitorlead')):
             messages.error(request, 'دسترسی غیرمجاز. فقط ادمین‌ها مجاز هستند.')
             return redirect('/')
         return view_func(request, *args, **kwargs)

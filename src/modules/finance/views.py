@@ -12,7 +12,9 @@ from src.modules.order import finance as order_finance
 def _require_staff(view_func):
     @wraps(view_func)
     def wrapper(request, *args, **kwargs):
-        if not request.user.is_authenticated or not request.user.is_staff:
+        # RBAC-GROUPS: staff بودن + مجوز view_bankaccount (گروه «حسابدار»/مدیر)
+        if (not request.user.is_authenticated or not request.user.is_staff
+                or not request.user.has_perm('order.view_bankaccount')):
             messages.error(request, 'دسترسی غیرمجاز. فقط ادمین‌ها مجاز هستند.')
             return redirect('/')
         return view_func(request, *args, **kwargs)
