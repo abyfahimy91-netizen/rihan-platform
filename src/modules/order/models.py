@@ -114,6 +114,12 @@ class Order(models.Model):
     subtotal = models.DecimalField(max_digits=10, decimal_places=2, default=0, verbose_name="جمع کل کالاها")
     shipping_cost = models.DecimalField(max_digits=10, decimal_places=2, default=0, verbose_name="هزینه ارسال (در قیمت نهایی نهفته)")
     total_price = models.DecimalField(max_digits=10, decimal_places=2, default=0, verbose_name="مبلغ نهایی")
+    # SALES-14050610: کد تخفیف
+    coupon = models.ForeignKey(
+        'Coupon', null=True, blank=True, on_delete=models.SET_NULL,
+        related_name='orders', verbose_name="کد تخفیف",
+    )
+    discount_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0, verbose_name="مبلغ تخفیف")
 
     # D-099: مهلت رزرو موجودی برای سفارش پرداخت‌نشده؛ پس از آن رزرو خودکار آزاد می‌شود
     expires_at = models.DateTimeField(
@@ -162,7 +168,13 @@ class Order(models.Model):
         # شفافیت قیمت (D-080): هزینه ارسال در قیمت نهایی نهفته است
         # برای نمایش "ارسال رایگان" در ظاهر، shipping_cost را 0 در نظر می‌گیریم
         self.shipping_cost = 0
-        self.total_price = self.subtotal
+        # SALES-14050610: کد تخفیف — هرگز بیش از subtotal تخفیف نمی‌گیرد
+        from decimal import Decimal as _D
+        if self.coupon_id:
+            self.discount_amount = min(self.coupon.discount_for(self.subtotal), self.subtotal)
+        else:
+            self.discount_amount = _D('0')
+        self.total_price = max(self.subtotal - self.discount_amount, _D('0'))
         self.save()
 
     # ── D-099: کمکی‌های مهلت رزرو ──
@@ -862,3 +874,81 @@ class UserNotification(models.Model):
             logger = logging.getLogger(__name__)
             logger.exception('UserNotification create failed')
             return None
+
+
+class Coupon(models.Model):
+    """SALES-14050610 — کد تخفیف کمپین‌های فروش ریهان"""
+    PERCENT = 'percent'
+    FIXED = 'fixed'
+    KIND_CHOICES = [(PERCENT, 'درصدی'), (FIXED, 'مبلغ ثابت (تومان)')]
+
+    code = models.CharField('کد', max_length=32, unique=True)
+    kind = models.CharField(max_length=10, choices=KIND_CHOICES, default=FIXED, verbose_name="نوع تخفیف")
+    value = models.DecimalField('مقدار (درصد یا تومان)', max_digits=12, decimal_places=0)
+    min_cart = models.DecimalField('حداقل مبلغ سبد (تومان)', max_digits=12, decimal_places=0, default=0)
+    max_uses_total = models.PositiveIntegerField('سقف کل استفاده (0=بی‌نهایت)', default=0)
+    max_uses_per_user = models.PositiveIntegerField('سقف هر شماره (0=بی‌نهایت)', default=1)
+    used_count = models.PositiveIntegerField('تعداد استفاده‌شده', default=0, editable=False)
+    active = models.BooleanField('فعال', default=True)
+    starts_at = models.DateTimeField('شروع', null=True, blank=True)
+    expires_at = models.DateTimeField('انقضا', null=True, blank=True)
+    note = models.CharField('یادداشت داخلی', max_length=200, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = 'کد تخفیف'
+        verbose_name_plural = 'کدهای تخفیف'
+
+    def __str__(self):
+        return f"{self.code} ({self.get_kind_display()} {self.value})"
+
+    def clean(self):
+        from django.core.exceptions import ValidationError
+        from decimal import Decimal
+        if self.kind == self.PERCENT and not (Decimal('0') < self.value <= Decimal('100')):
+            raise ValidationError({'value': 'درصد باید بین ۱ تا ۱۰۰ باشد.'})
+        if self.kind == self.FIXED and self.value <= 0:
+            raise ValidationError({'value': 'مبلغ تخفیف باید مثبت باشد.'})
+
+    @property
+    def normalized_code(self):
+        return (self.code or '').strip().upper()
+
+    def is_valid_window(self, now=None):
+        now = now or timezone.now()
+        if not self.active:
+            return False, 'این کد تخفیف غیرفعال است.'
+        if self.starts_at and now < self.starts_at:
+            return False, 'این کد هنوز شروع نشده است.'
+        if self.expires_at and now > self.expires_at:
+            return False, 'این کد تخفیف منقضی شده است.'
+        if self.max_uses_total and self.used_count >= self.max_uses_total:
+            return False, 'ظرفیت استفاده از این کد تمام شده است.'
+        return True, ''
+
+    def discount_for(self, subtotal):
+        from decimal import Decimal
+        subtotal = Decimal(str(subtotal))
+        if self.kind == self.PERCENT:
+            d = subtotal * self.value / Decimal('100')
+        else:
+            d = Decimal(str(self.value))
+        return min(d, subtotal)
+
+    def uses_by_phone(self, phone):
+        if not phone:
+            return 0
+        return self.uses.filter(phone=phone).count()
+
+
+class CouponUse(models.Model):
+    """رکورد استفاده از کد تخفیف — برای سقف هر شماره و گزارش کمپین"""
+    coupon = models.ForeignKey(Coupon, on_delete=models.CASCADE, related_name='uses')
+    order = models.ForeignKey('Order', on_delete=models.CASCADE, related_name='coupon_uses')
+    phone = models.CharField('تلفن استفاده‌کننده', max_length=15, blank=True)
+    amount = models.DecimalField('مبلغ تخفیف', max_digits=10, decimal_places=2)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = 'استفاده از کد تخفیف'
+        verbose_name_plural = 'استفاده‌های کدهای تخفیف'

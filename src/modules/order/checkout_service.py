@@ -52,6 +52,7 @@ class CheckoutService:
         cart: Cart,
         guest_info: Optional[Dict] = None,
         user=None,
+        coupon=None,
     ) -> Order:
         """
         Create order from cart with inventory reservation.
@@ -99,7 +100,10 @@ class CheckoutService:
             guest_postal_code=guest_info.get('postal_code', ''),
             shipping_cost=Decimal(str(guest_info.get('shipping_cost', 0))),
         )
-        
+        # SALES-14050610: کد تخفیف — قبل از calculate_totals ست می‌شود
+        if coupon is not None:
+            order.coupon = coupon
+
         # Step 3: Create OrderItems with product snapshots (ADR-002)
         for item_data in order_items_data:
             OrderItem.objects.create(

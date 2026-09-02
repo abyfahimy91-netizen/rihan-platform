@@ -283,6 +283,14 @@
                     <span>{{ item.subtotal|money }} تومان</span>
                 </div>
             {% endfor %}
+            <div class="coupon-box" style="margin:14px 0;padding:12px 14px;border:1px dashed var(--color-primary,#2d5a3d);border-radius:12px;background:#f8faf8;">
+                <label for="coupon_code" style="display:block;font-size:14px;font-weight:700;margin-bottom:8px;">🎁 کد تخفیف دارید؟</label>
+                <input type="text" name="coupon_code" id="coupon_code" value="{{ coupon_input|default:'' }}"
+                       placeholder="مثلاً: KHOSHAMAD"
+                       style="width:100%;padding:10px 12px;border:1px solid #ddd;border-radius:8px;font-size:15px;direction:ltr;text-align:left;">
+                <small style="color:#777;display:block;margin-top:6px;">کد را وارد کنید و سفارش را ثبت نمایید؛ تخفیف روی مبلغ نهایی اعمال می‌شود.</small>
+            </div>
+
             <div class="summary-total-row">
                 <span>مبلغ قابل پرداخت</span>
                 <span>{{ total|money }} تومان</span>

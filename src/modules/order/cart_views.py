@@ -2,6 +2,7 @@
 Cart Page Views (HTML) - UI سبد خرید
 """
 import re as _re
+from decimal import Decimal
 from django.shortcuts import render, redirect
 from django.core.exceptions import ValidationError
 from django.contrib import messages
@@ -307,12 +308,36 @@ def checkout_page_view(request):
             messages.error(request, 'سبد خرید شما خالی است.')
             return redirect('order_pages:cart_page')
 
+        # SALES-14050610: اعتبارسنجی و اعمال کد تخفیف پیش از ثبت سفارش
+        from . import coupon_service
+        order_coupon = None
+        coupon_discount = Decimal('0')
+        coupon_input = coupon_service.normalize(request.POST.get('coupon_code'))
+        if coupon_input:
+            try:
+                order_coupon, coupon_discount = coupon_service.apply(
+                    coupon_input, subtotal, phone=guest_info.get('phone', ''))
+            except ValidationError as e:
+                _msg = e.messages[0] if getattr(e, 'messages', None) else str(e)
+                messages.error(request, f'کد تخفیف اعمال نشد: {_msg}')
+                return render(request, 'order/checkout.html', {
+                    'items': items, 'subtotal': subtotal,
+                    'shipping': shipping, 'total': total,
+                    'form_data': form_data if form_data is not None else _default_form_data(request),
+                    'saved_addresses': saved_addresses,
+                    'address_choice': choice if is_auth else 'new',
+                    'coupon_input': coupon_input,
+                })
+
         try:
             order = CheckoutService.create_order(
                 cart,
                 guest_info=guest_info,
                 user=request.user if is_auth else None,
+                coupon=order_coupon,
             )
+            if order_coupon:
+                coupon_service.attach_to_order(order, order_coupon, coupon_discount)
             # D-102: ذخیره خودکار آدرس دستی جدید در پروفایل (با رضایت کاربر)
             if form_data is not None and save_address:
                 try:
@@ -329,7 +354,8 @@ def checkout_page_view(request):
                     messages.success(request, 'آدرس شما در پروفایل ذخیره شد؛ دفعه بعد فقط یک کلیک ✅')
                 except ValueError:
                     pass  # ذخیره آدرس نباید ثبت سفارش را متوقف کند
-            messages.success(request, f"سفارش شما با شماره {order.order_number} ثبت شد. لطفاً پرداخت را تکمیل کنید.")
+            _disc_note = f" ✅ {int(coupon_discount):,} تومان تخفیف با کد «{coupon_input}» اعمال شد." if order_coupon else ""
+            messages.success(request, f"سفارش شما با شماره {order.order_number} ثبت شد. لطفاً پرداخت را تکمیل کنید.{_disc_note}")
             request.session['tracking_order_id'] = str(order.id)
             return redirect('order_pages:payment_page', order_number=order.order_number)
         except ValidationError as e:

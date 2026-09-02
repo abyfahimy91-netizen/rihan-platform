@@ -9,7 +9,7 @@ from django.utils.html import format_html
 from django.utils import timezone
 from django.db.models import Count, Sum, Q
 from django.urls import reverse
-from .models import Cart, CartItem, Order, OrderItem, Payment, Address, BankAccount
+from .models import Cart, CartItem, Order, OrderItem, Payment, Address, BankAccount, Coupon
 from . import finance as _finance
 from src.core.fa import money as fa_money, jalali_datetime_str
 
@@ -880,3 +880,11 @@ class NotificationLogAdmin(admin.ModelAdmin):
     @admin.display(description='سفارش')
     def order_number(self, obj):
         return obj.order.order_number if obj.order_id else '-'
+
+
+@admin.register(Coupon)
+class CouponAdmin(admin.ModelAdmin):
+    list_display = ('code', 'kind', 'value', 'min_cart', 'used_count', 'max_uses_total', 'max_uses_per_user', 'active', 'expires_at')
+    list_filter = ('active', 'kind')
+    search_fields = ('code', 'note')
+    readonly_fields = ('used_count',)
