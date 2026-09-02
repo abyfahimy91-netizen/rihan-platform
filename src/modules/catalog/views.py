@@ -92,6 +92,13 @@ class ProductListView(ListView):
         context = super().get_context_data(**kwargs)
         context['search_query'] = self.request.GET.get('q', '')
         context['current_category'] = self.request.GET.get('category', '')
+        # SEO: نام دسته برای تایتل متمایز صفحهٔ دسته‌بندی
+        context['current_category_name'] = ''
+        if context['current_category']:
+            from .models import Category
+            _cat = Category.objects.filter(slug=context['current_category']).first()
+            if _cat:
+                context['current_category_name'] = _cat.name
         return context
 
 

@@ -939,13 +939,13 @@
             {% endif %}
         </div>
 
-        {% with gallery_urls=product.gallery_image_urls %}
-        {% if gallery_urls|length > 1 %}
+        {% with gallery_items=product.gallery_items %}
+        {% if gallery_items|length > 1 %}
         <div class="product-thumbs" role="group" aria-label="گالری تصاویر محصول">
-            {% for u in gallery_urls %}
+            {% for gi in gallery_items %}
             <button type="button" class="product-thumb{% if forloop.first %} active{% endif %}"
-                    data-src="{{ u }}" aria-label="نمایش تصویر {{ forloop.counter|fa }}">
-                <img src="{{ u }}" alt="" loading="lazy" decoding="async">
+                    data-src="{{ gi.url }}" aria-label="نمایش تصویر {{ forloop.counter|fa }}">
+                <img src="{{ gi.url }}" alt="{{ gi.alt }}" loading="lazy" decoding="async">
             </button>
             {% endfor %}
         </div>

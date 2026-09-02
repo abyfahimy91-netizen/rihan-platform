@@ -222,6 +222,25 @@ class Product(models.Model):
                 except Exception:
                     continue
         return urls
+
+    @property
+    def gallery_items(self):
+        """نشانی + alt همهٔ تصاویر گالری — برای سئو (تصاویر بدون alt ایندکس نمی‌شوند)"""
+        from src.core.thumbs import optimized_url
+        items = []
+        for i, g in enumerate(
+            self.gallery.filter(image__isnull=False).exclude(image="").order_by("sort_order"),
+            start=1,
+        ):
+            try:
+                url = optimized_url(g.image, 1200)
+            except Exception:
+                try:
+                    url = g.image.url
+                except Exception:
+                    continue
+            items.append({"url": url, "alt": g.caption or f"{self.name} — تصویر {i}"})
+        return items
     status = models.CharField(
         "وضعیت انتشار",
         max_length=20,

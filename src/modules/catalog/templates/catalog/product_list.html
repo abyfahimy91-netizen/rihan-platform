@@ -1,12 +1,12 @@
 {% extends "catalog/base.html" %}{% load fa_tags %}
 
 
-{% block title %}ریهان - انتخاب مطمئن{% endblock %}
-{% block meta_description %}ریهان - فروشگاه آنلاین اعتمادمحور. انتخاب‌های دقیق و باوقار برای شما.{% endblock %}
+{% block title %}{% if current_category_name %}خرید {{ current_category_name }} | ریهان{% else %}ریهان - انتخاب مطمئن{% endif %}{% endblock %}
+{% block meta_description %}فروشگاه اینترنتی ریهان؛ خرید سماق قرمز اصل هوراند با ضمانت اصالت، تک‌خاستگاه و بدون نمک. انتخاب دقیق، ارسال سریع و پرداخت امن.{% endblock %}
 
 {% block extra_head %}
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"Organization","name":"Rihan | ریهان","url":"https://rihan360.ir/","contactPoint":{"@type":"ContactPoint","telephone":"{{ site_settings.contact_phone }}","contactType":"customer service","areaServed":"IR","availableLanguage":"fa"}}
+{"@context":"https://schema.org","@type":"Organization","name":"Rihan | ریهان","url":"https://rihan360.ir/","logo":"https://rihan360.ir/static/img/logo/rihan-logo-badge.png","sameAs":["https://www.instagram.com/rihan360.ir"],"contactPoint":{"@type":"ContactPoint","telephone":"{{ site_settings.contact_phone }}","contactType":"customer service","areaServed":"IR","availableLanguage":"fa"}}
 </script>
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"WebSite","name":"Rihan | ریهان","url":"https://rihan360.ir/","inLanguage":"fa-IR"}
