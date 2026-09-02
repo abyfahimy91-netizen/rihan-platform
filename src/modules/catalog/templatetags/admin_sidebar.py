@@ -26,6 +26,7 @@ GROUPS = [
         ("order.order", "سفارش‌ها"),
         ("order.payment", "پرداخت‌ها"),
         ("order.shipment", "مرسوله‌ها"),
+        ("order.coupon", "کدهای تخفیف"),
         ("order.notificationlog", "لاگ اطلاع‌رسانی"),
         ("order.address", "آدرس‌ها"),
     ]),
