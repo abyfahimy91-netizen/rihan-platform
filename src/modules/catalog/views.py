@@ -27,7 +27,9 @@ def product_share_view(request, slug):
     from src.modules.pages.models import SiteSettings
     s = SiteSettings.objects.first()
     brand = (getattr(s, 'brand_name_latin', '') or 'Rihan').strip()
-    msg = (getattr(s, 'share_message_text', '') or '').strip() or (
+    # SHARE-CTA-14050611: متن اختصاصی محصول مقدم بر متن عمومی + تزریق {min_price}
+    msg = (getattr(product, 'share_text', '') or '').strip() or (
+        getattr(s, 'share_message_text', '') or '').strip() or (
         '✨ یه انتخاب خاص برات پیدا کردم؛ یه نگاه بنداز، ارزشش رو داره!')
     hashtags = (getattr(s, 'share_hashtags', '') or '').strip()
 
@@ -38,6 +40,8 @@ def product_share_view(request, slug):
         short_url = request.build_absolute_uri(
             product.get_absolute_url() if hasattr(product, 'get_absolute_url')
             else f'/products/{product.slug}/')
+
+    msg = _inject_min_price(msg, product)
 
     caption = f'{msg}\n{product.name} | {brand}\n{short_url}'
     if hashtags:
@@ -51,6 +55,20 @@ def product_share_view(request, slug):
         'url': short_url,
         'text': caption,
     })
+
+
+def _inject_min_price(text, product):
+    """SHARE-CTA: {min_price} → قیمت خواندنی ارزان‌ترین واریانت فعال"""
+    if '{min_price}' not in text:
+        return text
+    try:
+        prices = [v.price for v in product.variants.filter(is_active=True) if v.price]
+        if not prices:
+            return text.replace('{min_price}', '')
+        from src.core.fa import money as _money
+        return text.replace('{min_price}', _money(min(prices)))
+    except Exception:
+        return text.replace('{min_price}', '')
 
 
 def short_link_redirect(request, code):
@@ -124,7 +142,8 @@ class ProductDetailView(DetailView):
         from src.modules.pages.models import SiteSettings
         s = SiteSettings.objects.first()
         brand = (getattr(s, 'brand_name_latin', '') or 'Rihan').strip()
-        msg = (getattr(s, 'share_message_text', '') or '').strip() or (
+        msg = (getattr(product, 'share_text', '') or '').strip() or (
+            getattr(s, 'share_message_text', '') or '').strip() or (
             '✨ یه انتخاب خاص برات پیدا کردم؛ یه نگاه بنداز، ارزشش رو داره!')
         hashtags = (getattr(s, 'share_hashtags', '') or '').strip()
         try:
@@ -133,6 +152,7 @@ class ProductDetailView(DetailView):
         except Exception:
             context['short_url'] = self.request.build_absolute_uri(
                 f'/products/{product.slug}/')
+        msg = _inject_min_price(msg, product)
         caption = f'{msg}\n{product.name} | {brand}\n{context["short_url"]}'
         if hashtags:
             caption += f'\n\n{hashtags}'
