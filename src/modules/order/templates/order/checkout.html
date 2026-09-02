@@ -107,15 +107,16 @@
         width: 100%;
         margin-top: 20px;
         padding: 18px 32px;
-        background: linear-gradient(135deg, var(--color-primary), var(--color-primary-dark));
+        background: linear-gradient(135deg, #F76707, #E8590C);
         color: #fff;
         border: none;
         border-radius: 14px;
-        font-size: 17px;
+        font-size: 17.5px;
         font-weight: 800;
         font-family: inherit;
         cursor: pointer;
         transition: all 0.25s;
+        box-shadow: 0 6px 20px rgba(232,89,12,.35);
         display: flex;
         justify-content: center;
         align-items: center;
@@ -264,6 +265,10 @@
                     </div>
                     <div class="form-group">
                         <label for="id_postal_code">کد پستی (الزامی — ۱۰ رقم)</label>
+                        <div style="font-size:12.5px;color:#5C6B60;margin-bottom:8px;">
+                            📮 روی برچسبِ درِ خانه/قبض آب چسبانده شده — ندارید؟
+                            <a href="/faq/" target="_blank" rel="noopener" style="color:#2D6A4F;font-weight:700;">چطور پیدا کنم؟</a>
+                        </div>
                         <input type="text" id="id_postal_code" name="postal_code" class="form-control" dir="ltr" required
                                inputmode="numeric" pattern="[0-9۰-۹]{10}" maxlength="10" autocomplete="postal-code"
                                autocapitalize="off" spellcheck="false" enterkeyhint="done"
@@ -283,13 +288,15 @@
                     <span>{{ item.subtotal|money }} تومان</span>
                 </div>
             {% endfor %}
-            <div class="coupon-box" style="margin:14px 0;padding:12px 14px;border:1px dashed var(--color-primary,#2d5a3d);border-radius:12px;background:#f8faf8;">
-                <label for="coupon_code" style="display:block;font-size:14px;font-weight:700;margin-bottom:8px;">🎁 کد تخفیف دارید؟</label>
+            <details class="coupon-box" style="margin:14px 0;padding:12px 14px;border:1px dashed #C9A961;border-radius:12px;background:#FDFBF5;">
+                <summary style="cursor:pointer;font-size:14px;font-weight:700;color:#7A6428;list-style:none;">🎁 کد تخفیف دارید؟ (اینجا بزنید)</summary>
+                <div style="margin-top:10px;">
                 <input type="text" name="coupon_code" id="coupon_code" value="{{ coupon_input|default:'' }}"
                        placeholder="مثلاً: KHOSHAMAD"
                        style="width:100%;padding:10px 12px;border:1px solid #ddd;border-radius:8px;font-size:15px;direction:ltr;text-align:left;">
                 <small style="color:#777;display:block;margin-top:6px;">کد را وارد کنید و سفارش را ثبت نمایید؛ تخفیف روی مبلغ نهایی اعمال می‌شود.</small>
-            </div>
+                </div>
+            </details>
 
             <div class="summary-total-row">
                 <span>مبلغ قابل پرداخت</span>
@@ -308,6 +315,10 @@
                     <polyline points="12 19 5 12 12 5"></polyline>
                 </svg>
             </button>
+
+            <p style="text-align:center;font-size:12.5px;color:#5C6B60;margin:10px 0 0;font-weight:600;">
+                🔒 ثبت‌نام لازم نیست — اطلاعات شما فقط برای ارسال سفارش است
+            </p>
 
             <div class="trust-badges">
                 <span>✅ ارسال رایگان به سراسر ایران</span>
