@@ -285,22 +285,22 @@
         gap: 12px;
     }
     
-    .btn-checkout {
+        .btn-checkout {
+        display: flex; align-items: center; justify-content: center; gap: 10px;
+        width: 100%;
         padding: 18px 32px;
-        background: var(--color-primary);
+        background: linear-gradient(135deg, #F76707, #E8590C);
         color: #fff;
         border: none;
-        border-radius: 12px;
-        font-size: 16px;
-        font-weight: 700;
-        cursor: pointer;
-        transition: all 0.3s;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 10px;
+        border-radius: 14px;
+        font-size: 17.5px;
+        font-weight: 800;
         font-family: inherit;
+        cursor: pointer;
+        transition: all .25s;
+        box-shadow: 0 6px 20px rgba(232,89,12,.35);
     }
+    .btn-checkout:hover { transform: translateY(-2px); box-shadow: 0 10px 28px rgba(232,89,12,.45); }
     
     .btn-checkout:hover {
         background: var(--color-primary-dark);
